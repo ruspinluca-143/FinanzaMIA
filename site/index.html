@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-X4UwuOc1zjsIynQhi9Bjc0e5tXepOFMorwEcU4Mxu3k='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SX/PzUai+Gfcn+NBGfi6hRvdiB2oOsEEX0Kn+0/yHMA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1394,7 +1394,21 @@ function portfolioAssumptions() {
   let varp = 0; for (let a = 0; a < comps.length; a++) for (let b = 0; b < comps.length; b++) varp += comps[a].w * comps[b].w * comps[a].sg * comps[b].sg * (a === b ? 1 : (comps[a].safe || comps[b].safe ? 0 : 0.5));
   return { mu: mu / 100, sigma: Math.sqrt(varp) / 100 };
 }
-function simulate(w0, monthly, years, mu, sigma, g) {
+function requiredMonthly(w0, years, mu, sigma, target, probs) {         // versamento mensile minimo perche' la probabilita' di arrivare a "target" sia almeno quella richiesta (stessi numeri casuali di simulate: la probabilita' cresce sempre col versamento)
+  const N = 3000, T = Math.max(1, Math.round(years)), rnd = mulberry(20261029);
+  const s2 = Math.log(1 + (sigma / (1 + mu)) ** 2), mm = Math.log(1 + mu) - s2 / 2, ss = Math.sqrt(s2), fac = new Float64Array(N * T);
+  for (let n = 0; n < N; n++) for (let y = 0; y < T; y++) fac[n * T + y] = Math.exp(mm + ss * gauss(rnd));
+  const f = m => { const c = m * 12; let ok = 0; for (let n = 0; n < N; n++) { let w = w0; for (let y = 0; y < T; y++) w = (w + c) * fac[n * T + y]; if (w >= target) ok++; } return ok / N; };
+  return probs.map(prob => {
+    if (f(0) >= prob) return 0;
+    let lo = 0, hi = Math.max(1000, target / (T * 12));
+    while (f(hi) < prob && hi < 1e7) hi *= 2;
+    if (f(hi) < prob) return null;
+    for (let k = 0; k < 18; k++) { const mid = (lo + hi) / 2; if (f(mid) >= prob) hi = mid; else lo = mid; }
+    return hi > 1e6 ? null : hi;          // oltre un milione al mese e' fuori portata: si mostra "fuori portata", non una cifra assurda
+  });
+}
+function simulate(w0, monthly, years, mu, sigma, g, absTarget) {          // absTarget: cifra in euro da raggiungere (se manca, si usa il rendimento annuo g)
   const N = 3000, T = Math.max(1, Math.round(years)), rnd = mulberry(20261029), c = monthly * 12;
   const s2 = Math.log(1 + (sigma / (1 + mu)) ** 2), mm = Math.log(1 + mu) - s2 / 2, ss = Math.sqrt(s2);
   const cols = Array.from({ length: T + 1 }, () => new Float64Array(N));
@@ -1402,7 +1416,7 @@ function simulate(w0, monthly, years, mu, sigma, g) {
   const pc = (arr, q) => { const a = Float64Array.from(arr).sort(); return a[Math.min(N - 1, Math.floor(q * N))]; };
   const fan = { p10: [], p50: [], p90: [], tgt: [] }; let tw = w0;
   for (let y = 0; y <= T; y++) { fan.p10.push(pc(cols[y], 0.1)); fan.p50.push(pc(cols[y], 0.5)); fan.p90.push(pc(cols[y], 0.9)); if (y > 0) tw = (tw + c) * (1 + g); fan.tgt.push(tw); }
-  const fin2 = cols[T], target = fan.tgt[T], paid = w0 + c * T;
+  const fin2 = cols[T], target = absTarget != null ? absTarget : fan.tgt[T], paid = w0 + c * T;
   return { T, fan, target, pTarget: fin2.filter(v => v >= target).length / N, pLoss: fin2.filter(v => v < paid).length / N, p10: fan.p10[T], p50: fan.p50[T], p90: fan.p90[T], paid };
 }
 
@@ -1521,6 +1535,12 @@ function anObiettivo() {
     h('div', { class: 'row' }, btn('Cambia obiettivo', () => form('Il tuo obiettivo', [{ key: 'cagr', label: 'Rendimento annuo che vuoi ottenere (%)', type: 'number', req: true }, { key: 'years', label: 'Per quanti anni', type: 'number', req: true }, { key: 'monthly', label: 'Quanto aggiungi ogni mese (€)', type: 'number' }], g, o => { if (!(o.years >= 1 && o.years <= 40)) return 'Gli anni devono essere tra 1 e 40.'; g.cagr = o.cagr ?? 0; g.years = o.years; g.monthly = o.monthly || 0; done(); }), 'pri'),
       btn('Ipotesi per classe', () => { const A = assumptions(), cls = [...new Set([...exposure('class').map(x => x[0]), ...Object.keys(CLASS_DEFAULT)])]; const fields = cls.flatMap((c, k) => [{ key: 'm' + k, label: c + ': rendimento atteso annuo (%)', type: 'number' }, { key: 's' + k, label: c + ': volatilità annua (%)', type: 'number' }]), vals = {}; cls.forEach((c, k) => { const a = A[Object.keys(A).find(x => x.toLowerCase() === c.toLowerCase())] || A['Non classificato']; vals['m' + k] = a[0]; vals['s' + k] = a[1]; }); form('Ipotesi per classe', fields, vals, o => { g.assume = {}; cls.forEach((c, k) => { if (o['m' + k] != null && o['s' + k] != null) g.assume[c] = [o['m' + k], o['s' + k]]; }); done(); }); }, 'sm')),
     h('p', { class: 'muted' }, 'È una simulazione con ipotesi di rendimento e rischio per classe (modificabili): non è una previsione e non garantisce nulla. Le correlazioni sono semplificate e gli eventi estremi sottostimati.')));
+  const te = g.targetEur > 0 ? g.targetEur : (Math.round(tot * 1.5 / 1000) * 1000 || 10000), ys = Math.max(1, Math.round(g.years || 5)), probs = [0.5, 0.8, 0.95], req = requiredMonthly(tot, ys, pa.mu, pa.sigma, te, probs);
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto versare per arrivare a una cifra'),
+    h('p', null, 'Per avere ', h('b', null, eur(te)), ' tra ', h('b', null, pl(ys, 'anno', 'anni')), ', partendo dai tuoi ', eur(tot), ':'),
+    table([{ t: 'Probabilità di riuscirci' }, { t: 'Versamento al mese', n: 1 }, { t: 'Versato in totale', n: 1 }], probs.map((p, k) => ['Probabilità ' + Math.round(p * 100) + '%', req[k] == null ? 'fuori portata' : req[k] < 1 ? 'già raggiunto' : eur(req[k]), req[k] == null || req[k] < 1 ? '—' : eur(req[k] * 12 * ys)])),
+    h('div', { class: 'row' }, btn('Cambia cifra', () => form('Cifra da raggiungere', [{ key: 'te', label: 'Quanto vuoi avere (€)', type: 'number', req: true }], { te }, o => { if (!(o.te > 0)) return 'Inserisci una cifra positiva.'; g.targetEur = o.te; done(); }), 'sm')),
+    h('p', { class: 'muted' }, 'Con le stesse ipotesi di rendimento e rischio di qui sopra e gli stessi anni. Più vuoi essere sicuro di arrivarci, più devi versare: serve a coprire gli anni sbagliati. Non è una previsione.')));
   return el;
 }
 
@@ -1596,6 +1616,7 @@ function holdingTerms() {           // parole con cui riconoscere i tuoi titoli 
   }
   return out;
 }
+const linkEl = (url, text) => /^https?:\/\/[^\s<>"']+$/i.test(String(url || '')) ? h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, text) : h('span', null, text);      // solo collegamenti http/https: mai "javascript:" o altro, anche se il file dei mercati venisse alterato
 function holdingNews(max) {
   const m = DATA.mercati, T = holdingTerms(); if (!m || !T.length) return [];
   const seen = new Set(), out = [], esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1623,7 +1644,7 @@ function briefingCard() {
   const el = h('section', { class: 'card' }, h('h2', null, 'Cosa è successo oggi'));
   if (mv.length) el.append(table([{ t: 'Strumento' }, { t: 'Variazione', n: 1 }, { t: 'Effetto sul patrimonio', n: 1 }], mv.map(x => [x.i.name, gl(x.pct, spct(x.pct)), gl(x.eur, seur(x.eur))])),
     h('p', { class: 'muted' }, 'Ultimo prezzo contro il precedente, per le posizioni che hai. Sono prezzi di sedute diverse (Europa, USA, crypto) e non includono le quantità che hai comprato o venduto oggi.'));
-  if (nw.length) el.append(h('h4', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, h('a', { href: n.link, target: '_blank', rel: 'noopener noreferrer' }, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))));
+  if (nw.length) el.append(h('h4', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, linkEl(n.link, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))));
   return el;
 }
 
@@ -1732,10 +1753,10 @@ function tabMercati() {
   const sect = I.settori_usa; if (sect && sect.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Settori USA oggi'), table([{ t: 'Settore' }, { t: 'Variazione', n: 1 }], sect.map(x => [x.nome, gl(x.var_giorno_pct, (x.var_giorno_pct > 0 ? '+' : '') + nf2.format(x.var_giorno_pct) + '%')]))));
   const f = I.posizioni_grandi_futures; if (f && f.voci) el.append(h('section', { class: 'card' }, h('h2', null, 'Dove sono sbilanciati i grandi (futures)'), table([{ t: 'Mercato' }, { t: 'Lunghi', n: 1 }, { t: 'Corti', n: 1 }, { t: 'Netto', n: 1 }, { t: '% interessi aperti', n: 1 }], f.voci.map(x => [x.nome, nf0.format(x.lunghi), nf0.format(x.corti), gl(x.netto, (x.netto > 0 ? '+' : '') + nf0.format(x.netto)), (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '%'])),
     h('p', { class: 'muted' }, 'Posizioni dei grandi operatori non commerciali (fondi speculativi e gestori), dati CFTC del ' + fmtDate(f.data) + ', pubblicati con qualche giorno di ritardo. Sono un\'istantanea, non un segnale di acquisto o vendita.')));
-  const nw = holdingNews(10); if (nw.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, h('a', { href: n.link, target: '_blank', rel: 'noopener noreferrer' }, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))), h('p', { class: 'muted' }, 'Titoli che nominano i tuoi titoli singoli e le tue crypto: il riconoscimento è per nome, quindi può sbagliare.')));
+  const nw = holdingNews(10); if (nw.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, linkEl(n.link, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))), h('p', { class: 'muted' }, 'Titoli che nominano i tuoi titoli singoli e le tue crypto: il riconoscimento è per nome, quindi può sbagliare.')));
   const th2 = themes(m, 12); if (th2.list.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Di cosa parlano i titoli oggi'), h('div', { class: 'themes' }, th2.list.map(([w, c]) => h('span', { class: 'tag' }, w, h('b', null, String(c))))), h('p', { class: 'muted' }, 'Parole più ricorrenti nei ' + th2.heads + ' titoli letti (con quante notizie le nominano). Dice su cosa si concentra l\'attenzione, non se sia un bene o un male.')));
   const groups = [...new Set(ok.map(x => x.gruppo))];
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Titoli dalle fonti'), groups.map(gp => h('div', null, h('h4', null, gp), ok.filter(x => x.gruppo === gp).map(src => h('details', { class: 'src' }, h('summary', null, src.nome, h('small', null, ' · ' + src.voci.length + ' titoli')), h('ul', { class: 'news' }, src.voci.map(v => h('li', null, h('a', { href: v.link, target: '_blank', rel: 'noopener noreferrer' }, v.titolo), v.data ? h('small', null, ' ' + fmtDate(v.data.slice(0, 10))) : null))))))),
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Titoli dalle fonti'), groups.map(gp => h('div', null, h('h4', null, gp), ok.filter(x => x.gruppo === gp).map(src => h('details', { class: 'src' }, h('summary', null, src.nome, h('small', null, ' · ' + src.voci.length + ' titoli')), h('ul', { class: 'news' }, src.voci.map(v => h('li', null, linkEl(v.link, v.titolo), v.data ? h('small', null, ' ' + fmtDate(v.data.slice(0, 10))) : null))))))),
     ko.length ? h('p', { class: 'muted' }, 'Non disponibili adesso: ' + ko.map(x => x.nome).join(', ') + '.') : null,
     h('p', { class: 'muted' }, 'Dalle testate l\'app mostra solo titolo e collegamento: gli articoli si leggono sui loro siti (alcuni sono a pagamento).')));
   const cp = h('span', { class: 'muted' });
