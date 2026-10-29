@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DjPS3Xr4stHabhXsTtR8Aak8FYlqV8CU6KJU1FMuHp8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-G6OeOHqgJuDdfTUUA4PXtbLCOy/6x1xumRGz2G7EhzI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -200,6 +200,9 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .news{margin:4px 0 8px 18px;padding:0}
 .news li{margin:6px 0;line-height:1.35}
 .news small{color:var(--muted)}
+.themes{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--btn);border-radius:99px;padding:5px 6px 5px 13px;font-size:14px;font-weight:500}
+.tag b{background:var(--card-s);color:var(--s1);border-radius:99px;min-width:24px;padding:1px 7px;text-align:center;font-size:12px}
 .banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin:14px 0;border-radius:16px;font-weight:500;background:color-mix(in srgb,var(--s1) 12%,var(--card-s));border:1px solid color-mix(in srgb,var(--s1) 28%,transparent)}
 @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
 @media (hover:none){.tile:hover{transform:none;box-shadow:var(--sh)}.btn:hover{background:var(--btn)}.btn.pri:hover{background:var(--pri)}.chip:hover{background:var(--btn)}.tab:hover{color:var(--ink2)}tbody tr:hover{background:none}}
@@ -622,7 +625,7 @@ function editInstrument(i) {
     if (isNew) { const n = { id: uid(), price: o.price, priceDate: today(), hist: [{ d: today(), p: o.price }], ...d }; S.instruments.push(n); }
     else { Object.assign(i, d); if (o.price !== i.price) setPrice(i, o.price); }
     done();
-  }, h('div', null, ccyList(), dl('dl-cls', ['Azioni', 'Obbligazioni', 'Liquidità', 'Crypto', 'Materie prime', 'Immobiliare']), dl('dl-area', ['Mondo', 'USA', 'Europa', 'Italia', 'Asia', 'Emergenti', 'n.d.'])));
+  }, h('div', null, ccyList(), dl('dl-cls', ['Azioni', 'Obbligazioni', 'Liquidità', 'Crypto', 'Materie prime', 'Immobiliare']), dl('dl-area', ['Mondo', 'USA', 'Europa', 'Italia', 'Asia', 'Emergenti', 'n.d.']), btn('Importa composizione da file (CSV dell\'emittente)…', importHoldings, 'sm')));
 }
 function setPrice(i, v) {
   i.price = v; i.priceDate = today(); const last = i.hist[i.hist.length - 1];
@@ -1418,12 +1421,12 @@ function alerts() {
 }
 
 /* ============ scheda Analisi ============ */
-const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi e tasse'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
+const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi e tasse'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
 function tabAnalisi() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le analisi.'));
   const sub = UI.sub || 'andamento';
   const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Analisi' }, AN_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.sub = k; render(); } }, l)));
-  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
+  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
   return h('div', null, h('section', { class: 'card' }, h('h2', null, 'Analisi'), chips), body);
 }
 const histButtons = () => h('div', { class: 'row' }, ONLINE ? btn('Riscarica lo storico', () => loadOnlineData(), 'sm') : btn('Carica storico da file…', () => pickText('.csv,.txt,text/csv', t => { DATA.hist = parseHistory(t); render(); }), 'sm'));
@@ -1518,7 +1521,7 @@ function anObiettivo() {
 function anEsposizione() {
   const tot = totalValue(), el = h('div'); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
   const ex = new Map(), noH = []; let direct = 0, via = 0;
-  const add = (n, v, how) => { const e = ex.get(n.toLowerCase()) || { n, direct: 0, via: 0 }; e[how] += v; ex.set(n.toLowerCase(), e); };
+  const add = (n, v, how) => { const key = normName(n), e = ex.get(key) || { n, direct: 0, via: 0 }; e[how] += v; if (how === 'direct') e.n = n; ex.set(key, e); };      // "NVIDIA CORP" dentro un ETF e "NVIDIA" in diretta sono lo stesso titolo
   const agg = new Map(); for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) agg.set(i.id, (agg.get(i.id) || 0) + posValue(p)); }
   for (const [id, v] of agg) {
     const i = inst(id), hs = parseHoldings(i.holdings), k = kindOf(i);
@@ -1559,6 +1562,112 @@ function anDiario() {
   return el;
 }
 
+/* ============ briefing del giorno, notizie sui tuoi titoli, temi, nuovi soldi, composizione da file ============ */
+function dayMovers() {              // quanto si e' mosso ogni strumento che hai (ultimo prezzo contro il precedente) e quanto pesa sul patrimonio
+  const qty = new Map();
+  for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) qty.set(i.id, (qty.get(i.id) || 0) + p.qty); }
+  const out = [];
+  for (const [id, q] of qty) {
+    const i = inst(id), s = seriesOf(i); if (!s.length || !(i.price > 0)) continue;
+    const last = s[s.length - 1], ref = last.d < i.priceDate ? last : (s.length >= 2 ? s[s.length - 2] : null);
+    if (!ref || !(ref.p > 0)) continue;
+    const pc = i.price / ref.p - 1; if (!isFinite(pc) || Math.abs(pc) < 1e-9) continue;
+    out.push({ i, pct: pc, eur: q * (i.price - ref.p) * (fxRate(i.ccy) ?? 1), from: ref.d });
+  }
+  return out.sort((a, b) => Math.abs(b.eur) - Math.abs(a.eur));
+}
+const GENERIC_NAMES = new Set(['azione', 'fondo', 'etf', 'etc', 'etn', 'conto', 'demo', 'the', 'new']);
+function holdingTerms() {           // parole con cui riconoscere i tuoi titoli singoli e le tue crypto nei titoli delle notizie
+  const seen = new Set(), out = [];
+  for (const a of S.accounts) for (const p of a.positions) {
+    const i = inst(p.instId); if (!i || seen.has(i.id)) continue; seen.add(i.id);
+    const k = kindOf(i); if (k !== 'azione' && k !== 'crypto') continue;
+    const base = i.name.replace(/\(.*?\)/g, ' ').replace(/\b(s\.?p\.?a\.?|inc\.?|corp\.?|ltd\.?|plc|holdings?|group|co\.?|company)(?=\s|$)/ig, ' ').trim(), first = base.split(/\s+/)[0] || '', terms = new Set();
+    if (first.length >= 3 && !GENERIC_NAMES.has(first.toLowerCase())) terms.add(first);
+    for (const al of ({ ether: ['Ethereum'], xrp: ['Ripple'], bitcoin: ['BTC'] }[first.toLowerCase()] || [])) terms.add(al);
+    if (i.code && /^[A-Za-z]{3,5}$/.test(i.code) && !GENERIC_NAMES.has(i.code.toLowerCase())) terms.add(i.code.toUpperCase());
+    if (terms.size) out.push({ i, terms: [...terms] });
+  }
+  return out;
+}
+function holdingNews(max) {
+  const m = DATA.mercati, T = holdingTerms(); if (!m || !T.length) return [];
+  const seen = new Set(), out = [], esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const f of m.fonti) { if (!f.ok) continue; for (const v of f.voci) {
+    if (seen.has(v.link)) continue;
+    for (const { i, terms } of T) { if (terms.some(t => new RegExp('\\b' + esc(t) + '\\b', t === t.toUpperCase() && t.length <= 5 ? '' : 'i').test(v.titolo))) { seen.add(v.link); out.push({ titolo: v.titolo, link: v.link, fonte: f.nome, data: v.data || '', per: i.name }); break; } }
+  } }
+  return out.sort((a, b) => a.data < b.data ? 1 : -1).slice(0, max || 8);
+}
+const STOP = new Set(('the and for with from that this are was were has have had its into over after amid new says say will more than about their they you your not but out off can could would should may how why what who when where which while his her him she them our all any one two three four five six seven first last year years week day days today now just also been being per vs via inc corp ltd plc ' + 'del della delle degli dei dal dalla con tra fra una uno per che non come anche dopo prima sul sulla nel nella mentre alle agli sono sul gli lei suo sua ecco oggi ieri anno anni dopo').split(' '));
+function themes(m, n) {             // parole piu' ricorrenti nei titoli di oggi: cosa sta occupando le notizie
+  const cnt = new Map(), disp = new Map(); let heads = 0;
+  for (const f of m.fonti) if (f.ok) for (const v of f.voci) {
+    heads++; const seen = new Set();
+    for (const w of (v.titolo.match(/[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9&.'’-]*/g) || [])) {
+      const k = w.toLowerCase().replace(/['’]s$/, '').replace(/[.'’-]+$/, '');
+      if ((k.length < 3 && !/^[A-Z]{2}$/.test(w)) || STOP.has(k) || /^\d+$/.test(k) || seen.has(k)) continue;
+      seen.add(k); cnt.set(k, (cnt.get(k) || 0) + 1); if (!disp.has(k) || /^[A-Z]/.test(w)) disp.set(k, w);
+    }
+  }
+  return { heads, list: [...cnt.entries()].filter(([, c]) => c >= 3).sort((a, b) => b[1] - a[1]).slice(0, n || 10).map(([k, c]) => [disp.get(k), c]) };
+}
+function briefingCard() {
+  const mv = dayMovers().slice(0, 5), nw = holdingNews(5); if (!mv.length && !nw.length) return null;
+  const el = h('section', { class: 'card' }, h('h2', null, 'Cosa è successo oggi'));
+  if (mv.length) el.append(table([{ t: 'Strumento' }, { t: 'Variazione', n: 1 }, { t: 'Effetto sul patrimonio', n: 1 }], mv.map(x => [x.i.name, gl(x.pct, spct(x.pct)), gl(x.eur, seur(x.eur))])),
+    h('p', { class: 'muted' }, 'Ultimo prezzo contro il precedente, per le posizioni che hai. Sono prezzi di sedute diverse (Europa, USA, crypto) e non includono le quantità che hai comprato o venduto oggi.'));
+  if (nw.length) el.append(h('h4', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, h('a', { href: n.link, target: '_blank', rel: 'noopener noreferrer' }, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))));
+  return el;
+}
+
+/* ---- dove mettere i prossimi soldi: riporta il portafoglio verso la tua allocazione obiettivo senza vendere nulla ---- */
+function rebalance(amount) {
+  if (!(S.policy.target && S.policy.target.trim())) return null;
+  const tot = totalValue(), ex = exposure('class'), tgt = parseMix(S.policy.target, ''), cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v])), tl = new Map(tgt.map(([k, w]) => [k.toLowerCase(), w])), names = new Map();
+  ex.forEach(([l]) => names.set(l.toLowerCase(), l)); tgt.forEach(([k]) => { if (!names.has(k.toLowerCase())) names.set(k.toLowerCase(), k); });
+  const T2 = tot + amount, need = new Map(); let sum = 0;
+  for (const k of names.keys()) { const d = Math.max(0, (tl.get(k) || 0) * T2 - (cur.get(k) || 0)); need.set(k, d); sum += d; }
+  const put = new Map(); if (sum > 0) for (const [k, d] of need) put.set(k, d * Math.min(1, amount / sum));
+  const rest = amount - [...put.values()].reduce((a, b) => a + b, 0);
+  if (rest > 0.01) for (const [k, w] of tl) put.set(k, (put.get(k) || 0) + rest * w);        // tutto gia' a obiettivo: si ripartisce come l'obiettivo
+  return [...names].map(([k, label]) => { const c = cur.get(k) || 0, p = put.get(k) || 0; return { label, cur: c, curPct: tot ? c / tot : 0, tgt: tl.get(k) || 0, put: p, after: T2 > 0 ? (c + p) / T2 : 0 }; }).sort((a, b) => b.put - a.put);
+}
+function anRibilancia() {
+  const el = h('div'), g = G(), amt = pnum(UI.newMoney) ?? (g.monthly > 0 ? g.monthly : 500);
+  const inp = h('input', { type: 'number', step: 'any', class: 'pin', value: amt, 'aria-label': 'Importo da investire', onchange: e => { const v = pnum(e.target.value); UI.newMoney = v != null && v >= 0 ? v : amt; render(); } });
+  const head = h('section', { class: 'card' }, h('h2', null, 'Dove mettere i prossimi soldi'), h('p', { class: 'muted' }, 'Quanto vuoi investire adesso? L\'app calcola come ripartirlo per avvicinare il portafoglio alla tua allocazione obiettivo, senza vendere nulla.'), h('label', { class: 'fld' }, h('span', null, 'Importo da investire (€)'), inp));
+  const rb = rebalance(amt);
+  if (!rb) { el.append(head, h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Per questo calcolo serve l\'allocazione obiettivo: impostala in "Dati e sicurezza" (per esempio "Azioni 65, Obbligazioni 20, Crypto 5, Liquidità 10").'))); return el; }
+  const sug = k => { const c = S.instruments.filter(i => parseMix(i.cls, 'Non classificato')[0][0].toLowerCase() === k.toLowerCase() && S.accounts.some(a => a.positions.some(p => p.instId === i.id))).sort((a, b) => (a.ter ?? 9) - (b.ter ?? 9)); return c[0] ? c[0].name + (c[0].ter != null ? ' (TER ' + nfp.format(c[0].ter) + '%)' : '') : '—'; };
+  el.append(head, h('section', { class: 'card' }, h('h2', null, 'Come ripartirli'),
+    table([{ t: 'Classe' }, { t: 'Oggi', n: 1 }, { t: 'Obiettivo', n: 1 }, { t: 'Aggiungi', n: 1 }, { t: 'Dopo', n: 1 }, { t: 'Tra quelli che hai' }], rb.map(r => [r.label, pct(r.curPct), r.tgt ? pct(r.tgt) : '—', r.put > 0.5 ? h('b', null, eur(r.put)) : '—', pct(r.after), r.put > 0.5 ? sug(r.label) : ''])),
+    h('p', { class: 'muted' }, 'È un calcolo di ripartizione, non una raccomandazione: non considera costi, tasse, orizzonte né il momento di mercato. Gli strumenti li scegli tu; qui sono indicati, tra quelli che già possiedi, quelli con il costo annuo più basso.')));
+  return el;
+}
+
+/* ---- composizione di un ETF da un file dell'emittente (CSV con nome e peso) ---- */
+function parseHoldingsCsv(text) {
+  const rows = csvParse(text, detectDelim(text)); let hdr = -1, ni = -1, wi = -1;
+  for (let r = 0; r < Math.min(rows.length, 60); r++) {
+    const c = rows[r].map(x => String(x).toLowerCase().trim());
+    const n = c.findIndex(x => /^(name|nome|titolo|security|holding|emittente|description|descrizione|constituent)/.test(x)), w = c.findIndex(x => /(weight|peso|ponderaz|% of|% net|% del|percent)/.test(x));
+    if (n >= 0 && w >= 0 && n !== w) { hdr = r; ni = n; wi = w; break; }
+  }
+  if (hdr < 0) return null;
+  return rows.slice(hdr + 1).map(r => [String(r[ni] || '').trim(), pnum(String(r[wi] || '').replace('%', ''))]).filter(x => x[0] && x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 10);
+}
+function importHoldings() {
+  pickText('.csv,.tsv,.txt,text/csv', text => {
+    const list = parseHoldingsCsv(text);
+    if (!list) { alert('Non riconosco le colonne: servono il nome del titolo e il peso (%).'); return; }
+    if (!list.length) { alert('Nessun titolo con un peso valido nel file.'); return; }
+    const ta = [...document.querySelectorAll('dialog textarea')].pop();
+    if (ta) ta.value = list.map(([n, w]) => n + ' ' + w.toFixed(2)).join('; ');
+  });
+}
+const normName = n => String(n).toLowerCase().replace(/\b(inc|corp|corporation|ltd|plc|sa|ag|nv|co|company|class [a-c]|cl [a-c]|ordinary shares?|ord shs|holdings?)\b/g, ' ').replace(/[^a-z0-9àèéìòù ]+/g, ' ').replace(/\s+/g, ' ').trim();
+
 /* ============ scheda Mercati ============ */
 const FG_IT = { 'Extreme Fear': 'Paura estrema', 'Fear': 'Paura', 'Neutral': 'Neutrale', 'Greed': 'Avidità', 'Extreme Greed': 'Avidità estrema' };
 function readMarket(m) {            // lettura a regole dei dati (non e' una previsione)
@@ -1577,6 +1686,8 @@ function marketForClaude() {
   const m = DATA.mercati, L = ['Sei un analista finanziario prudente. Qui sotto trovi i dati pubblici di oggi sui mercati e un riepilogo anonimizzato del mio portafoglio. Spiegami in italiano, in modo concreto: 1) cosa sta succedendo oggi e perché, 2) dove sembrano muoversi i grandi capitali, 3) cosa può significare per il MIO portafoglio (concentrazione, rischi, cose da tenere d\'occhio). Distingui fatti da ipotesi, non fare previsioni sicure e non darmi consigli di acquisto o vendita personalizzati.', ''];
   L.push('Dati di mercato aggiornati al ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ':'); for (const t of readMarket(m)) L.push('- ' + t);
   L.push('', 'Titoli principali di oggi:'); for (const f of m.fonti.filter(x => x.ok).slice(0, 10)) L.push('- ' + f.nome + ': ' + f.voci.slice(0, 3).map(v => v.titolo).join(' | '));
+  const mv = dayMovers().slice(0, 5); if (mv.length) L.push('', 'Come si sono mossi oggi i miei strumenti: ' + mv.map(x => x.i.name + ' ' + spct(x.pct)).join('; ') + '.');
+  const nw2 = holdingNews(5); if (nw2.length) L.push('', 'Notizie sui miei titoli:', ...nw2.map(n => '- ' + n.per + ': ' + n.titolo));
   L.push('', 'Il mio portafoglio (anonimizzato):', buildSummary({ amounts: false, accNames: false, instNames: true, q: '' }).split('\n').slice(2).join('\n'));      // senza la sua frase di apertura: qui c'è già la richiesta
   return L.join('\n');
 }
@@ -1597,6 +1708,8 @@ function tabMercati() {
   const sect = I.settori_usa; if (sect && sect.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Settori USA oggi'), table([{ t: 'Settore' }, { t: 'Variazione', n: 1 }], sect.map(x => [x.nome, gl(x.var_giorno_pct, (x.var_giorno_pct > 0 ? '+' : '') + nf2.format(x.var_giorno_pct) + '%')]))));
   const f = I.posizioni_grandi_futures; if (f && f.voci) el.append(h('section', { class: 'card' }, h('h2', null, 'Dove sono sbilanciati i grandi (futures)'), table([{ t: 'Mercato' }, { t: 'Lunghi', n: 1 }, { t: 'Corti', n: 1 }, { t: 'Netto', n: 1 }, { t: '% interessi aperti', n: 1 }], f.voci.map(x => [x.nome, nf0.format(x.lunghi), nf0.format(x.corti), gl(x.netto, (x.netto > 0 ? '+' : '') + nf0.format(x.netto)), (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '%'])),
     h('p', { class: 'muted' }, 'Posizioni dei grandi operatori non commerciali (fondi speculativi e gestori), dati CFTC del ' + fmtDate(f.data) + ', pubblicati con qualche giorno di ritardo. Sono un\'istantanea, non un segnale di acquisto o vendita.')));
+  const nw = holdingNews(10); if (nw.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Notizie sui tuoi titoli'), h('ul', { class: 'news' }, nw.map(n => h('li', null, h('a', { href: n.link, target: '_blank', rel: 'noopener noreferrer' }, n.titolo), h('small', null, ' · ' + n.fonte + ' · ' + n.per)))), h('p', { class: 'muted' }, 'Titoli che nominano i tuoi titoli singoli e le tue crypto: il riconoscimento è per nome, quindi può sbagliare.')));
+  const th2 = themes(m, 12); if (th2.list.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Di cosa parlano i titoli oggi'), h('div', { class: 'themes' }, th2.list.map(([w, c]) => h('span', { class: 'tag' }, w, h('b', null, String(c))))), h('p', { class: 'muted' }, 'Parole più ricorrenti nei ' + th2.heads + ' titoli letti (con quante notizie le nominano). Dice su cosa si concentra l\'attenzione, non se sia un bene o un male.')));
   const groups = [...new Set(ok.map(x => x.gruppo))];
   el.append(h('section', { class: 'card' }, h('h2', null, 'Titoli dalle fonti'), groups.map(gp => h('div', null, h('h4', null, gp), ok.filter(x => x.gruppo === gp).map(src => h('details', { class: 'src' }, h('summary', null, src.nome, h('small', null, ' · ' + src.voci.length + ' titoli')), h('ul', { class: 'news' }, src.voci.map(v => h('li', null, h('a', { href: v.link, target: '_blank', rel: 'noopener noreferrer' }, v.titolo), v.data ? h('small', null, ' ' + fmtDate(v.data.slice(0, 10))) : null))))))),
     ko.length ? h('p', { class: 'muted' }, 'Non disponibili adesso: ' + ko.map(x => x.nome).join(', ') + '.') : null,
@@ -1735,6 +1848,7 @@ function tabPanoramica() {
   for (const t of alerts().slice(0, 4)) warns.push(t);      // regole che ti sei dato (Analisi → Regole)
   const nof = pa.filter(a => !a.flows.length); if (nof.length) warns.push('Senza movimenti, guadagno e rendimento non sono calcolabili per: ' + nof.map(a => a.name).join(', ') + '.');
   if (warns.length) el.append(h('div', { class: 'warn' }, h('b', null, 'Da sistemare'), h('ul', null, warns.map(w => h('li', null, w)))));
+  const bf = briefingCard(); if (bf) el.append(bf);
   const pts = chartPoints();
   if (pts.length) {
     const body = pts.length < 2 ? h('p', { class: 'muted' }, 'Il grafico si disegna quando hai almeno due punti nel tempo: registra uno snapshot ogni volta che aggiorni i prezzi.')
