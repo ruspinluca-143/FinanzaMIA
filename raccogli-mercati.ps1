@@ -125,6 +125,29 @@ try {   # posizioni dei grandi operatori sui futures (CFTC, settimanale, con qua
   $ind['posizioni_grandi_futures'] = [ordered]@{ data = $asof; voci = $cot }
 } catch { $indErr.Add('Posizioni sui futures (CFTC): ' + $_.Exception.Message) }
 
+try {   # calendario delle decisioni sui tassi: Fed (FOMC) e BCE, dalle pagine ufficiali (data dell'ultimo giorno di riunione)
+  $ev = New-Object Collections.Generic.List[object]; $oggi = (Get-Date).Date; $tra = $oggi.AddDays(120)
+  $mesi = 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'; $mre = ($mesi -join '|')
+  $ft = ((Get-Text 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm') -replace '<[^>]+>', ' ') -replace '\s+', ' '
+  foreach ($yr in $oggi.Year, ($oggi.Year + 1)) {
+    $i = $ft.IndexOf("$yr FOMC Meetings"); if ($i -lt 0) { continue }
+    $rest = $ft.Substring($i + 10); $nx = [regex]::Match($rest, '20\d\d FOMC Meetings'); $sec = if ($nx.Success) { $rest.Substring(0, $nx.Index) } else { $rest }
+    foreach ($mt in [regex]::Matches($sec, "($mre)\s+(\d{1,2})\s*-\s*(?:($mre)\s+)?(\d{1,2})\*?(?!\d|\s*,\s*20\d\d)")) {      # escluse le note con l'anno scritto (es. "25-26 gennaio 2028")
+      $mo = if ($mt.Groups[3].Success) { $mt.Groups[3].Value } else { $mt.Groups[1].Value }
+      $d = [datetime]::ParseExact(('{0} {1} {2}' -f $mo, $mt.Groups[4].Value, $yr), 'MMMM d yyyy', $inv)
+      if ($d -ge $oggi -and $d -le $tra) { $ev.Add([ordered]@{ data = $d.ToString('yyyy-MM-dd'); titolo = 'Fed (FOMC): decisione sui tassi'; fonte = 'federalreserve.gov' }) }
+    }
+  }
+  $et = Get-Text 'https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html'
+  foreach ($mt in [regex]::Matches($et, '<dt>\s*(\d{2})/(\d{2})/(\d{4})\s*</dt>\s*<dd>\s*([^<]+)')) {
+    if ($mt.Groups[4].Value -notmatch 'monetary policy meeting.*Day 2') { continue }
+    $d = [datetime]::ParseExact(('{0}-{1}-{2}' -f $mt.Groups[3].Value, $mt.Groups[2].Value, $mt.Groups[1].Value), 'yyyy-MM-dd', $inv)
+    if ($d -ge $oggi -and $d -le $tra) { $ev.Add([ordered]@{ data = $d.ToString('yyyy-MM-dd'); titolo = 'BCE: decisione sui tassi e conferenza stampa'; fonte = 'ecb.europa.eu' }) }
+  }
+  if (-not $ev.Count) { throw 'nessuna riunione trovata nei prossimi 120 giorni' }
+  $ind['calendario'] = @($ev | Sort-Object { $_['data'] })
+} catch { $indErr.Add('Calendario banche centrali: ' + $_.Exception.Message) }
+
 if ($env:FINNHUB_KEY) {   # settori USA (ETF SPDR), solo con la chiave gratuita di Finnhub
   try {
     $sect = New-Object Collections.Generic.List[object]
