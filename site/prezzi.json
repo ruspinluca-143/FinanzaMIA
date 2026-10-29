@@ -1,7 +1,7 @@
 {
   "app": "finanze-prezzi",
   "versione": 1,
-  "generato": "2026-10-29T21:00:25+00:00",
+  "generato": "2026-10-29T21:18:19+00:00",
   "prezzi": [
     {"nome":"iShares Core MSCI World UCITS ETF USD (Acc)","id":"IE00B4L5Y983","prezzo":131.48,"valuta":"EUR","data":"2026-10-29","ter":0.2,"bench":"MSCI TRN WORLD INDEX","div":"CAPITALIZED"},
     {"nome":"Amundi Core Nasdaq-100 Swap UCITS ETF Acc","id":"LU1829221024","prezzo":107.28,"valuta":"EUR","data":"2026-10-29","ter":0.3,"bench":"NASDAQ-100 Notional Net Total Return","div":"CAPITALIZED"},
@@ -27,11 +27,11 @@
     {"nome":"Apple","id":"aapl","prezzo":343.83,"valuta":"USD","data":"2026-10-28"},
     {"nome":"Alumis Inc","id":"alms","prezzo":7.13,"valuta":"USD","data":"2026-10-28"},
     {"nome":"Accenture","id":"acn","prezzo":243.4,"valuta":"USD","data":"2026-10-28"},
-    {"nome":"Bitcoin","id":"bitcoin","prezzo":70491,"valuta":"EUR","data":"2026-10-29"},
-    {"nome":"XRP","id":"ripple","prezzo":1.11,"valuta":"EUR","data":"2026-10-29"},
-    {"nome":"Ether","id":"ethereum","prezzo":2019.9,"valuta":"EUR","data":"2026-10-29"},
-    {"nome":"Solana","id":"solana","prezzo":86.06,"valuta":"EUR","data":"2026-10-29"},
-    {"nome":"Cardano","id":"cardano","prezzo":0.170587,"valuta":"EUR","data":"2026-10-29"},
-    {"nome":"Cosmos","id":"cosmos","prezzo":1.35,"valuta":"EUR","data":"2026-10-29"}
+    {"nome":"Bitcoin","id":"bitcoin","prezzo":70922,"valuta":"EUR","data":"2026-10-29"},
+    {"nome":"XRP","id":"ripple","prezzo":1.12,"valuta":"EUR","data":"2026-10-29"},
+    {"nome":"Ether","id":"ethereum","prezzo":2038.67,"valuta":"EUR","data":"2026-10-29"},
+    {"nome":"Solana","id":"solana","prezzo":87.12,"valuta":"EUR","data":"2026-10-29"},
+    {"nome":"Cardano","id":"cardano","prezzo":0.173606,"valuta":"EUR","data":"2026-10-29"},
+    {"nome":"Cosmos","id":"cosmos","prezzo":1.37,"valuta":"EUR","data":"2026-10-29"}
   ]
 }
