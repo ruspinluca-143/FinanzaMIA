@@ -1,0 +1,47 @@
+name: Prezzi e pubblicazione
+on:
+  schedule:
+    - cron: '10 7,17 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', '.github/workflows/prezzi.yml']
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  prezzi:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Leggi i prezzi pubblici
+        id: leggi
+        continue-on-error: true
+        shell: pwsh
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+        run: ./aggiorna-prezzi.ps1 -Watchlist ./watchlist-pubblica.json -Uscita ./site
+      - name: Avviso se troppi prezzi non si leggono
+        if: steps.leggi.outcome == 'failure'
+        run: echo "::warning::Piu della meta dei prezzi non si e letta (un sito potrebbe rifiutare il data center). Il sito resta con gli ultimi prezzi buoni."
+      - name: Salva prezzi e storico nel repository
+        run: |
+          rm -f site/aggiorna-prezzi.log
+          git config user.name "prezzi-bot"
+          git config user.email "prezzi-bot@users.noreply.github.com"
+          git add -A site
+          git diff --cached --quiet || git commit -m "Prezzi del $(date -u '+%Y-%m-%d %H:%M') UTC"
+          git push
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
