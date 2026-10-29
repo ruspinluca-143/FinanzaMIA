@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SX/PzUai+Gfcn+NBGfi6hRvdiB2oOsEEX0Kn+0/yHMA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6+sFKK37J1Fnjv+qYRm0MyZa5e1FTVBsyR6ByAFIbhM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1394,6 +1394,15 @@ function portfolioAssumptions() {
   let varp = 0; for (let a = 0; a < comps.length; a++) for (let b = 0; b < comps.length; b++) varp += comps[a].w * comps[b].w * comps[a].sg * comps[b].sg * (a === b ? 1 : (comps[a].safe || comps[b].safe ? 0 : 0.5));
   return { mu: mu / 100, sigma: Math.sqrt(varp) / 100 };
 }
+function normCdf(x) {          // funzione di ripartizione della normale (approssimazione di Abramowitz-Stegun, errore sotto 1e-7)
+  const t = 1 / (1 + 0.2316419 * Math.abs(x)), d = 0.3989422804 * Math.exp(-x * x / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return x > 0 ? 1 - p : p;
+}
+function horizonRange(mu, sigma, years) {          // fascia 10°-90° e probabilita' di perdita dopo "years" anni, senza nuovi versamenti (rendimento lognormale, stesse ipotesi della simulazione)
+  const s2 = Math.log(1 + (sigma / (1 + mu)) ** 2), m = (Math.log(1 + mu) - s2 / 2) * years, sd = Math.sqrt(s2 * years), z = 1.2815516;
+  return { lo: Math.exp(m - z * sd) - 1, mid: Math.exp(m) - 1, hi: Math.exp(m + z * sd) - 1, pLoss: normCdf(-m / sd) };
+}
 function requiredMonthly(w0, years, mu, sigma, target, probs) {         // versamento mensile minimo perche' la probabilita' di arrivare a "target" sia almeno quella richiesta (stessi numeri casuali di simulate: la probabilita' cresce sempre col versamento)
   const N = 3000, T = Math.max(1, Math.round(years)), rnd = mulberry(20261029);
   const s2 = Math.log(1 + (sigma / (1 + mu)) ** 2), mm = Math.log(1 + mu) - s2 / 2, ss = Math.sqrt(s2), fac = new Float64Array(N * T);
@@ -1535,6 +1544,11 @@ function anObiettivo() {
     h('div', { class: 'row' }, btn('Cambia obiettivo', () => form('Il tuo obiettivo', [{ key: 'cagr', label: 'Rendimento annuo che vuoi ottenere (%)', type: 'number', req: true }, { key: 'years', label: 'Per quanti anni', type: 'number', req: true }, { key: 'monthly', label: 'Quanto aggiungi ogni mese (€)', type: 'number' }], g, o => { if (!(o.years >= 1 && o.years <= 40)) return 'Gli anni devono essere tra 1 e 40.'; g.cagr = o.cagr ?? 0; g.years = o.years; g.monthly = o.monthly || 0; done(); }), 'pri'),
       btn('Ipotesi per classe', () => { const A = assumptions(), cls = [...new Set([...exposure('class').map(x => x[0]), ...Object.keys(CLASS_DEFAULT)])]; const fields = cls.flatMap((c, k) => [{ key: 'm' + k, label: c + ': rendimento atteso annuo (%)', type: 'number' }, { key: 's' + k, label: c + ': volatilità annua (%)', type: 'number' }]), vals = {}; cls.forEach((c, k) => { const a = A[Object.keys(A).find(x => x.toLowerCase() === c.toLowerCase())] || A['Non classificato']; vals['m' + k] = a[0]; vals['s' + k] = a[1]; }); form('Ipotesi per classe', fields, vals, o => { g.assume = {}; cls.forEach((c, k) => { if (o['m' + k] != null && o['s' + k] != null) g.assume[c] = [o['m' + k], o['s' + k]]; }); done(); }); }, 'sm')),
     h('p', { class: 'muted' }, 'È una simulazione con ipotesi di rendimento e rischio per classe (modificabili): non è una previsione e non garantisce nulla. Le correlazioni sono semplificate e gli eventi estremi sottostimati.')));
+  const HZ = [['1 settimana', 1 / 52], ['1 mese', 1 / 12], ['3 mesi', 0.25], ['1 anno', 1]], hr = HZ.map(([l, y]) => [l, horizonRange(pa.mu, pa.sigma, y)]);
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Dove può essere il patrimonio tra poco'),
+    h('p', null, 'Senza nuovi versamenti e con le ipotesi di rendimento e rischio di qui sopra, è la fascia in cui cadrebbe il tuo patrimonio nell\'80% dei casi: nel 10% starebbe sotto e nel 10% sopra.'),
+    table([{ t: 'Tra' }, { t: 'Fascia in %', n: 1 }, { t: 'Fascia in euro', n: 1 }, { t: 'Caso mediano', n: 1 }, { t: 'Rischio di perdita', n: 1 }], hr.map(([l, r]) => [l, spct(r.lo) + ' … ' + spct(r.hi), eur(tot * (1 + r.lo)) + ' … ' + eur(tot * (1 + r.hi)), eur(tot * (1 + r.mid)), pct(r.pLoss)])),
+    h('p', { class: 'muted' }, 'Non è una previsione di dove andrà il mercato, perché nessuno lo sa: è l\'ampiezza normale delle oscillazioni per un portafoglio fatto come il tuo. A breve conta più la volatilità che il rendimento, quindi la fascia è quasi simmetrica. I mercati veri hanno giornate molto peggiori di quelle che questo modello considera possibili.')));
   const te = g.targetEur > 0 ? g.targetEur : (Math.round(tot * 1.5 / 1000) * 1000 || 10000), ys = Math.max(1, Math.round(g.years || 5)), probs = [0.5, 0.8, 0.95], req = requiredMonthly(tot, ys, pa.mu, pa.sigma, te, probs);
   el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto versare per arrivare a una cifra'),
     h('p', null, 'Per avere ', h('b', null, eur(te)), ' tra ', h('b', null, pl(ys, 'anno', 'anni')), ', partendo dai tuoi ', eur(tot), ':'),
