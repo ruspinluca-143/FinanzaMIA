@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-utxmBQ7lnh7c5bh2JlWKrIcyEOJem2gufRJhNoNCDFo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DjPS3Xr4stHabhXsTtR8Aak8FYlqV8CU6KJU1FMuHp8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -193,6 +193,13 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 .top{padding-top:max(12px,env(safe-area-inset-top))}
 .ti,.ls{display:none}
 .tab{display:inline-flex;align-items:center}
+.meter{position:relative;height:8px;margin-top:8px;border-radius:99px;background:linear-gradient(90deg,#ff453a,#ff9f0a 35%,#ffd60a 50%,#30d158 100%)}
+.meter i{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--card-s)}
+details.src{border-bottom:1px solid var(--grid);padding:6px 0}
+details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
+.news{margin:4px 0 8px 18px;padding:0}
+.news li{margin:6px 0;line-height:1.35}
+.news small{color:var(--muted)}
 .banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin:14px 0;border-radius:16px;font-weight:500;background:color-mix(in srgb,var(--s1) 12%,var(--card-s));border:1px solid color-mix(in srgb,var(--s1) 28%,transparent)}
 @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
 @media (hover:none){.tile:hover{transform:none;box-shadow:var(--sh)}.btn:hover{background:var(--btn)}.btn.pri:hover{background:var(--pri)}.chip:hover{background:var(--btn)}.tab:hover{color:var(--ink2)}tbody tr:hover{background:none}}
@@ -204,7 +211,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(7,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
 .tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10.5px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
@@ -304,16 +311,19 @@ const TYPES = {
   crypto: { label: 'Crypto / exchange', perf: true },
   pensione: { label: 'Fondo pensione', perf: true },
   trading: { label: 'Trading (MT4…)', perf: true },
+  deposito: { label: 'Conto deposito / vincolato', perf: true },
+  contanti: { label: 'Contanti', perf: false },
   banca: { label: 'Conto corrente / banca', perf: false },
   pagamenti: { label: 'Pagamenti / carte', perf: false },
   altro: { label: 'Altro', perf: false }
 };
 const FLOW_TYPES = [['versamento', 'Versamento (soldi che entrano)'], ['prelievo', 'Prelievo (soldi che escono)'], ['partenza', 'Valore di partenza (inizio tracciamento)']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 5 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' } });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 5 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} } });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
+  d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
@@ -430,7 +440,7 @@ document.addEventListener('visibilitychange', () => {
 const fxRate = c => (!c || c === 'EUR') ? 1 : (S.fx[c] > 0 ? S.fx[c] : null);
 const inst = id => S.instruments.find(i => i.id === id);
 const posValue = p => { const i = inst(p.instId); return i ? p.qty * i.price * (fxRate(i.ccy) ?? 1) : 0; };
-const accCash = a => (a.cash || 0) * (fxRate(a.cashCcy) ?? 1);
+const accCash = a => a.dep ? depValue(a.dep) : (a.cash || 0) * (fxRate(a.cashCcy) ?? 1);      // conto deposito: capitale piu' interessi maturati
 const accValue = a => accCash(a) + a.positions.reduce((t, p) => t + posValue(p), 0);
 const totalValue = () => S.accounts.reduce((t, a) => t + accValue(a), 0);
 const netContrib = (a, upto) => a.flows.filter(f => !upto || f.date <= upto).reduce((t, f) => t + flowSign(f.type) * f.amount, 0);
@@ -569,18 +579,25 @@ const done = () => { touch(); render(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
-  const isNew = !a, v = a || { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '' };
+  const isNew = !a, v = a ? Object.assign({}, a, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26 };
   form(isNew ? 'Nuovo conto' : 'Modifica conto', [
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
     { key: 'type', label: 'Tipo', type: 'select', options: Object.entries(TYPES).map(([k, t]) => [k, t.label]), ...(isNew ? { sync: i => { i.perf.checked = TYPES[i.type.value].perf; } } : {}) },
     { key: 'perf', label: 'Includi nel calcolo di guadagno e rendimento', type: 'check', hint: 'sì per broker, crypto, pensione, trading; no per conti correnti e carte' },
     { key: 'cash', label: 'Liquidità nel conto', type: 'number' },
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
-    { key: 'note', label: 'Note' }
+    { key: 'note', label: 'Note' },
+    { key: 'dpP', label: 'Solo conto deposito: capitale versato (€)', type: 'number' },
+    { key: 'dpR', label: 'Solo conto deposito: tasso annuo lordo (%)', type: 'number' },
+    { key: 'dpS', label: 'Solo conto deposito: data di inizio', type: 'date' },
+    { key: 'dpE', label: 'Solo conto deposito: scadenza (facoltativa)', type: 'date' },
+    { key: 'dpT', label: 'Solo conto deposito: ritenuta sugli interessi (%)', type: 'number', hint: 'Gli interessi maturano da soli ogni giorno, al netto della ritenuta' }
   ], v, o => {
     if (!o.name) return 'Inserisci un nome.';
-    const d = { name: o.name, type: o.type, perf: o.perf, cash: o.cash || 0, cashCcy: normCcy(o.cashCcy), note: o.note };
-    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], ...d }; S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else Object.assign(a, d);
+    let dep = null;
+    if (o.type === 'deposito') { if (!(o.dpP > 0) || !o.dpS) return 'Per un conto deposito indica capitale e data di inizio.'; dep = { principal: o.dpP, rate: o.dpR || 0, start: o.dpS, end: o.dpE || '', taxPct: o.dpT ?? 26 }; }
+    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep };
+    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else Object.assign(a, d);
     done();
   }, ccyList());
 }
@@ -594,11 +611,14 @@ function editInstrument(i) {
     { key: 'ccy', label: 'Valuta del prezzo', list: 'dl-ccy', ph: 'EUR' },
     { key: 'price', label: 'Prezzo attuale (per fondi a quote: valore quota)', type: 'number', req: true },
     { key: 'cls', label: 'Classe di attività (o composizione)', list: 'dl-cls', ph: 'Azioni  oppure  Azioni 60, Obbligazioni 40', hint: 'Con più voci scrivi le percentuali separate da virgola, usando il punto per i decimali (es. 33.3).' },
-    { key: 'area', label: 'Area geografica (o composizione)', list: 'dl-area', ph: 'Mondo  oppure  USA 65, Europa 20, Emergenti 15' }
+    { key: 'area', label: 'Area geografica (o composizione)', list: 'dl-area', ph: 'Mondo  oppure  USA 65, Europa 20, Emergenti 15' },
+    { key: 'ter', label: 'Costo annuo del fondo (TER %)', type: 'number', hint: 'Per gli ETF lo legge da solo quando applichi i prezzi online' },
+    { key: 'tax', label: 'Aliquota sulle plusvalenze (%)', type: 'number', hint: 'Vuoto = 26%. Per i titoli di Stato italiani si usa il 12,5%' },
+    { key: 'holdings', label: 'Principali titoli dentro (facoltativo)', type: 'textarea', ph: 'NVIDIA 5, Apple 4,5, Microsoft 4', hint: 'Percentuali del fondo, per vedere da cosa dipendi davvero (Analisi → Esposizione)' }
   ], v, o => {
     if (!(o.price >= 0)) return 'Inserisci un prezzo valido.';
     if (!o.cls) return 'Indica almeno la classe di attività (es. Azioni).';
-    const d = { name: o.name, code: o.code, ccy: normCcy(o.ccy), cls: o.cls, area: o.area || 'n.d.' };
+    const d = { name: o.name, code: o.code, ccy: normCcy(o.ccy), cls: o.cls, area: o.area || 'n.d.', ter: o.ter, tax: o.tax, holdings: o.holdings };
     if (isNew) { const n = { id: uid(), price: o.price, priceDate: today(), hist: [{ d: today(), p: o.price }], ...d }; S.instruments.push(n); }
     else { Object.assign(i, d); if (o.price !== i.price) setPrice(i, o.price); }
     done();
@@ -678,6 +698,11 @@ function openPrices(P, fname) {
   function upd() { const n = boxes.filter(b => b && b.checked).length; ok.textContent = n ? 'Applica ' + pl(n, 'prezzo', 'prezzi') : 'Nessun prezzo da applicare'; ok.disabled = !n; }
   ok.onclick = () => {
     let n = 0; P.rows.forEach((r, k) => { if (boxes[k] && boxes[k].checked) { setPriceAt(r.i, r.np, r.e.data); n++; } });
+    for (const r of P.rows) {          // dati pubblici dell'ETF (costo annuo, benchmark, distribuzione): si completano solo se mancano
+      if (typeof r.e.ter === 'number' && r.e.ter >= 0 && r.i.ter == null) r.i.ter = r.e.ter;
+      if (typeof r.e.bench === 'string' && !r.i.bench) r.i.bench = r.e.bench;
+      if (typeof r.e.div === 'string' && !r.i.div) r.i.div = r.e.div;
+    }
     if (n && snap.checked) takeSnapshot();
     shut(); PRICE_BANNER = null; done();
   };
@@ -1212,6 +1237,376 @@ function endQueue(Q) {
   document.body.append(dlg); dlg.showModal();
 }
 
+/* ============ analisi, mercati, regole e diario ============ */
+const DATA = { hist: null, mercati: null };      // storico dei prezzi e dati di mercato letti dal sito (o da file)
+const pnum = v => { const x = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(x) ? x : null; };
+const G = () => S.goal || (S.goal = { cagr: 20, years: 5, monthly: 0, assume: {} });
+const JR = () => S.journal || (S.journal = []);
+const DEFAULTS = { maxPos: 5, maxCrypto: 10, maxAny: 35, maxCash: 20, tol: 5 };
+const th = k => { const v = pnum(S.policy[k]); return v > 0 ? v : DEFAULTS[k]; };
+const LEV_RE = /leverage|\b[2-5]x\b|\bshort\b|inverse|ultra|daily/i;
+const CLASS_DEFAULT = { 'Azioni': [7, 16], 'Obbligazioni': [3, 5], 'Materie prime': [4, 15], 'Crypto': [10, 70], 'Monetario': [2, 1], 'Liquidità': [1.5, 0.5], 'Non classificato': [5, 15] };   // [rendimento atteso %, volatilità %]: IPOTESI modificabili, non previsioni
+const kindOf = i => {
+  if (i.kind) return i.kind;
+  if (/crypto/i.test(i.cls || '')) return 'crypto';
+  if (/ucits|\betf\b|\betc\b|\betn\b|\betp\b|ishares|xtrackers|amundi|vanguard|invesco|wisdomtree|21shares|bitwise|lyxor|spdr|fondo|comparto|cometa|obbligaz|\bbond\b|\bbtp\b|\bbund\b/i.test(i.name)) return 'fondo';
+  return 'azione';
+};
+const taxRateOf = i => i.tax >= 0 && i.tax != null ? i.tax : 26;
+function parseHoldings(txt) {          // "NVIDIA 5.2, Apple 4.6" -> [['NVIDIA', 5.2], ['Apple', 4.6]] (percentuali del fondo: NON si normalizzano). La virgola separa i titoli solo se segue un nome: "Apple 4,5, Microsoft 4" si legge bene
+  return String(txt || '').split(/\s*[;\n]\s*|,\s*(?=[^\d\s])/).map(t => t.trim()).filter(Boolean).map(t => { const m = t.match(/^(.*?)[\s:=]+(\d+(?:[.,]\d+)?)\s*%?$/); return m && m[1].trim() ? [m[1].trim(), parseFloat(m[2].replace(',', '.'))] : null; }).filter(Boolean);
+}
+
+/* ---- conti deposito e vincolati: interessi semplici maturati, al netto della ritenuta ---- */
+function depValue(dp, onDate) {
+  if (!dp || !(dp.principal > 0)) return 0;
+  const d1 = dayMs(onDate || today()), d0 = dayMs(dp.start || today()), dEnd = dp.end ? dayMs(dp.end) : Infinity;
+  const days = Math.max(0, (Math.min(d1, dEnd) - d0) / 864e5);
+  const gross = dp.principal * (dp.rate || 0) / 100 * days / 365;
+  return dp.principal + gross * (1 - (dp.taxPct ?? 26) / 100);
+}
+
+/* ---- storico dei prezzi: lettura, serie del valore, variazioni ---- */
+function parseHistory(text) {
+  const byKey = new Map();
+  const L = String(text || '').split(/\r?\n/);
+  for (let k = 1; k < L.length; k++) {
+    const f = L[k].split(';'); if (f.length < 7) continue;
+    const p = parseFloat(f[3]); if (!(p > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(f[5])) continue;
+    for (const key of [f[1].toLowerCase(), f[2].toLowerCase()]) { if (!key) continue; if (!byKey.has(key)) byKey.set(key, new Map()); byKey.get(key).set(f[5], p); }      // per ogni giorno vale l'ultimo prezzo letto
+  }
+  const out = new Map();
+  for (const [k, m] of byKey) out.set(k, [...m.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1).map(([d, p]) => ({ d, p })));
+  return out;
+}
+function seriesOf(i) {
+  const own = (i.hist || []).map(x => [x.d, x.p]);
+  const h2 = DATA.hist && (DATA.hist.get(i.name.toLowerCase()) || (i.code && DATA.hist.get(i.code.toLowerCase())));
+  const m = new Map(own); if (h2) for (const x of h2) m.set(x.d, x.p);
+  return [...m.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1).map(([d, p]) => ({ d, p }));
+}
+function priceAtS(s, fallback, d) {
+  if (!s.length) return fallback;
+  if (d <= s[0].d) return s[0].p;
+  let lo = 0, hi = s.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (s[m].d <= d) lo = m; else hi = m - 1; }
+  return s[lo].p;
+}
+function valueSeries(accs) {              // valore dei conti nel tempo con le quantita' di oggi (non conosce acquisti e vendite passati)
+  const held = new Map();
+  for (const a of accs) for (const p of a.positions) { const i = inst(p.instId); if (i) held.set(i.id, (held.get(i.id) || 0) + p.qty); }
+  const ser = new Map(), dates = new Set([today()]);
+  for (const id of held.keys()) { const s = seriesOf(inst(id)); ser.set(id, s); for (const x of s) if (x.d <= today()) dates.add(x.d); }
+  const cashFixed = accs.reduce((t, a) => t + (a.dep ? 0 : accCash(a)), 0);
+  return [...dates].sort().map(d => {
+    let v = cashFixed + accs.reduce((t, a) => t + (a.dep ? depValue(a.dep, d) : 0), 0);
+    for (const [id, q] of held) { const i = inst(id); v += q * (d === today() ? i.price : priceAtS(ser.get(id), i.price, d)) * (fxRate(i.ccy) ?? 1); }
+    return { d, t: dayMs(d), v };
+  });
+}
+const isoOf = t => { const x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+function deltaFrom(pts, days) {
+  if (pts.length < 2) return null;
+  const last = pts[pts.length - 1], lim = isoOf(last.t - days * 864e5); let ref = null;
+  for (const p of pts) if (p.d <= lim) ref = p;
+  return ref ? { abs: last.v - ref.v, pct: ref.v > 0 ? last.v / ref.v - 1 : null, d: ref.d } : null;
+}
+const heroDelta = () => {          // sotto il totale: come si e' mosso oggi e negli ultimi 7 giorni (dai prezzi storici)
+  const accs = S.accounts.filter(a => a.perf); if (!accs.length) return null;
+  const pts = valueSeries(accs); if (pts.length < 2) return null;
+  const n = pts.length, d1 = pts[n - 1].v - pts[n - 2].v, d7 = deltaFrom(pts, 7);
+  return h('div', { class: 'sub' }, 'Oggi ', gl(d1, seur(d1)), d7 ? [' · 7 giorni ', gl(d7.abs, seur(d7.abs))] : null);
+};
+function pickText(accept, fn) {
+  const inp = h('input', { type: 'file', accept, style: 'display:none' });
+  inp.addEventListener('change', async () => { const f = inp.files[0]; inp.remove(); if (!f) return; if (f.size > 8e6) { alert('Il file è troppo grande.'); return; } fn(await f.text(), f.name); });
+  document.body.append(inp); inp.click();
+}
+const asArr = x => Array.isArray(x) ? x : (x == null ? [] : [x]);
+function normMercati(j) {           // un elenco con un solo elemento puo' arrivare come oggetto: lo si riporta sempre a elenco
+  if (!j || j.app !== 'finanze-mercati') return null;
+  j.fonti = asArr(j.fonti).map(f => Object.assign({}, f, { voci: asArr(f.voci) })); j.indicatori = j.indicatori || {};
+  const I = j.indicatori; if (I.posizioni_grandi_futures) I.posizioni_grandi_futures.voci = asArr(I.posizioni_grandi_futures.voci); if (I.settori_usa) I.settori_usa = asArr(I.settori_usa);
+  return j;
+}
+async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
+  if (!ONLINE) return;
+  const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
+  const [hh, mm] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json')]);
+  if (hh) DATA.hist = parseHistory(hh);
+  if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
+  if (S && !LOCKED && (hh || mm)) render();
+}
+
+/* ---- grafici semplici ---- */
+function trendChart(pts, label) {
+  const W = 720, H = 220, m = { l: 56, r: 16, t: 14, b: 26 };
+  const vs = pts.map(p => p.v), lo = Math.min(...vs), hi = Math.max(...vs), pad = (hi - lo || hi * 0.01 || 1) * 0.15, a = lo - pad, b = hi + pad;
+  const x0 = pts[0].t, x1 = pts[pts.length - 1].t, X = t => m.l + (t - x0) / ((x1 - x0) || 1) * (W - m.l - m.r), Y = v => H - m.b - (v - a) / ((b - a) || 1) * (H - m.t - m.b);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': label });
+  for (const v of niceTicks(a, b, 3)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(s('text', { class: 'g-txt', x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end' }, compact(v))); }
+  const d = 'M' + pts.map(p => X(p.t).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' L');
+  svg.append(s('defs', null, s('linearGradient', { id: 'areaT', x1: 0, y1: 0, x2: 0, y2: 1 }, s('stop', { offset: '0%', style: 'stop-color:var(--s1);stop-opacity:.24' }), s('stop', { offset: '100%', style: 'stop-color:var(--s1);stop-opacity:0' }))),
+    s('path', { class: 'area', d: d + ' L' + X(x1).toFixed(1) + ' ' + (H - m.b) + ' L' + X(x0).toFixed(1) + ' ' + (H - m.b) + ' Z', fill: 'url(#areaT)' }), s('path', { class: 'ln l1 draw', d, pathLength: 1 }),
+    s('circle', { class: 'dot d1', cx: X(x1), cy: Y(pts[pts.length - 1].v), r: 4.5 }),
+    s('text', { class: 'g-txt', x: m.l, y: H - 8 }, fmtDate(pts[0].d)), s('text', { class: 'g-txt', x: W - m.r, y: H - 8, 'text-anchor': 'end' }, fmtDate(pts[pts.length - 1].d)));
+  return h('div', { class: 'chart' }, svg);
+}
+function duoChart(rows, la, lb) {          // due serie riportate a base 100
+  const W = 720, H = 220, m = { l: 44, r: 16, t: 14, b: 26 };
+  const all = rows.flatMap(r => [r.a, r.b]), lo = Math.min(...all), hi = Math.max(...all), pad = (hi - lo || 1) * 0.15, a = lo - pad, b = hi + pad;
+  const x0 = rows[0].t, x1 = rows[rows.length - 1].t, X = t => m.l + (t - x0) / ((x1 - x0) || 1) * (W - m.l - m.r), Y = v => H - m.b - (v - a) / ((b - a) || 1) * (H - m.t - m.b);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': la + ' contro ' + lb });
+  for (const v of niceTicks(a, b, 3)) svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }), s('text', { class: 'g-txt', x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end' }, nf0.format(v)));
+  const path = k => 'M' + rows.map(r => X(r.t).toFixed(1) + ' ' + Y(r[k]).toFixed(1)).join(' L');
+  svg.append(s('path', { class: 'ln l2 draw', d: path('b'), pathLength: 1 }), s('path', { class: 'ln l1 draw', d: path('a'), pathLength: 1 }),
+    s('text', { class: 'g-txt', x: m.l, y: H - 8 }, fmtDate(rows[0].d)), s('text', { class: 'g-txt', x: W - m.r, y: H - 8, 'text-anchor': 'end' }, fmtDate(rows[rows.length - 1].d)));
+  return h('div', { class: 'chart' }, h('div', { class: 'legend' }, h('span', null, h('span', { class: 'key', style: 'background:var(--s1)' }), la), h('span', null, h('span', { class: 'key', style: 'background:var(--s2)' }), lb)), svg);
+}
+function fanChart(fan) {                   // ventaglio di esiti possibili: 10°-90° percentile, mediana e traguardo
+  const W = 720, H = 240, m = { l: 62, r: 16, t: 14, b: 26 }, T = fan.p50.length - 1;
+  const hi = Math.max(...fan.p90, ...fan.tgt), lo = Math.min(...fan.p10, ...fan.tgt, 0), X = y => m.l + y / (T || 1) * (W - m.l - m.r), Y = v => H - m.b - (v - lo) / ((hi - lo) || 1) * (H - m.t - m.b);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': 'Esiti possibili del portafoglio nel tempo' });
+  for (const v of niceTicks(lo, hi, 4)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(s('text', { class: 'g-txt', x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end' }, compact(v))); }
+  const line = arr => arr.map((v, y) => X(y).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' L');
+  svg.append(s('path', { d: 'M' + line(fan.p90) + ' L' + fan.p10.map((v, y) => X(T - y).toFixed(1) + ' ' + Y(fan.p10[T - y]).toFixed(1)).join(' L') + ' Z', fill: 'var(--s1)', 'fill-opacity': '.16' }),
+    s('path', { class: 'ln l1', d: 'M' + line(fan.p50) }), s('path', { class: 'ln l2', d: 'M' + line(fan.tgt), 'stroke-dasharray': '6 5' }));
+  for (let y = 0; y <= T; y += Math.max(1, Math.ceil(T / 6))) svg.append(s('text', { class: 'g-txt', x: X(y), y: H - 8, 'text-anchor': 'middle' }, y === 0 ? 'oggi' : y + ' a'));
+  return h('div', { class: 'chart' }, h('div', { class: 'legend' }, h('span', null, h('span', { class: 'key', style: 'background:var(--s1)' }), 'caso mediano e fascia 10°-90° percentile'), h('span', null, h('span', { class: 'key', style: 'background:var(--s2)' }), 'percorso necessario per il tuo obiettivo')), svg);
+}
+
+/* ---- simulazione dell'obiettivo (ipotesi di classe, non previsioni) ---- */
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rnd) { let u = 0, v = 0; while (u === 0) u = rnd(); while (v === 0) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function assumptions() { return Object.assign({}, CLASS_DEFAULT, G().assume || {}); }
+function portfolioAssumptions() {
+  const ex = exposure('class'), tot = ex.reduce((t, x) => t + x[1], 0) || 1, A = assumptions();
+  let mu = 0; const comps = [];
+  for (const [lab, v] of ex) { const key = Object.keys(A).find(k => k.toLowerCase() === lab.toLowerCase()) || 'Non classificato', [m, sg] = A[key], w = v / tot; mu += w * m; comps.push({ w, sg, safe: /liquid|monetar/i.test(key) }); }
+  let varp = 0; for (let a = 0; a < comps.length; a++) for (let b = 0; b < comps.length; b++) varp += comps[a].w * comps[b].w * comps[a].sg * comps[b].sg * (a === b ? 1 : (comps[a].safe || comps[b].safe ? 0 : 0.5));
+  return { mu: mu / 100, sigma: Math.sqrt(varp) / 100 };
+}
+function simulate(w0, monthly, years, mu, sigma, g) {
+  const N = 3000, T = Math.max(1, Math.round(years)), rnd = mulberry(20261029), c = monthly * 12;
+  const s2 = Math.log(1 + (sigma / (1 + mu)) ** 2), mm = Math.log(1 + mu) - s2 / 2, ss = Math.sqrt(s2);
+  const cols = Array.from({ length: T + 1 }, () => new Float64Array(N));
+  for (let n = 0; n < N; n++) { let w = w0; cols[0][n] = w; for (let y = 1; y <= T; y++) { w = (w + c) * Math.exp(mm + ss * gauss(rnd)); cols[y][n] = w; } }
+  const pc = (arr, q) => { const a = Float64Array.from(arr).sort(); return a[Math.min(N - 1, Math.floor(q * N))]; };
+  const fan = { p10: [], p50: [], p90: [], tgt: [] }; let tw = w0;
+  for (let y = 0; y <= T; y++) { fan.p10.push(pc(cols[y], 0.1)); fan.p50.push(pc(cols[y], 0.5)); fan.p90.push(pc(cols[y], 0.9)); if (y > 0) tw = (tw + c) * (1 + g); fan.tgt.push(tw); }
+  const fin2 = cols[T], target = fan.tgt[T], paid = w0 + c * T;
+  return { T, fan, target, pTarget: fin2.filter(v => v >= target).length / N, pLoss: fin2.filter(v => v < paid).length / N, p10: fan.p10[T], p50: fan.p50[T], p90: fan.p90[T], paid };
+}
+
+/* ---- regole e allarmi ---- */
+function alerts() {
+  const out = [], tot = totalValue(); if (!(tot > 0)) return out;
+  const agg = new Map();
+  for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) agg.set(i.id, (agg.get(i.id) || 0) + posValue(p)); }
+  for (const [id, v] of agg) {
+    const i = inst(id), w = v / tot;
+    if (kindOf(i) === 'azione' && w * 100 > th('maxPos')) out.push('«' + i.name + '» pesa il ' + pct(w) + ' del patrimonio: oltre la soglia del ' + th('maxPos') + '% per un singolo titolo.');
+    else if (w * 100 > th('maxAny')) out.push('«' + i.name + '» pesa il ' + pct(w) + ': oltre la soglia del ' + th('maxAny') + '% per una singola posizione.');
+  }
+  const ex = exposure('class'), cr = ex.filter(([l]) => /crypto/i.test(l)).reduce((t, x) => t + x[1], 0) / tot;
+  if (cr * 100 > th('maxCrypto')) out.push('Le crypto valgono il ' + pct(cr) + ': oltre la soglia del ' + th('maxCrypto') + '%.');
+  const cash = S.accounts.filter(a => ['broker', 'crypto', 'trading'].includes(a.type)).reduce((t, a) => t + accCash(a), 0) / tot;
+  if (cash * 100 > th('maxCash')) out.push('Liquidità ferma nei conti d\'investimento: ' + pct(cash) + ' del patrimonio (soglia ' + th('maxCash') + '%).');
+  if (S.policy.target && S.policy.target.trim()) { const cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v / tot])); for (const [k, w] of parseMix(S.policy.target, 'Non classificato')) { const d = ((cur.get(k.toLowerCase()) || 0) - w) * 100; if (Math.abs(d) > th('tol')) out.push('«' + k + '»: ' + (d > 0 ? '+' : '') + nfp.format(d) + ' punti rispetto all\'obiettivo (soglia ±' + th('tol') + ').'); } }
+  const unc = ex.filter(([l]) => /non classificat/i.test(l)).reduce((t, x) => t + x[1], 0) / tot; if (unc > 0.1) out.push('Il ' + pct(unc) + ' del patrimonio è "Non classificato": completa le classi in Strumenti.');
+  const lev = [...agg.keys()].map(inst).filter(i => LEV_RE.test(i.name) || i.lev); if (lev.length) out.push('Possibili prodotti con leva o inversi: ' + lev.map(i => i.name).join(', ') + '. Controlla la struttura.');
+  return out;
+}
+
+/* ============ scheda Analisi ============ */
+const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi e tasse'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
+function tabAnalisi() {
+  if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le analisi.'));
+  const sub = UI.sub || 'andamento';
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Analisi' }, AN_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.sub = k; render(); } }, l)));
+  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
+  return h('div', null, h('section', { class: 'card' }, h('h2', null, 'Analisi'), chips), body);
+}
+const histButtons = () => h('div', { class: 'row' }, ONLINE ? btn('Riscarica lo storico', () => loadOnlineData(), 'sm') : btn('Carica storico da file…', () => pickText('.csv,.txt,text/csv', t => { DATA.hist = parseHistory(t); render(); }), 'sm'));
+
+function anAndamento() {
+  const accs = S.accounts.filter(a => a.perf), pts = accs.length ? valueSeries(accs) : [], el = h('div');
+  if (pts.length < 2) { el.append(h('section', { class: 'card' }, h('h2', null, 'Andamento dai prezzi storici'), h('p', { class: 'muted' }, 'Lo storico dei prezzi è appena iniziato (' + pl(pts.length, 'giorno', 'giorni') + '): l\'andamento si disegna man mano che si accumulano giorni. Dal sito l\'app lo scarica da sola.'), histButtons())); return el; }
+  const n = pts.length, ref = (p) => ({ abs: pts[n - 1].v - p.v, pct: p.v > 0 ? pts[n - 1].v / p.v - 1 : null, d: p.d });
+  const tl = (l, d) => ({ l, v: d ? gl(d.abs, seur(d.abs)) : '—', s: d ? (d.pct != null ? spct(d.pct) + ' · ' : '') + 'dal ' + fmtDate(d.d) : 'serve più storico' });
+  el.append(tiles([tl('Oggi', ref(pts[n - 2])), tl('7 giorni', deltaFrom(pts, 7)), tl('30 giorni', deltaFrom(pts, 30)), tl('Da ' + fmtDate(pts[0].d), ref(pts[0]))]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Valore dei conti d\'investimento'), trendChart(pts, 'Andamento del valore'), h('p', { class: 'muted' }, 'Ricostruito con le quantità di oggi sui prezzi storici raccolti: non tiene conto di acquisti e vendite fatti nel frattempo, né di dividendi.'), histButtons()));
+  return el;
+}
+
+function benchInst() {
+  const cands = S.instruments.filter(i => seriesOf(i).length >= 2), sel = S.settings.bench && cands.find(i => i.id === S.settings.bench);
+  return { cands, b: sel || cands.find(i => /msci\s*world/i.test(i.name)) || null };
+}
+function anConfronto() {
+  const accs = S.accounts.filter(a => a.perf), pts = accs.length ? valueSeries(accs) : [], { cands, b } = benchInst(), el = h('div');
+  const pick = cands.length ? h('label', { class: 'fld' }, h('span', null, 'Confronta con'), h('select', { onchange: e => { S.settings.bench = e.target.value; done(); } }, cands.map(i => h('option', { value: i.id, selected: b && b.id === i.id }, i.name)))) : null;
+  if (!b || pts.length < 2) { el.append(h('section', { class: 'card' }, h('h2', null, 'Sei meglio del semplice ETF mondo?'), h('p', { class: 'muted' }, !b ? 'Serve uno strumento con storico dei prezzi da usare come riferimento (di solito un ETF azionario mondiale). Lo storico si accumula da solo.' : 'Serve almeno un altro giorno di storico per fare il confronto.'), pick)); return el; }
+  const bs = seriesOf(b), d0 = pts[0].d > bs[0].d ? pts[0].d : bs[0].d, rows0 = pts.filter(p => p.d >= d0);
+  let pf0 = pts[0].v; for (const p of pts) if (p.d <= d0) pf0 = p.v;
+  const bp = d => d === today() ? b.price : priceAtS(bs, b.price, d), b0 = bp(d0), rows = rows0.map(p => ({ d: p.d, t: p.t, a: p.v / pf0 * 100, b: bp(p.d) / b0 * 100 }));
+  if (rows.length < 2) { el.append(h('section', { class: 'card' }, h('h2', null, 'Sei meglio del semplice ETF mondo?'), h('p', { class: 'muted' }, 'Serve almeno un altro giorno di storico per fare il confronto.'), pick)); return el; }
+  const last = rows[rows.length - 1], ra = last.a / 100 - 1, rb = last.b / 100 - 1, diff = (ra - rb) * 100;
+  el.append(tiles([{ l: 'Il tuo portafoglio', v: gl(ra, spct(ra)), s: 'dal ' + fmtDate(rows[0].d) }, { l: b.name, v: gl(rb, spct(rb)), s: 'stesso periodo' }, { l: 'Differenza', v: gl(diff, (diff > 0 ? '+' : '') + nfp.format(diff) + ' pt'), s: diff >= 0 ? 'stai battendo il riferimento' : 'il riferimento fa meglio' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Il tuo portafoglio contro ' + b.name), duoChart(rows, 'Il tuo portafoglio', b.name), pick,
+    h('p', { class: 'muted' }, 'Confronto sui prezzi con le quantità di oggi, partendo da 100 nello stesso giorno. Escluse commissioni, dividendi e imposte. Un periodo breve dice poco: conta la tendenza su mesi e anni.')));
+  return el;
+}
+
+function anCosti() {
+  const el = h('div'), tot = totalValue(); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  let ter = 0; const noTer = [], inv = ['broker', 'crypto', 'trading']; let bollo = 0, cash = 0, latent = 0, gainTot = 0; const bigTer = [];
+  for (const a of S.accounts) {
+    const isInv = inv.includes(a.type);
+    if (isInv) cash += accCash(a);
+    for (const p of a.positions) {
+      const i = inst(p.instId); if (!i) continue; const v = posValue(p);
+      if (isInv) bollo += v * 0.002;
+      if (i.ter >= 0 && i.ter != null) { ter += v * i.ter / 100; bigTer.push({ n: i.name, c: v * i.ter / 100 }); } else if (kindOf(i) === 'fondo' && !/liquidit|monetar/i.test(i.cls || '')) noTer.push(i.name);
+      if (p.cost > 0 && v > p.cost) { gainTot += v - p.cost; latent += (v - p.cost) * taxRateOf(i) / 100; }
+    }
+  }
+  const alt = th('altRate') || 2, drag = cash * (pnum(S.policy.altRate) ?? 2) / 100, rows = [['Costi annui dei fondi (TER)', eur(ter), pct(ter / tot)], ['Imposta di bollo sui titoli (0,2%, stima)', eur(bollo), pct(bollo / tot)], ['Liquidità ferma nei conti d\'investimento (contro ' + nfp.format(pnum(S.policy.altRate) ?? 2) + '% alternativo)', eur(drag), pct(drag / tot)]];
+  const sum = ter + bollo + drag; rows.push([h('b', null, 'Totale stimato all\'anno'), h('b', null, eur(sum)), h('b', null, pct(sum / tot))]);
+  el.append(tiles([{ l: 'Quanto ti costa ogni anno', v: eur(sum), s: pct(sum / tot) + ' del patrimonio' }, { l: 'Tasse latenti', v: eur(latent), s: 'se vendessi tutto oggi (stima ' + eur(gainTot) + ' di utili non realizzati)' }, { l: 'Fuori dall\'euro', v: pct(exposure('ccy').filter(([c]) => c !== 'EUR').reduce((t, x) => t + x[1], 0) / tot), s: 'esposizione al cambio' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Dove perdi rendimento'), table([{ t: 'Voce' }, { t: 'Stima all\'anno', n: 1 }, { t: '% patrimonio', n: 1 }], rows),
+    bigTer.length ? h('p', null, 'I fondi che costano di più: ' + bigTer.sort((a, b) => b.c - a.c).slice(0, 3).map(x => x.n + ' (' + eur(x.c) + ')').join(' · ') + '.') : null,
+    noTer.length ? h('div', { class: 'warn' }, pl(noTer.length, 'strumento senza costo annuo noto', 'strumenti senza costo annuo noto') + ': ' + noTer.join(', ') + '. Il TER si legge da solo per gli ETF quando applichi i prezzi online; per gli altri scrivilo in "Modifica strumento".') : null,
+    h('p', { class: 'muted' }, 'Stime semplificate: il bollo è lo 0,2% sul valore dei titoli nei conti broker, crypto e trading; le imposte latenti usano il 26% sull\'utile non realizzato (cambia l\'aliquota di uno strumento in "Modifica strumento"); la liquidità ferma si confronta con un rendimento alternativo che puoi cambiare qui sotto.'),
+    h('div', { class: 'row' }, btn('Cambia rendimento alternativo (' + nfp.format(pnum(S.policy.altRate) ?? 2) + '%)', () => form('Rendimento alternativo della liquidità', [{ key: 'r', label: 'Rendimento annuo lordo che otterresti altrove (%)', type: 'number', hint: 'Per esempio un conto deposito o un fondo monetario' }], { r: pnum(S.policy.altRate) ?? 2 }, o => { S.policy.altRate = o.r ?? 2; done(); }), 'sm'))));
+  return el;
+}
+
+function anRischio() {
+  const tot = totalValue(), el = h('div'); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  const agg = new Map(); for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) agg.set(i.id, (agg.get(i.id) || 0) + posValue(p)); }
+  const arr = [...agg.entries()].map(([id, v]) => ({ i: inst(id), v })).sort((a, b) => b.v - a.v);
+  const top1 = arr[0] ? arr[0].v / tot : 0, top3 = arr.slice(0, 3).reduce((t, x) => t + x.v, 0) / tot, hhi = arr.reduce((t, x) => t + (x.v / tot) ** 2, 0), eff = hhi > 0 ? 1 / hhi : 0;
+  const crypto = exposure('class').filter(([l]) => /crypto/i.test(l)).reduce((t, x) => t + x[1], 0) / tot, stocks = arr.filter(x => kindOf(x.i) === 'azione'), sShare = stocks.reduce((t, x) => t + x.v, 0) / tot;
+  const pa = portfolioAssumptions(), m95 = 1.645 * pa.sigma / Math.sqrt(12);
+  el.append(tiles([{ l: 'Prima posizione', v: pct(top1), s: arr[0] ? arr[0].i.name : '' }, { l: 'Prime tre posizioni', v: pct(top3), s: 'del patrimonio' }, { l: 'Posizioni "vere"', v: nf2.format(eff), s: 'numero effettivo (più alto = più diversificato)' }, { l: 'Crypto', v: pct(crypto), s: 'del patrimonio' }, { l: 'Titoli singoli', v: pct(sShare), s: stocks.length + ' ' + (stocks.length === 1 ? 'titolo' : 'titoli') }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto puoi perdere (stima da ipotesi)'),
+    h('p', null, 'Con le ipotesi di rischio per classe, la volatilità del portafoglio è circa ', h('b', null, nfp.format(pa.sigma * 100) + '% annuo'), '. In un mese brutto (uno su venti) potresti perdere circa ', h('b', null, pct(m95)), ' (', h('b', null, eur(tot * m95)), ').'),
+    h('p', { class: 'muted' }, 'Sono ipotesi per classe (le modifichi in Analisi → Obiettivo), non misure. Non sono previsioni: nei mercati veri i cali possono essere molto più forti.')));
+  const accs = S.accounts.filter(a => a.perf), pts = accs.length ? valueSeries(accs) : [];
+  if (pts.length >= 21) {
+    const r = []; for (let k = 1; k < pts.length; k++) if (pts[k - 1].v > 0) r.push(Math.log(pts[k].v / pts[k - 1].v));
+    const mean = r.reduce((t, x) => t + x, 0) / r.length, sd = Math.sqrt(r.reduce((t, x) => t + (x - mean) ** 2, 0) / Math.max(1, r.length - 1)); let peak = -Infinity, dd = 0; for (const p of pts) { peak = Math.max(peak, p.v); dd = Math.min(dd, p.v / peak - 1); }
+    el.append(h('section', { class: 'card' }, h('h2', null, 'Rischio misurato'), tiles([{ l: 'Volatilità misurata', v: nfp.format(sd * Math.sqrt(252) * 100) + '%', s: 'annua, sui prezzi storici' }, { l: 'Peggior calo', v: gl(dd, spct(dd)), s: 'dal massimo, nel periodo' }])));
+  } else el.append(h('section', { class: 'card' }, h('h2', null, 'Rischio misurato'), h('p', { class: 'muted' }, 'Servono circa 20 giorni di storico dei prezzi per misurare volatilità e peggior calo: oggi ce ne sono ' + pts.length + '. Intanto vale la stima da ipotesi qui sopra.')));
+  const al = alerts(); el.append(h('section', { class: 'card' }, h('h2', null, 'Cose da guardare'), al.length ? h('ul', { class: 'list' }, al.map(t => h('li', null, h('span', null, t)))) : h('p', { class: 'muted' }, 'Nessuna regola superata con le soglie attuali.')));
+  return el;
+}
+
+function anObiettivo() {
+  const tot = totalValue(), g = G(), el = h('div'); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  const pa = portfolioAssumptions(), r = simulate(tot, g.monthly || 0, g.years || 5, pa.mu, pa.sigma, (g.cagr || 0) / 100);
+  const pPct = r.pTarget * 100, tone = pPct < 15 ? 'dn' : pPct < 45 ? '' : 'up';
+  el.append(tiles([{ l: 'Probabilità di centrare l\'obiettivo', v: h('span', { class: 'pill ' + tone }, nfp.format(pPct) + '%'), s: nfp.format(g.cagr) + '% l\'anno per ' + pl(r.T, 'anno', 'anni') }, { l: 'Esito mediano', v: eur(r.p50), s: 'obiettivo: ' + eur(r.target) }, { l: 'Fascia 10°–90°', v: eur(r.p10) + ' – ' + eur(r.p90), s: 'su 3.000 simulazioni' }, { l: 'Possibilità di finire sotto quanto hai messo', v: pct(r.pLoss), s: 'versato in totale ' + eur(r.paid) }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Dove può arrivare il portafoglio'), fanChart(r.fan),
+    h('p', null, 'Con le ipotesi attuali il portafoglio rende in media ', h('b', null, nfp.format(pa.mu * 100) + '% l\'anno'), ' con una volatilità di circa ', h('b', null, nfp.format(pa.sigma * 100) + '%'), '. ', pPct < 15 ? 'Per avvicinarti al ' + nfp.format(g.cagr) + '% costante servirebbero molto più rischio (concentrazione, leva, crypto) e, negli anni sbagliati, perdite pesanti: la simulazione mostra la fascia bassa.' : 'Il risultato dipende molto da ipotesi che nessuno conosce in anticipo.'),
+    h('div', { class: 'row' }, btn('Cambia obiettivo', () => form('Il tuo obiettivo', [{ key: 'cagr', label: 'Rendimento annuo che vuoi ottenere (%)', type: 'number', req: true }, { key: 'years', label: 'Per quanti anni', type: 'number', req: true }, { key: 'monthly', label: 'Quanto aggiungi ogni mese (€)', type: 'number' }], g, o => { if (!(o.years >= 1 && o.years <= 40)) return 'Gli anni devono essere tra 1 e 40.'; g.cagr = o.cagr ?? 0; g.years = o.years; g.monthly = o.monthly || 0; done(); }), 'pri'),
+      btn('Ipotesi per classe', () => { const A = assumptions(), cls = [...new Set([...exposure('class').map(x => x[0]), ...Object.keys(CLASS_DEFAULT)])]; const fields = cls.flatMap((c, k) => [{ key: 'm' + k, label: c + ': rendimento atteso annuo (%)', type: 'number' }, { key: 's' + k, label: c + ': volatilità annua (%)', type: 'number' }]), vals = {}; cls.forEach((c, k) => { const a = A[Object.keys(A).find(x => x.toLowerCase() === c.toLowerCase())] || A['Non classificato']; vals['m' + k] = a[0]; vals['s' + k] = a[1]; }); form('Ipotesi per classe', fields, vals, o => { g.assume = {}; cls.forEach((c, k) => { if (o['m' + k] != null && o['s' + k] != null) g.assume[c] = [o['m' + k], o['s' + k]]; }); done(); }); }, 'sm')),
+    h('p', { class: 'muted' }, 'È una simulazione con ipotesi di rendimento e rischio per classe (modificabili): non è una previsione e non garantisce nulla. Le correlazioni sono semplificate e gli eventi estremi sottostimati.')));
+  return el;
+}
+
+function anEsposizione() {
+  const tot = totalValue(), el = h('div'); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  const ex = new Map(), noH = []; let direct = 0, via = 0;
+  const add = (n, v, how) => { const e = ex.get(n.toLowerCase()) || { n, direct: 0, via: 0 }; e[how] += v; ex.set(n.toLowerCase(), e); };
+  const agg = new Map(); for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) agg.set(i.id, (agg.get(i.id) || 0) + posValue(p)); }
+  for (const [id, v] of agg) {
+    const i = inst(id), hs = parseHoldings(i.holdings), k = kindOf(i);
+    if (hs.length) for (const [n, w] of hs) { add(n, v * w / 100, 'via'); via += v * w / 100; }
+    else if (k === 'azione' || k === 'crypto') { add(i.name, v, 'direct'); direct += v; }
+    else if (k === 'fondo' && !/liquidit|monetar|obbligaz/i.test(i.cls || '')) noH.push(i.name);
+  }
+  const rows = [...ex.values()].map(e => ({ ...e, t: e.direct + e.via })).sort((a, b) => b.t - a.t).slice(0, 15);
+  el.append(tiles([{ l: 'Titoli diretti', v: eur(direct), s: pct(direct / tot) + ' del patrimonio' }, { l: 'Dentro i fondi (noti)', v: eur(via), s: pct(via / tot) + ' del patrimonio' }, { l: 'Fondi senza composizione', v: String(noH.length), s: 'da completare per vedere tutto' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Da cosa dipende davvero il tuo patrimonio'),
+    rows.length ? table([{ t: 'Titolo' }, { t: 'Totale', n: 1 }, { t: '% patrimonio', n: 1 }, { t: 'Diretto', n: 1 }, { t: 'Tramite fondi', n: 1 }], rows.map(r => [r.n, eur(r.t), pct(r.t / tot), r.direct ? eur(r.direct) : '—', r.via ? eur(r.via) : '—'])) : h('p', { class: 'muted' }, 'Nessun titolo da mostrare.'),
+    noH.length ? h('div', { class: 'warn' }, 'Per vedere NVIDIA, Apple e gli altri anche dentro gli ETF, in "Modifica strumento" riempi "Principali titoli dentro" con le prime posizioni del fondo (le trovi sul sito dell\'emittente), per esempio: NVIDIA 5, Apple 4,5. Senza questi dati l\'esposizione reale è sottostimata. Fondi da completare: ' + noH.join(', ') + '.') : null,
+    h('p', { class: 'muted' }, 'Le percentuali per paese e settore restano nella scheda Allocazione (campo Area degli strumenti).')));
+  return el;
+}
+
+function anRegole() {
+  const el = h('div'), al = alerts();
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Regole che ti sei dato'),
+    table([{ t: 'Regola' }, { t: 'Soglia', n: 1 }], [['Peso massimo di un singolo titolo', th('maxPos') + '%'], ['Peso massimo di una singola posizione', th('maxAny') + '%'], ['Crypto sul patrimonio', th('maxCrypto') + '%'], ['Liquidità ferma nei conti d\'investimento', th('maxCash') + '%'], ['Scostamento dall\'allocazione obiettivo', '±' + th('tol') + ' punti']]),
+    h('div', { class: 'row' }, btn('Cambia soglie', () => form('Soglie delle regole', [{ key: 'maxPos', label: 'Peso massimo di un singolo titolo (%)', type: 'number' }, { key: 'maxAny', label: 'Peso massimo di una singola posizione (%)', type: 'number' }, { key: 'maxCrypto', label: 'Crypto sul patrimonio (%)', type: 'number' }, { key: 'maxCash', label: 'Liquidità ferma nei conti d\'investimento (%)', type: 'number' }, { key: 'tol', label: 'Scostamento dall\'allocazione obiettivo (punti)', type: 'number' }], { maxPos: th('maxPos'), maxAny: th('maxAny'), maxCrypto: th('maxCrypto'), maxCash: th('maxCash'), tol: th('tol') }, o => { for (const k of ['maxPos', 'maxAny', 'maxCrypto', 'maxCash', 'tol']) S.policy[k] = o[k] > 0 ? o[k] : DEFAULTS[k]; done(); }), 'sm'))));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Cosa non rispetta le regole adesso'), al.length ? h('ul', { class: 'list' }, al.map(t => h('li', null, h('span', null, t)))) : h('p', { class: 'muted' }, 'Tutto in regola con le soglie attuali.')));
+  return el;
+}
+
+function anDiario() {
+  const el = h('div'), list = JR().slice().sort((a, b) => a.date < b.date ? 1 : -1), KIND = { acquisto: 'Acquisto', vendita: 'Vendita', idea: 'Idea', nota: 'Nota' };
+  const add = () => form('Nuova nota nel diario', [{ key: 'kind', label: 'Che cos\'è', type: 'select', options: Object.entries(KIND) }, { key: 'instId', label: 'Strumento (facoltativo)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] },
+    { key: 'why', label: 'Perché lo faccio', type: 'textarea', ph: 'La ragione, con parole tue' }, { key: 'thesis', label: 'Cosa mi aspetto e cosa mi farebbe cambiare idea', type: 'textarea' }, { key: 'months', label: 'Da rivedere tra (mesi)', type: 'number' }], { kind: 'idea', instId: '', months: 6 }, o => {
+    if (!o.why) return 'Scrivi almeno il perché.'; const i = o.instId ? inst(o.instId) : null;
+    JR().push({ id: uid(), date: today(), kind: o.kind, instId: o.instId || '', instName: i ? i.name : '', price: i ? i.price : null, why: o.why, thesis: o.thesis || '', months: o.months > 0 ? o.months : 6 }); done();
+  });
+  const rows = list.map(j => { const i = j.instId ? inst(j.instId) : null, since = i && j.price > 0 ? i.price / j.price - 1 : null, due = daysSince(j.date) >= (j.months || 6) * 30;
+    return [fmtDate(j.date), KIND[j.kind] || j.kind, j.instName || '—', h('span', null, j.why, j.thesis ? h('small', null, ' — ' + j.thesis) : null), since == null ? '—' : gl(since, spct(since)), due ? '⚠ da rivedere' : '', rowActs(btn('Elimina', () => { if (confirm('Eliminare questa nota?')) { S.journal = JR().filter(x => x !== j); done(); } }, 'sm danger'))]; });
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Diario delle decisioni'), btn('+ Nuova nota', add, 'pri')),
+    h('p', { class: 'muted' }, 'Scrivi perché compri, vendi o eviti qualcosa. Dopo qualche mese l\'app te lo ripropone con quello che è successo ai prezzi: è il modo più onesto per capire dove le tue decisioni aggiungono o tolgono rendimento.'),
+    table([{ t: 'Data' }, { t: 'Tipo' }, { t: 'Strumento' }, { t: 'Perché' }, { t: 'Da allora', n: 1 }, { t: '' }, { t: '' }], rows, 'Ancora nessuna nota.')));
+  return el;
+}
+
+/* ============ scheda Mercati ============ */
+const FG_IT = { 'Extreme Fear': 'Paura estrema', 'Fear': 'Paura', 'Neutral': 'Neutrale', 'Greed': 'Avidità', 'Extreme Greed': 'Avidità estrema' };
+function readMarket(m) {            // lettura a regole dei dati (non e' una previsione)
+  const I = m.indicatori || {}, out = [], t = I.tassi_usa;
+  if (t) {
+    out.push((t.spread_2_10 < 0 ? 'La curva dei tassi USA è invertita' : 'La curva dei tassi USA è normale') + ' (decennale ' + nf2.format(t.y10) + '%, biennale ' + nf2.format(t.y2) + '%, differenza ' + (t.spread_2_10 > 0 ? '+' : '') + nf2.format(t.spread_2_10) + ' punti).' + (t.spread_2_10 < 0 ? ' Storicamente è un segnale di cautela sull\'economia.' : ''));
+    if (t.y10_prec != null) { const bp = Math.round((t.y10 - t.y10_prec) * 100); if (Math.abs(bp) >= 5) out.push('Il decennale USA si è mosso di ' + (bp > 0 ? '+' : '') + bp + ' punti base in un giorno: ' + (bp > 0 ? 'rendimenti in salita, di solito una pressione per obbligazioni e azioni di crescita.' : 'rendimenti in calo, di solito un sostegno per le obbligazioni.')); }
+  }
+  const fg = I.paura_avidita_crypto; if (fg) out.push('Il termometro paura/avidità delle crypto è a ' + fg.valore + ' su 100 (' + (FG_IT[fg.classe] || fg.classe) + (fg.ieri != null ? ', ieri ' + fg.ieri : '') + ').' + (fg.valore <= 25 ? ' Paura estrema: storicamente fasi di forte pessimismo.' : fg.valore >= 75 ? ' Avidità estrema: storicamente fasi di euforia.' : ''));
+  const c = I.crypto; if (c) out.push('Le crypto valgono ' + nf0.format(c.capitalizzazione_mld_usd) + ' miliardi di dollari (' + (c.var_24h_pct > 0 ? '+' : '') + nf2.format(c.var_24h_pct) + '% in 24 ore); il Bitcoin pesa il ' + nfp.format(c.dominanza_btc_pct) + '% del totale.');
+  const sc = I.stablecoin; if (sc) out.push('Le stablecoin in circolazione sono ' + nfp.format(sc.totale_mld_usd) + ' miliardi di dollari (' + (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni): ' + (sc.var_7g_pct < 0 ? 'meno liquidità pronta a entrare nelle crypto.' : 'più liquidità pronta a entrare nelle crypto.'));
+  const f = I.posizioni_grandi_futures; if (f && f.voci && f.voci.length) { const srt = f.voci.slice().sort((a, b) => Math.abs(b.netto_su_oi_pct) - Math.abs(a.netto_su_oi_pct)).slice(0, 2); out.push('I grandi speculatori sui futures (dati CFTC del ' + fmtDate(f.data) + ') sono più sbilanciati su: ' + srt.map(x => x.nome + ' (' + (x.netto_su_oi_pct > 0 ? 'lunghi' : 'corti') + ', ' + (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '% degli interessi aperti)').join(' e ') + '. Posizioni molto affollate possono rientrare in fretta.'); }
+  return out;
+}
+function marketForClaude() {
+  const m = DATA.mercati, L = ['Sei un analista finanziario prudente. Qui sotto trovi i dati pubblici di oggi sui mercati e un riepilogo anonimizzato del mio portafoglio. Spiegami in italiano, in modo concreto: 1) cosa sta succedendo oggi e perché, 2) dove sembrano muoversi i grandi capitali, 3) cosa può significare per il MIO portafoglio (concentrazione, rischi, cose da tenere d\'occhio). Distingui fatti da ipotesi, non fare previsioni sicure e non darmi consigli di acquisto o vendita personalizzati.', ''];
+  L.push('Dati di mercato aggiornati al ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ':'); for (const t of readMarket(m)) L.push('- ' + t);
+  L.push('', 'Titoli principali di oggi:'); for (const f of m.fonti.filter(x => x.ok).slice(0, 10)) L.push('- ' + f.nome + ': ' + f.voci.slice(0, 3).map(v => v.titolo).join(' | '));
+  L.push('', 'Il mio portafoglio (anonimizzato):', buildSummary({ amounts: false, accNames: false, instNames: true, q: '' }).split('\n').slice(2).join('\n'));      // senza la sua frase di apertura: qui c'è già la richiesta
+  return L.join('\n');
+}
+function tabMercati() {
+  const m = DATA.mercati, el = h('div');
+  const load = ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : btn('Carica mercati.json da file…', () => pickText('.json,application/json', t => { try { const j = normMercati(JSON.parse(t)); if (!j) throw 0; DATA.mercati = j; render(); } catch { alert('Non è un file dei mercati di Finanze.'); } }), 'sm');
+  if (!m) { el.append(h('section', { class: 'card' }, h('h2', null, 'Mercati'), h('p', { class: 'muted' }, ONLINE ? 'I dati dei mercati non sono ancora disponibili: il sito li aggiorna due volte al giorno. Riprova tra poco.' : 'Carica il file mercati.json (si trova nel sito, nella cartella dei dati).'), load)); return el; }
+  const I = m.indicatori || {}, ok = m.fonti.filter(f => f.ok), ko = m.fonti.filter(f => !f.ok), t = I.tassi_usa, fg = I.paura_avidita_crypto, c = I.crypto, sc = I.stablecoin;
+  const meter = v => h('div', { class: 'meter', 'aria-hidden': 'true' }, h('i', { style: 'left:' + Math.max(0, Math.min(100, v)) + '%' }));
+  const tl = [];
+  if (t) tl.push({ l: 'Decennale USA', v: nf2.format(t.y10) + '%', s: 'biennale ' + nf2.format(t.y2) + '% · differenza ' + (t.spread_2_10 > 0 ? '+' : '') + nf2.format(t.spread_2_10) });
+  if (fg) tl.push({ l: 'Paura / avidità crypto', v: String(fg.valore), s: h('span', null, FG_IT[fg.classe] || fg.classe, meter(fg.valore)) });
+  if (c) tl.push({ l: 'Mercato crypto', v: nf0.format(c.capitalizzazione_mld_usd) + ' mld $', s: (c.var_24h_pct > 0 ? '+' : '') + nf2.format(c.var_24h_pct) + '% in 24 ore · Bitcoin ' + nfp.format(c.dominanza_btc_pct) + '%' });
+  if (sc) tl.push({ l: 'Stablecoin', v: nfp.format(sc.totale_mld_usd) + ' mld $', s: (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni' });
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Mercati oggi'), load), h('p', { class: 'muted' }, 'Aggiornato il ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ' · ' + pl(ok.length, 'fonte letta', 'fonti lette') + (ko.length ? ' su ' + m.fonti.length : ''))));
+  if (tl.length) el.append(tiles(tl));
+  const notes = readMarket(m); if (notes.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Come leggerli'), h('ul', { class: 'list' }, notes.map(x => h('li', null, h('span', null, x)))), h('p', { class: 'muted' }, 'È una lettura meccanica dei dati, non una previsione né un consiglio.')));
+  const sect = I.settori_usa; if (sect && sect.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Settori USA oggi'), table([{ t: 'Settore' }, { t: 'Variazione', n: 1 }], sect.map(x => [x.nome, gl(x.var_giorno_pct, (x.var_giorno_pct > 0 ? '+' : '') + nf2.format(x.var_giorno_pct) + '%')]))));
+  const f = I.posizioni_grandi_futures; if (f && f.voci) el.append(h('section', { class: 'card' }, h('h2', null, 'Dove sono sbilanciati i grandi (futures)'), table([{ t: 'Mercato' }, { t: 'Lunghi', n: 1 }, { t: 'Corti', n: 1 }, { t: 'Netto', n: 1 }, { t: '% interessi aperti', n: 1 }], f.voci.map(x => [x.nome, nf0.format(x.lunghi), nf0.format(x.corti), gl(x.netto, (x.netto > 0 ? '+' : '') + nf0.format(x.netto)), (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '%'])),
+    h('p', { class: 'muted' }, 'Posizioni dei grandi operatori non commerciali (fondi speculativi e gestori), dati CFTC del ' + fmtDate(f.data) + ', pubblicati con qualche giorno di ritardo. Sono un\'istantanea, non un segnale di acquisto o vendita.')));
+  const groups = [...new Set(ok.map(x => x.gruppo))];
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Titoli dalle fonti'), groups.map(gp => h('div', null, h('h4', null, gp), ok.filter(x => x.gruppo === gp).map(src => h('details', { class: 'src' }, h('summary', null, src.nome, h('small', null, ' · ' + src.voci.length + ' titoli')), h('ul', { class: 'news' }, src.voci.map(v => h('li', null, h('a', { href: v.link, target: '_blank', rel: 'noopener noreferrer' }, v.titolo), v.data ? h('small', null, ' ' + fmtDate(v.data.slice(0, 10))) : null))))))),
+    ko.length ? h('p', { class: 'muted' }, 'Non disponibili adesso: ' + ko.map(x => x.nome).join(', ') + '.') : null,
+    h('p', { class: 'muted' }, 'Dalle testate l\'app mostra solo titolo e collegamento: gli articoli si leggono sui loro siti (alcuni sono a pagamento).')));
+  const cp = h('span', { class: 'muted' });
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi a Claude'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat con Claude e ti risponde con un\'analisi.'),
+    h('div', { class: 'row' }, btn('Copia il testo per Claude', async () => { const txt = marketForClaude(); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+  return el;
+}
+
 /* ============ schermate ============ */
 /* movimento: ingresso delle schede, cursore che scivola, numeri che contano (tutto spento con "riduci movimento") */
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -1240,12 +1635,12 @@ function render() {
   const y = window.scrollY;
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
   else {
-    const vk = UI.tab + '|' + (UI.acc || ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
+    const vk = UI.tab + '|' + (UI.acc || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
     $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), tabsBar(), h('div', { class: 'view' }, content())));
     window.scrollTo(0, y); afterRender();
   }
 }
-function enter() { UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); }
+function enter() { UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
 function viewStart() {
   const fsa = !!window.showSaveFilePicker;
   $app.replaceChildren(h('main', { class: 'start' },
@@ -1309,12 +1704,12 @@ function topbar() {
       btn(HIDE ? 'Mostra importi' : 'Nascondi importi', () => { HIDE = !HIDE; render(); }),
       DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, btn('Blocca', lock)]));
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['scenari', 'Scenari'], ['dati', 'Dati e sicurezza']];
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
-const SHORT = { dati: 'Dati' };
+const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, analisi: tabAnalisi, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
@@ -1323,7 +1718,7 @@ function tabPanoramica() {
       h('li', null, 'Questa pagina si compila da sola: patrimonio, guadagni, rendimento annuo, allocazione.')),
     h('div', { class: 'row' }, btn('Crea uno strumento', () => editInstrument(), 'pri'), btn('Crea un conto', () => editAccount())));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
-  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'))));
+  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn('Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
@@ -1337,6 +1732,7 @@ function tabPanoramica() {
   const warns = [], mf = missingFx(); if (mf.length) warns.push('Manca il tasso di cambio per ' + mf.join(', ') + ': quei valori sono contati 1:1 (scheda "Dati e sicurezza").');
   const stale = S.instruments.filter(i => S.accounts.some(a => a.positions.some(p => p.instId === i.id)) && daysSince(i.priceDate) > 14);
   if (stale.length) warns.push('Prezzo non aggiornato da più di 14 giorni: ' + stale.map(i => i.name).join(', ') + '.');
+  for (const t of alerts().slice(0, 4)) warns.push(t);      // regole che ti sei dato (Analisi → Regole)
   const nof = pa.filter(a => !a.flows.length); if (nof.length) warns.push('Senza movimenti, guadagno e rendimento non sono calcolabili per: ' + nof.map(a => a.name).join(', ') + '.');
   if (warns.length) el.append(h('div', { class: 'warn' }, h('b', null, 'Da sistemare'), h('ul', null, warns.map(w => h('li', null, w)))));
   const pts = chartPoints();
@@ -1430,7 +1826,7 @@ function tabScenari() {
   el.append(h('section', { class: 'card' }, h('h2', null, 'Impatto'), table([{ t: 'Conto' }, { t: 'Valore oggi', n: 1 }, { t: 'Impatto', n: 1 }, { t: '%', n: 1 }], drows)));
   const ml = parseFloat(String(S.policy.maxLoss).replace(',', '.'));
   if (ml > 0 && tot > 0 && dt / tot < -ml / 100) el.append(h('div', { class: 'warn' }, 'Questo scenario supera la perdita massima che ti sei dato (' + ml + '%): ' + spct(dt / tot) + ' sul patrimonio.'));
-  el.append(h('p', { class: 'muted' }, 'Volatilità, drawdown e simulazioni sui prezzi storici arriveranno quando l\'archivio avrà abbastanza storia di prezzi: l\'app la raccoglie già a ogni aggiornamento.'));
+  el.append(h('p', { class: 'muted' }, 'Per volatilità, peggior calo e simulazione dell\'obiettivo vedi Analisi → Rischio e Obiettivo.'));
   return el;
 }
 

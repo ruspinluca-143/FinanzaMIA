@@ -46,7 +46,13 @@ function Read-Borsa($n) {
   $cands = @($cands | Where-Object { $_.p -gt 0 -and $_.d })
   if (-not $cands.Count) { throw 'prezzo o data non trovati nella pagina' }
   $best = $cands | Sort-Object -Property @{ Expression = 'd'; Descending = $true }, @{ Expression = 'base'; Descending = $true } | Select-Object -First 1   # data piu recente; a pari data vince "ultimo"
-  return [pscustomobject]@{ prezzo = $best.p; valuta = 'EUR'; data = $best.d; base = $best.base }
+  $ter = [regex]::Match($h, 'Commissioni totali annue</strong>.{0,300}?([\d\.,]+)\s*%', 'Singleline')                      # costi annui (TER), benchmark e distribuzione: servono all'app per costi e tasse
+  $bm = [regex]::Match($h, '<strong>Benchmark</strong>.{0,300}?-right">\s*([^<]{1,80}?)\s*</span>', 'Singleline')
+  $dv = [regex]::Match($h, '<strong>Dividendi</strong>.{0,300}?-right">\s*([^<]{1,30}?)\s*</span>', 'Singleline')
+  return [pscustomobject]@{ prezzo = $best.p; valuta = 'EUR'; data = $best.d; base = $best.base
+    ter = $(if ($ter.Success) { ToNum $ter.Groups[1].Value } else { $null })
+    bench = $(if ($bm.Success) { [Net.WebUtility]::HtmlDecode($bm.Groups[1].Value).Trim() } else { $null })
+    div = $(if ($dv.Success) { [Net.WebUtility]::HtmlDecode($dv.Groups[1].Value).Trim() } else { $null }) }
 }
 
 $wl = (Get-Content $wlPath -Raw -Encoding UTF8 | ConvertFrom-Json).strumenti
@@ -100,12 +106,22 @@ foreach ($k in @($new.Keys)) {
 
 $rows = New-Object Collections.Generic.List[object]; $fromOld = 0
 foreach ($n in $wl) {
-  if ($new.ContainsKey($n.nome)) { $x = $new[$n.nome]; $rows.Add([ordered]@{ nome = $n.nome; id = $n.id; prezzo = $x.prezzo; valuta = $x.valuta; data = $x.data }) }
-  elseif ($old.ContainsKey($n.nome)) { $o = $old[$n.nome]; $rows.Add([ordered]@{ nome = $o.nome; id = $o.id; prezzo = [double]$o.prezzo; valuta = $o.valuta; data = $o.data }); $fromOld++ }
+  $e = $null; $m = $null
+  if ($new.ContainsKey($n.nome)) { $m = $new[$n.nome]; $e = [ordered]@{ nome = $n.nome; id = $n.id; prezzo = $m.prezzo; valuta = $m.valuta; data = $m.data } }
+  elseif ($old.ContainsKey($n.nome)) { $o = $old[$n.nome]; $e = [ordered]@{ nome = $o.nome; id = $o.id; prezzo = [double]$o.prezzo; valuta = $o.valuta; data = $o.data }; $fromOld++ }
+  if ($e) {
+    foreach ($k in 'ter', 'bench', 'div') {       # dati dell'ETF: se questa volta non si leggono, restano quelli dell'ultimo file
+      $v = $null
+      if ($m -and $m.PSObject.Properties[$k] -and $null -ne $m.$k -and "$($m.$k)" -ne '') { $v = $m.$k }
+      elseif ($old.ContainsKey($n.nome) -and $old[$n.nome].PSObject.Properties[$k]) { $v = $old[$n.nome].$k }
+      if ($null -ne $v -and "$v" -ne '') { $e[$k] = $v }
+    }
+    $rows.Add($e)
+  }
 }
 
 "{0}  letti ora: {1} su {2}  |  ripresi dall'ultimo file: {3}  |  non letti: {4}  |  sospetti: {5}" -f $stamp, $new.Count, $expected, $fromOld, $fail.Count, $susp.Count
-foreach ($n in $wl) { if ($new.ContainsKey($n.nome)) { $x = $new[$n.nome]; '  {0,-62} {1,12} {2} {3} ({4})' -f $n.nome.Substring(0, [Math]::Min(62, $n.nome.Length)), $x.prezzo.ToString('0.######', $inv), $x.valuta, $x.data, $x.base } }
+foreach ($n in $wl) { if ($new.ContainsKey($n.nome)) { $x = $new[$n.nome]; '  {0,-62} {1,12} {2} {3} ({4})' -f $n.nome.Substring(0, [Math]::Min(62, $n.nome.Length)), $x.prezzo.ToString('0.######', $inv), $x.valuta, $x.data, ($x.base + $(if ($null -ne $x.ter) { ', TER ' + $x.ter } else { '' })) } }
 foreach ($f in $fail) { "  NON LETTO  $f" }
 foreach ($s in $susp) { "  SOSPETTO   $s" }
 
@@ -114,7 +130,13 @@ if (-not (Test-Path $outDir)) { throw "cartella non trovata: $outDir" }
 if ($new.Count -eq 0) { Add-Content -Path $logPath -Value ("{0}  NESSUN PREZZO LETTO: file lasciato com'era" -f $stamp) -Encoding UTF8; Write-Error 'Nessun prezzo letto: prezzi.json non modificato.'; exit 1 }
 
 function JStr([string]$s) { '"' + ((($s -replace '\\', '\\') -replace '"', '\"') -replace '[\x00-\x1f]', ' ') + '"' }   # niente ConvertTo-Json: in PowerShell 5.1 e' fragile
-$items = foreach ($r in $rows) { '    {{"nome":{0},"id":{1},"prezzo":{2},"valuta":{3},"data":{4}}}' -f (JStr $r.nome), (JStr $r.id), ([double]$r.prezzo).ToString('R', $inv), (JStr $r.valuta), (JStr $r.data) }
+$items = foreach ($r in $rows) {
+  $s = '{{"nome":{0},"id":{1},"prezzo":{2},"valuta":{3},"data":{4}' -f (JStr $r.nome), (JStr $r.id), ([double]$r.prezzo).ToString('R', $inv), (JStr $r.valuta), (JStr $r.data)
+  if ($null -ne $r['ter']) { $s += ',"ter":' + ([double]$r['ter']).ToString('R', $inv) }
+  if ($r['bench']) { $s += ',"bench":' + (JStr ([string]$r['bench'])) }
+  if ($r['div']) { $s += ',"div":' + (JStr ([string]$r['div'])) }
+  '    ' + $s + '}'
+}
 $json = "{`n  `"app`": `"finanze-prezzi`",`n  `"versione`": 1,`n  `"generato`": $(JStr $stamp),`n  `"prezzi`": [`n" + ($items -join ",`n") + "`n  ]`n}`n"
 [IO.File]::WriteAllText($pjPath, $json, $utf8)
 

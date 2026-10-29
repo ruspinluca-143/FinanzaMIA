@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -28,6 +28,16 @@ jobs:
         env:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
         run: ./aggiorna-prezzi.ps1 -Watchlist ./watchlist-pubblica.json -Uscita ./site
+      - name: Leggi i mercati (notizie e dati pubblici)
+        id: mercati
+        continue-on-error: true
+        shell: pwsh
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+        run: ./raccogli-mercati.ps1 -Uscita ./site
+      - name: Avviso se i mercati non si leggono
+        if: steps.mercati.outcome == 'failure'
+        run: echo "::warning::Nessuna fonte dei mercati si e letta. Il sito resta con l'ultimo file buono."
       - name: Avviso se troppi prezzi non si leggono
         if: steps.leggi.outcome == 'failure'
         run: echo "::warning::Piu della meta dei prezzi non si e letta (un sito potrebbe rifiutare il data center). Il sito resta con gli ultimi prezzi buoni."
