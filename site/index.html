@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xzzPb/4J9P87jhHwZExC0lnmhK17TD6H17lGNDCdCk0='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-X4UwuOc1zjsIynQhi9Bjc0e5tXepOFMorwEcU4Mxu3k='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1334,7 +1334,7 @@ const asArr = x => Array.isArray(x) ? x : (x == null ? [] : [x]);
 function normMercati(j) {           // un elenco con un solo elemento puo' arrivare come oggetto: lo si riporta sempre a elenco
   if (!j || j.app !== 'finanze-mercati') return null;
   j.fonti = asArr(j.fonti).map(f => Object.assign({}, f, { voci: asArr(f.voci) })); j.indicatori = j.indicatori || {};
-  const I = j.indicatori; if (I.posizioni_grandi_futures) I.posizioni_grandi_futures.voci = asArr(I.posizioni_grandi_futures.voci); if (I.settori_usa) I.settori_usa = asArr(I.settori_usa);
+  const I = j.indicatori; if (I.posizioni_grandi_futures) I.posizioni_grandi_futures.voci = asArr(I.posizioni_grandi_futures.voci); if (I.settori_usa) I.settori_usa = asArr(I.settori_usa); if (I.calendario) I.calendario = asArr(I.calendario);
   return j;
 }
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
@@ -1675,6 +1675,8 @@ function importHoldings() {
 const normName = n => String(n).toLowerCase().replace(/\b(inc|corp|corporation|ltd|plc|sa|ag|nv|co|company|class [a-c]|cl [a-c]|ordinary shares?|ord shs|holdings?)\b/g, ' ').replace(/[^a-z0-9àèéìòù ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 /* ============ scheda Mercati ============ */
+const upcoming = (m, n) => asArr(m.indicatori && m.indicatori.calendario).filter(e => e.data >= today()).slice(0, n);
+const whenIn = d => { const n = Math.round((dayMs(d) - dayMs(today())) / 864e5); return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; };
 const FG_IT = { 'Extreme Fear': 'Paura estrema', 'Fear': 'Paura', 'Neutral': 'Neutrale', 'Greed': 'Avidità', 'Extreme Greed': 'Avidità estrema' };
 function readMarket(m) {            // lettura a regole dei dati (non e' una previsione)
   const I = m.indicatori || {}, out = [], t = I.tassi_usa;
@@ -1699,6 +1701,7 @@ function marketForClaude(qk) {
   const q = CLAUDE_Q[qk] || CLAUDE_Q.oggi, m = DATA.mercati, L = ['Sei un analista finanziario prudente. Qui sotto trovi i dati pubblici di oggi sui mercati e un riepilogo anonimizzato del mio portafoglio. ' + q[1] + ' Distingui fatti da ipotesi, non fare previsioni sicure e non darmi consigli di acquisto o vendita personalizzati.', ''];
   L.push('Dati di mercato aggiornati al ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ':'); for (const t of readMarket(m)) L.push('- ' + t);
   L.push('', 'Titoli principali di oggi:'); for (const f of m.fonti.filter(x => x.ok).slice(0, 10)) L.push('- ' + f.nome + ': ' + f.voci.slice(0, 3).map(v => v.titolo).join(' | '));
+  const ca = upcoming(m, 4); if (ca.length) L.push('', 'Prossimi appuntamenti ufficiali: ' + ca.map(e => fmtDate(e.data) + ' ' + e.titolo + ' (' + whenIn(e.data) + ')').join('; ') + '.');
   const mv = dayMovers().slice(0, 5); if (mv.length) L.push('', 'Come si sono mossi oggi i miei strumenti: ' + mv.map(x => x.i.name + ' ' + spct(x.pct)).join('; ') + '.');
   const nw2 = holdingNews(5); if (nw2.length) L.push('', 'Notizie sui miei titoli:', ...nw2.map(n => '- ' + n.per + ': ' + n.titolo));
   L.push('', 'Il mio portafoglio (anonimizzato):', buildSummary({ amounts: false, accNames: false, instNames: true, q: '' }).split('\n').slice(2).join('\n'));      // senza la sua frase di apertura: qui c'è già la richiesta
@@ -1723,6 +1726,9 @@ function tabMercati() {
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Mercati oggi'), load), h('p', { class: 'muted' }, 'Aggiornato il ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ' · ' + pl(ok.length, 'fonte letta', 'fonti lette') + (ko.length ? ' su ' + m.fonti.length : ''))));
   if (tl.length) el.append(tiles(tl));
   const notes = readMarket(m); if (notes.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Come leggerli'), h('ul', { class: 'list' }, notes.map(x => h('li', null, h('span', null, x)))), h('p', { class: 'muted' }, 'È una lettura meccanica dei dati, non una previsione né un consiglio.')));
+  const cal = upcoming(m, 5);
+  if (cal.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Prossimi appuntamenti'), h('ul', { class: 'list' }, cal.map(e => h('li', null, h('span', null, e.titolo), h('span', null, fmtDate(e.data), h('small', null, ' · ' + whenIn(e.data)))))),
+    h('p', { class: 'muted' }, 'Date ufficiali di Federal Reserve e BCE (ultimo giorno di riunione): il giorno della decisione i mercati di solito si muovono di più. Le date più lontane possono cambiare.')));
   const sect = I.settori_usa; if (sect && sect.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Settori USA oggi'), table([{ t: 'Settore' }, { t: 'Variazione', n: 1 }], sect.map(x => [x.nome, gl(x.var_giorno_pct, (x.var_giorno_pct > 0 ? '+' : '') + nf2.format(x.var_giorno_pct) + '%')]))));
   const f = I.posizioni_grandi_futures; if (f && f.voci) el.append(h('section', { class: 'card' }, h('h2', null, 'Dove sono sbilanciati i grandi (futures)'), table([{ t: 'Mercato' }, { t: 'Lunghi', n: 1 }, { t: 'Corti', n: 1 }, { t: 'Netto', n: 1 }, { t: '% interessi aperti', n: 1 }], f.voci.map(x => [x.nome, nf0.format(x.lunghi), nf0.format(x.corti), gl(x.netto, (x.netto > 0 ? '+' : '') + nf0.format(x.netto)), (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '%'])),
     h('p', { class: 'muted' }, 'Posizioni dei grandi operatori non commerciali (fondi speculativi e gestori), dati CFTC del ' + fmtDate(f.data) + ', pubblicati con qualche giorno di ritardo. Sono un\'istantanea, non un segnale di acquisto o vendita.')));
