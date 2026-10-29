@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-G6OeOHqgJuDdfTUUA4PXtbLCOy/6x1xumRGz2G7EhzI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xzzPb/4J9P87jhHwZExC0lnmhK17TD6H17lGNDCdCk0='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -191,6 +191,8 @@ h4{margin:18px 0 6px;font-size:14px;color:var(--ink2);font-weight:600}
 @media (max-width:640px){.bar-row,.bar-row.t{grid-template-columns:90px 1fr 56px}.bar-row .amt,.bar-row.t>:nth-child(n+5){display:none}.hero-n{font-size:44px}.hero{padding:22px 20px}.donut{grid-template-columns:1fr}.dleg .amt{display:none}.top{padding:10px 16px}}
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 .top{padding-top:max(12px,env(safe-area-inset-top))}
+[hidden]{display:none!important}
+.banner.unsaved{background:var(--warn);color:var(--warnink);border-color:transparent;margin:10px 0 0}
 .ti,.ls{display:none}
 .tab{display:inline-flex;align-items:center}
 .meter{position:relative;height:8px;margin-top:8px;border-radius:99px;background:linear-gradient(90deg,#ff453a,#ff9f0a 35%,#ffd60a 50%,#30d158 100%)}
@@ -382,7 +384,11 @@ async function changePass(oldp, newp) {
 }
 
 /* ============ salvataggio ============ */
-function setStatus(t) { STATUS = t; const e = document.getElementById('status'); if (e) e.textContent = t; }
+function setStatus(t) { STATUS = t; const e = document.getElementById('status'); if (e) e.textContent = t; refreshUnsaved(); }
+const needsSave = () => !!(DIRTY && !FH && KEY && !DEMO);          // su Safari i dati restano in memoria finche' non li salvi in un file
+function refreshUnsaved() { const e = document.getElementById('unsaved'); if (e) e.hidden = !needsSave(); }
+const unsavedBar = () => h('div', { class: 'banner unsaved', id: 'unsaved', hidden: needsSave() ? null : '', role: 'status' }, h('span', null, 'Hai modifiche non salvate: su questo browser si salvano a mano in un file.'),
+  btn(typeof navigator.canShare === 'function' ? 'Salva in File' : 'Scarica copia', () => { if (typeof navigator.canShare === 'function') shareCopy(); else save(true); }, 'pri sm'));
 function touch() {
   DIRTY = true;
   if (DEMO) { setStatus('Demo: nulla viene salvato'); return; }
@@ -406,7 +412,7 @@ function download(text) {
   const a = h('a', { href: url, download: 'finanze.finanze' }); document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
-async function downloadCopy() { if (!KEY) return; download(await seal()); setStatus('Copia cifrata scaricata'); }
+async function downloadCopy() { if (!KEY) return; download(await seal()); DIRTY = false; setStatus('Copia cifrata scaricata'); }
 async function shareCopy() {     // iPhone e Mac (Safari): foglio di condivisione di sistema -> "Salva su File" (iCloud Drive o "Su questo iPhone")
   if (!KEY) return;
   const text = await seal();
@@ -1682,13 +1688,25 @@ function readMarket(m) {            // lettura a regole dei dati (non e' una pre
   const f = I.posizioni_grandi_futures; if (f && f.voci && f.voci.length) { const srt = f.voci.slice().sort((a, b) => Math.abs(b.netto_su_oi_pct) - Math.abs(a.netto_su_oi_pct)).slice(0, 2); out.push('I grandi speculatori sui futures (dati CFTC del ' + fmtDate(f.data) + ') sono più sbilanciati su: ' + srt.map(x => x.nome + ' (' + (x.netto_su_oi_pct > 0 ? 'lunghi' : 'corti') + ', ' + (x.netto_su_oi_pct > 0 ? '+' : '') + nfp.format(x.netto_su_oi_pct) + '% degli interessi aperti)').join(' e ') + '. Posizioni molto affollate possono rientrare in fretta.'); }
   return out;
 }
-function marketForClaude() {
-  const m = DATA.mercati, L = ['Sei un analista finanziario prudente. Qui sotto trovi i dati pubblici di oggi sui mercati e un riepilogo anonimizzato del mio portafoglio. Spiegami in italiano, in modo concreto: 1) cosa sta succedendo oggi e perché, 2) dove sembrano muoversi i grandi capitali, 3) cosa può significare per il MIO portafoglio (concentrazione, rischi, cose da tenere d\'occhio). Distingui fatti da ipotesi, non fare previsioni sicure e non darmi consigli di acquisto o vendita personalizzati.', ''];
+const CLAUDE_Q = {          // domande pronte da accompagnare ai dati
+  oggi: ['Cosa sta succedendo oggi e cosa significa per me', 'Spiegami in italiano, in modo concreto: 1) cosa sta succedendo oggi e perché, 2) dove sembrano muoversi i grandi capitali, 3) cosa può significare per il MIO portafoglio (concentrazione, rischi, cose da tenere d\'occhio).'],
+  rischi: ['Quali sono i rischi principali del mio portafoglio adesso', 'Individua i rischi principali del MIO portafoglio alla luce dei dati di oggi: concentrazione, esposizione al cambio e ai tassi, correlazioni nascoste tra le mie posizioni, prodotti complessi. Per ogni rischio dimmi quanto è rilevante e quale informazione mi servirebbe per valutarlo meglio.'],
+  soldi: ['Come potrei usare i prossimi soldi da investire', 'Ho un importo da investire e un calcolo di ripartizione verso la mia allocazione obiettivo (in fondo). Discuti pro e contro di questa ripartizione, cosa potrebbe non funzionare e quali domande dovrei pormi prima (orizzonte, liquidità di emergenza, costi, tasse).'],
+  settimana: ['Cosa tenere d\'occhio questa settimana', 'Dimmi quali eventi, dati e notizie tra quelli di oggi possono muovere i miei strumenti nei prossimi giorni e come leggerli. Distingui ciò che è già nei prezzi da ciò che è incerto.'],
+  semplice: ['Spiegamelo in modo semplice', 'Spiega i dati di oggi come a una persona che non conosce la finanza, senza gergo, e dimmi in tre punti cosa conta davvero per me.']
+};
+function marketForClaude(qk) {
+  const q = CLAUDE_Q[qk] || CLAUDE_Q.oggi, m = DATA.mercati, L = ['Sei un analista finanziario prudente. Qui sotto trovi i dati pubblici di oggi sui mercati e un riepilogo anonimizzato del mio portafoglio. ' + q[1] + ' Distingui fatti da ipotesi, non fare previsioni sicure e non darmi consigli di acquisto o vendita personalizzati.', ''];
   L.push('Dati di mercato aggiornati al ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ':'); for (const t of readMarket(m)) L.push('- ' + t);
   L.push('', 'Titoli principali di oggi:'); for (const f of m.fonti.filter(x => x.ok).slice(0, 10)) L.push('- ' + f.nome + ': ' + f.voci.slice(0, 3).map(v => v.titolo).join(' | '));
   const mv = dayMovers().slice(0, 5); if (mv.length) L.push('', 'Come si sono mossi oggi i miei strumenti: ' + mv.map(x => x.i.name + ' ' + spct(x.pct)).join('; ') + '.');
   const nw2 = holdingNews(5); if (nw2.length) L.push('', 'Notizie sui miei titoli:', ...nw2.map(n => '- ' + n.per + ': ' + n.titolo));
   L.push('', 'Il mio portafoglio (anonimizzato):', buildSummary({ amounts: false, accNames: false, instNames: true, q: '' }).split('\n').slice(2).join('\n'));      // senza la sua frase di apertura: qui c'è già la richiesta
+  if (qk === 'soldi') {
+    const amt = pnum(UI.newMoney) ?? (G().monthly > 0 ? G().monthly : 500), rb = rebalance(amt); L.push('', 'Importo che voglio investire adesso: ' + nf0.format(amt) + ' €.');
+    if (rb) { L.push('Ripartizione calcolata verso la mia allocazione obiettivo (percentuali sul patrimonio dopo l\'investimento):'); for (const r of rb) L.push('- ' + r.label + ': oggi ' + pct(r.curPct) + ', obiettivo ' + (r.tgt ? pct(r.tgt) : 'n.d.') + (r.put > 0.5 ? ', da aggiungere ' + nf0.format(r.put) + ' €' : '') + ', dopo ' + pct(r.after) + '.'); }
+    else L.push('Non ho ancora definito un\'allocazione obiettivo.');
+  }
   return L.join('\n');
 }
 function tabMercati() {
@@ -1716,7 +1734,8 @@ function tabMercati() {
     h('p', { class: 'muted' }, 'Dalle testate l\'app mostra solo titolo e collegamento: gli articoli si leggono sui loro siti (alcuni sono a pagamento).')));
   const cp = h('span', { class: 'muted' });
   el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi a Claude'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat con Claude e ti risponde con un\'analisi.'),
-    h('div', { class: 'row' }, btn('Copia il testo per Claude', async () => { const txt = marketForClaude(); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+    h('label', { class: 'fld' }, h('span', null, 'Cosa vuoi chiedergli'), h('select', { 'aria-label': 'Domanda per Claude', onchange: e => { UI.claudeQ = e.target.value; } }, Object.entries(CLAUDE_Q).map(([k, v]) => h('option', { value: k, selected: (UI.claudeQ || 'oggi') === k }, v[0])))),
+    h('div', { class: 'row' }, btn('Copia il testo per Claude', async () => { const txt = marketForClaude(UI.claudeQ || 'oggi'); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
   return el;
 }
 
@@ -1749,7 +1768,7 @@ function render() {
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
   else {
     const vk = UI.tab + '|' + (UI.acc || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
-    $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), tabsBar(), h('div', { class: 'view' }, content())));
+    $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), unsavedBar(), tabsBar(), h('div', { class: 'view' }, content())));
     window.scrollTo(0, y); afterRender();
   }
 }
@@ -2030,6 +2049,7 @@ function demoData() {
   return D;
 }
 
+if (ONLINE && 'serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* senza: l'app funziona lo stesso, solo non si apre offline */ }); });
 render();
 </script>
 </body>
