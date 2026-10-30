@@ -1,11 +1,12 @@
 name: Prezzi e pubblicazione
 on:
   schedule:
-    - cron: '10 7,17 * * *'
+    - cron: '23 5,7 * * *'
+    - cron: '53 16,18,20 * * *'
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -41,6 +42,13 @@ jobs:
       - name: Avviso se troppi prezzi non si leggono
         if: steps.leggi.outcome == 'failure'
         run: echo "::warning::Piu della meta dei prezzi non si e letta (un sito potrebbe rifiutare il data center). Il sito resta con gli ultimi prezzi buoni."
+      - name: Manda il recap sul telefono (se hai impostato NTFY_TOPIC)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        shell: pwsh
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: ./notifica.ps1 -Sito ./site
       - name: Salva prezzi e storico nel repository
         run: |
           rm -f site/aggiorna-prezzi.log

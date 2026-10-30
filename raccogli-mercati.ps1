@@ -42,20 +42,37 @@ $feeds = @(
   @('Mercati e imprese', 'BBC - Economia', 'https://feeds.bbci.co.uk/news/business/rss.xml'),
   @('Mercati e imprese', 'The Guardian - Economia', 'https://www.theguardian.com/uk/business/rss'),
   @('Mercati e imprese', 'eToro - News e analisi', 'https://www.etoro.com/news-and-analysis/feed/'),
+  @('Mercati e imprese', 'Bloomberg - Mercati', 'https://feeds.bloomberg.com/markets/news.rss'),
+  @('Europa', 'Handelsblatt - Finanze', 'https://www.handelsblatt.com/contentexport/feed/finanzen'),
+  @('Ricerca e professori', 'Aswath Damodaran (NYU) - Musings on Markets', 'https://aswathdamodaran.blogspot.com/feeds/posts/default', 60),
+  @('Ricerca e professori', 'VoxEU (CEPR) - economisti', 'https://cepr.org/rss/vox-content', 30),
+  @('Ricerca e professori', 'Project Syndicate - economia', 'https://www.project-syndicate.org/rss', 30),
+  @('Ricerca e professori', 'lavoce.info - economisti italiani', 'https://www.lavoce.info/feed/', 30),
+  @('Ricerca e professori', 'Liberty Street Economics (NY Fed)', 'https://libertystreeteconomics.newyorkfed.org/feed/', 60),
+  @('Ricerca e professori', 'BIS - discorsi', 'https://www.bis.org/doclist/cbspeeches.rss', 30),
+  @('Ricerca e professori', 'BIS - working paper', 'https://www.bis.org/doclist/wppubls.rss', 60),
+  @('Ricerca e professori', 'Fed - FEDS Notes', 'https://www.federalreserve.gov/feeds/feds_notes.xml', 60),
+  @('Ricerca e professori', 'NBER - nuovi paper', 'https://www.nber.org/rss/new.xml', 30),
+  @('Ricerca e professori', 'BCE - blog', 'https://www.ecb.europa.eu/rss/blog.html', 60),
+  @('Ricerca e professori', 'Bank Underground (Bank of England)', 'https://bankunderground.co.uk/feed/', 60),
+  @('Investire con metodo', 'Of Dollars And Data', 'https://ofdollarsanddata.com/feed/', 45),
+  @('Investire con metodo', 'A Wealth of Common Sense', 'https://awealthofcommonsense.com/feed/', 45),
   @('Italia', 'Il Sole 24 Ore - Finanza', 'https://www.ilsole24ore.com/rss/finanza.xml'),
   @('Italia', 'ANSA - Economia', 'https://www.ansa.it/sito/notizie/economia/economia_rss.xml'),
   @('Banche centrali', 'Federal Reserve', 'https://www.federalreserve.gov/feeds/press_all.xml'),
   @('Banche centrali', 'BCE', 'https://www.ecb.europa.eu/rss/press.html'),
   @('Crypto', 'CoinDesk', 'https://www.coindesk.com/arc/outboundfeeds/rss')
 )
-function Read-Feed($url) {
+function Read-Feed($url, $days = 10) {          # $days: quanto vecchia puo' essere la notizia piu' recente (i blog di ricerca escono di rado)
   $x = (Get-Text $url).Trim()
   $blocks = [regex]::Matches($x, '<item[\s>].*?</item>|<entry[\s>].*?</entry>', 'Singleline')
   $out = New-Object Collections.Generic.List[object]
   foreach ($b in $blocks) {
     $s = $b.Value
     $t = [regex]::Match($s, '<title[^>]*>(.*?)</title>', 'Singleline').Groups[1].Value
-    $l = [regex]::Match($s, '<link[^>]*href="([^"]+)"').Groups[1].Value
+    $l = [regex]::Match($s, '<link[^>]*rel=["'']alternate["''][^>]*href=["'']([^"'']+)["'']').Groups[1].Value          # Atom (es. Blogger): tra i tanti <link> serve quello "alternate", cioe' la pagina dell'articolo
+    if (-not $l) { $l = [regex]::Match($s, '<link[^>]*href=["'']([^"'']+)["''][^>]*rel=["'']alternate["'']').Groups[1].Value }
+    if (-not $l) { $l = [regex]::Match($s, '<link[^>]*href="([^"]+)"').Groups[1].Value }
     if (-not $l) { $l = [regex]::Match($s, '<link[^>]*>\s*(?:<!\[CDATA\[)?\s*(https?://[^<\s\]]+)').Groups[1].Value }
     $d = [regex]::Match($s, '<(?:pubDate|published|updated|dc:date)[^>]*>([^<]+)<').Groups[1].Value
     $iso = ''; $dt = [DateTimeOffset]::MinValue; if ($d -and [DateTimeOffset]::TryParse($d.Trim(), $inv, [Globalization.DateTimeStyles]::AssumeUniversal, [ref]$dt)) { $iso = $dt.UtcDateTime.ToString('yyyy-MM-ddTHH:mm:ssZ') }
@@ -64,14 +81,14 @@ function Read-Feed($url) {
     if ($out.Count -ge 40) { break }
   }
   if (-not $out.Count) { throw 'nessuna notizia riconosciuta nel file' }
-  $limit = (Get-Date).ToUniversalTime().AddDays(-10).ToString('yyyy-MM-ddTHH:mm:ssZ')          # niente notizie vecchie: un feed fermo da mesi si segnala, non si mostra
+  $limit = (Get-Date).ToUniversalTime().AddDays(-$days).ToString('yyyy-MM-ddTHH:mm:ssZ')          # niente notizie vecchie: un feed fermo da mesi si segnala, non si mostra
   $fresh = @($out | Where-Object { -not $_['data'] -or $_['data'] -ge $limit })
   if (-not $fresh.Count) { $newest = ($out | ForEach-Object { $_['data'] } | Sort-Object -Descending | Select-Object -First 1); throw ('feed non aggiornato (ultima notizia: ' + $newest + ')') }
   return @($fresh | Sort-Object -Property @{ Expression = { $_['data'] }; Descending = $true } | Select-Object -First 8)
 }
 $fonti = New-Object Collections.Generic.List[object]
 foreach ($f in $feeds) {
-  try { $fonti.Add([ordered]@{ nome = $f[1]; gruppo = $f[0]; ok = $true; voci = @(Read-Feed $f[2]) }) }       # @(): con una sola notizia deve restare un elenco, non diventare un oggetto
+  try { $fonti.Add([ordered]@{ nome = $f[1]; gruppo = $f[0]; ok = $true; voci = @(if ($f.Count -gt 3) { Read-Feed $f[2] $f[3] } else { Read-Feed $f[2] }) }) }       # @(): con una sola notizia deve restare un elenco, non diventare un oggetto
   catch { $msg = ($_.Exception.Message -replace '\s+', ' '); if ($msg.Length -gt 90) { $msg = $msg.Substring(0, 90) }; $fonti.Add([ordered]@{ nome = $f[1]; gruppo = $f[0]; ok = $false; errore = $msg; voci = @() }) }
   Start-Sleep -Milliseconds 300
 }

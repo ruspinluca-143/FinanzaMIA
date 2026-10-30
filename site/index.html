@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6+sFKK37J1Fnjv+qYRm0MyZa5e1FTVBsyR6ByAFIbhM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Sn/ZKLx4h4E5HYUGAZC2LK7aF0Zn4eiIlDBDPWXfGAk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -145,6 +145,7 @@ td .acts{justify-content:flex-end;flex-wrap:nowrap}
 .notes{text-align:left;color:var(--ink2);font-size:14px;margin:20px auto;max-width:500px}
 .notes li{margin:8px 0}
 .start input{width:100%;max-width:320px}
+.more{margin-top:24px}.more>summary{cursor:pointer;color:var(--muted);font-size:14px;list-style:none}.more>summary::-webkit-details-marker{display:none}.more>summary:hover{color:var(--ink2)}.more[open]>summary{margin-bottom:2px}
 dialog{border:1px solid var(--ring);border-radius:24px;background:var(--card-s);color:var(--ink);padding:24px;max-width:560px;width:calc(100% - 28px);box-shadow:0 30px 90px rgba(0,0,0,.35)}
 dialog[open]{animation:pop .42s var(--ease)}
 dialog::backdrop{background:rgba(0,0,0,.30);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:fade .35s ease}
@@ -216,9 +217,9 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(7,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(8,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
-.tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10.5px;color:var(--muted)}
+.tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
 .tab .lf{display:none}
 .tab .ls{display:inline}
@@ -309,6 +310,7 @@ let FH = null;           // handle del file (se il browser lo permette)
 let DIRTY = false, DEMO = false, LOCKED = false, STATUS = '';
 let CANSAVE = false;     // dati caricati dall'esterno in sola visualizzazione: si possono salvare in un archivio cifrato
 let saveTimer = null, saveChain = Promise.resolve(), lastActivity = Date.now();
+let UNSAVED = false;     // l'ultimo tentativo di salvataggio non e' riuscito da nessuna parte (ne' sul dispositivo ne' su file)
 const UI = { tab: 'panoramica', acc: null, dim: 'class', scen: 'ribasso', shock: null, chartTable: false, sum: { amounts: false, accNames: false, instNames: true, q: '' } };
 
 const TYPES = {
@@ -324,11 +326,12 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento (soldi che entrano)'], ['prelievo', 'Prelievo (soldi che escono)'], ['partenza', 'Valore di partenza (inizio tracciamento)']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 5 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} } });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 5 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget() });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
+  d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
@@ -336,12 +339,45 @@ function migrate(d) {
 /* ============ cifratura (AES-256-GCM, chiave da passphrase con PBKDF2) ============ */
 const b64 = u8 => { let t = ''; for (let i = 0; i < u8.length; i += 0x8000) t += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(t); };
 const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+const CAN_CRYPTO = () => !!(window.crypto && window.crypto.subtle);          // la cifratura del browser esiste solo in pagine "sicure": file aperto da Edge/Chrome/Safari o indirizzo https
+const NOCRYPTO = 'Questa pagina è aperta in un modo in cui il browser non permette la cifratura (succede nelle anteprime incorporate in altre app e con indirizzi http:// non locali). Aprila in Edge, Chrome o Safari: sul computer con doppio clic su finanze.html, oppure da https://ruspinluca-143.github.io/FinanzaMIA/. La demo funziona anche qui.';
 async function deriveKey(pass, salt, iter) {
   const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
 const hdr = () => ({ app: 'finanze', v: 1, kdf: 'PBKDF2-SHA256', iter: ITER, salt: b64(SALT) });
+/* ---- copia cifrata sul dispositivo (IndexedDB): al prossimo avvio basta la passphrase, senza ricaricare il file ---- */
+const LOC = { rec: null, ok: false, off: false, persisted: null, err: '', where: '' };          // rec = { text, saved, at }: lo stesso testo cifrato che finisce nel file .finanze
+const idbOpen = () => new Promise((res, rej) => {
+  if (!window.indexedDB) return rej(new Error('questo browser non permette di salvare sul dispositivo'));
+  const r = indexedDB.open('finanze-locale', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('k');
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error || new Error('apertura non riuscita')); r.onblocked = () => rej(new Error('archivio locale bloccato da un\'altra scheda'));
+});
+async function idbDo(mode, fn) {
+  const db = await idbOpen();
+  try { return await new Promise((res, rej) => { const tx = db.transaction('k', mode), rq = fn(tx.objectStore('k')); tx.oncomplete = () => res(rq ? rq.result : undefined); tx.onerror = tx.onabort = () => rej(tx.error || new Error('operazione annullata')); }); }
+  finally { db.close(); }
+}
+const LS_KEY = 'finanze-archivio';          // riserva: se IndexedDB non funziona (alcuni browser o criteri aziendali) si prova con la memoria locale semplice
+async function locGet() {
+  try { const r = await idbDo('readonly', st => st.get('archivio')); if (r && r.text) { LOC.where = 'IndexedDB'; return r; } } catch (e) { LOC.err = String(e.message || e); }
+  try { const t = localStorage.getItem(LS_KEY); if (t) { const r = JSON.parse(t); if (r && r.text) { LOC.where = 'memoria locale'; return r; } } } catch (e) { LOC.err = LOC.err || String(e.message || e); }
+  return null;
+}
+async function locPut(text, at) {
+  const rec = { text, saved: new Date().toISOString(), at: at || '' };
+  try { await idbDo('readwrite', st => st.put(rec, 'archivio')); LOC.where = 'IndexedDB'; try { localStorage.removeItem(LS_KEY); } catch { /* niente */ } }
+  catch (e1) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(rec)); LOC.where = 'memoria locale'; }
+    catch (e2) { throw new Error(String(e1.message || e1) + (e2 && e2.name ? ' / ' + e2.name : '')); }
+  }
+  LOC.rec = rec; LOC.ok = true; LOC.err = '';
+  if (LOC.persisted == null && navigator.storage && navigator.storage.persist) { try { LOC.persisted = await navigator.storage.persist(); } catch { LOC.persisted = false; } }          // chiede al browser di non cancellare questi dati da solo
+}
+async function locDel() { let bad = null; try { await idbDo('readwrite', st => st.delete('archivio')); } catch (e) { bad = e; } try { localStorage.removeItem(LS_KEY); } catch { /* niente */ } if (bad && LOC.where !== 'memoria locale') throw bad; LOC.rec = null; LOC.ok = false; }
 async function seal() {
+  S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(JSON.stringify(header)) }, KEY, enc.encode(JSON.stringify(S)));
   return JSON.stringify({ ...header, iv: b64(iv), ct: b64(new Uint8Array(ct)) });
@@ -353,7 +389,7 @@ async function makeVerify() {
 async function checkPass(pass) {
   try { const k = await deriveKey(pass, SALT, ITER); return dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: VERIFY.iv }, k, VERIFY.ct)) === 'ok'; } catch { return false; }
 }
-async function openArchive(text, fh, pass) {
+async function openArchive(text, fh, pass, fromLocal) {          // fromLocal: la copia salvata sul dispositivo (si apre con la sola passphrase)
   let f; try { f = JSON.parse(text); } catch { return 'Il file non è un archivio valido.'; }
   if (!f || f.app !== 'finanze' || f.v !== 1 || f.kdf !== 'PBKDF2-SHA256' || !(f.iter >= 100000 && f.iter <= 20000000) || !f.salt || !f.iv || !f.ct) return 'Il file non è un archivio Finanze valido.';
   if (fh && fh.requestPermission) { try { if (await fh.requestPermission({ mode: 'readwrite' }) !== 'granted') fh = null; } catch { fh = null; } }
@@ -362,9 +398,11 @@ async function openArchive(text, fh, pass) {
   let pt;
   try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv), additionalData: enc.encode(JSON.stringify(header)) }, key, unb64(f.ct)); }
   catch { return 'Passphrase errata oppure file danneggiato.'; }
-  S = JSON.parse(dec.decode(pt)); migrate(S);
-  SALT = salt; ITER = f.iter; KEY = key; VERIFY = await makeVerify(); FH = fh; DEMO = false; DIRTY = false;
-  enter(); setStatus(fh ? 'Aperto · ' + fh.name : 'Aperto (modalità copia: usa "Scarica copia" per salvare)');
+  const D = JSON.parse(dec.decode(pt)); migrate(D);
+  if (!fromLocal && LOC.rec && LOC.rec.at && LOC.rec.at > (D.savedAt || '') && !confirm('Su questo dispositivo c\'è una versione più recente di questo file (modificata il ' + new Date(LOC.rec.at).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) + '). Se apri il file la sostituisci e perdi le modifiche fatte dopo. Aprire comunque il file?')) return 'Apertura annullata: la versione su questo dispositivo è più recente.';
+  S = D; SALT = salt; ITER = f.iter; KEY = key; VERIFY = await makeVerify(); FH = fh; DEMO = false; DIRTY = false; UNSAVED = false; LOC.off = false;
+  if (!fromLocal) { if (!S.settings.backupAt) S.settings.backupAt = today(); try { await locPut(text, S.savedAt); } catch (e) { LOC.ok = false; LOC.err = String(e.message || e); } }          // un file appena aperto vale come copia di sicurezza; si tiene anche sul dispositivo
+  enter(); setStatus(fromLocal ? 'Aperto dal dispositivo' : fh ? 'Aperto · ' + fh.name : LOC.ok ? 'Aperto e salvato su questo dispositivo' : 'Aperto (questo browser non salva da solo: usa "Scarica copia")');
 }
 async function createArchive(pass, keepData) {      // keepData: tiene i dati già in memoria invece di partire da un archivio vuoto
   let fh = null;
@@ -385,52 +423,77 @@ async function changePass(oldp, newp) {
 
 /* ============ salvataggio ============ */
 function setStatus(t) { STATUS = t; const e = document.getElementById('status'); if (e) e.textContent = t; refreshUnsaved(); }
-const needsSave = () => !!(DIRTY && !FH && KEY && !DEMO);          // su Safari i dati restano in memoria finche' non li salvi in un file
-function refreshUnsaved() { const e = document.getElementById('unsaved'); if (e) e.hidden = !needsSave(); }
-const unsavedBar = () => h('div', { class: 'banner unsaved', id: 'unsaved', hidden: needsSave() ? null : '', role: 'status' }, h('span', null, 'Hai modifiche non salvate: su questo browser si salvano a mano in un file.'),
-  btn(typeof navigator.canShare === 'function' ? 'Salva in File' : 'Scarica copia', () => { if (typeof navigator.canShare === 'function') shareCopy(); else save(true); }, 'pri sm'));
+const backupDays = () => S && S.settings ? daysSince(S.settings.backupAt || S.created || today()) : 0;          // giorni dall'ultima copia su file
+const backupDue = () => backupDays() >= 30;
+const needsSave = () => !!(KEY && !DEMO && (UNSAVED || (!FH && backupDue())));          // avviso: o non si riesce a salvare, o la copia di sicurezza su file e' vecchia
+const unsavedText = () => UNSAVED ? 'Hai modifiche non salvate: questo browser non riesce a tenerle da solo, salvale in un file.' : 'Da ' + backupDays() + ' giorni non fai una copia di sicurezza su file: se il browser cancellasse i dati del sito, senza una copia perderesti tutto.';
+function refreshUnsaved() { const e = document.getElementById('unsaved'); if (!e) return; e.hidden = !needsSave(); const m = document.getElementById('unsavedMsg'); if (m) m.textContent = unsavedText(); }
+const unsavedBar = () => h('div', { class: 'banner unsaved', id: 'unsaved', hidden: needsSave() ? null : '', role: 'status' }, h('span', { id: 'unsavedMsg' }, unsavedText()),
+  btn(typeof navigator.canShare === 'function' ? 'Salva in File' : 'Scarica copia', () => { if (typeof navigator.canShare === 'function') shareCopy(); else downloadCopy(); }, 'pri sm'));
 function touch() {
   DIRTY = true;
   if (DEMO) { setStatus('Demo: nulla viene salvato'); return; }
-  if (!FH) { setStatus('Modifiche non salvate: premi "Scarica copia"'); return; }
-  setStatus('Salvataggio…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => save(false), 600);
+  setStatus('Salvataggio…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => save(false), 600);          // a ogni modifica: copia sul dispositivo e, se c'e', anche sul file
 }
 function save(manual) { saveChain = saveChain.then(() => doSave(manual)).catch(() => {}); return saveChain; }
 async function doSave(manual) {
   if (DEMO || !KEY || !S) return;
+  const prevBackup = S.settings.backupAt, toFile = !!(FH || manual);
   try {
+    if (toFile) S.settings.backupAt = today();          // si scrive prima di cifrare, cosi' la data e' dentro la copia
     const text = await seal(), hm = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    let loc = false, file = false, why = '';
+    if (!LOC.off) { try { await locPut(text, S.savedAt); loc = true; } catch (e) { LOC.ok = false; LOC.err = String(e.message || e); why = LOC.err; } }
     if (FH) {
-      if (manual && FH.queryPermission) { try { if (await FH.queryPermission({ mode: 'readwrite' }) !== 'granted') await FH.requestPermission({ mode: 'readwrite' }); } catch { /* si prova comunque */ } }
-      const w = await FH.createWritable(); await w.write(text); await w.close();
-      DIRTY = false; setStatus('Salvato · ' + FH.name + ' · ' + hm);
-    } else { download(text); DIRTY = false; setStatus('Copia scaricata alle ' + hm); }
-  } catch (e) { setStatus('Errore di salvataggio (' + (e.message || e) + '): usa "Scarica copia"'); }
+      try {
+        if (manual && FH.queryPermission) { try { if (await FH.queryPermission({ mode: 'readwrite' }) !== 'granted') await FH.requestPermission({ mode: 'readwrite' }); } catch { /* si prova comunque */ } }
+        const w = await FH.createWritable(); await w.write(text); await w.close(); file = true;
+      } catch (e) { why = String(e.message || e); }
+    } else if (manual) { download(text); file = true; }
+    if (toFile && !file) S.settings.backupAt = prevBackup;
+    UNSAVED = !(loc || file); DIRTY = UNSAVED;
+    const noDev = !loc && !LOC.off ? ' · NON salvato sul dispositivo (' + (why || 'motivo sconosciuto') + ')' : '';          // il motivo si legge subito qui, senza cercarlo altrove
+    if (file && FH) setStatus('Salvato · ' + FH.name + (loc ? ' e su questo dispositivo' : '') + ' · ' + hm + noDev);
+    else if (file) setStatus('Copia scaricata nella cartella Download alle ' + hm + (loc ? ' · salvato anche su questo dispositivo' : '') + noDev);
+    else if (loc) setStatus('Salvato su questo dispositivo · ' + hm);
+    else setStatus('Non riesco a salvare' + (why ? ' (' + why + ')' : '') + ': usa "Scarica copia"');
+  } catch (e) { S.settings.backupAt = prevBackup; UNSAVED = true; setStatus('Errore di salvataggio (' + (e.message || e) + '): usa "Scarica copia"'); }
 }
+const copyName = () => 'finanze-' + today() + '.finanze';          // con la data nel nome: una copia nuova non si confonde con quelle vecchie
 function download(text) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' }));
-  const a = h('a', { href: url, download: 'finanze.finanze' }); document.body.append(a); a.click(); a.remove();
+  const a = h('a', { href: url, download: copyName() }); document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
-async function downloadCopy() { if (!KEY) return; download(await seal()); DIRTY = false; setStatus('Copia cifrata scaricata'); }
+async function exportCopy(send) {          // send(text) -> true se la copia e' davvero uscita (scaricata o condivisa); in quel caso la data della copia di sicurezza si aggiorna
+  if (!KEY || DEMO) return false;
+  const prev = S.settings.backupAt; S.settings.backupAt = today();
+  const text = await seal();
+  if (!(await send(text))) { S.settings.backupAt = prev; return false; }
+  if (!LOC.off) { try { await locPut(text, S.savedAt); } catch (e) { LOC.ok = false; LOC.err = String(e.message || e); } }
+  UNSAVED = false; DIRTY = false; return true;
+}
+async function downloadCopy() { if (await exportCopy(async t => { download(t); return true; })) setStatus('Copia cifrata scaricata nella cartella Download: ' + copyName()); }
 async function shareCopy() {     // iPhone e Mac (Safari): foglio di condivisione di sistema -> "Salva su File" (iCloud Drive o "Su questo iPhone")
   if (!KEY) return;
-  const text = await seal();
-  for (const type of ['application/octet-stream', 'application/json', 'text/plain']) {
-    const f = new File([text], 'finanze.finanze', { type });
-    if (!(navigator.canShare && navigator.canShare({ files: [f] }))) continue;
-    try { await navigator.share({ files: [f], title: 'Archivio Finanze' }); DIRTY = false; setStatus('Archivio salvato o condiviso'); }
-    catch (e) { if (!e || e.name !== 'AbortError') setStatus('Condivisione non riuscita: usa "Scarica copia"'); }
-    return;
-  }
-  download(text); setStatus('Copia cifrata scaricata');
+  let msg = '';
+  const ok = await exportCopy(async text => {
+    for (const type of ['application/octet-stream', 'application/json', 'text/plain']) {
+      const f = new File([text], copyName(), { type });
+      if (!(navigator.canShare && navigator.canShare({ files: [f] }))) continue;
+      try { await navigator.share({ files: [f], title: 'Archivio Finanze' }); return true; }
+      catch (e) { if (!e || e.name !== 'AbortError') msg = 'Condivisione non riuscita: usa "Scarica copia"'; return false; }
+    }
+    download(text); return true;
+  });
+  setStatus(ok ? 'Copia di sicurezza salvata o condivisa' : msg || 'Copia annullata');
 }
 window.addEventListener('beforeunload', e => { if (DIRTY && !DEMO) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ============ blocco automatico ============ */
 async function lock() {
   if (DEMO || !KEY || LOCKED) return;
-  if (DIRTY && FH) await save(false);
+  if (DIRTY) { clearTimeout(saveTimer); await save(false); }
   document.querySelectorAll('dialog').forEach(d => { if (d.open) d.close(); d.remove(); });
   LOCKED = true; render();
 }
@@ -560,7 +623,7 @@ function form(title, fields, values, onOk, extra) {
     if (f.type === 'select') inp = h('select', null, f.options.map(o => h('option', { value: o[0], selected: o[0] === values[f.key] }, o[1])));
     else if (f.type === 'textarea') inp = h('textarea', { rows: 3, placeholder: f.ph || '', value: values[f.key] ?? '' });
     else if (f.type === 'check') inp = h('input', { type: 'checkbox', checked: !!values[f.key] });
-    else inp = h('input', { type: f.type || 'text', step: f.type === 'number' ? 'any' : null, placeholder: f.ph || '', value: values[f.key] ?? '', list: f.list || null, autocomplete: 'off', required: f.req || null });
+    else inp = h('input', { type: f.type || 'text', step: f.type === 'number' ? 'any' : null, placeholder: f.ph || '', value: values[f.key] ?? '', list: f.list || null, autocomplete: f.ac || 'off', required: f.req || null });          // f.ac: "new-password" / "current-password" fanno proporre al telefono di generare e ricordare la passphrase (portachiavi)
     inputs[f.key] = inp;
     frm.append(f.type === 'check' ? h('label', { class: 'chk' }, inp, h('span', null, f.label, f.hint ? h('small', null, ' — ' + f.hint) : null))
       : h('label', { class: 'fld' }, h('span', null, f.label), inp, f.hint ? h('small', null, f.hint) : null));
@@ -694,10 +757,28 @@ async function pricesOnline() {
   try { openPrices(planPrices(await fetchPricesText()), 'prezzi.json (online)'); }
   catch (e) { alert('Impossibile scaricare i prezzi: ' + (e.message || e)); }
 }
-async function checkOnlinePrices() {             // all'apertura: se online ci sono prezzi più nuovi dei tuoi, compare un avviso con un solo tocco
-  if (!ONLINE || !S) return;
-  try { const text = await fetchPricesText(), P = planPrices(text), n = P.error ? 0 : P.rows.filter(x => !x.skip && x.use).length; PRICE_BANNER = n ? { text, n } : null; if (S && !LOCKED) render(); } catch { /* senza rete o senza file: nessun avviso */ }
+let LASTPX = 0;
+async function checkOnlinePrices(force) {          // i prezzi si applicano DA SOLI all'apertura e ogni volta che torni sull'app; solo le variazioni sospette (oltre il 25%) aspettano il tuo controllo
+  if (!ONLINE || !S || DEMO || !KEY) return;
+  if (!force && Date.now() - LASTPX < 10 * 60000) return; LASTPX = Date.now();
+  try { autoApplyPrices(await fetchPricesText()); } catch { /* senza rete o senza file: l'app resta con i prezzi di prima */ }
 }
+function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce quanti ne ha applicati
+  let P = planPrices(text); if (P.error) return 0;
+  let n = 0, last = '';
+  for (const r of P.rows) if (!r.skip && r.use) { setPriceAt(r.i, r.np, r.e.data); n++; if (r.e.data > last) last = r.e.data; }
+  for (const r of P.rows) {          // dati pubblici dell'ETF (costo annuo, benchmark, distribuzione): si completano solo se mancano
+    if (typeof r.e.ter === 'number' && r.e.ter >= 0 && r.i.ter == null) r.i.ter = r.e.ter;
+    if (typeof r.e.bench === 'string' && !r.i.bench) r.i.bench = r.e.bench;
+    if (typeof r.e.div === 'string' && !r.i.div) r.i.div = r.e.div;
+  }
+  if (n) { takeSnapshot(); setStatus('Prezzi aggiornati da soli: ' + pl(n, 'strumento', 'strumenti') + ' (quotazioni del ' + fmtDate(last) + ')'); }
+  P = planPrices(text); const rest = P.rows.filter(x => !x.skip && !x.use).length; PRICE_BANNER = rest ? { text, n: rest, review: true } : null;
+  if (S && !LOCKED) render();
+  return n;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !LOCKED) checkOnlinePrices(); });
+setInterval(() => { if (!document.hidden && S && !LOCKED) checkOnlinePrices(); }, 30 * 60000);
 function openPrices(P, fname) {
   if (P.error) { alert(P.error); return; }
   const dlg = h('dialog', { class: 'wide' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
@@ -1808,29 +1889,67 @@ function render() {
   const y = window.scrollY;
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
   else {
-    const vk = UI.tab + '|' + (UI.acc || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
+    const vk = UI.tab + '|' + (UI.acc || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : UI.tab === 'piano' ? UI.psub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
     $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), unsavedBar(), tabsBar(), h('div', { class: 'view' }, content())));
     window.scrollTo(0, y); afterRender();
   }
 }
 function enter() { UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
-function viewStart() {
-  const fsa = !!window.showSaveFilePicker;
+async function forgetLocal() {
+  if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
+  try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
+  LOC.off = !!S;          // se i dati sono aperti, da qui in poi non si salvano piu' sul dispositivo (fino alla prossima apertura)
+  if (S) { UNSAVED = !FH; DIRTY = UNSAVED; setStatus('Copia sul dispositivo cancellata: ora salva a mano in un file'); }
+  render();
+}
+/* ---- freno ai tentativi: dopo 5 passphrase sbagliate si aspetta (15 s, poi il doppio, fino a 15 minuti) ---- */
+const gateGet = () => { try { return JSON.parse(localStorage.getItem('finanze-tentativi') || '{}'); } catch { return {}; } };
+const gateSet = o => { try { localStorage.setItem('finanze-tentativi', JSON.stringify(o)); } catch { /* senza memoria locale il freno vale solo finche' la pagina resta aperta */ } };
+const gateWait = () => { const g = gateGet(); return g.until > Date.now() ? Math.ceil((g.until - Date.now()) / 1000) : 0; };
+const gateFail = () => { const n = (gateGet().n || 0) + 1; gateSet({ n, until: n >= 5 ? Date.now() + Math.min(900, 15 * Math.pow(2, n - 5)) * 1000 : 0 }); };
+const gateOk = () => gateSet({});
+const gateMsg = w => 'Troppi tentativi sbagliati: riprova tra ' + (w >= 60 ? Math.ceil(w / 60) + ' minuti' : w + ' secondi') + '.';
+function viewUnlockLocal() {          // sul dispositivo c'e' gia' l'archivio cifrato: basta la passphrase
+  const inp = h('input', { type: 'password', placeholder: 'Passphrase', autocomplete: 'current-password', 'aria-label': 'Passphrase' }), msg = h('p', { class: 'err' }), when = new Date(LOC.rec.saved);
+  const go = async () => {
+    const w = gateWait(); if (w) { msg.textContent = gateMsg(w); return; }
+    if (!inp.value) { msg.textContent = 'Scrivi la passphrase.'; return; }
+    msg.textContent = 'Verifica…'; const r = await openArchive(LOC.rec.text, null, inp.value, true);
+    if (!r) { gateOk(); return; }
+    if (/errata/.test(r)) { gateFail(); const w2 = gateWait(); msg.textContent = w2 ? gateMsg(w2) : r; } else msg.textContent = r;
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   $app.replaceChildren(h('main', { class: 'start' },
     h('h1', null, 'Finanze'),
-    h('p', { class: 'lead' }, 'Patrimonio, guadagni e rischio dei tuoi conti, in un file cifrato che resta sul tuo computer.'),
-    h('div', { class: 'cta' }, btn('Nuovo archivio', startNew, 'pri'), btn('Apri archivio', startOpen), btn('Prova la demo', startDemo)),
-    h('ul', { class: 'notes' },
-      h('li', null, h('b', null, 'Nessuna connessione di rete: '), 'il browser stesso blocca qualsiasi invio di dati fuori da questa pagina.'),
-      h('li', null, h('b', null, 'Cifrato: '), 'AES-256 con una passphrase che conosci solo tu. Non c\'è recupero se la perdi.'),
-      h('li', null, h('b', null, 'Nessuna password dei tuoi conti '), 'è mai richiesta né salvata.'),
-      h('li', null, 'Tieni il file ', h('b', null, '.finanze'), ' in una cartella ', h('b', null, 'fuori da OneDrive'), ' e fanne una copia su una chiavetta tua.'),
-      fsa ? null : h('li', null, 'Questo browser non salva direttamente su file: dovrai usare "Scarica copia" dopo le modifiche.'))));
+    h('p', { class: 'lead' }, 'Scrivi la passphrase per entrare.'),
+    inp, h('div', { class: 'cta' }, btn('Entra', go, 'pri')), msg,
+    h('p', { class: 'muted' }, 'Ultimo salvataggio su questo dispositivo: ' + (isNaN(when) ? '—' : when.toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' })) + '.'),
+    h('details', { class: 'more' }, h('summary', null, 'Altre opzioni'),
+      h('div', { class: 'cta' }, btn('Apri un altro file…', startOpen), btn('Nuovo archivio', startNew), btn('Prova la demo', startDemo)),
+      h('p', { class: 'muted' }, h('a', { href: '#', onclick: e => { e.preventDefault(); forgetLocal(); } }, 'Dimentica i dati su questo dispositivo')))));
+  inp.focus();
+}
+function viewStart() {
+  if (LOC.rec) return viewUnlockLocal();
+  $app.replaceChildren(h('main', { class: 'start' },
+    h('h1', null, 'Finanze'),
+    h('p', { class: 'lead' }, 'Il tuo patrimonio, in un archivio cifrato che resta sul tuo dispositivo.'),
+    CAN_CRYPTO() ? null : h('div', { class: 'warn' }, NOCRYPTO),
+    h('div', { class: 'cta' }, btn('Entra', startOpen, 'pri')),
+    h('p', { class: 'muted' }, 'Scegli il tuo file .finanze e scrivi la passphrase. Su questo dispositivo lo fai una volta sola: poi basta la passphrase.'),
+    h('details', { class: 'more' }, h('summary', null, 'Prima volta o altre opzioni'),
+      h('div', { class: 'cta' }, btn('Crea un nuovo archivio', startNew), btn('Prova la demo', startDemo)),
+      h('ul', { class: 'notes' },
+        h('li', null, h('b', null, 'Nessuna connessione di rete: '), 'il browser stesso blocca qualsiasi invio di dati fuori da questa pagina.'),
+        h('li', null, h('b', null, 'Cifrato: '), 'AES-256 con una passphrase che conosci solo tu. Non c\'è recupero se la perdi.'),
+        h('li', null, h('b', null, 'Nessuna password dei tuoi conti '), 'è mai richiesta né salvata.'),
+        h('li', null, h('b', null, 'Copia di sicurezza: '), 'ogni tanto salva un file ', h('b', null, '.finanze'), ' (fuori da OneDrive, meglio anche su una chiavetta tua).')))));
 }
 function startNew() {
+  if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   form('Nuovo archivio cifrato', [
-    { key: 'p1', label: 'Passphrase', type: 'password', req: true, hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole che ricordi solo tu. Se la perdi i dati non sono recuperabili.' },
-    { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true }
+    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole. Se la perdi i dati non sono recuperabili da nessuno: salvala subito nell\'app Password del telefono o in un posto sicuro.' },
+    { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }
   ], {}, o => {
     if (o.p1.length < 12) return 'Servono almeno 12 caratteri.';
     if (o.p1 !== o.p2) return 'Le due passphrase non coincidono.';
@@ -1846,8 +1965,9 @@ function pickOpen() {
   });
 }
 async function startOpen() {
+  if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   let r; try { r = await pickOpen(); } catch (e) { if (e && (e.name === 'AbortError' || e.message === 'annullato')) return; alert('Impossibile aprire il file: ' + (e.message || e)); return; }
-  form('Apri archivio' + (r.fh ? ' – ' + r.fh.name : ''), [{ key: 'p', label: 'Passphrase', type: 'password', req: true }], {}, o => openArchive(r.text, r.fh, o.p));
+  form('Apri archivio' + (r.fh ? ' – ' + r.fh.name : ''), [{ key: 'p', label: 'Passphrase', type: 'password', req: true, ac: 'current-password' }], {}, o => openArchive(r.text, r.fh, o.p));
 }
 function startDemo() { S = demoData(); DEMO = true; KEY = null; FH = null; DIRTY = false; enter(); setStatus('Demo: dati inventati, nulla viene salvato'); }
 function exitDemo() {
@@ -1855,9 +1975,10 @@ function exitDemo() {
   S = null; DEMO = false; CANSAVE = false; render();
 }
 function saveViewAsArchive() {
+  if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   form('Salva come archivio cifrato', [
-    { key: 'p1', label: 'Passphrase', type: 'password', req: true, hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole che ricordi solo tu. Se la perdi i dati non sono recuperabili. Poi scegli dove salvare il file: una cartella fuori da OneDrive.' },
-    { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true }
+    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole. Se la perdi i dati non sono recuperabili da nessuno: salvala subito nell\'app Password del telefono o in un posto sicuro.' },
+    { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }
   ], {}, o => {
     if (o.p1.length < 12) return 'Servono almeno 12 caratteri.';
     if (o.p1 !== o.p2) return 'Le due passphrase non coincidono.';
@@ -1865,8 +1986,13 @@ function saveViewAsArchive() {
   });
 }
 function viewLock() {
-  const inp = h('input', { type: 'password', placeholder: 'Passphrase', autocomplete: 'off' }), msg = h('p', { class: 'err' });
-  const go = async () => { msg.textContent = 'Verifica…'; if (await checkPass(inp.value)) { LOCKED = false; lastActivity = Date.now(); render(); } else msg.textContent = 'Passphrase errata.'; };
+  const inp = h('input', { type: 'password', placeholder: 'Passphrase', autocomplete: 'current-password' }), msg = h('p', { class: 'err' });
+  const go = async () => {
+    const w = gateWait(); if (w) { msg.textContent = gateMsg(w); return; }
+    msg.textContent = 'Verifica…';
+    if (await checkPass(inp.value)) { gateOk(); LOCKED = false; lastActivity = Date.now(); render(); }
+    else { gateFail(); const w2 = gateWait(); msg.textContent = w2 ? gateMsg(w2) : 'Passphrase errata.'; }
+  };
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   $app.replaceChildren(h('main', { class: 'start' }, h('h1', null, 'Bloccato'), h('p', { class: 'lead' }, 'I dati sono nascosti. Inserisci la passphrase per continuare.'), inp, h('div', { class: 'cta' }, btn('Sblocca', go, 'pri')), msg));
   inp.focus();
@@ -1877,12 +2003,12 @@ function topbar() {
       btn(HIDE ? 'Mostra importi' : 'Nascondi importi', () => { HIDE = !HIDE; render(); }),
       DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, btn('Blocca', lock)]));
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, analisi: tabAnalisi, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
@@ -1891,10 +2017,13 @@ function tabPanoramica() {
       h('li', null, 'Questa pagina si compila da sola: patrimonio, guadagni, rendimento annuo, allocazione.')),
     h('div', { class: 'row' }, btn('Crea uno strumento', () => editInstrument(), 'pri'), btn('Crea un conto', () => editAccount())));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
-  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'))));
+  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
-  if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn('Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
+  if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
+  const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
+  if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
+  const dueP = planDueAll(); if (dueP.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(dueP.length, 'acquisto programmato da registrare', 'acquisti programmati da registrare')), btn('Apri', () => { UI.tab = 'piano'; UI.psub = 'appuntamenti'; render(); }, 'pri sm')));
   el.append(tiles([
     { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti' },
     { l: 'Guadagno / perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato' },
@@ -1940,7 +2069,7 @@ function tabConti() {
 function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
-  el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
+  el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.note ? ' · ' + a.note : '')));
   el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : '') }, { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—' },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? 'serve almeno 1 mese di storia' : '' }]));
@@ -1951,6 +2080,11 @@ function viewAccount(id) {
   const frow = a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).map(f => [fmtDate(f.date), (FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0], (f.type === 'prelievo' ? '−' : '') + eur(f.amount), f.note || '', rowActs(btn('Modifica', () => editFlow(a, f), 'sm'), btn('Elimina', () => delFlow(a, f), 'sm danger'))]);
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Movimenti (soldi tuoi in entrata e uscita)'), btn('+ Movimento', () => editFlow(a), 'pri')),
     table([{ t: 'Data' }, { t: 'Tipo' }, { t: 'Importo', n: 1 }, { t: 'Nota' }, { t: '' }], frow, 'Nessun movimento. Se non hai lo storico, inserisci un "Valore di partenza" con la data di oggi: il rendimento conterà da qui.')));
+  const mineOps = OPS().filter(x => x.accId === a.id || x.toId === a.id).slice().reverse();
+  if (mineOps.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Operazioni registrate'),
+    table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Importo', n: 1 }, { t: '' }],
+      mineOps.slice(0, 10).map((x, k) => [fmtDate(x.date), OP_LABEL[x.kind] || x.kind, x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), k === 0 ? rowActs(btn('Annulla', () => undoOp(x), 'sm danger')) : ''])),
+    h('p', { class: 'muted' }, 'Si può annullare soltanto l\'ultima operazione del conto: serve se hai sbagliato un numero.')));
   const last = a.imports && a.imports[a.imports.length - 1];
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
     h('p', { class: 'muted' }, 'Estratti conto e portafoglio scaricati dal broker. Il file è letto solo in questa pagina e non viene inviato da nessuna parte. Se il tuo è in Excel (.xlsx), aprilo e salvalo come CSV.'),
@@ -2053,13 +2187,375 @@ function tabDati() {
     h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
     h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
   el.append(h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
-    h('ul', null, h('li', null, 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : FH ? 'File: ' + FH.name + ' (salvataggio automatico a ogni modifica).' : 'Il browser non salva direttamente su file: usa "Scarica copia".')),
+    h('ul', null, h('li', null, 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
+      DEMO ? null : h('li', null, 'Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) + (backupDays() ? ' (' + pl(backupDays(), 'giorno', 'giorni') + ' fa)' : ' (oggi)') : 'mai') + '. Se il browser cancellasse i dati del sito, quella copia è l\'unica cosa che ti salva.')),
     DEMO ? null : h('div', { class: 'row' },
-      btn('Scarica copia cifrata (backup)', downloadCopy),
+      btn(typeof navigator.canShare === 'function' ? 'Salva copia di sicurezza in File' : 'Scarica copia cifrata (backup)', typeof navigator.canShare === 'function' ? shareCopy : downloadCopy, 'pri'),
+      LOC.rec || LOC.ok ? btn('Dimentica i dati su questo dispositivo', forgetLocal, 'danger') : null,
       btn('Cambia passphrase', () => form('Cambia passphrase', [{ key: 'o', label: 'Passphrase attuale', type: 'password', req: true }, { key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, hint: 'Almeno 12 caratteri.' }, { key: 'n2', label: 'Ripeti la nuova passphrase', type: 'password', req: true }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(o.o, o.n1); })),
       h('label', { class: 'fld', style: 'margin:0' }, h('span', null, 'Blocco automatico dopo'), h('select', { onchange: e => { S.settings.autolock = parseInt(e.target.value, 10); done(); } }, [[0, 'mai'], [2, '2 minuti'], [5, '5 minuti'], [10, '10 minuti'], [30, '30 minuti']].map(([v, l]) => h('option', { value: v, selected: S.settings.autolock === v }, l))))),
     h('p', { class: 'muted' }, 'Conserva il file .finanze fuori da OneDrive e fanne una copia su una chiavetta tua. La passphrase non è recuperabile da nessuno.')));
   return el;
+}
+
+/* ============ operazioni: acquisti, vendite, versamenti e prelievi registrati in un attimo ============ */
+const OPS = () => S.ops || (S.ops = []);
+const OP_KINDS = [['acquisto', 'Acquisto'], ['vendita', 'Vendita'], ['trasferimento', 'Trasferimento da un conto a un altro (es. dalla banca al broker)'], ['versamento', 'Versamento (soldi tuoi che entrano nel conto da fuori)'], ['prelievo', 'Prelievo (soldi tuoi che escono dal conto verso fuori)']];
+const OP_LABEL = { acquisto: 'Acquisto', vendita: 'Vendita', trasferimento: 'Trasferimento', versamento: 'Versamento', prelievo: 'Prelievo' };
+const accName = id => (S.accounts.find(a => a.id === id) || {}).name || '—';
+function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), liquidita' e movimenti; ricorda come tornare indietro. Restituisce un messaggio solo se qualcosa non va
+  const a = S.accounts.find(x => x.id === o.accId); if (!a) return 'Scegli il conto.';
+  if (!o.date) return 'Inserisci la data.';
+  const u = { cash: a.cash || 0 }, op = { id: uid(), date: o.date, accId: a.id, kind: o.kind, note: o.note || '' }, cfx = fxRate(a.cashCcy) ?? 1;
+  if (o.kind === 'trasferimento') {          // soldi tuoi che passano da un conto all'altro (es. dalla banca al broker): cambiano le due liquidita'; i movimenti si registrano dove il conto e' d'investimento
+    const b = S.accounts.find(x => x.id === o.toId);
+    if (!b) return 'Scegli il conto di arrivo.'; if (b.id === a.id) return 'Il conto di partenza e quello di arrivo sono lo stesso.';
+    if (!(o.amount > 0)) return 'Inserisci l\'importo.'; if (a.dep || b.dep) return 'Un conto deposito non si muove da qui: usa "Modifica conto".';
+    const fee = o.fee > 0 ? o.fee : 0, bfx = fxRate(b.cashCcy) ?? 1, note = o.note || ('Trasferimento ' + a.name + ' → ' + b.name);
+    u.toId = b.id; u.toCash = b.cash || 0; u.flowIds = [];
+    a.cash = (a.cash || 0) - (o.amount + fee) / cfx; b.cash = (b.cash || 0) + o.amount / bfx;
+    if (a.perf) { const f = { id: uid(), date: o.date, type: 'prelievo', amount: o.amount, note }; a.flows.push(f); u.flowIds.push([a.id, f.id]); }
+    if (b.perf) { const f = { id: uid(), date: o.date, type: 'versamento', amount: o.amount, note }; b.flows.push(f); u.flowIds.push([b.id, f.id]); }
+    Object.assign(op, { toId: b.id, amount: o.amount, fee });
+  } else if (o.kind === 'versamento' || o.kind === 'prelievo') {
+    if (!(o.amount > 0)) return 'Inserisci l\'importo.';
+    const f = { id: uid(), date: o.date, type: o.kind, amount: o.amount, note: o.note || 'Operazione' }; a.flows.push(f); u.flowId = f.id;
+    if (o.fromCash) a.cash = (a.cash || 0) + (o.kind === 'versamento' ? 1 : -1) * o.amount / cfx;
+    op.amount = o.amount;
+  } else {
+    let i = o.instId ? inst(o.instId) : null, price = o.price > 0 ? o.price : (i && i.price > 0 ? i.price : 0), qty = o.qty > 0 ? o.qty : 0;          // senza prezzo si usa l'ultimo che l'app conosce (si aggiorna da solo mattina e sera)
+    const fail = m => { if (u.instNew) S.instruments = S.instruments.filter(x => x.id !== u.instNew); return m; };          // se qualcosa non va, uno strumento appena creato non resta
+    if (!i) {
+      const nm = String(o.newName || '').trim(); if (!nm) return 'Scegli lo strumento oppure scrivi il nome di uno nuovo.';
+      if (o.kind === 'vendita') return 'Per vendere scegli uno strumento che hai già.';
+      if (!(price > 0)) return 'Per uno strumento nuovo serve il prezzo.';
+      i = { id: uid(), name: nm, code: '', ccy: normCcy(o.newCcy), price, priceDate: o.date, cls: '', area: '', hist: [{ d: o.date, p: price }] }; S.instruments.push(i); u.instNew = i.id;
+    }
+    const fx = fxRate(i.ccy); if (fx == null) return fail('Manca il tasso di cambio per ' + i.ccy + ' (scheda Dati e sicurezza).');
+    if (!(price > 0)) return fail('Inserisci il prezzo: per questo strumento non ne conosco ancora uno.');
+    if (!qty && o.amount > 0) qty = Math.round(o.amount / (price * fx) * 1e6) / 1e6;          // non sai la quantita': si ricava dall'importo speso e dal prezzo
+    if (!(qty > 0)) return fail('Inserisci la quantità oppure l\'importo che hai speso.');
+    const gross = qty * price * fx, fee = o.fee > 0 ? o.fee : 0; let p = a.positions.find(x => x.instId === i.id);
+    if (o.kind === 'acquisto') {
+      if (p) { u.pos = { id: p.id, qty: p.qty, cost: p.cost || 0 }; p.qty += qty; p.cost = (p.cost || 0) + gross + fee; }
+      else { p = { id: uid(), instId: i.id, qty, cost: gross + fee }; a.positions.push(p); u.posNew = p.id; }
+      if (o.fromCash) a.cash = (a.cash || 0) - (gross + fee) / cfx;
+    } else {
+      if (!p || qty > p.qty * (1 + 1e-9)) return fail('In questo conto hai ' + (p ? nfq.format(p.qty) : 'nessuna quota') + ' di questo strumento: non puoi venderne ' + nfq.format(qty) + '.');
+      u.pos = { id: p.id, qty: p.qty, cost: p.cost || 0 }; const out = (p.cost || 0) * (qty / p.qty);
+      if (p.cost > 0) op.realized = gross - fee - out;          // guadagno o perdita realizzata, se il costo di carico era noto
+      p.qty -= qty; p.cost = Math.max(0, (p.cost || 0) - out);
+      if (p.qty < 1e-9) { u.removed = true; a.positions = a.positions.filter(x => x !== p); }
+      if (o.fromCash) a.cash = (a.cash || 0) + (gross - fee) / cfx;
+    }
+    if (o.price > 0 && o.date >= i.priceDate) { u.price = { price: i.price, priceDate: i.priceDate }; setPriceAt(i, price, o.date); }          // il prezzo che hai scritto tu e' una quotazione vera di quel giorno; se non l'hai scritto non si tocca
+    Object.assign(op, { instId: i.id, instName: i.name, qty, price, ccy: i.ccy, fee, gross });
+  }
+  op.undo = u; OPS().push(op); return null;
+}
+function undoOp(op) {
+  const a = S.accounts.find(x => x.id === op.accId);
+  for (const id of [op.accId, op.toId].filter(Boolean)) { const mine = OPS().filter(x => x.accId === id || x.toId === id); if (mine[mine.length - 1] !== op) { alert('Si può annullare soltanto l\'ultima operazione di ogni conto.'); return; } }
+  if (!confirm('Annullo questa operazione e ripristino il conto com\'era prima?')) return;
+  const u = op.undo || {};
+  if (u.toId) { const b = S.accounts.find(x => x.id === u.toId); if (b) b.cash = u.toCash ?? b.cash; for (const [aid, fid] of u.flowIds || []) { const ac = S.accounts.find(x => x.id === aid); if (ac) ac.flows = ac.flows.filter(f => f.id !== fid); } }
+  if (a) {
+    a.cash = u.cash ?? a.cash;
+    if (u.flowId) a.flows = a.flows.filter(f => f.id !== u.flowId);
+    if (u.posNew) a.positions = a.positions.filter(p => p.id !== u.posNew);
+    else if (u.pos) { let p = a.positions.find(x => x.id === u.pos.id); if (!p) { p = { id: u.pos.id, instId: op.instId, qty: 0, cost: 0 }; a.positions.push(p); } p.qty = u.pos.qty; p.cost = u.pos.cost; }
+  }
+  if (u.instNew && !S.accounts.some(x => x.positions.some(p => p.instId === u.instNew))) S.instruments = S.instruments.filter(i => i.id !== u.instNew);
+  if (u.price) { const i = inst(op.instId); if (i) { i.price = u.price.price; i.priceDate = u.price.priceDate; } }
+  S.ops = OPS().filter(x => x !== op); done();
+}
+function editOperation(pre, after) {
+  if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
+  pre = pre || {};
+  const v = { accId: pre.accId || UI.acc || S.accounts[0].id, toId: pre.toId || '', kind: pre.kind || 'acquisto', date: pre.date || today(), instId: pre.instId || '', newName: '', newCcy: 'EUR', qty: pre.qty ?? null, price: pre.price ?? null, fee: null, amount: pre.amount ?? null, fromCash: pre.fromCash ?? true, note: pre.note || '' };
+  form('Registra operazione', [
+    { key: 'accId', label: 'Conto (per un trasferimento: quello di partenza)', type: 'select', options: S.accounts.map(a => [a.id, a.name]) },
+    { key: 'kind', label: 'Che cosa è successo', type: 'select', options: OP_KINDS },
+    { key: 'toId', label: 'Solo trasferimento: conto di arrivo', type: 'select', options: [['', '— scegli —'], ...S.accounts.map(a => [a.id, a.name])] },
+    { key: 'date', label: 'Data', type: 'date', req: true },
+    { key: 'instId', label: 'Acquisto o vendita: strumento', type: 'select', options: [['', '— uno nuovo (scrivilo sotto) —'], ...S.instruments.map(i => [i.id, i.name + ' (' + i.ccy + ')'])] },
+    { key: 'newName', label: 'Se lo strumento è nuovo: nome', ph: 'es. ETF Azionario Mondo' },
+    { key: 'newCcy', label: 'Se è nuovo: valuta', list: 'dl-ccy', ph: 'EUR' },
+    { key: 'qty', label: 'Acquisto o vendita: quantità', type: 'number', hint: 'se non la sai, lascia vuoto e scrivi l\'importo speso' },
+    { key: 'price', label: 'Acquisto o vendita: prezzo di una quota', type: 'number', hint: 'se lo lasci vuoto uso l\'ultimo prezzo che l\'app conosce (si aggiorna da solo mattina e sera)' },
+    { key: 'fee', label: 'Commissioni (€, facoltative)', type: 'number' },
+    { key: 'amount', label: 'Importo (€): per trasferimento, versamento, prelievo, oppure per un acquisto o una vendita se non conosci la quantità', type: 'number' },
+    { key: 'fromCash', label: 'Aggiorna anche la liquidità del conto', type: 'check', hint: 'sì se paghi con i soldi che sono già nel conto (non vale per i trasferimenti: lì la liquidità cambia sempre)' },
+    { key: 'note', label: 'Nota' }
+  ], v, o => {
+    const r = applyOp(o); if (r) return r;
+    done(); if (after) after();
+  }, ccyList());
+}
+
+/* ============ acquisti programmati (PAC) e scadenze ============ */
+const PL = () => S.plans || (S.plans = []);
+const FREQ = [['mensile', 'Ogni mese', 1], ['bimestrale', 'Ogni 2 mesi', 2], ['trimestrale', 'Ogni 3 mesi', 3], ['semestrale', 'Ogni 6 mesi', 6], ['annuale', 'Ogni anno', 12]];
+const freqMonths = f => (FREQ.find(x => x[0] === f) || [0, 0, 1])[2];
+const freqLabel = f => (FREQ.find(x => x[0] === f) || [0, f])[1];
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const ymOf = ds => { const y = +ds.slice(0, 4), m = +ds.slice(5, 7); return y * 12 + m - 1; };
+const addMonthsStr = (ds, n) => { const d = new Date(ds + 'T00:00:00'); return ymd(new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), 28))); };
+function occurrences(start, step, day, from, to, end) {          // le date (AAAA-MM-GG) di un acquisto periodico tra "from" e "to"
+  const out = [], s = new Date(start + 'T00:00:00'); if (isNaN(s) || !(step > 0)) return out;
+  for (let k = 0; k < 2400; k++) {
+    const y = s.getFullYear(), m = s.getMonth() + k * step, dim = new Date(y, m + 1, 0).getDate(), d = ymd(new Date(y, m, Math.min(day || s.getDate(), dim)));
+    if (d > to || (end && d > end)) break;
+    if (d >= start && d >= from) out.push(d);
+  }
+  return out;
+}
+const planNext = (p, n) => occurrences(p.start, freqMonths(p.freq), p.day, today(), addMonthsStr(today(), 130), p.end).slice(0, n || 1);
+function planDueAll() {          // scadute o di oggi e non ancora registrate ne' saltate
+  const t = today(), out = [];
+  for (const p of PL()) { const dn = new Set(p.done || []); for (const d of occurrences(p.start, freqMonths(p.freq), p.day, p.since || p.start, t, p.end)) if (!dn.has(d)) out.push({ p, d }); }
+  return out.sort((a, b) => a.d < b.d ? -1 : 1);
+}
+function registerDue(p, d) {
+  const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '';
+  const buy = after => { const q = Math.floor(p.amount / (i.price * fx)); editOperation({ accId: p.accId, kind: 'acquisto', date: d, instId: i.id, qty: q >= 1 ? q : null, note: p.label }, after); };
+  if (p.kind === 'acquisto' && i) { if (from) editOperation({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: p.amount, note: p.label }, () => buy(mark)); else buy(mark); }          // con un conto di origine: prima il trasferimento, poi l'acquisto
+  else if (from) editOperation({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: p.amount, note: p.label }, mark);
+  else editOperation({ accId: p.accId, kind: 'versamento', date: d, amount: p.amount, note: p.label }, mark);
+}
+function editPlan(p) {
+  if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
+  const isNew = !p, v = p || { label: '', kind: 'acquisto', accId: S.accounts[0].id, fromAccId: '', instId: '', amount: null, freq: 'mensile', day: 5, start: today(), end: '', note: '' };
+  form(isNew ? 'Nuovo acquisto programmato' : 'Modifica acquisto programmato', [
+    { key: 'label', label: 'Nome', req: true, ph: 'es. PAC ETF mondo' },
+    { key: 'kind', label: 'Che cos\'è', type: 'select', options: [['acquisto', 'Acquisto di uno strumento'], ['versamento', 'Versamento sul conto']] },
+    { key: 'accId', label: 'Conto di arrivo (dove finiscono i soldi o l\'acquisto)', type: 'select', options: S.accounts.map(a => [a.id, a.name]) },
+    { key: 'fromAccId', label: 'Conto di partenza (facoltativo)', type: 'select', options: [['', '— i soldi sono già lì o arrivano da fuori —'], ...S.accounts.map(a => [a.id, a.name])], hint: 'per esempio il conto corrente da cui parte il bonifico verso il broker' },
+    { key: 'instId', label: 'Strumento (per gli acquisti)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] },
+    { key: 'amount', label: 'Importo ogni volta (€)', type: 'number', req: true },
+    { key: 'freq', label: 'Frequenza', type: 'select', options: FREQ.map(f => [f[0], f[1]]) },
+    { key: 'day', label: 'Giorno del mese (1-28)', type: 'number' },
+    { key: 'start', label: 'Dal', type: 'date', req: true },
+    { key: 'end', label: 'Fino al (facoltativo)', type: 'date' },
+    { key: 'note', label: 'Nota' }
+  ], v, o => {
+    if (!(o.amount > 0)) return 'L\'importo deve essere maggiore di zero.';
+    if (o.end && o.end < o.start) return 'La data finale è prima di quella iniziale.';
+    const d = { label: o.label, kind: o.kind, accId: o.accId, fromAccId: o.fromAccId && o.fromAccId !== o.accId ? o.fromAccId : '', instId: o.instId, amount: o.amount, freq: o.freq, day: Math.min(28, Math.max(1, Math.round(o.day || +o.start.slice(8, 10)))), start: o.start, end: o.end || '', note: o.note };
+    if (isNew) PL().push({ id: uid(), ...d, since: today(), done: [] }); else Object.assign(p, d);
+    done();
+  });
+}
+function piAppuntamenti() {
+  const el = h('div'), due = planDueAll(), plans = PL(), perMonth = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0);
+  if (due.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Da registrare'),
+    h('p', { class: 'muted' }, 'Scadute o di oggi. Quando le hai eseguite premi "Registra": l\'app aggiorna posizione, costo medio e liquidità. Se non le hai fatte, salta.'),
+    table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Conto' }, { t: 'Importo', n: 1 }, { t: '' }], due.map(({ p, d }) => [fmtDate(d), p.label, accName(p.accId), eur(p.amount), rowActs(btn('Registra', () => registerDue(p, d), 'sm pri'), btn('Salta', () => { (p.done = p.done || []).push(d); done(); }, 'sm'))]))));
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Acquisti programmati'), btn('+ Nuovo', () => editPlan(), 'pri')),
+    plans.length ? tiles([{ l: 'Impegno medio al mese', v: eur(perMonth), s: eur(perMonth * 12) + ' in un anno' }, { l: 'Programmati', v: String(plans.length), s: plans.length === 1 ? 'acquisto periodico' : 'acquisti periodici' }]) : null,
+    table([{ t: 'Voce' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }],
+      plans.map(p => { const nx = planNext(p, 1)[0]; return [p.label, accName(p.accId), p.instId && inst(p.instId) ? inst(p.instId).name : '—', eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }),
+      'Ancora nessun acquisto programmato: aggiungi i PAC e i versamenti periodici che hai.'),
+    h('p', { class: 'muted' }, 'Li scrivi una volta sola: poi l\'app ti ricorda quando registrarli e li usa nelle previsioni.')));
+  if (plans.length) {
+    const now = new Date(), rows = [];
+    for (let k = 0; k < 12; k++) { const dt = new Date(now.getFullYear(), now.getMonth() + k, 1); rows.push({ key: dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'), label: dt.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }), t: 0, n: 0 }); }
+    const upc = [];
+    for (const p of plans) for (const d of occurrences(p.start, freqMonths(p.freq), p.day, today(), addMonthsStr(today(), 12), p.end)) { const r = rows.find(x => x.key === d.slice(0, 7)); if (r) { r.t += p.amount; r.n++; } upc.push({ p, d }); }
+    upc.sort((a, b) => a.d < b.d ? -1 : 1); const mx = Math.max(...rows.map(r => r.t), 1);
+    el.append(h('section', { class: 'card' }, h('h2', null, 'Prossimi 12 mesi'),
+      rows.map(r => h('div', { class: 'row', style: 'gap:10px;align-items:center;margin:6px 0;flex-wrap:nowrap' }, h('span', { style: 'width:62px;flex:none' }, r.label), h('div', { class: 'bar-track', style: 'flex:1' }, h('div', { class: 'bar', style: 'width:' + (r.t > 0 ? Math.max(r.t / mx * 100, 1.5) : 0) + '%' })), h('span', { style: 'width:84px;flex:none;text-align:right' }, r.t > 0 ? eur(r.t) : '—'))),
+      h('h4', null, 'Le prossime scadenze'),
+      table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Importo', n: 1 }], upc.slice(0, 8).map(({ p, d }) => [fmtDate(d), p.label + ' · ' + accName(p.accId), eur(p.amount)]))));
+  }
+  return el;
+}
+
+/* ============ budget: entrate, spese, eventi futuri ============ */
+const newBudget = () => ({ items: [], hist: [], horizons: [6, 12, 36, 60, 120], liqRate: 0, avgMonths: 6, ext: null, retMode: 'mercato' });
+const BG = () => S.budget || (S.budget = newBudget());
+const BFREQ = [['mensile', 'Ogni mese', 1], ['trimestrale', 'Ogni 3 mesi', 3], ['semestrale', 'Ogni 6 mesi', 6], ['annuale', 'Ogni anno', 12], ['una-tantum', 'Una sola volta', 0]];
+const bfreqLabel = f => (BFREQ.find(x => x[0] === f) || [0, f])[1];
+const nowYm = () => { const n = new Date(); return n.getFullYear() * 12 + n.getMonth(); };
+function avgFromHist(label) {          // media degli ultimi N mesi completi (i mesi senza incasso contano zero)
+  const B = BG(), N = B.avgMonths || 6, y0 = nowYm(), rows = B.hist.filter(x => x.label === label && ymOf(x.month + '-01') >= y0 - N && ymOf(x.month + '-01') < y0);
+  return rows.length ? rows.reduce((t, x) => t + x.amount, 0) / N : null;
+}
+const itemAmount = it => it.avg ? (avgFromHist(it.label) ?? it.amount ?? 0) : (it.amount || 0);
+function itemHits(it, ym) {
+  const s = ymOf(it.start || today()), e = it.end ? ymOf(it.end) : Infinity; if (ym < s || ym > e) return false;
+  if (it.freq === 'una-tantum') return ym === s;
+  const st = (BFREQ.find(x => x[0] === it.freq) || [0, 0, 1])[2] || 1; return (ym - s) % st === 0;
+}
+function planFlows(M) {          // mese per mese (dal prossimo): entrate, spese, eventi una tantum e acquisti programmati che passano dalla liquidita' agli investimenti
+  const y0 = nowYm(), inc = new Float64Array(M + 1), exp = new Float64Array(M + 1), one = new Float64Array(M + 1), pac = new Float64Array(M + 1), ev = [], B = BG();
+  for (const it of B.items) {
+    const amt = Math.max(0, itemAmount(it)), sg = it.kind === 'entrata' ? 1 : -1;
+    for (let m = 1; m <= M; m++) if (itemHits(it, y0 + m)) { if (it.freq === 'una-tantum') { one[m] += sg * amt; ev.push({ m, label: it.label, amount: sg * amt }); } else if (sg > 0) inc[m] += amt; else exp[m] += amt; }
+  }
+  if (B.ext) for (const r of B.ext.rows) { const m = ymOf(r.d) - y0; if (m >= 1 && m <= M) { one[m] += r.a; ev.push({ m, label: r.label, amount: r.a, ext: true }); } }
+  const end = addMonthsStr(today(), M + 1);
+  for (const p of PL()) { const a = S.accounts.find(x => x.id === p.accId), fa = p.fromAccId ? S.accounts.find(x => x.id === p.fromAccId) : null; if (!a || !a.perf || (fa && fa.perf)) continue; for (const d of occurrences(p.start, freqMonths(p.freq), p.day, today(), end, p.end)) { const m = ymOf(d) - y0; if (m >= 1 && m <= M) pac[m] += p.amount; } }
+  return { inc, exp, one, pac, ev };
+}
+function editItem(it) {
+  const isNew = !it, v = it || { kind: 'spesa', label: '', amount: null, freq: 'mensile', start: today(), end: '', avg: false };
+  form(isNew ? 'Nuova voce del budget' : 'Modifica voce', [
+    { key: 'kind', label: 'È una', type: 'select', options: [['spesa', 'Spesa'], ['entrata', 'Entrata']] },
+    { key: 'label', label: 'Nome', req: true, ph: 'es. Affitto, Stipendio, Dogsitter, Acquisto casa' },
+    { key: 'amount', label: 'Importo (€)', type: 'number', req: true },
+    { key: 'freq', label: 'Quando', type: 'select', options: BFREQ.map(f => [f[0], f[1]]) },
+    { key: 'start', label: 'Dal (se è una sola volta: la data)', type: 'date', req: true },
+    { key: 'end', label: 'Fino al (facoltativo)', type: 'date' },
+    { key: 'avg', label: 'Importo variabile: usa la media degli ultimi mesi', type: 'check', hint: 'per esempio il dogsitter: registri gli incassi mese per mese e l\'app ne fa la media; l\'importo sopra serve finché non hai dati' }
+  ], v, o => {
+    if (!(o.amount >= 0)) return 'Inserisci un importo.';
+    if (o.end && o.end < o.start) return 'La data finale è prima di quella iniziale.';
+    const d = { kind: o.kind, label: o.label, amount: o.amount, freq: o.freq, start: o.start, end: o.end || '', avg: !!o.avg && o.freq !== 'una-tantum' };
+    if (isNew) BG().items.push({ id: uid(), ...d }); else Object.assign(it, d);
+    done();
+  });
+}
+function addHist() {
+  const av = BG().items.filter(x => x.avg && x.kind === 'entrata'); if (!av.length) { alert('Crea prima una entrata con "importo variabile" (es. Dogsitter).'); return; }
+  form('Incasso del mese', [{ key: 'label', label: 'Entrata', type: 'select', options: [...new Set(av.map(x => x.label))].map(l => [l, l]) }, { key: 'date', label: 'Mese (scegli un giorno qualsiasi di quel mese)', type: 'date', req: true }, { key: 'amount', label: 'Quanto hai incassato (€)', type: 'number', req: true }], { label: av[0].label, date: today(), amount: null }, o => {
+    if (!(o.amount >= 0)) return 'Inserisci l\'importo.';
+    const month = o.date.slice(0, 7), B = BG(); B.hist = B.hist.filter(x => !(x.label === o.label && x.month === month)); B.hist.push({ id: uid(), label: o.label, month, amount: o.amount }); done();
+  });
+}
+function piBudget() {
+  const el = h('div'), B = BG(), F = planFlows(12), sum = a => { let t = 0; for (let m = 1; m <= 12; m++) t += a[m]; return t; };
+  const inc = sum(F.inc) / 12, exp = sum(F.exp) / 12, pac = sum(F.pac) / 12, left = inc - exp - pac;
+  el.append(tiles([{ l: 'Entrate al mese', v: eur(inc), s: 'media dei prossimi 12 mesi' }, { l: 'Spese al mese', v: eur(exp), s: 'annuali e trimestrali spalmate' }, { l: 'Acquisti programmati al mese', v: eur(pac), s: 'dal conto alla liquidità verso gli investimenti' },
+    { l: 'Ti resta al mese', v: h('span', { class: 'pill ' + (left < 0 ? 'dn' : 'up') }, eur(left)), s: left < 0 ? 'spendi più di quanto entra' : 'si accumula come liquidità' }]));
+  const rowsOf = (kind, once) => B.items.filter(x => x.kind === kind && (x.freq === 'una-tantum') === once).map(it => [it.label + (it.avg ? ' (variabile)' : ''), eur(itemAmount(it)) + (it.avg && avgFromHist(it.label) != null ? ' · media ' + (B.avgMonths || 6) + ' mesi' : ''), bfreqLabel(it.freq) + (it.freq === 'una-tantum' ? ' · ' + fmtDate(it.start) : it.end ? ' · fino al ' + fmtDate(it.end) : ''), rowActs(btn('Modifica', () => editItem(it), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + it.label + '"?')) { B.items = B.items.filter(x => x !== it); done(); } }, 'sm danger'))]);
+  const cols = [{ t: 'Voce' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: '' }];
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Entrate'), btn('+ Voce', () => editItem(), 'pri')), table(cols, rowsOf('entrata', false), 'Nessuna entrata: aggiungi stipendio, dogsitter, affitti incassati…')));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Spese'), table(cols, rowsOf('spesa', false), 'Nessuna spesa: aggiungi affitto o mutuo, bollette, spesa, abbonamenti e una voce "Spese generali" per tutto il resto.')));
+  const evs = [...rowsOf('spesa', true), ...rowsOf('entrata', true)];
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Eventi futuri (una sola volta)'), table(cols, evs, 'Nessun evento: per esempio l\'anticipo della casa, un viaggio, un premio. Usa "Voce" e scegli "Una sola volta".')));
+  const av = B.items.filter(x => x.avg && x.kind === 'entrata');
+  if (av.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Incassi variabili mese per mese'), btn('+ Incasso del mese', addHist, 'pri')),
+    table([{ t: 'Mese' }, { t: 'Entrata' }, { t: 'Incassato', n: 1 }, { t: '' }], B.hist.slice().sort((a, b) => a.month < b.month ? 1 : -1).slice(0, 18).map(x => [x.month, x.label, eur(x.amount), rowActs(btn('Elimina', () => { B.hist = B.hist.filter(y => y !== x); done(); }, 'sm danger'))]), 'Ancora nessun incasso registrato.'),
+    h('label', { class: 'fld', style: 'max-width:260px' }, h('span', null, 'La media usa gli ultimi'), h('select', { onchange: e => { B.avgMonths = parseInt(e.target.value, 10); done(); } }, [3, 6, 12].map(n => h('option', { value: n, selected: (B.avgMonths || 6) === n }, n + ' mesi'))))));
+  return el;
+}
+
+/* ============ previsioni: liquidita' e investimenti nel tempo ============ */
+const pctile = (arr, q) => { const a = Float64Array.from(arr).sort(); return a[Math.min(a.length - 1, Math.floor(q * a.length))]; };
+function observedReturn() {          // rendimento annuo osservato sui conti d'investimento: si usa solo con almeno 12 mesi di storia, altrimenti e' rumore
+  const accs = S.accounts.filter(a => a.perf), dates = accs.flatMap(a => a.flows.map(f => f.date)).sort(); if (!dates.length || daysSince(dates[0]) < 365) return null;
+  const x = perfOf(accs).xirr; return x == null || !isFinite(x) ? null : Math.max(-0.2, Math.min(0.3, x));
+}
+function projectPlan(M) {
+  const N = 1500, rnd = mulberry(20261030), pa = portfolioAssumptions(), sg = pa.sigma, B = BG(), ob = observedReturn();
+  const mode = B.retMode === 'storico' && ob != null ? 'storico' : B.retMode === 'media' && ob != null ? 'media' : 'mercato', mu = mode === 'storico' ? ob : mode === 'media' ? (pa.mu + ob) / 2 : pa.mu;
+  const s2 = Math.log(1 + (sg / (1 + mu)) ** 2), mm = (Math.log(1 + mu) - s2 / 2) / 12, ss = Math.sqrt(s2 / 12), rl = Math.pow(1 + (B.liqRate || 0) / 100, 1 / 12), F = planFlows(M);
+  let L0 = 0, I0 = 0; for (const a of S.accounts) { if (a.perf) I0 += accValue(a); else L0 += accValue(a); }
+  const cols = () => Array.from({ length: M + 1 }, () => new Float64Array(N)), T = cols(), Lq = cols(), Iq = cols(); let debt = 0;
+  for (let n = 0; n < N; n++) {
+    let L = L0, I = I0, neg = false; T[0][n] = L + I; Lq[0][n] = L; Iq[0][n] = I;
+    for (let m = 1; m <= M; m++) {
+      L = L * rl + F.inc[m] - F.exp[m] + F.one[m] - F.pac[m]; I = (I + F.pac[m]) * Math.exp(mm + ss * gauss(rnd));
+      if (L < 0 && I > 0) { const take = Math.min(I, -L); I -= take; L += take; }          // se la liquidita' non basta si vendono investimenti
+      if (L < -0.5) neg = true;
+      T[m][n] = L + I; Lq[m][n] = L; Iq[m][n] = I;
+    }
+    if (neg) debt++;
+  }
+  const out = { M, N, L0, I0, F, p10: [], p50: [], p90: [], l50: [], i50: [], pDebt: debt / N, pa, mu, mode, ob };
+  for (let m = 0; m <= M; m++) { out.p10.push(pctile(T[m], 0.1)); out.p50.push(pctile(T[m], 0.5)); out.p90.push(pctile(T[m], 0.9)); out.l50.push(pctile(Lq[m], 0.5)); out.i50.push(pctile(Iq[m], 0.5)); }
+  return out;
+}
+function planChart(R) {
+  const W = 720, H = 250, m = { l: 62, r: 16, t: 14, b: 28 }, M = R.M, hi = Math.max(...R.p90), lo = Math.min(...R.p10, 0), X = k => m.l + k / (M || 1) * (W - m.l - m.r), Y = v => H - m.b - (v - lo) / ((hi - lo) || 1) * (H - m.t - m.b);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': 'Patrimonio previsto nel tempo' });
+  for (const v of niceTicks(lo, hi, 4)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(s('text', { class: 'g-txt', x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end' }, compact(v))); }
+  const line = arr => arr.map((v, k) => X(k).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' L');
+  svg.append(s('path', { d: 'M' + line(R.p90) + ' L' + R.p10.map((v, k) => X(M - k).toFixed(1) + ' ' + Y(R.p10[M - k]).toFixed(1)).join(' L') + ' Z', fill: 'var(--s1)', 'fill-opacity': '.16' }), s('path', { class: 'ln l1', d: 'M' + line(R.p50) }));
+  const big = R.F.ev.filter(e => Math.abs(e.amount) >= 0.02 * Math.max(R.p50[0], 1)).slice(0, 12);
+  for (const e of big) svg.append(s('line', { class: 'g-grid', x1: X(e.m), x2: X(e.m), y1: m.t, y2: H - m.b, 'stroke-dasharray': '3 4' }));
+  const step = M <= 12 ? 3 : M <= 36 ? 6 : 12;
+  for (let k = 0; k <= M; k += step) svg.append(s('text', { class: 'g-txt', x: X(k), y: H - 8, 'text-anchor': 'middle' }, k === 0 ? 'oggi' : k % 12 === 0 ? (k / 12) + ' a' : k + ' m'));
+  return h('div', { class: 'chart' }, h('div', { class: 'legend' }, h('span', null, h('span', { class: 'key', style: 'background:var(--s1)' }), 'patrimonio mediano e fascia 10°-90° percentile'), big.length ? h('span', null, '┆ eventi una tantum') : null), svg);
+}
+function parseHorizons(t) {          // "6 mesi, 1 anno, 3 anni" -> [6, 12, 36]
+  const out = []; for (const raw of String(t || '').split(/[,;]+/)) {
+    const m = raw.trim().toLowerCase().match(/^(\d+(?:[.,]\d+)?)\s*(m|mes\w*|a|ann\w*)?$/); if (!m) continue;
+    const n = parseFloat(m[1].replace(',', '.')), months = /^m/.test(m[2] || '') ? n : n * 12; if (months >= 1 && months <= 480) out.push(Math.round(months));
+  }
+  return [...new Set(out)].sort((a, b) => a - b).slice(0, 8);
+}
+const horizonLabel = mo => mo % 12 === 0 ? pl(mo / 12, 'anno', 'anni') : pl(mo, 'mese', 'mesi');
+const IT_MON = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'], EN_MON = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+function parseLooseDate(raw, fmt) {
+  const t = String(raw ?? '').trim(); if (!t) return null; const full = parseDate(t, fmt); if (full) return full;
+  let m = t.match(/^(\d{4})[-\/.](\d{1,2})$/); if (m && +m[2] >= 1 && +m[2] <= 12) return m[1] + '-' + String(m[2]).padStart(2, '0') + '-01';
+  m = t.match(/^(\d{1,2})[-\/.](\d{4})$/); if (m && +m[1] >= 1 && +m[1] <= 12) return m[2] + '-' + String(m[1]).padStart(2, '0') + '-01';
+  m = t.toLowerCase().match(/^([a-zà-ù]{3,})\.?\s+(\d{2,4})$/);
+  if (m) { const a = m[1].slice(0, 3), k = IT_MON.indexOf(a) >= 0 ? IT_MON.indexOf(a) : EN_MON.indexOf(a); if (k >= 0) { const y = +m[2] < 100 ? 2000 + +m[2] : +m[2]; return y + '-' + String(k + 1).padStart(2, '0') + '-01'; } }
+  return null;
+}
+function parsePlanFile(text) {          // file esterno di previsioni: una riga per data con un importo (positivo = entrata, negativo = spesa, oppure una colonna "tipo")
+  const rows = csvParse(text, detectDelim(text)); if (rows.length < 2) return { error: 'Il file è vuoto o ha una sola riga.' };
+  const hr = guessHeaderRow(rows), head = rows[hr].map(x => x.trim().toLowerCase()), body = rows.slice(hr + 1), fmt = detectDateFmt(body.slice(0, 50).flatMap(r => r.slice(0, 6)));
+  const col = re => head.findIndex(x => re.test(x));
+  let cd = col(/^(data|date|mese|month|periodo|scadenza)/), ca = col(/(import|valore|amount|totale|euro|€|saldo|previs)/), cl = col(/(voce|descr|nome|label|categoria|causale|dettaglio)/), ct = col(/^(tipo|type|segno|natura)/);
+  const share = (c, fn) => body.length ? body.filter(r => fn(r[c])).length / body.length : 0, nc = Math.max(...body.slice(0, 20).map(r => r.length));
+  if (cd < 0) for (let c = 0; c < nc; c++) if (share(c, v => parseLooseDate(v, fmt)) >= 0.7) { cd = c; break; }
+  const dec = numFormat(body.slice(0, 50).flatMap(r => r.slice(0, 8)));
+  if (ca < 0) for (let c = nc - 1; c >= 0; c--) if (c !== cd && share(c, v => !isNaN(parseNum(v, dec))) >= 0.7) { ca = c; break; }
+  if (cd < 0 || ca < 0) return { error: 'Non riconosco le colonne: servono una data (o un mese) e un importo, per esempio "Data;Voce;Importo".' };
+  if (cl < 0) for (let c = 0; c < nc; c++) if (c !== cd && c !== ca && c !== ct && share(c, v => String(v ?? '').trim() && isNaN(parseNum(v, dec))) >= 0.6) { cl = c; break; }
+  const out = []; let skipped = 0;
+  for (const r of body) {
+    const d = parseLooseDate(r[cd], fmt); let a = parseNum(r[ca], dec); if (!d || isNaN(a)) { skipped++; continue; }
+    const tp = ct >= 0 ? String(r[ct] || '').toLowerCase() : ''; if (/spes|usc|expens|out|costo|addebit/.test(tp)) a = -Math.abs(a); else if (/entr|inc|ricav|accredit|in$/.test(tp)) a = Math.abs(a);
+    out.push({ d, label: (cl >= 0 && String(r[cl] || '').trim()) || 'Da file', a });
+  }
+  if (!out.length) return { error: 'Nessuna riga con data e importo validi.' };
+  return { rows: out.slice(0, 5000), skipped, cols: [head[cd], head[ca], cl >= 0 ? head[cl] : '—', ct >= 0 ? head[ct] : 'segno dell\'importo'] };
+}
+function importPlanFile() {
+  pickText('.csv,.txt,text/csv,text/plain', (text, name) => {
+    const P = parsePlanFile(text); if (P.error) { alert(P.error); return; }
+    const tot = P.rows.reduce((t, r) => t + r.a, 0), a = P.rows.map(r => r.d).sort();
+    if (!confirm('Leggo ' + P.rows.length + ' righe da "' + name + '" (dal ' + fmtDate(a[0]) + ' al ' + fmtDate(a[a.length - 1]) + '), totale ' + nf0.format(tot) + ' €. Colonne usate: ' + P.cols.join(' / ') + (P.skipped ? '. Ignorate ' + P.skipped + ' righe senza data o importo.' : '') + '. Positivo = entrata, negativo = spesa. Le aggiungo alle previsioni?')) return;
+    BG().ext = { name, date: today(), rows: P.rows }; done();
+  });
+}
+function piPrevisioni() {
+  const el = h('div'), B = BG(); if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le previsioni.'));
+  const hz = (B.horizons && B.horizons.length ? B.horizons : [12, 36, 60, 120]).slice().sort((a, b) => a - b), M = hz[hz.length - 1], R = projectPlan(M), F1 = planFlows(12);
+  const s12 = a => { let t = 0; for (let m = 1; m <= 12; m++) t += a[m]; return t; }, left = (s12(F1.inc) - s12(F1.exp) - s12(F1.pac)) / 12, now = R.p50[0];
+  el.append(tiles([{ l: 'Patrimonio di oggi', v: eur(now), s: 'liquidità ' + eur(R.L0) + ' · investimenti ' + eur(R.I0) }, { l: 'Ti resta al mese', v: gl(left, seur(left)), s: 'entrate − spese − acquisti programmati' },
+    { l: 'Rendimento ipotizzato', v: nfp.format(R.mu * 100) + '% l\'anno', s: (R.mode === 'storico' ? 'dal tuo storico' : R.mode === 'media' ? 'media tra mercato e tuo storico' : 'ipotesi di mercato') + ' · rischio ' + nfp.format(R.pa.sigma * 100) + '%' }, { l: 'Rischio di restare senza liquidità', v: pct(R.pDebt), s: 'anche vendendo gli investimenti' }]));
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Dove sarà il tuo patrimonio'),
+    btn('Cambia orizzonti', () => form('Orizzonti da guardare', [{ key: 't', label: 'Scrivili separati da virgola', req: true, hint: 'per esempio: 6 mesi, 1 anno, 3 anni, 5 anni, 10 anni' }], { t: hz.map(horizonLabel).join(', ') }, o => { const p = parseHorizons(o.t); if (!p.length) return 'Non ho capito: scrivi per esempio "6 mesi, 1 anno, 5 anni".'; B.horizons = p; done(); }), 'sm')),
+    planChart(R),
+    table([{ t: 'Tra' }, { t: 'Liquidità', n: 1 }, { t: 'Investimenti', n: 1 }, { t: 'Patrimonio (mediano)', n: 1 }, { t: 'Fascia 10°–90°', n: 1 }], hz.map(k => [horizonLabel(k) + ' · ' + addMonthsStr(today(), k).slice(0, 7), eur(R.l50[k]), eur(R.i50[k]), eur(R.p50[k]), eur(R.p10[k]) + ' … ' + eur(R.p90[k])])),
+    R.pDebt > 0.05 ? h('div', { class: 'warn' }, 'In ' + pct(R.pDebt) + ' dei casi simulati la liquidità finisce prima di coprire le spese, anche vendendo gli investimenti. Controlla le spese, gli eventi o gli acquisti programmati.') : null,
+    h('p', { class: 'muted' }, 'Parte dal mese prossimo. Usa le tue entrate, spese ed eventi (scheda Budget), gli acquisti programmati e l\'ipotesi di rendimento del portafoglio attuale: i soldi che non investi restano liquidità' + ((B.liqRate || 0) ? ' al ' + nfp.format(B.liqRate) + '% l\'anno' : ' ferma') + '. È una simulazione, non una promessa: la fascia mostra quanto può cambiare.'),
+    h('label', { class: 'fld', style: 'max-width:420px' }, h('span', null, 'Rendimento degli investimenti da usare'), h('select', { onchange: e => { B.retMode = e.target.value; done(); } }, [['mercato', 'Ipotesi di mercato (portafoglio attuale)'], ['storico', 'Il mio storico degli ultimi mesi'], ['media', 'Media dei due']].map(([v, l]) => h('option', { value: v, selected: R.mode === v || (R.mode === 'mercato' && (B.retMode || 'mercato') === v) }, l))),
+      R.ob == null ? h('small', null, 'Lo storico serve almeno 12 mesi di movimenti nei conti d\'investimento: per ora si usa l\'ipotesi di mercato.') : h('small', null, 'Il tuo rendimento osservato è ' + spct(R.ob) + ' l\'anno (limitato tra −20% e +30%).')),
+    h('label', { class: 'fld', style: 'max-width:280px' }, h('span', null, 'Interesse sulla liquidità (% annuo)'), h('input', { type: 'number', step: 'any', value: B.liqRate || 0, onchange: e => { const v = parseFloat(e.target.value); B.liqRate = v >= 0 && v < 20 ? v : 0; done(); } }))));
+  const ev = R.F.ev.filter(e => !e.ext).slice().sort((a, b) => a.m - b.m);
+  if (ev.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Eventi considerati'), table([{ t: 'Quando' }, { t: 'Evento' }, { t: 'Importo', n: 1 }], ev.map(e => [addMonthsStr(today(), e.m).slice(0, 7), e.label, gl(e.amount, seur(e.amount))]))));
+  const ob = (() => { const since = ymd(new Date(new Date().getFullYear() - 1, new Date().getMonth(), new Date().getDate())); let dep = 0; for (const a of S.accounts) if (a.perf) for (const f of a.flows) if (f.date >= since && f.type !== 'partenza') dep += flowSign(f.type) * f.amount; return { perMonth: dep / 12, xirr: perfOf(S.accounts.filter(a => a.perf)).xirr }; })();
+  const obs = h('section', { class: 'card' }, h('h2', null, 'Dai mesi scorsi'),
+    h('ul', null, h('li', null, 'Negli ultimi 12 mesi hai messo negli investimenti in media ', h('b', null, eur(ob.perMonth)), ' al mese' + (PL().length ? ' (i programmati di oggi pesano ' + eur(s12(F1.pac) / 12) + ')' : '') + '.'),
+      h('li', null, ob.xirr == null ? 'Il rendimento osservato si vede dopo almeno un mese di storia.' : 'Il tuo rendimento osservato è ' + spct(ob.xirr) + ' l\'anno, contro l\'ipotesi di ' + nfp.format(R.mu * 100) + '%.')),
+    h('p', { class: 'muted' }, 'Serve per confrontare ciò che hai fatto con ciò che la previsione ipotizza: se i numeri sono molto diversi, rivedi gli acquisti programmati o l\'ipotesi di rendimento.'));
+  el.append(obs);
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Previsioni da un file'), btn('Carica un file CSV…', importPlanFile, 'pri'), B.ext ? btn('Togli', () => { if (confirm('Tolgo le righe caricate da "' + B.ext.name + '"?')) { B.ext = null; done(); } }, 'sm danger') : null),
+    B.ext ? h('p', null, 'Caricato "' + B.ext.name + '" il ' + fmtDate(B.ext.date) + ': ' + pl(B.ext.rows.length, 'riga', 'righe') + ', totale ' + eur(B.ext.rows.reduce((t, r) => t + r.a, 0)) + '. Entra nelle previsioni come eventi del mese.') : h('p', { class: 'muted' }, 'Se hai un file di previsioni fatto altrove (CSV con data, voce e importo), caricalo: positivo è un\'entrata, negativo una spesa. Il file resta in questa pagina e non viene mandato da nessuna parte.')));
+  return el;
+}
+
+const PI_SUBS = [['appuntamenti', 'Appuntamenti'], ['budget', 'Budget'], ['previsioni', 'Previsioni']];
+function tabPiano() {
+  const sub = UI.psub || 'appuntamenti', chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Piano' }, PI_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.psub = k; render(); } }, l)));
+  return h('div', null, h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Piano'), btn('+ Operazione', () => editOperation({}), 'pri')), chips), ({ appuntamenti: piAppuntamenti, budget: piBudget, previsioni: piPrevisioni }[sub] || piAppuntamenti)());
 }
 
 /* ============ dati dimostrativi ============ */
@@ -2083,6 +2579,9 @@ function demoData() {
     A('Conto corrente (demo)', 'banca', false, 8000, [], []),
     A('Trading MT4 (demo)', 'trading', true, 2300, [], [F(ago(300), 'partenza', 3000)])
   ];
+  D.plans = [{ id: uid(), label: 'PAC ETF mondo (demo)', kind: 'acquisto', accId: D.accounts[0].id, instId: wld.id, amount: 300, freq: 'mensile', day: 5, start: ago(200), end: '', note: '', since: today(), done: [] }, { id: uid(), label: 'Versamento fondo pensione (demo)', kind: 'versamento', accId: D.accounts[2].id, instId: '', amount: 150, freq: 'mensile', day: 20, start: ago(200), end: '', note: '', since: today(), done: [] }];
+  const mk = (kind, label, amount, freq, start, avg) => ({ id: uid(), kind, label, amount, freq, start, end: '', avg: !!avg }), mon = n => { const d = new Date(); d.setMonth(d.getMonth() - n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+  D.budget = Object.assign(newBudget(), { items: [mk('entrata', 'Stipendio (demo)', 2100, 'mensile', ago(300)), mk('entrata', 'Dogsitter (demo)', 250, 'mensile', ago(300), true), mk('spesa', 'Affitto (demo)', 750, 'mensile', ago(300)), mk('spesa', 'Bollette e spesa (demo)', 520, 'mensile', ago(300)), mk('spesa', 'Spese generali (demo)', 400, 'mensile', ago(300)), mk('spesa', 'Assicurazione auto (demo)', 600, 'annuale', ago(120)), mk('spesa', 'Anticipo casa (demo)', 40000, 'una-tantum', addMonthsStr(today(), 36))], hist: [1, 2, 3, 4, 5, 6].map((n, k) => ({ id: uid(), label: 'Dogsitter (demo)', month: mon(n), amount: [310, 180, 260, 420, 90, 240][k] })) });
   const keep = S; S = D;
   const curPerf = D.accounts.filter(a => a.perf).reduce((t, a) => t + accValue(a), 0), curTot = totalValue();
   for (let k = 6; k >= 0; k--) { const f = (0.9 + 0.1 * (6 - k) / 6) * (1 + 0.012 * Math.sin(k * 2)); D.snapshots.push({ date: ago(k * 30), total: curTot - curPerf + curPerf * f, perf: curPerf * f, accs: {} }); }
@@ -2091,7 +2590,11 @@ function demoData() {
 }
 
 if (ONLINE && 'serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* senza: l'app funziona lo stesso, solo non si apre offline */ }); });
-render();
+(async () => {          // se sul dispositivo c'e' gia' l'archivio, la prima schermata chiede solo la passphrase
+  try { const rec = await Promise.race([locGet(), new Promise(r => setTimeout(() => r(null), 2500))]); if (rec && rec.text) { LOC.rec = rec; LOC.ok = true; } }
+  catch (e) { LOC.err = String(e.message || e); }
+  render();
+})();
 </script>
 </body>
 </html>
