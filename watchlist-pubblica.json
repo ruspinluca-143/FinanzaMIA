@@ -53,7 +53,7 @@
     {"nome":"BTP 30/04/2045 1,5% Green","classe":"Obbligazioni","fonte":"borsa_italiana","id":"IT0005438004","tipo":"obbligazioni/mot/btp"},
     {"nome":"BTP 1,7% set 2051","classe":"Obbligazioni","fonte":"borsa_italiana","id":"IT0005425233","tipo":"obbligazioni/mot/btp"},
     {"nome":"BTP Valore ott 2031","classe":"Obbligazioni","fonte":"borsa_italiana","id":"IT0005735201","tipo":"obbligazioni/mot/btp"},
-    {"nome":"T-Bond USA 4,75% nov 2053","classe":"Obbligazioni","fonte":"borsa_italiana","id":"US912810TV08","tipo":"obbligazioni/eurotlx"},
+    {"nome":"T-Bond USA 4,75% nov 2053","classe":"Obbligazioni","fonte":"borsa_italiana","id":"US912810TV08","tipo":"obbligazioni/eurotlx","valuta":"USD"},
     {"nome":"Innodata Inc.","classe":"Azioni","fonte":"stockanalysis","id":"inod"},
     {"nome":"USD Coin (USDC)","classe":"Crypto","fonte":"coingecko","id":"usd-coin"}
   ]
