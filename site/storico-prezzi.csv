@@ -482,3 +482,52 @@ timestamp;nome;id;prezzo;valuta;data;fonte
 2026-10-30T15:49:17+00:00;Amundi Core MSCI World UCITS ETF Acc;IE000BI8OT95;163.02;EUR;2026-10-30;borsa_italiana
 2026-10-30T15:49:17+00:00;Xtrackers MSCI Brazil UCITS ETF 1C;LU0292109344;54.36;EUR;2026-10-30;borsa_italiana
 2026-10-30T15:49:17+00:00;iShares MSCI Global Semiconductors UCITS ETF Acc;IE000I8KRLL9;15.998;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;iShares Core MSCI World UCITS ETF USD (Acc);IE00B4L5Y983;129.55;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi Core Nasdaq-100 Swap UCITS ETF Acc;LU1829221024;103.8;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Xtrackers II Global Government Bond UCITS ETF 1C EUR Hedged;LU0378818131;205.9;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Xtrackers II EUR Overnight Rate Swap UCITS ETF 1C;LU0290358497;150.6622;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi Euro Government Bond 0-6 M UCITS ETF;FR0010754200;127.62;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi S&P Eurozone Climate Paris Aligned UCITS ETF Acc;LU2195226068;41.475;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;iShares Core MSCI EM IMI UCITS ETF USD (Acc);IE00BKM4GZ66;44.815;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi MSCI Emerging Markets Swap II UCITS ETF;FR0010429068;17.782;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Invesco Physical Gold ETC;IE00B579F325;335.84;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;WisdomTree Core Physical Gold;JE00BN2CJ301;346.6;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi Euro Stoxx 50 II UCITS ETF-A;FR0007054358;69.93;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi Bl. Equal-weight Comm. ex-Agr. UCITS ETF;LU1829218749;38.07;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Vanguard FTSE Developed Europe UCITS ETF (EUR) Acc;IE00BK5BQX27;60.4;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;21Shares Bitcoin Core ETP;CH1199067674;16.56;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;WisdomTree World;XS3151433813;25.64;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Bitwise MSCI Digital Assets Select 20 ETP;DE000A3G3ZL3;85.64;EUR;2026-10-29;borsa_italiana
+2026-10-30T16:05:40+00:00;L&G Global Brands UCITS ETF;IE0007HKA9K1;16.126;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;NVIDIA;nvda;205.5;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;SpaceX;spcx;138.25;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Bending Spoons S.p.A.;bsp;45.09;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Broadcom;avgo;325.65;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Apple;aapl;345.93;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Alumis Inc;alms;6.61;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Accenture;acn;257.17;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Bitcoin;bitcoin;69277;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;XRP;ripple;1.12;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;Ether;ethereum;1989.43;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;Solana;solana;84.71;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;Cardano;cardano;0.171884;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;Cosmos;cosmos;1.36;EUR;2026-10-30;coingecko
+2026-10-30T16:05:40+00:00;iShares Core MSCI Europe UCITS ETF EUR (Acc);IE00B4K48X80;105.2;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;WisdomTree Physical Gold EUR Daily Hedged;JE00B8DFY052;20.275;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;WisdomTree Physical Solana;GB00BNGJ9G01;11.976;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;WisdomTree NASDAQ-100;XS3003325795;37.365;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Amundi MSCI World SRI Climate Paris Aligned;IE000Y77LGG9;123.34;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Xtrackers S&P 500 Swap UCITS ETF 1C;LU0490618542;138.16;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Bitwise Physical Ethereum ETP;DE000A3GMKD7;19.374;EUR;2026-10-29;borsa_italiana
+2026-10-30T16:05:40+00:00;Summit Midstream Corp;smc;31.1;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;nLIGHT;lasr;36.62;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Lumentum Holdings;lite;823.8;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Alphabet (Class A);googl;282.03;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Build-A-Bear Workshop;bbw;27.69;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Super Micro Computer Inc;smci;32.15;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;CoreWeave Inc.;crwv;54.55;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Sionna Therapeutics Inc;sion;3.9;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Innventure Inc;inv;0.2999;USD;2026-10-30;stockanalysis
+2026-10-30T16:05:40+00:00;Amundi Core MSCI World UCITS ETF Acc;IE000BI8OT95;162.9;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;Xtrackers MSCI Brazil UCITS ETF 1C;LU0292109344;54.36;EUR;2026-10-30;borsa_italiana
+2026-10-30T16:05:40+00:00;iShares MSCI Global Semiconductors UCITS ETF Acc;IE000I8KRLL9;15.92;EUR;2026-10-30;borsa_italiana
