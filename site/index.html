@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-yTW7y8UPEwV8i3s2Kn7naq3ndu+UOJHT0dwQCZj3Hjo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Rhs7UrZVcOMBUATWZxO656NUpSYDCQuNgFUKhSLmkH8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,10 @@
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:rgba(255,255,255,.80);--card-s:#fff;--ink:#1d1d1f;--ink2:#424245;--muted:#6e6e73;--grid:rgba(60,60,67,.13);--base:rgba(60,60,67,.30);--ring:rgba(0,0,0,.07);--s1:#0071e3;--s2:#ff9500;--gain:#248a3d;--loss:#d70015;--btn:rgba(120,120,128,.12);--btn-h:rgba(120,120,128,.20);--pri:#0071e3;--pri-h:#0077ed;--lnk:#0066cc;--warn:#fff6dc;--warnink:#664d00;--seg:rgba(120,120,128,.14);--thumb:#fff;--sh:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.06);--sh-h:0 2px 6px rgba(0,0,0,.06),0 18px 44px rgba(0,0,0,.12);--glow1:rgba(0,113,227,.13);--glow2:rgba(175,82,222,.10);--ease:cubic-bezier(.2,.8,.2,1);--r:20px;--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI Variable Display","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif}
 @media (prefers-color-scheme:dark){:root{--bg:#000;--card:rgba(28,28,30,.72);--card-s:#1c1c1e;--ink:#f5f5f7;--ink2:#d1d1d6;--muted:#98989f;--grid:rgba(235,235,245,.12);--base:rgba(235,235,245,.30);--ring:rgba(255,255,255,.09);--s1:#0a84ff;--s2:#ff9f0a;--gain:#30d158;--loss:#ff453a;--btn:rgba(120,120,128,.24);--btn-h:rgba(120,120,128,.36);--pri:#0a84ff;--pri-h:#409cff;--lnk:#64a8ff;--warn:#3a3118;--warnink:#f5d58a;--seg:rgba(118,118,128,.24);--thumb:#636366;--sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--sh-h:0 2px 6px rgba(0,0,0,.5),0 18px 44px rgba(0,0,0,.55);--glow1:rgba(10,132,255,.22);--glow2:rgba(191,90,242,.16)}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+.ptr{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;transform:translate(-50%,-60px);z-index:60;padding:8px 16px;border-radius:999px;background:var(--card-s);color:var(--ink);font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;pointer-events:none;white-space:nowrap}
+.ptr.done{transition:transform .25s,opacity .25s}
+#status{cursor:pointer}
 a{color:var(--lnk);text-decoration:none}
 a:hover{text-decoration:underline}
 body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.47 var(--font);letter-spacing:-.01em;-webkit-font-smoothing:antialiased;background:radial-gradient(900px 520px at 6% -8%,var(--glow1),transparent 62%),radial-gradient(820px 470px at 100% -4%,var(--glow2),transparent 60%),var(--bg);background-attachment:fixed}
@@ -569,7 +572,7 @@ async function clPush(final) {
     const text = await clSeal();
     const r = await cloudRpc('finanze_scrivi', { p_codice: CL.code, p_dati: text, p_versione: CL.ver }, final && text.length < 60000);
     if (r && r.ok) {
-      CL.ver = +r.versione; CL.pending = false; CL.at = r.quando || new Date().toISOString(); CL.state = 'ok'; clStore();
+      CL.ver = +r.versione; CL.pending = false; CL.wiped = false; CL.at = r.quando || new Date().toISOString(); CL.state = 'ok'; clStore();
       if (UNSAVED) { UNSAVED = false; DIRTY = false; refreshUnsaved(); }          // il browser non teneva i dati, ma online sono al sicuro
       clNote();
     } else if (r && r.err === 'conflitto') await clMerge(await cloudRpc('finanze_leggi', { p_codice: CL.code }));
@@ -579,7 +582,7 @@ async function clPush(final) {
 }
 function clChoose(D, r) {          // due versioni diverse dei dati: si sceglie quale tenere
   const nL = S ? S.accounts.length : 0, nR = D.accounts.length;
-  if (!nR && nL) return 'local'; if (!nL) return 'remote';
+  if (!nR && nL) return 'local'; if (!nL) return CL.wiped ? 'local' : 'remote';          // archivio vuoto: vince quello online, tranne se l'hai appena svuotato tu
   const keep = S; S = D; const tR = totalValue(); S = keep; const tL = totalValue();
   return confirm('Ci sono due versioni dei tuoi dati.\n\nOnline (salvata il ' + clHm(r.quando) + '): ' + pl(nR, 'conto', 'conti') + ', ' + eur(tR) + '.\nSu questo dispositivo: ' + pl(nL, 'conto', 'conti') + ', ' + eur(tL) + '.\n\nOK = tengo quella online.\nAnnulla = tengo quella di questo dispositivo e la metto online.') ? 'remote' : 'local';
 }
@@ -645,6 +648,37 @@ function cloudCard() {
     h('div', { class: 'row' },
       CL.code ? btn('Salva online adesso', async () => { if (!CL.ready) await clAttach(); else { CL.pending = true; await clPush(); await clCheck(); } render(); }, 'pri') : btn('Attiva su questo dispositivo', () => clLogin(), 'pri'),
       CL.code ? btn('Togli il codice da questo dispositivo', clForget, 'danger') : null));
+}
+/* ---- "refresh" = salvataggio: in cima alla pagina, trascinando in basso (o toccando la scritta di stato) si salva subito, qui e online ---- */
+const PTR = { y0: null, d: 0, el: null, busy: false };
+const ptrEl = () => PTR.el || (PTR.el = document.body.appendChild(h('div', { class: 'ptr', 'aria-live': 'polite' })));
+function ptrShow(t, y, done) { const el = ptrEl(); el.classList.toggle('done', !!done); el.textContent = t; el.style.transform = 'translate(-50%,' + y + 'px)'; el.style.opacity = y > -40 ? 1 : 0; }
+const ptrHide = () => ptrShow(ptrEl().textContent, -60, true);
+async function saveNow() {
+  if (!S || DEMO || PTR.busy) return; PTR.busy = true;
+  ptrShow('Salvo…', 10, true);
+  try {
+    clearTimeout(saveTimer); await save(false);
+    let msg = UNSAVED ? 'Non riesco a salvare su questo dispositivo' : 'Salvato su questo dispositivo ✓';
+    if (CLOUD_ON() && CL.code) {
+      if (!CL.ready) await clAttach(true);
+      if (CL.ready) { CL.pending = true; clStore(); clearTimeout(CL.timer); await clPush(); await clCheck(); }
+      msg = CL.state === 'ok' && !CL.pending ? 'Salvato online ✓ ' + clHm(CL.at) : 'Salvato sul dispositivo · online non raggiungibile, riprovo da solo';
+    } else if (CLOUD_ON()) msg += ' · online non attivo';
+    ptrShow(msg, 10, true);
+  } catch (e) { ptrShow('Errore: ' + (e.message || e), 10, true); }
+  finally { PTR.busy = false; setTimeout(ptrHide, 2200); }
+}
+window.addEventListener('touchstart', e => { PTR.y0 = (!S || LOCKED || DEMO || PTR.busy || window.scrollY > 2 || e.touches.length !== 1 || document.querySelector('dialog[open]')) ? null : e.touches[0].clientY; PTR.d = 0; }, { passive: true });
+window.addEventListener('touchmove', e => { if (PTR.y0 == null) return; PTR.d = e.touches[0].clientY - PTR.y0; if (PTR.d <= 0 || window.scrollY > 2) { PTR.y0 = null; ptrHide(); return; } const p = Math.min(PTR.d * 0.6, 70); ptrShow(PTR.d >= 90 ? 'Rilascia per salvare' : 'Tira giù per salvare', p - 50); }, { passive: true });
+window.addEventListener('touchend', () => { if (PTR.y0 == null) return; const go = PTR.d >= 90; PTR.y0 = null; if (go) saveNow(); else ptrHide(); });
+function wipeAll() {          // per ripartire da zero: svuota l'archivio qui e online (prima scarica una copia; online restano anche le copie orarie)
+  form('Cancella tutti i dati', [{ key: 'w', label: 'Scrivi CANCELLA per confermare', req: true, hint: 'Toglie tutti i conti, i movimenti, il piano e lo storico, su questo dispositivo e online (quindi anche sugli altri dispositivi). Prima scarico una copia di sicurezza nella cartella Download.' }], {}, async o => {
+    if (o.w.trim().toUpperCase() !== 'CANCELLA') return 'Scrivi la parola CANCELLA.';
+    try { download(await seal()); } catch { /* si continua lo stesso */ }
+    const al = S.settings.autolock; S = newData(); S.settings.autolock = al; CL.wiped = true;
+    UI.tab = 'panoramica'; UI.acc = null; touch(); render(); setStatus('Dati cancellati: ora puoi importare di nuovo i file');
+  }, null, 'Cancella tutto');
 }
 window.addEventListener('online', () => { if (CL.pending || (CL.code && !CL.ready)) clPush(); });
 document.addEventListener('visibilitychange', () => { if (!CLOUD_ON() || !S || DEMO) return; if (document.hidden) { if (CL.pending && CL.ready) { clearTimeout(CL.timer); clPush(true); } } else clCheck(); });
@@ -2288,7 +2322,7 @@ function viewLock() {
   inp.focus();
 }
 function topbar() {
-  return h('header', { class: 'top' }, h('div', { class: 'brand' }, 'Finanze'), h('div', { class: 'status', id: 'status', role: 'status' }, STATUS),
+  return h('header', { class: 'top' }, h('div', { class: 'brand' }, 'Finanze'), h('div', { class: 'status', id: 'status', role: 'status', title: 'Tocca per salvare adesso', onclick: () => saveNow() }, STATUS),
     h('div', { class: 'acts' },
       btn(HIDE ? 'Mostra importi' : 'Nascondi importi', () => { HIDE = !HIDE; render(); }),
       DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, NOPW ? null : btn('Blocca', lock)]));
@@ -2485,6 +2519,7 @@ function tabDati() {
     DEMO ? null : h('div', { class: 'row' },
       btn(typeof navigator.canShare === 'function' ? 'Salva copia di sicurezza in File' : 'Scarica copia cifrata (backup)', typeof navigator.canShare === 'function' ? shareCopy : downloadCopy, 'pri'),
       LOC.rec || LOC.ok ? btn('Dimentica i dati su questo dispositivo', forgetLocal, 'danger') : null,
+      btn('Cancella tutti i dati', wipeAll, 'danger'),
       btn('Controlla che i dati si salvino', async () => { const ok = await locProbe(); let ric = false; try { const r = await locGet(); ric = !!(r && r.text); } catch { /* niente */ } alert(ok ? 'Sì: questo browser conserva i dati (' + (LOC.where || 'ok') + ')' + (ric ? ', e l\'archivio è presente.' : '.') + (LOC.persisted === false ? ' Attenzione: il browser potrebbe cancellarli se serve spazio: tieni una copia di sicurezza.' : '') + ' Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) : 'mai') + '.' : 'NO: questo browser non conserva i dati. Apri il sito da internet (https://ruspinluca-143.github.io/FinanzaMIA/) oppure lavora su un file (Esci e premi Entra).'); }),
       btn('Controlla di ricordare la passphrase', () => form('Controlla la passphrase', [{ key: 'p', label: 'Scrivi la passphrase', type: 'password', req: true, ac: 'current-password' }], {}, async o => { alert((await checkPass(o.p)) ? 'Corretta: è quella di questo archivio.' : 'Non corrisponde: controlla maiuscole, spazi e la tastiera (usa "Mostra").'); })),
       NOPW ? btn('Metti una passphrase', () => form('Metti una passphrase', [{ key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'n2', hint: 'Almeno 12 caratteri. Con "Suggeriscimi una frase" te ne scrive una e la copia.' }, { key: 'n2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(NOPASS, o.n1); }))
