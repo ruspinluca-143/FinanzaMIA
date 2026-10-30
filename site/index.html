@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Sn/ZKLx4h4E5HYUGAZC2LK7aF0Zn4eiIlDBDPWXfGAk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tETxz/Qaq9HP3V6OKHDaibGSbNpSIFlVAZM+54BWTaE='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -145,6 +145,7 @@ td .acts{justify-content:flex-end;flex-wrap:nowrap}
 .notes{text-align:left;color:var(--ink2);font-size:14px;margin:20px auto;max-width:500px}
 .notes li{margin:8px 0}
 .start input{width:100%;max-width:320px}
+.pwrow{display:flex;gap:8px;align-items:center;justify-content:center}.pwrow input{flex:1;min-width:0}.fld .pwrow{justify-content:flex-start}.start .pwrow input{max-width:260px}
 .more{margin-top:24px}.more>summary{cursor:pointer;color:var(--muted);font-size:14px;list-style:none}.more>summary::-webkit-details-marker{display:none}.more>summary:hover{color:var(--ink2)}.more[open]>summary{margin-bottom:2px}
 dialog{border:1px solid var(--ring);border-radius:24px;background:var(--card-s);color:var(--ink);padding:24px;max-width:560px;width:calc(100% - 28px);box-shadow:0 30px 90px rgba(0,0,0,.35)}
 dialog[open]{animation:pop .42s var(--ease)}
@@ -326,7 +327,7 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento (soldi che entrano)'], ['prelievo', 'Prelievo (soldi che escono)'], ['partenza', 'Valore di partenza (inizio tracciamento)']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 5 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget() });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget() });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
@@ -339,6 +340,8 @@ function migrate(d) {
 /* ============ cifratura (AES-256-GCM, chiave da passphrase con PBKDF2) ============ */
 const b64 = u8 => { let t = ''; for (let i = 0; i < u8.length; i += 0x8000) t += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(t); };
 const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+const NOPASS = 'finanze-senza-passphrase';          // archivio "libero": cifrato con una frase fissa e nota, quindi si apre da solo senza chiedere nulla (protegge dalla lettura distratta del file, non da chi lo vuole aprire davvero)
+let NOPW = false;          // vero se l'archivio aperto e' senza passphrase
 const CAN_CRYPTO = () => !!(window.crypto && window.crypto.subtle);          // la cifratura del browser esiste solo in pagine "sicure": file aperto da Edge/Chrome/Safari o indirizzo https
 const NOCRYPTO = 'Questa pagina è aperta in un modo in cui il browser non permette la cifratura (succede nelle anteprime incorporate in altre app e con indirizzi http:// non locali). Aprila in Edge, Chrome o Safari: sul computer con doppio clic su finanze.html, oppure da https://ruspinluca-143.github.io/FinanzaMIA/. La demo funziona anche qui.';
 async function deriveKey(pass, salt, iter) {
@@ -380,7 +383,7 @@ async function seal() {
   S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(JSON.stringify(header)) }, KEY, enc.encode(JSON.stringify(S)));
-  return JSON.stringify({ ...header, iv: b64(iv), ct: b64(new Uint8Array(ct)) });
+  return JSON.stringify({ ...header, iv: b64(iv), ct: b64(new Uint8Array(ct)), ...(NOPW ? { np: 1 } : {}) });          // "np": nessuna passphrase (e' solo un'indicazione per l'app: la cifratura vera e' quella dell'intestazione)
 }
 async function makeVerify() {
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -390,7 +393,7 @@ async function checkPass(pass) {
   try { const k = await deriveKey(pass, SALT, ITER); return dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: VERIFY.iv }, k, VERIFY.ct)) === 'ok'; } catch { return false; }
 }
 async function openArchive(text, fh, pass, fromLocal) {          // fromLocal: la copia salvata sul dispositivo (si apre con la sola passphrase)
-  let f; try { f = JSON.parse(text); } catch { return 'Il file non è un archivio valido.'; }
+  let f; try { f = JSON.parse(text); } catch { return /^﻿?#\s*Finanze|;/.test(String(text).slice(0, 400)) ? 'Questo è un file da IMPORTARE (CSV), non l\'archivio. Prima entra nell\'archivio (o creane uno), poi usa "Importa i file dei conti…".' : 'Il file non è un archivio valido.'; }
   if (!f || f.app !== 'finanze' || f.v !== 1 || f.kdf !== 'PBKDF2-SHA256' || !(f.iter >= 100000 && f.iter <= 20000000) || !f.salt || !f.iv || !f.ct) return 'Il file non è un archivio Finanze valido.';
   if (fh && fh.requestPermission) { try { if (await fh.requestPermission({ mode: 'readwrite' }) !== 'granted') fh = null; } catch { fh = null; } }
   const salt = unb64(f.salt), key = await deriveKey(pass, salt, f.iter);
@@ -400,24 +403,31 @@ async function openArchive(text, fh, pass, fromLocal) {          // fromLocal: l
   catch { return 'Passphrase errata oppure file danneggiato.'; }
   const D = JSON.parse(dec.decode(pt)); migrate(D);
   if (!fromLocal && LOC.rec && LOC.rec.at && LOC.rec.at > (D.savedAt || '') && !confirm('Su questo dispositivo c\'è una versione più recente di questo file (modificata il ' + new Date(LOC.rec.at).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) + '). Se apri il file la sostituisci e perdi le modifiche fatte dopo. Aprire comunque il file?')) return 'Apertura annullata: la versione su questo dispositivo è più recente.';
-  S = D; SALT = salt; ITER = f.iter; KEY = key; VERIFY = await makeVerify(); FH = fh; DEMO = false; DIRTY = false; UNSAVED = false; LOC.off = false;
+  S = D; SALT = salt; ITER = f.iter; KEY = key; VERIFY = await makeVerify(); FH = fh; DEMO = false; DIRTY = false; UNSAVED = false; LOC.off = false; NOPW = !!f.np && pass === NOPASS;
   if (!fromLocal) { if (!S.settings.backupAt) S.settings.backupAt = today(); try { await locPut(text, S.savedAt); } catch (e) { LOC.ok = false; LOC.err = String(e.message || e); } }          // un file appena aperto vale come copia di sicurezza; si tiene anche sul dispositivo
   enter(); setStatus(fromLocal ? 'Aperto dal dispositivo' : fh ? 'Aperto · ' + fh.name : LOC.ok ? 'Aperto e salvato su questo dispositivo' : 'Aperto (questo browser non salva da solo: usa "Scarica copia")');
 }
-async function createArchive(pass, keepData) {      // keepData: tiene i dati già in memoria invece di partire da un archivio vuoto
+async function locProbe() {          // il browser riesce a tenere l'archivio da solo? (si prova a scrivere e cancellare un record minuscolo)
+  try { await idbDo('readwrite', st => st.put({ probe: 1 }, 'probe')); await idbDo('readwrite', st => st.delete('probe')); return true; }
+  catch { try { localStorage.setItem('finanze-probe', '1'); localStorage.removeItem('finanze-probe'); return true; } catch { return false; } }
+}
+async function createArchive(pass, keepData, nopass) {      // keepData: tiene i dati già in memoria invece di partire da un archivio vuoto
   let fh = null;
-  if (window.showSaveFilePicker) {
-    try { fh = await showSaveFilePicker({ suggestedName: 'finanze.finanze', types: [{ description: 'Archivio Finanze cifrato', accept: { 'application/octet-stream': ['.finanze'] } }] }); }
+  if (window.showSaveFilePicker && !(await locProbe())) {          // di solito NON si chiede dove salvare: l'archivio resta nel browser e una copia di sicurezza viene scaricata da sola. La finestra "Salva" compare solo se il browser non riesce a tenerlo
+    try {
+      fh = await showSaveFilePicker({ suggestedName: 'finanze.finanze', types: [{ description: 'Archivio Finanze cifrato', accept: { 'application/octet-stream': ['.finanze'] } }] });
+      if (!/\.finanze$/i.test(fh.name)) return 'Il nome del file deve finire con .finanze (per esempio finanze.finanze): quello scelto potrebbe essere un tuo file, che verrebbe sovrascritto. Riprova.';
+    }
     catch (e) { if (e && e.name === 'AbortError') return 'Creazione annullata.'; fh = null; }
   }
   if (!keepData) S = newData();
   SALT = crypto.getRandomValues(new Uint8Array(16)); ITER = 1000000;
-  KEY = await deriveKey(pass, SALT, ITER); VERIFY = await makeVerify(); FH = fh; DEMO = false; CANSAVE = false; DIRTY = true;
+  KEY = await deriveKey(pass, SALT, ITER); VERIFY = await makeVerify(); FH = fh; DEMO = false; CANSAVE = false; DIRTY = true; NOPW = !!nopass;
   enter(); await save(true);
 }
 async function changePass(oldp, newp) {
   if (!(await checkPass(oldp))) return 'La passphrase attuale non è corretta.';
-  SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(newp, SALT, ITER); VERIFY = await makeVerify();
+  SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(newp, SALT, ITER); VERIFY = await makeVerify(); NOPW = newp === NOPASS;
   touch(); await save(true);
 }
 
@@ -459,7 +469,7 @@ async function doSave(manual) {
     else setStatus('Non riesco a salvare' + (why ? ' (' + why + ')' : '') + ': usa "Scarica copia"');
   } catch (e) { S.settings.backupAt = prevBackup; UNSAVED = true; setStatus('Errore di salvataggio (' + (e.message || e) + '): usa "Scarica copia"'); }
 }
-const copyName = () => 'finanze-' + today() + '.finanze';          // con la data nel nome: una copia nuova non si confonde con quelle vecchie
+const copyName = () => { const n = new Date(); return 'finanze-' + today() + '-' + String(n.getHours()).padStart(2, '0') + String(n.getMinutes()).padStart(2, '0') + '.finanze'; };          // data e ora nel nome: una copia nuova non si confonde con quelle vecchie
 function download(text) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' }));
   const a = h('a', { href: url, download: copyName() }); document.body.append(a); a.click(); a.remove();
@@ -492,7 +502,7 @@ window.addEventListener('beforeunload', e => { if (DIRTY && !DEMO) { e.preventDe
 
 /* ============ blocco automatico ============ */
 async function lock() {
-  if (DEMO || !KEY || LOCKED) return;
+  if (DEMO || !KEY || LOCKED || NOPW) return;          // senza passphrase non c'e' nulla da chiedere per sbloccare
   if (DIRTY) { clearTimeout(saveTimer); await save(false); }
   document.querySelectorAll('dialog').forEach(d => { if (d.open) d.close(); d.remove(); });
   LOCKED = true; render();
@@ -625,8 +635,13 @@ function form(title, fields, values, onOk, extra) {
     else if (f.type === 'check') inp = h('input', { type: 'checkbox', checked: !!values[f.key] });
     else inp = h('input', { type: f.type || 'text', step: f.type === 'number' ? 'any' : null, placeholder: f.ph || '', value: values[f.key] ?? '', list: f.list || null, autocomplete: f.ac || 'off', required: f.req || null });          // f.ac: "new-password" / "current-password" fanno proporre al telefono di generare e ricordare la passphrase (portachiavi)
     inputs[f.key] = inp;
+    const gen = f.gen ? h('button', { type: 'button', class: 'btn sm', onclick: async () => {          // suggerisce una frase facile da leggere e da copiare, la scrive (visibile) nei campi collegati e la mette negli appunti
+      const v = f.gen(); inp.value = v; inp.type = 'text'; if (f.mirror && inputs[f.mirror]) { inputs[f.mirror].value = v; inputs[f.mirror].type = 'text'; }
+      let ok = false; try { await navigator.clipboard.writeText(v); ok = true; } catch { /* senza permesso: la si copia a mano */ }
+      err.textContent = ok ? 'Frase scritta e copiata: incollala subito nell\'app Password o scrivila su un foglio.' : 'Frase scritta qui sopra: copiala e salvala subito (app Password o un foglio).';
+    } }, 'Suggeriscimi una frase') : null;
     frm.append(f.type === 'check' ? h('label', { class: 'chk' }, inp, h('span', null, f.label, f.hint ? h('small', null, ' — ' + f.hint) : null))
-      : h('label', { class: 'fld' }, h('span', null, f.label), inp, f.hint ? h('small', null, f.hint) : null));
+      : h('label', { class: 'fld' }, h('span', null, f.label), f.type === 'password' ? h('div', { class: 'pwrow' }, inp, pwToggle(inp)) : inp, gen, f.hint ? h('small', null, f.hint) : null));
   }
   for (const f of fields) if (f.sync) inputs[f.key].addEventListener('change', () => f.sync(inputs));
   const okb = h('button', { type: 'submit', class: 'btn pri' }, 'Salva');
@@ -645,13 +660,19 @@ function form(title, fields, values, onOk, extra) {
   dlg.append(frm); document.body.append(dlg); dlg.showModal();
   const first = frm.querySelector('input,select,textarea'); if (first) first.focus();
 }
+const pwToggle = inp => { const b = h('button', { type: 'button', class: 'btn sm', 'aria-label': 'Mostra o nascondi la passphrase', onclick: () => { const show = inp.type === 'password'; inp.type = show ? 'text' : 'password'; b.textContent = show ? 'Nascondi' : 'Mostra'; inp.focus(); } }, 'Mostra'); return b; };          // un errore di battitura e' la causa piu' comune di "passphrase errata": cosi' la si vede mentre la scrivi
+function suggestPass() {          // 10 sillabe pronunciabili (consonante + vocale) in 5 gruppi, es. "bafo-tilu-mero-sega-nupi": circa 61 bit, 24 caratteri
+  const C = 'bdfgklmnprstvz', V = 'aeiou', buf = crypto.getRandomValues(new Uint32Array(10)); let out = '';
+  for (let i = 0; i < 10; i++) { const x = buf[i]; out += C[x % C.length] + V[Math.floor(x / C.length) % V.length]; if (i % 2 === 1 && i < 9) out += '-'; }
+  return out;
+}
 const ccyList = () => h('datalist', { id: 'dl-ccy' }, ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD'].map(c => h('option', { value: c })));
 const normCcy = c => (String(c || 'EUR').trim().toUpperCase().slice(0, 3)) || 'EUR';
 const done = () => { touch(); render(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
-  const isNew = !a, v = a ? Object.assign({}, a, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26 };
+  const isNew = !a, v = a ? Object.assign({ freq: '' }, a, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26 };
   form(isNew ? 'Nuovo conto' : 'Modifica conto', [
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
     { key: 'type', label: 'Tipo', type: 'select', options: Object.entries(TYPES).map(([k, t]) => [k, t.label]), ...(isNew ? { sync: i => { i.perf.checked = TYPES[i.type.value].perf; } } : {}) },
@@ -659,6 +680,7 @@ function editAccount(a) {
     { key: 'cash', label: 'Liquidità nel conto', type: 'number' },
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
     { key: 'note', label: 'Note' },
+    { key: 'freq', label: 'Ogni quanto lo aggiorni', type: 'select', options: [['', 'Non serve un promemoria'], ['mese', 'Ogni mese'], ['trimestre', 'Ogni 3 mesi']], hint: 'Passato quel tempo, in Panoramica compare "Da aggiornare".' },
     { key: 'dpP', label: 'Solo conto deposito: capitale versato (€)', type: 'number' },
     { key: 'dpR', label: 'Solo conto deposito: tasso annuo lordo (%)', type: 'number' },
     { key: 'dpS', label: 'Solo conto deposito: data di inizio', type: 'date' },
@@ -668,10 +690,27 @@ function editAccount(a) {
     if (!o.name) return 'Inserisci un nome.';
     let dep = null;
     if (o.type === 'deposito') { if (!(o.dpP > 0) || !o.dpS) return 'Per un conto deposito indica capitale e data di inizio.'; dep = { principal: o.dpP, rate: o.dpR || 0, start: o.dpS, end: o.dpE || '', taxPct: o.dpT ?? 26 }; }
-    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep };
-    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else Object.assign(a, d);
+    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep, freq: o.freq || '' };
+    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], upd: today(), ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else { if (!dep && d.cash !== a.cash) a.upd = today(); Object.assign(a, d); }
     done();
   }, ccyList());
+}
+/* ============ conti fermi (soldi sul conto, contanti, carte): una schermata sola per aggiornare i saldi ============ */
+const CASH_PRESETS = [['Revolut (conto)', 'banca', 'revolut'], ['BancoPosta', 'banca', 'bancoposta'], ['Contanti (portafoglio)', 'contanti', 'contanti'], ['Satispay', 'pagamenti', 'satispay'], ['PayPal', 'pagamenti', 'paypal']];
+const isCashAcc = a => !a.perf && !a.dep;          // conti fermi: banche, contanti, carte e pagamenti
+const FREQ_DAYS = { mese: 31, trimestre: 92 };
+const accDue = a => { if (!a.freq || !a.upd || !FREQ_DAYS[a.freq]) return null; const d = daysSince(a.upd); return d >= FREQ_DAYS[a.freq] ? d : null; };          // giorni dall'ultimo aggiornamento, se e' scaduto
+function openBalances() {
+  const have = S.accounts.filter(isCashAcc), extra = CASH_PRESETS.filter(p => !have.some(a => a.name.toLowerCase().includes(p[2])));
+  const fields = [...have.map(a => ({ key: 'a_' + a.id, label: a.name + ' (€)', type: 'number' })), ...extra.map((p, k) => ({ key: 'n_' + k, label: p[0] + ' (€)', type: 'number', hint: have.length || k ? '' : 'Scrivi quanti soldi ci sono adesso. I conti che non usi lasciali vuoti: non vengono creati.' }))];
+  const vals = {}; for (const a of have) vals['a_' + a.id] = a.cash || 0;
+  form('Saldi dei conti fermi', fields, vals, o => {
+    let n = 0;
+    for (const a of have) { const v = o['a_' + a.id]; if (v != null && isFinite(v)) { if (v !== (a.cash || 0)) n++; a.cash = v; a.upd = today(); if (!a.freq) a.freq = 'mese'; } }
+    extra.forEach((p, k) => { const v = o['n_' + k]; if (v != null && isFinite(v)) { S.accounts.push({ id: uid(), name: p[0], type: p[1], perf: false, cash: v, cashCcy: 'EUR', note: '', positions: [], flows: [], imports: [], freq: 'mese', upd: today() }); n++; } });
+    if (!n && !have.length) return 'Scrivi almeno un importo.';
+    takeSnapshot(); UI.tab = 'panoramica'; UI.acc = null; done();
+  });
 }
 function delAccount(a) { if (confirm('Eliminare il conto "' + a.name + '" con tutte le sue posizioni e i suoi movimenti?')) { S.accounts = S.accounts.filter(x => x !== a); UI.acc = null; done(); } }
 function editInstrument(i) {
@@ -1129,6 +1168,7 @@ function applyImport(W, P) {
       keep.add(i.id); setPos(i, r.qty, r.costEur, false); }
     if (W.drop) { const n = a.positions.length; a.positions = a.positions.filter(x => keep.has(x.instId)); R.removed += n - a.positions.length; }
   }
+  a.upd = today();
   (a.imports || (a.imports = [])).push({ id: uid(), date: today(), file: W.fname, hash: W.hash, rec: { sig: sigOf(W.rows, W.hdr), mode: W.mode, hdr: W.hdr, map: Object.assign({}, W.map), typeMap: Object.assign({}, W.typeMap), dec: W.dec, dfmt: W.dfmt, repl: W.repl, drop: W.drop } });
   if (W.queue) W.queue.done.push({ fname: W.fname, acc: a.name, R });
   touch(); return R;
@@ -1259,31 +1299,100 @@ function guessAccountFor(fname) {           // 1) il conto dove hai già importa
   for (const a of S.accounts) { const sc = nameTokens(a.name).filter(t => ft.has(t)).length; if (sc > top) { top = sc; pick = a; tie = false; } else if (sc === top && sc > 0) tie = true; }
   return top > 0 && !tie ? pick : null;
 }
+async function importFiles(fs) {
+  if (!fs.length || !S || LOCKED) return;
+  if (fs.length > 30) { alert('Scegli al massimo 30 file alla volta.'); return; }
+  const items = [];
+  for (const f of fs) {
+    if (/\.(xlsx?|pdf)$/i.test(f.name)) { items.push({ name: f.name, bad: 'Formato non leggibile qui: apri il file in Excel e salvalo come CSV (UTF-8).' }); continue; }
+    if (f.size > 20e6) { items.push({ name: f.name, bad: 'File troppo grande.' }); continue; }
+    const buf = await f.arrayBuffer();
+    items.push({ name: f.name, text: decodeBytes(buf), hash: b64(new Uint8Array(await crypto.subtle.digest('SHA-256', buf))) });
+  }
+  openBatch(items);
+}
 function pickBatch() {
   const inp = h('input', { type: 'file', multiple: true, accept: '.csv,.tsv,.txt,.xlsx,.xls,.pdf,text/csv', style: 'display:none' });
-  inp.addEventListener('change', async () => {
-    const fs = [...inp.files]; inp.remove(); if (!fs.length) return;
-    if (fs.length > 30) { alert('Scegli al massimo 30 file alla volta.'); return; }
-    const items = [];
-    for (const f of fs) {
-      if (/\.(xlsx?|pdf)$/i.test(f.name)) { items.push({ name: f.name, bad: 'Formato non leggibile qui: apri il file in Excel e salvalo come CSV (UTF-8).' }); continue; }
-      if (f.size > 20e6) { items.push({ name: f.name, bad: 'File troppo grande.' }); continue; }
-      const buf = await f.arrayBuffer();
-      items.push({ name: f.name, text: decodeBytes(buf), hash: b64(new Uint8Array(await crypto.subtle.digest('SHA-256', buf))) });
-    }
-    openBatch(items);
-  });
+  inp.addEventListener('change', () => { const fs = [...inp.files]; inp.remove(); importFiles(fs); });
   document.body.append(inp); inp.click();
 }
+window.addEventListener('dragover', e => { if (e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files')) e.preventDefault(); });          // trascinare i file sulla pagina li importa (e non fa aprire il file dal browser)
+window.addEventListener('drop', async e => { if (!(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)) return; e.preventDefault(); if (!S) { if (CAN_CRYPTO()) { const f = e.dataTransfer.files[0]; if (f.size < 20e6) await openFromFile({ fh: null, text: await f.text() }); } return; } importFiles([...e.dataTransfer.files]); });          // sulla schermata iniziale: una copia di sicurezza trascinata qui si apre
+function parseMeta(text) {          // i file preparati per Finanze hanno in cima una riga "#Finanze;conto=...;liquidita=...": il file dice da solo a quale conto appartiene
+  const lines = String(text).replace(/^﻿/, '').split(/\r?\n/), meta = {}; let found = false;
+  const rest = lines.filter(l => { if (/^#\s*Finanze\b/i.test(l)) { found = true; for (const kv of l.split(';').slice(1)) { const i = kv.indexOf('='); if (i > 0) meta[kv.slice(0, i).trim().toLowerCase()] = kv.slice(i + 1).trim(); } return false; } return true; });
+  return found ? { meta, clean: rest.join('\n') } : null;
+}
+function splitBlocks(text) {          // un file puo' contenere piu' conti: ogni blocco comincia con la sua riga "#Finanze;conto=..."
+  const lines = String(text).replace(/^﻿/, '').split(/\r?\n/), starts = []; lines.forEach((l, i) => { if (/^#\s*Finanze\b/i.test(l)) starts.push(i); });
+  return starts.map((s, k) => { const t = lines.slice(s, k + 1 < starts.length ? starts[k + 1] : lines.length).join('\n'); return { text: t, fin: parseMeta(t) }; });
+}
+function autoImport(items) {          // tutti i file sono "Finanze": nessuna finestra per file, un solo riepilogo con "Annulla"
+  const before = JSON.stringify(S), out = [];
+  for (const it of items) {
+    if (it.bad) { out.push({ it, skip: it.bad }); continue; }
+    const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
+    let acc = S.accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
+    const dup = acc && (acc.imports || []).find(x => x.hash === it.hash); if (dup) { out.push({ it, acc, skip: 'già importato il ' + fmtDate(dup.date) }); continue; }
+    const created = !acc; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; S.accounts.push(acc); }
+    if (!it.fin.clean.trim()) {          // blocco senza righe: e' un conto fermo (banca, risparmi...), conta solo il saldo
+      const v = parseNum(m.liquidita || '', ','); if (!fin(v)) { if (created) S.accounts = S.accounts.filter(a => a !== acc); out.push({ it, acc, skip: 'manca il saldo (liquidita=...)' }); continue; }
+      acc.cash = v; if (m.valuta) acc.cashCcy = normCcy(m.valuta); if (FREQ_DAYS[m.frequenza]) acc.freq = m.frequenza; acc.upd = today();
+      (acc.imports || (acc.imports = [])).push({ id: uid(), date: today(), file: it.name, hash: it.hash });
+      out.push({ it, acc, R: { flows: 0, dup: 0, pos: 0, removed: 0, created: [] }, created, cashOnly: true }); continue;
+    }
+    const clean = it.fin.clean, rows = csvParse(clean, detectDelim(clean));
+    const W = { acc, fname: it.name, hash: it.hash, delim: detectDelim(clean), rows, hdr: guessHeaderRow(rows), mode: 'pos', map: null, typeMap: {}, typeCounts: new Map(), dec: ',', dfmt: 'dmy', repl: 'replace', drop: true, fmtTouched: false, queue: null, closed: false, recipe: false };
+    W.mode = guessMode(rows, W.hdr); recompute(W, true); const P = buildPlan(W);
+    if (W.mode !== 'pos' || P.missing || P.errors.length || !P.pos.length) { if (created) S.accounts = S.accounts.filter(a => a !== acc); out.push({ it, acc, skip: 'problema nel file: ' + (P.missing ? 'colonne non riconosciute' : P.errors[0] || 'nessuna posizione') }); continue; }
+    const R = applyImport(W, P);          // drop: il file e' la fotografia completa del conto, le posizioni che non ci sono piu' vengono tolte
+    if (m.liquidita) { const v = parseNum(m.liquidita, ','); if (fin(v)) acc.cash = v; }
+    if (m.valuta) acc.cashCcy = normCcy(m.valuta);
+    if (FREQ_DAYS[m.frequenza]) acc.freq = m.frequenza;          // "mese" o "trimestre": ogni quanto va aggiornato questo conto
+    if (/^\d{4}-\d{2}-\d{2}$/.test(m.partenza || '') && !acc.flows.length) {          // valore di partenza: costo di carico + liquidita' (cosi' la liquidita' non sembra un guadagno); se il costo non c'e' nel documento, "importopartenza" dice da che valore far partire il conto
+      const cost = P.pos.reduce((t, p) => t + (p.costEur || 0), 0), forced = m.importopartenza ? parseNum(m.importopartenza, ',') : NaN, base = fin(forced) && forced > 0 ? forced : cost + Math.max(0, acc.cash || 0);
+      if (base > 0) acc.flows.push({ id: uid(), date: m.partenza, type: 'partenza', amount: +base.toFixed(2), note: fin(forced) && forced > 0 ? 'Valore del conto alla data del file (costo di carico non disponibile)' : 'Costo di carico e liquidità alla data del file' });
+    }
+    out.push({ it, acc, R, created });
+  }
+  touch(); UI.tab = 'panoramica'; UI.acc = null; render(); showAutoResult(out, before);
+  if (out.some(x => x.R)) save(true);          // dopo un import si scarica sempre una copia in Download: se il browser dimenticasse i dati, con "Entra" scegli quel file e c'e' tutto
+}
+function showAutoResult(out, before) {
+  const dlg = h('dialog', { class: 'wide' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
+  dlg.append(h('h3', null, ok.length ? 'Fatto: ' + pl(ok.length, 'conto aggiornato', 'conti aggiornati') : 'Nessun file importato'),
+    table([{ t: 'Conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Nota' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), x.cashOnly ? 'solo saldo' : x.R.removed ? pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : ''] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', x.skip])),
+    ok.length ? h('p', { class: 'muted' }, 'Totale dei conti importati: ' + eur(ok.reduce((t, x) => t + accValue(x.acc), 0)) + '. I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco. Ho anche scaricato una copia di sicurezza (cartella Download, nome "finanze-data-ora.finanze"): se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.') : null,
+    h('div', { class: 'dlgacts' }, ok.length ? btn('Annulla l\'importazione', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); }) : null, btn('Chiudi', shut, 'pri')));
+  dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
+}
+function newAccountFromFile(fname, taken) {          // se il conto non esiste lo si propone dal nome del file: "fineco-dossier.csv" -> "Fineco Dossier", "fineco-advice-plus.csv" -> "Fineco Advice+"
+  const toks = String(fname || '').replace(/\.[^.]+$/, '').split(/[^A-Za-z0-9À-ÿ]+/).filter(t => t && !/^(csv|export|exports|portafoglio|file|import|copia)$/i.test(t) && !/^\d{4}$/.test(t) && !/^\(?\d+\)?$/.test(t));
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); let name = toks.map(cap).join(' ').replace(/ Plus$/, '+') || 'Nuovo conto';
+  const used = new Set([...S.accounts.map(a => a.name.toLowerCase()), ...(taken || []).map(n => n.toLowerCase())]); let k = 2, base = name; while (used.has(name.toLowerCase())) name = base + ' ' + k++;
+  const type = /crypto|nexo|binance|coinbase|kraken|exchange|revolut x|bitcoin/i.test(name) ? 'crypto' : /pension|cometa|previdenz/i.test(name) ? 'pensione' : /mt4|mt5|trading|cfd/i.test(name) ? 'trading' : /deposito|vincolat/i.test(name) ? 'deposito' : 'broker';
+  return { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: 'EUR', note: '', positions: [], flows: [], imports: [], _new: true };
+}
 function openBatch(items) {
-  if (!S.accounts.length) { alert('Crea prima almeno un conto (scheda Conti).'); return; }
+  const expanded = [];          // un file "Finanze" puo' contenere piu' conti (blocchi): ognuno diventa un elemento a parte
+  for (const it of items) {
+    if (it.bad) { expanded.push(it); continue; }
+    const bl = splitBlocks(it.text);
+    if (bl.length) bl.forEach((b, k) => expanded.push({ name: it.name + (bl.length > 1 ? ' · ' + (b.fin.meta.conto || (k + 1)) : ''), hash: it.hash + (bl.length > 1 ? '#' + k : ''), text: b.text, fin: b.fin }));
+    else expanded.push(it);
+  }
+  items.splice(0, items.length, ...expanded);
+  if (items.some(x => !x.bad) && items.every(x => x.bad || x.fin)) { autoImport(items); return; }          // tutti file "Finanze": si importa subito
   const dupOf = it => it.acc && (it.acc.imports || []).find(x => x.hash === it.hash);
   items.sort((a, b) => a.name.localeCompare(b.name, 'it'));
+  const taken = [];
   for (const it of items) {
     if (it.bad) { it.use = false; continue; }
     it.rows = csvParse(it.text, detectDelim(it.text));
     if (it.rows.length < 2) { it.bad = 'Il file non contiene righe leggibili.'; it.use = false; continue; }
-    it.mode = guessMode(it.rows, guessHeaderRow(it.rows)); it.acc = guessAccountFor(it.name); it.use = !!it.acc && !dupOf(it);
+    it.mode = guessMode(it.rows, guessHeaderRow(it.rows)); it.acc = guessAccountFor(it.name);
+    if (!it.acc) { it.acc = it.newAcc = newAccountFromFile(it.name, taken); taken.push(it.acc.name); }          // nessun conto adatto: ne nasce uno nuovo, col nome del file (lo puoi cambiare qui)
+    it.use = !!it.acc && !dupOf(it);
   }
   const dlg = h('dialog', { class: 'wide' }), body = h('div'), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
   const draw = () => {
@@ -1292,13 +1401,14 @@ function openBatch(items) {
       const dup = dupOf(it);
       return [h('input', { type: 'checkbox', checked: it.use, disabled: !it.acc, 'aria-label': 'Importa ' + it.name, onchange: e => { it.use = e.target.checked; draw(); } }), it.name,
         (it.mode === 'pos' ? 'Portafoglio' : 'Movimenti') + ' · ' + pl(it.rows.length - 1, 'riga', 'righe'),
-        h('select', { 'aria-label': 'Conto per ' + it.name, onchange: e => { it.acc = S.accounts.find(a => a.id === e.target.value) || null; it.use = !!it.acc && !dupOf(it); draw(); } },
-          [h('option', { value: '' }, '— scegli il conto —'), ...S.accounts.map(a => h('option', { value: a.id, selected: it.acc === a }, a.name))]),
-        !it.acc ? 'scegli un conto' : dup ? 'già importato il ' + fmtDate(dup.date) + ' (saltato)' : ''];
+        h('div', null, h('select', { 'aria-label': 'Conto per ' + it.name, onchange: e => { it.acc = e.target.value === '__new' ? (it.newAcc || (it.newAcc = newAccountFromFile(it.name, items.filter(x => x !== it && x.newAcc).map(x => x.newAcc.name)))) : (S.accounts.find(a => a.id === e.target.value) || null); it.use = !!it.acc && !dupOf(it); draw(); } },
+          [h('option', { value: '__new', selected: !!(it.acc && it.acc._new) }, '+ Nuovo conto'), ...S.accounts.map(a => h('option', { value: a.id, selected: it.acc === a }, a.name))]),
+          it.acc && it.acc._new ? h('input', { type: 'text', value: it.acc.name, 'aria-label': 'Nome del nuovo conto', style: 'margin-top:6px;width:100%', oninput: e => { it.acc.name = e.target.value; } }) : null),
+        !it.acc ? 'scegli un conto' : dup ? 'già importato il ' + fmtDate(dup.date) + ' (saltato)' : it.acc._new ? 'verrà creato un nuovo conto' : ''];
     });
     const list = items.filter(it => it.use && it.acc && !it.bad);
     body.replaceChildren(h('h3', null, 'Importa più file'),
-      h('p', { class: 'muted' }, 'Il conto è proposto dal nome del file o da dove lo avevi già importato: controllalo. Poi i file si aprono uno alla volta, con la stessa anteprima di sempre, e ripartono dalle impostazioni dell\'ultima volta.'),
+      h('p', { class: 'muted' }, 'Il conto è proposto dal nome del file o da dove lo avevi già importato; se non esiste, ne creo uno nuovo con il nome del file (puoi cambiarlo qui). Poi i file si aprono uno alla volta, con la stessa anteprima di sempre, e ripartono dalle impostazioni dell\'ultima volta.'),
       table([{ t: '' }, { t: 'File' }, { t: 'Contenuto' }, { t: 'Conto' }, { t: 'Nota' }], rows, 'Nessun file.'),
       h('div', { class: 'dlgacts' }, btn('Annulla', shut),
         h('button', { type: 'button', class: 'btn pri', disabled: !list.length, onclick: () => { shut(); runQueue(list); } }, list.length ? 'Importa ' + pl(list.length, 'file', 'file') + ', uno alla volta' : 'Nessun file da importare')));
@@ -1307,11 +1417,14 @@ function openBatch(items) {
   dlg.append(body); document.body.append(dlg); draw(); dlg.showModal();
 }
 function runQueue(list) {
-  const Q = { n: list.length, k: 0, done: [], abort: false };
+  const Q = { n: list.length, k: 0, done: [], abort: false, prev: null };
   Q.next = () => {
     if (LOCKED || !S) return;              // se l'app si è bloccata nel frattempo, non riaprire finestre con i dati
+    const p = Q.prev; if (p && p._new && !(p.imports && p.imports.length) && !p.positions.length && !p.flows.length) { S.accounts = S.accounts.filter(a => a !== p); render(); }          // file saltato: il conto nuovo rimasto vuoto sparisce
     if (Q.abort || Q.k >= Q.n) { endQueue(Q); return; }
-    const it = list[Q.k++]; openImport(it.acc, it.text, it.name, it.hash, Q);
+    const it = list[Q.k++]; Q.prev = it.acc;
+    if (it.acc._new && !S.accounts.includes(it.acc)) { it.acc.name = String(it.acc.name || '').trim() || 'Nuovo conto'; S.accounts.push(it.acc); UI.tab = 'conti'; }          // il conto nasce solo ora, quando si apre il suo file
+    openImport(it.acc, it.text, it.name, it.hash, Q);
   };
   Q.next();
 }
@@ -1922,33 +2035,35 @@ function viewUnlockLocal() {          // sul dispositivo c'e' gia' l'archivio ci
   $app.replaceChildren(h('main', { class: 'start' },
     h('h1', null, 'Finanze'),
     h('p', { class: 'lead' }, 'Scrivi la passphrase per entrare.'),
-    inp, h('div', { class: 'cta' }, btn('Entra', go, 'pri')), msg,
+    h('div', { class: 'pwrow' }, inp, pwToggle(inp)), h('div', { class: 'cta' }, btn('Entra', go, 'pri')), msg,
     h('p', { class: 'muted' }, 'Ultimo salvataggio su questo dispositivo: ' + (isNaN(when) ? '—' : when.toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' })) + '.'),
     h('details', { class: 'more' }, h('summary', null, 'Altre opzioni'),
       h('div', { class: 'cta' }, btn('Apri un altro file…', startOpen), btn('Nuovo archivio', startNew), btn('Prova la demo', startDemo)),
       h('p', { class: 'muted' }, h('a', { href: '#', onclick: e => { e.preventDefault(); forgetLocal(); } }, 'Dimentica i dati su questo dispositivo')))));
   inp.focus();
 }
-function viewStart() {
-  if (LOC.rec) return viewUnlockLocal();
+const npOf = rec => { try { return !!JSON.parse(rec.text).np; } catch { return false; } };
+function viewStart() {          // schermata iniziale: solo "Benvenuto" e un pulsante. Tutto il resto (archivio, salvataggi) e' automatico
+  if (LOC.rec && !npOf(LOC.rec)) return viewUnlockLocal();          // caso raro: sul dispositivo c'e' un archivio con passphrase (creato prima)
   $app.replaceChildren(h('main', { class: 'start' },
-    h('h1', null, 'Finanze'),
-    h('p', { class: 'lead' }, 'Il tuo patrimonio, in un archivio cifrato che resta sul tuo dispositivo.'),
+    h('h1', null, 'Benvenuto'),
     CAN_CRYPTO() ? null : h('div', { class: 'warn' }, NOCRYPTO),
-    h('div', { class: 'cta' }, btn('Entra', startOpen, 'pri')),
-    h('p', { class: 'muted' }, 'Scegli il tuo file .finanze e scrivi la passphrase. Su questo dispositivo lo fai una volta sola: poi basta la passphrase.'),
-    h('details', { class: 'more' }, h('summary', null, 'Prima volta o altre opzioni'),
-      h('div', { class: 'cta' }, btn('Crea un nuovo archivio', startNew), btn('Prova la demo', startDemo)),
-      h('ul', { class: 'notes' },
-        h('li', null, h('b', null, 'Nessuna connessione di rete: '), 'il browser stesso blocca qualsiasi invio di dati fuori da questa pagina.'),
-        h('li', null, h('b', null, 'Cifrato: '), 'AES-256 con una passphrase che conosci solo tu. Non c\'è recupero se la perdi.'),
-        h('li', null, h('b', null, 'Nessuna password dei tuoi conti '), 'è mai richiesta né salvata.'),
-        h('li', null, h('b', null, 'Copia di sicurezza: '), 'ogni tanto salva un file ', h('b', null, '.finanze'), ' (fuori da OneDrive, meglio anche su una chiavetta tua).')))));
+    h('div', { class: 'cta' }, btn('Entra', enterApp, 'pri')),
+    h('p', { class: 'muted', style: 'font-size:13px' }, 'Tutto quello che fai si salva da solo. ', h('a', { href: '#', onclick: e => { e.preventDefault(); startOpen(); } }, 'Ho una copia di sicurezza'))));
+}
+async function enterApp() {          // un clic: se c'e' gia' l'archivio su questo dispositivo lo apre, altrimenti ne crea uno nuovo e vuoto (senza passphrase, si salva da solo)
+  if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
+  const m = LOC.rec && npOf(LOC.rec) ? await openArchive(LOC.rec.text, null, NOPASS, true) : await createArchive(NOPASS, false, true);
+  if (m) alert(m);
+}async function startNoPass() {          // niente passphrase: l'archivio si apre da solo (piu' comodo, meno protetto)
+  if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
+  if (!confirm('Senza passphrase l\'archivio si apre da solo, senza chiedere nulla: chiunque usi questo dispositivo, o trovi il file, vede i tuoi conti. Lo puoi cambiare quando vuoi (Dati e sicurezza → "Metti una passphrase"). Procedo senza passphrase?')) return;
+  const m = await createArchive(NOPASS, false, true); if (m) alert(m);
 }
 function startNew() {
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   form('Nuovo archivio cifrato', [
-    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole. Se la perdi i dati non sono recuperabili da nessuno: salvala subito nell\'app Password del telefono o in un posto sicuro.' },
+    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'p2', hint: 'Almeno 12 caratteri. Il modo più semplice: premi "Suggeriscimi una frase" (si copia da sola) e incollala nell\'app Password o scrivila su un foglio. Se la perdi i dati non sono recuperabili da nessuno.' },
     { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }
   ], {}, o => {
     if (o.p1.length < 12) return 'Servono almeno 12 caratteri.';
@@ -1967,6 +2082,12 @@ function pickOpen() {
 async function startOpen() {
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   let r; try { r = await pickOpen(); } catch (e) { if (e && (e.name === 'AbortError' || e.message === 'annullato')) return; alert('Impossibile aprire il file: ' + (e.message || e)); return; }
+  return openFromFile(r);
+}
+async function openFromFile(r) {          // r = { fh, text }: dal selettore di file oppure trascinato sulla pagina
+  let ar = null; try { ar = JSON.parse(r.text); } catch { /* non e' un archivio */ }
+  if (!ar || ar.app !== 'finanze') { alert('Questo file non è un archivio di Finanze' + (/#\s*Finanze|;/.test(String(r.text).slice(0, 400)) ? ': è un file da IMPORTARE (CSV). Entra prima nell\'archivio (il file .finanze), poi usa "Importa i file dei conti…".' : '. Cerca il file che finisce con .finanze (per esempio finanze.finanze).')); return; }
+  if (ar.np) { const m = await openArchive(r.text, r.fh, NOPASS); if (m) alert(m); return; }          // archivio senza passphrase: si apre da solo
   form('Apri archivio' + (r.fh ? ' – ' + r.fh.name : ''), [{ key: 'p', label: 'Passphrase', type: 'password', req: true, ac: 'current-password' }], {}, o => openArchive(r.text, r.fh, o.p));
 }
 function startDemo() { S = demoData(); DEMO = true; KEY = null; FH = null; DIRTY = false; enter(); setStatus('Demo: dati inventati, nulla viene salvato'); }
@@ -1977,7 +2098,7 @@ function exitDemo() {
 function saveViewAsArchive() {
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   form('Salva come archivio cifrato', [
-    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', hint: 'Almeno 12 caratteri: meglio una frase di 4-5 parole. Se la perdi i dati non sono recuperabili da nessuno: salvala subito nell\'app Password del telefono o in un posto sicuro.' },
+    { key: 'p1', label: 'Passphrase', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'p2', hint: 'Almeno 12 caratteri. Il modo più semplice: premi "Suggeriscimi una frase" (si copia da sola) e incollala nell\'app Password o scrivila su un foglio. Se la perdi i dati non sono recuperabili da nessuno. Poi scegli dove salvare il file: una cartella fuori da OneDrive.' },
     { key: 'p2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }
   ], {}, o => {
     if (o.p1.length < 12) return 'Servono almeno 12 caratteri.';
@@ -1994,14 +2115,14 @@ function viewLock() {
     else { gateFail(); const w2 = gateWait(); msg.textContent = w2 ? gateMsg(w2) : 'Passphrase errata.'; }
   };
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-  $app.replaceChildren(h('main', { class: 'start' }, h('h1', null, 'Bloccato'), h('p', { class: 'lead' }, 'I dati sono nascosti. Inserisci la passphrase per continuare.'), inp, h('div', { class: 'cta' }, btn('Sblocca', go, 'pri')), msg));
+  $app.replaceChildren(h('main', { class: 'start' }, h('h1', null, 'Bloccato'), h('p', { class: 'lead' }, 'I dati sono nascosti. Inserisci la passphrase per continuare.'), h('div', { class: 'pwrow' }, inp, pwToggle(inp)), h('div', { class: 'cta' }, btn('Sblocca', go, 'pri')), msg));
   inp.focus();
 }
 function topbar() {
   return h('header', { class: 'top' }, h('div', { class: 'brand' }, 'Finanze'), h('div', { class: 'status', id: 'status', role: 'status' }, STATUS),
     h('div', { class: 'acts' },
       btn(HIDE ? 'Mostra importi' : 'Nascondi importi', () => { HIDE = !HIDE; render(); }),
-      DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, btn('Blocca', lock)]));
+      DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, NOPW ? null : btn('Blocca', lock)]));
 }
 const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
@@ -2012,10 +2133,9 @@ function content() { return { panoramica: tabPanoramica, conti: tabConti, strume
 
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
-    h('ol', null, h('li', null, 'Nella scheda ', h('b', null, 'Strumenti'), ' crea ETF, azioni, crypto o fondi che possiedi, con il prezzo di oggi.'),
-      h('li', null, 'Nella scheda ', h('b', null, 'Conti'), ' crea i conti, poi aggiungi liquidità, posizioni (quantità e costo) e i movimenti (versamenti e prelievi).'),
-      h('li', null, 'Questa pagina si compila da sola: patrimonio, guadagni, rendimento annuo, allocazione.')),
-    h('div', { class: 'row' }, btn('Crea uno strumento', () => editInstrument(), 'pri'), btn('Crea un conto', () => editAccount())));
+    h('p', null, 'Scegli i file dei tuoi conti (oppure trascinali su questa pagina): i conti, le posizioni e la liquidità si creano da soli.'),
+    h('div', { class: 'row' }, btn('Importa i file dei conti…', () => pickBatch(), 'pri'), btn('Saldi dei conti fermi', openBalances), btn('Crea un conto a mano', () => editAccount())),
+    h('p', { class: 'muted' }, 'I file che ti preparo io (per esempio quelli di Fineco) contengono già tutto. Per i file scaricati dal broker l\'app ti fa vedere un\'anteprima.'));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
@@ -2036,6 +2156,10 @@ function tabPanoramica() {
   if (stale.length) warns.push('Prezzo non aggiornato da più di 14 giorni: ' + stale.map(i => i.name).join(', ') + '.');
   for (const t of alerts().slice(0, 4)) warns.push(t);      // regole che ti sei dato (Analisi → Regole)
   const nof = pa.filter(a => !a.flows.length); if (nof.length) warns.push('Senza movimenti, guadagno e rendimento non sono calcolabili per: ' + nof.map(a => a.name).join(', ') + '.');
+  const dueA = S.accounts.map(a => [a, accDue(a)]).filter(x => x[1] != null);          // conti per cui e' passato il tempo che ti sei dato
+  if (dueA.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Da aggiornare'),
+    table([{ t: 'Conto' }, { t: 'Ultimo aggiornamento' }, { t: 'Come' }], dueA.map(([a, d]) => [a.name, fmtDate(a.upd) + ' (' + pl(d, 'giorno', 'giorni') + ' fa)', isCashAcc(a) ? btn('Aggiorna saldi', openBalances, 'sm pri') : 'mandami l\'estratto (PDF o screenshot) e ti preparo il file'])),
+    h('p', { class: 'muted' }, 'La frequenza di ogni conto si cambia da "Modifica conto".')));
   if (warns.length) el.append(h('div', { class: 'warn' }, h('b', null, 'Da sistemare'), h('ul', null, warns.map(w => h('li', null, w)))));
   const bf = briefingCard(); if (bf) el.append(bf);
   const pts = chartPoints();
@@ -2061,7 +2185,7 @@ function tabConti() {
   if (UI.acc) return viewAccount(UI.acc);
   const total = totalValue();
   const rows = S.accounts.map(a => { const p = perfOf([a]); return [h('a', { href: '#', onclick: e => { e.preventDefault(); UI.acc = a.id; render(); } }, a.name), TYPES[a.type] ? TYPES[a.type].label : a.type, eur(accValue(a)), a.perf && p.pnl != null ? gl(p.pnl, seur(p.pnl)) : '—', a.perf ? spct(p.xirr) : '—', rowActs(btn('Apri', () => { UI.acc = a.id; render(); }, 'sm'), btn('Modifica', () => editAccount(a), 'sm'), btn('Elimina', () => delAccount(a), 'sm danger'))]; });
-  return h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Conti'), btn('Importa più file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount(), 'pri')),
+  return h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Conti'), btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount())),
     table([{ t: 'Conto' }, { t: 'Tipo' }, { t: 'Valore', n: 1 }, { t: 'Guadagno', n: 1 }, { t: 'Annuo', n: 1 }, { t: '' }], rows, 'Nessun conto: creane uno.'),
     S.accounts.length ? h('p', { class: 'muted' }, 'Totale: ' + eur(total)) : null,
     h('p', { class: 'muted' }, 'Suggerimento: se un servizio ha sia il saldo sia gli investimenti (es. Revolut), crea due conti separati.'));
@@ -2070,7 +2194,7 @@ function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
   el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
-    h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.note ? ' · ' + a.note : '')));
+    h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
   el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : '') }, { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—' },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? 'serve almeno 1 mese di storia' : '' }]));
   if (a.type === 'pensione') el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
@@ -2192,8 +2316,11 @@ function tabDati() {
     DEMO ? null : h('div', { class: 'row' },
       btn(typeof navigator.canShare === 'function' ? 'Salva copia di sicurezza in File' : 'Scarica copia cifrata (backup)', typeof navigator.canShare === 'function' ? shareCopy : downloadCopy, 'pri'),
       LOC.rec || LOC.ok ? btn('Dimentica i dati su questo dispositivo', forgetLocal, 'danger') : null,
-      btn('Cambia passphrase', () => form('Cambia passphrase', [{ key: 'o', label: 'Passphrase attuale', type: 'password', req: true }, { key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, hint: 'Almeno 12 caratteri.' }, { key: 'n2', label: 'Ripeti la nuova passphrase', type: 'password', req: true }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(o.o, o.n1); })),
-      h('label', { class: 'fld', style: 'margin:0' }, h('span', null, 'Blocco automatico dopo'), h('select', { onchange: e => { S.settings.autolock = parseInt(e.target.value, 10); done(); } }, [[0, 'mai'], [2, '2 minuti'], [5, '5 minuti'], [10, '10 minuti'], [30, '30 minuti']].map(([v, l]) => h('option', { value: v, selected: S.settings.autolock === v }, l))))),
+      btn('Controlla di ricordare la passphrase', () => form('Controlla la passphrase', [{ key: 'p', label: 'Scrivi la passphrase', type: 'password', req: true, ac: 'current-password' }], {}, async o => { alert((await checkPass(o.p)) ? 'Corretta: è quella di questo archivio.' : 'Non corrisponde: controlla maiuscole, spazi e la tastiera (usa "Mostra").'); })),
+      NOPW ? btn('Metti una passphrase', () => form('Metti una passphrase', [{ key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'n2', hint: 'Almeno 12 caratteri. Con "Suggeriscimi una frase" te ne scrive una e la copia.' }, { key: 'n2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(NOPASS, o.n1); }))
+        : btn('Togli la passphrase', () => form('Togli la passphrase', [{ key: 'o', label: 'Passphrase attuale', type: 'password', req: true, ac: 'current-password', hint: 'Dopo, l\'archivio si apre da solo senza chiedere nulla: chi usa questo dispositivo vede i tuoi dati.' }], {}, o => changePass(o.o, NOPASS))),
+      NOPW ? null : btn('Cambia passphrase', () => form('Cambia passphrase', [{ key: 'o', label: 'Passphrase attuale', type: 'password', req: true }, { key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, hint: 'Almeno 12 caratteri.' }, { key: 'n2', label: 'Ripeti la nuova passphrase', type: 'password', req: true }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(o.o, o.n1); })),
+      h('label', { class: 'fld', style: 'margin:0' }, h('span', null, 'Blocco automatico dopo'), h('select', { onchange: e => { S.settings.autolock = parseInt(e.target.value, 10); done(); } }, [[0, 'mai'], [2, '2 minuti'], [5, '5 minuti'], [10, '10 minuti'], [15, '15 minuti'], [30, '30 minuti'], [60, '1 ora']].map(([v, l]) => h('option', { value: v, selected: S.settings.autolock === v }, l))))),
     h('p', { class: 'muted' }, 'Conserva il file .finanze fuori da OneDrive e fanne una copia su una chiavetta tua. La passphrase non è recuperabile da nessuno.')));
   return el;
 }
@@ -2251,6 +2378,7 @@ function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), 
     if (o.price > 0 && o.date >= i.priceDate) { u.price = { price: i.price, priceDate: i.priceDate }; setPriceAt(i, price, o.date); }          // il prezzo che hai scritto tu e' una quotazione vera di quel giorno; se non l'hai scritto non si tocca
     Object.assign(op, { instId: i.id, instName: i.name, qty, price, ccy: i.ccy, fee, gross });
   }
+  a.upd = today(); const bb = op.toId && S.accounts.find(x => x.id === op.toId); if (bb) bb.upd = today();          // un'operazione registrata e' un aggiornamento del conto
   op.undo = u; OPS().push(op); return null;
 }
 function undoOp(op) {
