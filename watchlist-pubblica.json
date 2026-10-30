@@ -37,6 +37,18 @@
     {"nome":"WisdomTree NASDAQ-100","classe":"Azioni","fonte":"borsa_italiana","id":"XS3003325795","tipo":"etc-etn"},
     {"nome":"Amundi MSCI World SRI Climate Paris Aligned","classe":"Azioni","fonte":"borsa_italiana","id":"IE000Y77LGG9","tipo":"etf"},
     {"nome":"Xtrackers S&P 500 Swap UCITS ETF 1C","classe":"Azioni","fonte":"borsa_italiana","id":"LU0490618542","tipo":"etf"},
-    {"nome":"Bitwise Physical Ethereum ETP","classe":"Crypto","fonte":"borsa_italiana","id":"DE000A3GMKD7","tipo":"etc-etn"}
+    {"nome":"Bitwise Physical Ethereum ETP","classe":"Crypto","fonte":"borsa_italiana","id":"DE000A3GMKD7","tipo":"etc-etn"},
+    {"nome":"Summit Midstream Corp","classe":"Azioni","fonte":"stockanalysis","id":"smc"},
+    {"nome":"nLIGHT","classe":"Azioni","fonte":"stockanalysis","id":"lasr"},
+    {"nome":"Lumentum Holdings","classe":"Azioni","fonte":"stockanalysis","id":"lite"},
+    {"nome":"Alphabet (Class A)","classe":"Azioni","fonte":"stockanalysis","id":"googl"},
+    {"nome":"Build-A-Bear Workshop","classe":"Azioni","fonte":"stockanalysis","id":"bbw"},
+    {"nome":"Super Micro Computer Inc","classe":"Azioni","fonte":"stockanalysis","id":"smci"},
+    {"nome":"CoreWeave Inc.","classe":"Azioni","fonte":"stockanalysis","id":"crwv"},
+    {"nome":"Sionna Therapeutics Inc","classe":"Azioni","fonte":"stockanalysis","id":"sion"},
+    {"nome":"Innventure Inc","classe":"Azioni","fonte":"stockanalysis","id":"inv"},
+    {"nome":"Amundi Core MSCI World UCITS ETF Acc","classe":"Azioni","fonte":"borsa_italiana","id":"IE000BI8OT95","tipo":"etf"},
+    {"nome":"Xtrackers MSCI Brazil UCITS ETF 1C","classe":"Azioni","fonte":"borsa_italiana","id":"LU0292109344","tipo":"etf"},
+    {"nome":"iShares MSCI Global Semiconductors UCITS ETF Acc","classe":"Azioni","fonte":"borsa_italiana","id":"IE000I8KRLL9","tipo":"etf"}
   ]
 }

@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2DsNreWqjPmArig/ISBFqjosLSwyuSr00Al+O3ukJRo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-mTiPDVAueuZTJxFuA6GYdQD1AQjIGmgq0N+ZWtqb0Yg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1119,6 +1119,10 @@ async function checkOnlinePrices(force) {          // i prezzi si applicano DA S
   try { autoApplyPrices(await fetchPricesText()); } catch { /* senza rete o senza file: l'app resta con i prezzi di prima */ }
 }
 function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce quanti ne ha applicati
+  try {          // cambi ufficiali della BCE (euro per 1 unita'), solo per le valute che usi
+    const f = JSON.parse(text), used = new Set([...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)]);
+    if (f && f.cambi && typeof f.cambi === 'object') for (const [c, r] of Object.entries(f.cambi)) if (/^[A-Z]{3}$/.test(c) && used.has(c) && typeof r === 'number' && r > 0 && r < 1000) S.fx[c] = r;
+  } catch { /* il controllo vero lo fa planPrices */ }
   let P = planPrices(text); if (P.error) return 0;
   let n = 0, last = '';
   for (const r of P.rows) if (!r.skip && r.use) { setPriceAt(r.i, r.np, r.e.data); n++; if (r.e.data > last) last = r.e.data; }
@@ -1768,6 +1772,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
+    for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
     let acc = S.accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
     const dup = acc && (acc.imports || []).find(x => x.hash === it.hash); if (dup) { out.push({ it, acc, skip: 'già importato il ' + fmtDate(dup.date) }); continue; }
     const created = !acc; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; S.accounts.push(acc); }

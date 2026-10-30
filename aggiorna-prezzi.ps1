@@ -137,7 +137,11 @@ $items = foreach ($r in $rows) {
   if ($r['div']) { $s += ',"div":' + (JStr ([string]$r['div'])) }
   '    ' + $s + '}'
 }
-$json = "{`n  `"app`": `"finanze-prezzi`",`n  `"versione`": 1,`n  `"generato`": $(JStr $stamp),`n  `"prezzi`": [`n" + ($items -join ",`n") + "`n  ]`n}`n"
+# cambi ufficiali della BCE (euro per 1 unita' di valuta): servono all'app per i titoli quotati in dollari
+$cambi = [ordered]@{}
+try { $x = [xml](Invoke-WebRequest 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml' -UseBasicParsing -TimeoutSec 30).Content; foreach ($cb in @($x.Envelope.Cube.Cube.Cube)) { if (@('USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD') -contains $cb.currency) { $rt = [double]::Parse($cb.rate, $inv); if ($rt -gt 0) { $cambi[[string]$cb.currency] = [Math]::Round(1 / $rt, 6) } } } } catch { }
+$cj = if ($cambi.Count) { "  `"cambi`": {" + (($cambi.Keys | ForEach-Object { (JStr $_) + ': ' + ([double]$cambi[$_]).ToString('R', $inv) }) -join ', ') + "},`n" } else { '' }
+$json = "{`n  `"app`": `"finanze-prezzi`",`n  `"versione`": 1,`n  `"generato`": $(JStr $stamp),`n" + $cj + "  `"prezzi`": [`n" + ($items -join ",`n") + "`n  ]`n}`n"
 [IO.File]::WriteAllText($pjPath, $json, $utf8)
 
 $lines = New-Object Collections.Generic.List[string]
