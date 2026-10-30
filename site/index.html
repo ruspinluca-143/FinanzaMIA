@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-uidRDV0uj0PVmm1AAhJyhuuHPs3Z+MxmoihRA/aGyNo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2DsNreWqjPmArig/ISBFqjosLSwyuSr00Al+O3ukJRo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1267,6 +1267,7 @@ function talk(o) {          // o = { kind, title, value, num, fmt, say, how, row
   const big = h('div', { class: 'talk-n' }, o.value && o.value.nodeType ? o.value.cloneNode(true) : (o.value ?? ''));
   [o.kind ? h('div', { class: 'talk-k' }, o.kind) : null, h('h3', null, o.title), big,
     o.say ? h('p', { class: 'talk-say' }, o.say) : null,
+    o.box ? h('div', { class: 'talk-box' }, h('b', null, o.box[0]), o.box[1]) : null,
     o.how ? h('div', { class: 'talk-box' }, h('b', null, 'Come si calcola'), h('div', null, o.how)) : null,
     o.rows && o.rows.length ? h('div', { class: 'talk-box' }, o.rowsTitle ? h('b', null, o.rowsTitle) : null, talkBars(o.rows, o.signed)) : null,
     o.tip ? h('div', { class: 'talk-box tip' }, h('b', null, 'Cosa puoi fare'), h('div', null, o.tip)) : null,
@@ -1876,7 +1877,7 @@ function endQueue(Q) {
 }
 
 /* ============ analisi, mercati, regole e diario ============ */
-const DATA = { hist: null, mercati: null };      // storico dei prezzi e dati di mercato letti dal sito (o da file)
+const DATA = { hist: null, mercati: null, aziende: null };      // storico dei prezzi e dati di mercato letti dal sito (o da file)
 const pnum = v => { const x = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(x) ? x : null; };
 const G = () => S.goal || (S.goal = { cagr: 20, years: 5, monthly: 0, assume: {} });
 const JR = () => S.journal || (S.journal = []);
@@ -1971,10 +1972,11 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json')]);
+  const [hh, mm, az] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json')]);
   if (hh) DATA.hist = parseHistory(hh);
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
-  if (S && !LOCKED && (hh || mm)) render();
+  if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
+  if (S && !LOCKED && (hh || mm || az)) render();
 }
 
 /* ---- grafici semplici ---- */
@@ -2446,8 +2448,28 @@ function marketForClaude(qk) {
   }
   return L.join('\n');
 }
+/* ---- le grandi aziende USA (S&P 100) che scendono di piu': ultima seduta, 7 e 30 giorni, con le notizie che spiegano il perche' ---- */
+const AZ_P = [['giorno', 'Ultima seduta', 'giorno_pct'], ['settimana', '7 giorni', 'settimana_pct'], ['mese', '30 giorni', 'mese_pct']];
+const spc = v => fin(v) ? (v > 0 ? '+' : '') + nf2.format(v) + '%' : '—';
+function talkAzienda(x) {
+  const A = DATA.aziende, nw = (A.notizie && A.notizie[x.ticker]) || [];
+  talk({ kind: 'Grande azienda USA · ' + x.settore, title: x.nome + ' (' + x.ticker + ')', value: spc(x.giorno_pct), say: 'Nell\'ultima seduta ' + (x.giorno_pct < 0 ? 'ha perso ' + nf2.format(-x.giorno_pct) + '%' : 'ha fatto ' + spc(x.giorno_pct)) + (fin(x.settimana_pct) ? ', in 7 giorni ' + spc(x.settimana_pct) : '') + (fin(x.mese_pct) ? ', in 30 giorni ' + spc(x.mese_pct) : '') + '. Prezzo: ' + nf2.format(x.prezzo) + ' $ (seduta del ' + fmtDate(x.data) + ').',
+    box: ['Perché: le ultime notizie', nw.length ? h('ul', { class: 'news' }, nw.map(n => h('li', null, linkEl(n.link, n.titolo), h('small', null, ' · ' + n.fonte + (n.data ? ' · ' + fmtDate(n.data.slice(0, 10)) : '')), n.sintesi ? h('div', { class: 'muted', style: 'font-size:13px' }, n.sintesi) : null))) : h('p', { class: 'muted' }, 'Nessuna notizia trovata nel periodo: il calo può dipendere da tutto il settore o dal mercato.')],
+    tip: 'Un calo forte per una notizia può essere un\'occasione o l\'inizio di un problema serio. Prima di comprare: leggi la notizia, guarda se scende tutto il settore, entra a piccole dosi e metti solo soldi che potresti perdere. Non è un consiglio.' });
+}
+function bigLosersCard() {
+  const A = DATA.aziende;
+  if (!A) return ONLINE && DATA.mercati ? h('section', { class: 'card' }, h('h2', null, 'Grandi aziende che scendono di più'), h('p', { class: 'muted' }, 'Per vedere ogni giorno le 10 grandi aziende USA che scendono di più (con le notizie che spiegano il perché) serve una chiave gratuita di Finnhub nel sito: si imposta una volta sola su GitHub.')) : null;
+  const k = UI.azP || 'giorno', P = AZ_P.find(p => p[0] === k), list = A[k] || [];
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, AZ_P.map(([key, lab]) => h('button', { class: 'chip', 'aria-pressed': k === key ? 'true' : 'false', onclick: () => { UI.azP = key; render(); } }, lab)));
+  const rows = list.map(x => [x.nome, x[P[2]], x.ticker + ' · ' + x.settore + ((A.notizie && (A.notizie[x.ticker] || []).length) ? ' · notizie' : ''), () => talkAzienda(x), spc(x[P[2]])]);
+  return h('section', { class: 'card' }, h('h2', null, 'Grandi aziende che scendono di più'), chips,
+    rows.length ? talkBars(rows, true) : h('p', { class: 'muted' }, k === 'giorno' ? 'Nessuna grande azienda in calo nell\'ultima seduta.' : 'Questa lista si riempie man mano che si accumula lo storico (ora ' + pl(A.giorni_di_storico || 0, 'giorno', 'giorni') + '): servono ' + (k === 'settimana' ? '7' : '30') + ' giorni.'),
+    h('p', { class: 'muted' }, 'Tra ' + (A.universo || 'le grandi aziende USA') + ': ' + A.lette + ' lette, seduta del ' + fmtDate(A.seduta) + ', aggiornato il ' + String(A.generato || '').slice(0, 16).replace('T', ' ') + '. Tocca un\'azienda per le notizie. Chi scende tanto può continuare a scendere: è un elenco da studiare, non un segnale di acquisto.'));
+}
 function tabMercati() {
   const m = DATA.mercati, el = h('div');
+  if (!m && DATA.aziende) el.append(bigLosersCard());
   const load = ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : btn('Carica mercati.json da file…', () => pickText('.json,application/json', t => { try { const j = normMercati(JSON.parse(t)); if (!j) throw 0; DATA.mercati = j; render(); } catch { alert('Non è un file dei mercati di Finanze.'); } }), 'sm');
   if (!m) { el.append(h('section', { class: 'card' }, h('h2', null, 'Mercati'), h('p', { class: 'muted' }, ONLINE ? 'I dati dei mercati non sono ancora disponibili: il sito li aggiorna due volte al giorno. Riprova tra poco.' : 'Carica il file mercati.json (si trova nel sito, nella cartella dei dati).'), load)); return el; }
   const I = m.indicatori || {}, ok = m.fonti.filter(f => f.ok), ko = m.fonti.filter(f => !f.ok), t = I.tassi_usa, fg = I.paura_avidita_crypto, c = I.crypto, sc = I.stablecoin;
@@ -2459,6 +2481,7 @@ function tabMercati() {
   if (sc) tl.push({ l: 'Stablecoin', v: nfp.format(sc.totale_mld_usd) + ' mld $', s: (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni' });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Mercati oggi'), load), h('p', { class: 'muted' }, 'Aggiornato il ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ' · ' + pl(ok.length, 'fonte letta', 'fonti lette') + (ko.length ? ' su ' + m.fonti.length : ''))));
   if (tl.length) el.append(tiles(tl));
+  const blc = bigLosersCard(); if (blc) el.append(blc);
   const notes = readMarket(m); if (notes.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Come leggerli'), h('ul', { class: 'list' }, notes.map(x => h('li', null, h('span', null, x)))), h('p', { class: 'muted' }, 'È una lettura meccanica dei dati, non una previsione né un consiglio.')));
   const cal = upcoming(m, 5);
   if (cal.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Prossimi appuntamenti'), h('ul', { class: 'list' }, cal.map(e => h('li', null, h('span', null, e.titolo), h('span', null, fmtDate(e.data), h('small', null, ' · ' + whenIn(e.data)))))),

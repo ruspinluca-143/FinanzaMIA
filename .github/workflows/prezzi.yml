@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -40,6 +40,13 @@ jobs:
         env:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
         run: ./raccogli-mercati.ps1 -Uscita ./site
+      - name: Grandi aziende USA che scendono di piu (serve il segreto FINNHUB_KEY)
+        id: aziende
+        continue-on-error: true
+        shell: pwsh
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+        run: ./aziende.ps1 -Uscita ./site
       - name: Avviso se i mercati non si leggono
         if: steps.mercati.outcome == 'failure'
         run: echo "::warning::Nessuna fonte dei mercati si e letta. Il sito resta con l'ultimo file buono."

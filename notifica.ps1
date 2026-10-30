@@ -46,6 +46,19 @@ if (Test-Path $stor) {
 }
 if ($forti.Count) { $righe.Insert(0, 'Movimenti forti: ' + (($forti | ForEach-Object { $_.nome + ' ' + $(if ($_.ch -gt 0) { '+' } else { '' }) + (Fmt ($_.ch * 100) 1) + '%' }) -join ', ') + '.') }
 
+# grandi aziende USA che sono scese di piu' nell'ultima seduta (da aziende.json, se c'e' la chiave Finnhub)
+$azf = Join-Path $Sito 'aziende.json'
+if (Test-Path $azf) { try {
+  $az = Get-Content $azf -Raw -Encoding UTF8 | ConvertFrom-Json
+  $fresco = ($ora - ([DateTimeOffset]::Parse($az.generato)).UtcDateTime).TotalHours -lt 30
+  $peg = @($az.giorno | Where-Object { $_.giorno_pct -le -3 } | Select-Object -First 3)
+  if ($fresco -and $peg.Count) {
+    $t = 'Grandi aziende USA in calo: ' + (($peg | ForEach-Object { $_.nome + ' ' + (Fmt $_.giorno_pct 1) + '%' }) -join ', ') + '.'
+    $nw = @($az.notizie.($peg[0].ticker)); if ($nw.Count -and $nw[0].titolo) { $t += ' Perche'': "' + $nw[0].titolo + '" (' + $nw[0].fonte + ').' }
+    $righe.Add($t + ' Elenco completo nell''app, scheda Mercati.')
+  }
+} catch { } }
+
 # promemoria del mese: nei primi 3 giorni del mese (ora italiana), una volta sola
 $roma = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($ora, $(if ($IsLinux -or $IsMacOS) { 'Europe/Rome' } else { 'W. Europe Standard Time' }))
 $mese = $roma.ToString('yyyy-MM'); $promemoria = ($roma.Day -le 3 -and $st['promemoria'] -ne $mese)
