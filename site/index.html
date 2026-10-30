@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tETxz/Qaq9HP3V6OKHDaibGSbNpSIFlVAZM+54BWTaE='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6IfJRmJKPoK3YC3/DVvrESsjLaVnKwanGnFgX3oufkk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -350,7 +350,7 @@ async function deriveKey(pass, salt, iter) {
 }
 const hdr = () => ({ app: 'finanze', v: 1, kdf: 'PBKDF2-SHA256', iter: ITER, salt: b64(SALT) });
 /* ---- copia cifrata sul dispositivo (IndexedDB): al prossimo avvio basta la passphrase, senza ricaricare il file ---- */
-const LOC = { rec: null, ok: false, off: false, persisted: null, err: '', where: '' };          // rec = { text, saved, at }: lo stesso testo cifrato che finisce nel file .finanze
+const LOC = { rec: null, ok: false, off: false, persisted: null, err: '', where: '', works: null };          // rec = { text, saved, at }: lo stesso testo cifrato che finisce nel file .finanze
 const idbOpen = () => new Promise((res, rej) => {
   if (!window.indexedDB) return rej(new Error('questo browser non permette di salvare sul dispositivo'));
   const r = indexedDB.open('finanze-locale', 1);
@@ -375,6 +375,7 @@ async function locPut(text, at) {
     try { localStorage.setItem(LS_KEY, JSON.stringify(rec)); LOC.where = 'memoria locale'; }
     catch (e2) { throw new Error(String(e1.message || e1) + (e2 && e2.name ? ' / ' + e2.name : '')); }
   }
+  const back = await locGet(); if (!back || back.text !== text) { LOC.ok = false; throw new Error('il browser non conserva i dati: la rilettura di controllo è fallita'); }          // si controlla davvero che quello che è stato scritto si rilegga
   LOC.rec = rec; LOC.ok = true; LOC.err = '';
   if (LOC.persisted == null && navigator.storage && navigator.storage.persist) { try { LOC.persisted = await navigator.storage.persist(); } catch { LOC.persisted = false; } }          // chiede al browser di non cancellare questi dati da solo
 }
@@ -2007,7 +2008,7 @@ function render() {
     window.scrollTo(0, y); afterRender();
   }
 }
-function enter() { UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7) save(true); }, 4000); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -2053,9 +2054,17 @@ function viewStart() {          // schermata iniziale: solo "Benvenuto" e un pul
 }
 async function enterApp() {          // un clic: se c'e' gia' l'archivio su questo dispositivo lo apre, altrimenti ne crea uno nuovo e vuoto (senza passphrase, si salva da solo)
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
+  if (!(LOC.rec && npOf(LOC.rec)) && LOC.works === false && window.showSaveFilePicker) { fileModeDialog(); return; }          // il browser non ricorda i dati: si sceglie un file, senza creare in silenzio un archivio vuoto
   const m = LOC.rec && npOf(LOC.rec) ? await openArchive(LOC.rec.text, null, NOPASS, true) : await createArchive(NOPASS, false, true);
   if (m) alert(m);
-}async function startNoPass() {          // niente passphrase: l'archivio si apre da solo (piu' comodo, meno protetto)
+}
+function fileModeDialog() {
+  const dlg = h('dialog'), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
+  dlg.append(h('h3', null, 'Questo browser non ricorda i dati da solo'), h('p', null, 'I tuoi dati restano in un file che scegli tu e si aggiorna a ogni modifica. Meglio ancora: apri il sito da internet (https://ruspinluca-143.github.io/FinanzaMIA/), dove si salva da solo.'),
+    h('div', { class: 'dlgacts' }, btn('Apri il mio file', () => { shut(); startOpen(); }), btn('Crea un file nuovo', async () => { shut(); const m = await createArchive(NOPASS, false, true); if (m) alert(m); }, 'pri')));
+  dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
+}
+async function startNoPass() {          // niente passphrase: l'archivio si apre da solo (piu' comodo, meno protetto)
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
   if (!confirm('Senza passphrase l\'archivio si apre da solo, senza chiedere nulla: chiunque usi questo dispositivo, o trovi il file, vede i tuoi conti. Lo puoi cambiare quando vuoi (Dati e sicurezza → "Metti una passphrase"). Procedo senza passphrase?')) return;
   const m = await createArchive(NOPASS, false, true); if (m) alert(m);
@@ -2316,6 +2325,7 @@ function tabDati() {
     DEMO ? null : h('div', { class: 'row' },
       btn(typeof navigator.canShare === 'function' ? 'Salva copia di sicurezza in File' : 'Scarica copia cifrata (backup)', typeof navigator.canShare === 'function' ? shareCopy : downloadCopy, 'pri'),
       LOC.rec || LOC.ok ? btn('Dimentica i dati su questo dispositivo', forgetLocal, 'danger') : null,
+      btn('Controlla che i dati si salvino', async () => { const ok = await locProbe(); let ric = false; try { const r = await locGet(); ric = !!(r && r.text); } catch { /* niente */ } alert(ok ? 'Sì: questo browser conserva i dati (' + (LOC.where || 'ok') + ')' + (ric ? ', e l\'archivio è presente.' : '.') + (LOC.persisted === false ? ' Attenzione: il browser potrebbe cancellarli se serve spazio: tieni una copia di sicurezza.' : '') + ' Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) : 'mai') + '.' : 'NO: questo browser non conserva i dati. Apri il sito da internet (https://ruspinluca-143.github.io/FinanzaMIA/) oppure lavora su un file (Esci e premi Entra).'); }),
       btn('Controlla di ricordare la passphrase', () => form('Controlla la passphrase', [{ key: 'p', label: 'Scrivi la passphrase', type: 'password', req: true, ac: 'current-password' }], {}, async o => { alert((await checkPass(o.p)) ? 'Corretta: è quella di questo archivio.' : 'Non corrisponde: controlla maiuscole, spazi e la tastiera (usa "Mostra").'); })),
       NOPW ? btn('Metti una passphrase', () => form('Metti una passphrase', [{ key: 'n1', label: 'Nuova passphrase', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'n2', hint: 'Almeno 12 caratteri. Con "Suggeriscimi una frase" te ne scrive una e la copia.' }, { key: 'n2', label: 'Ripeti la passphrase', type: 'password', req: true, ac: 'new-password' }], {}, o => { if (o.n1.length < 12) return 'Servono almeno 12 caratteri.'; if (o.n1 !== o.n2) return 'Le due passphrase non coincidono.'; return changePass(NOPASS, o.n1); }))
         : btn('Togli la passphrase', () => form('Togli la passphrase', [{ key: 'o', label: 'Passphrase attuale', type: 'password', req: true, ac: 'current-password', hint: 'Dopo, l\'archivio si apre da solo senza chiedere nulla: chi usa questo dispositivo vede i tuoi dati.' }], {}, o => changePass(o.o, NOPASS))),
@@ -2721,6 +2731,7 @@ if (ONLINE && 'serviceWorker' in navigator) window.addEventListener('load', () =
 (async () => {          // se sul dispositivo c'e' gia' l'archivio, la prima schermata chiede solo la passphrase
   try { const rec = await Promise.race([locGet(), new Promise(r => setTimeout(() => r(null), 2500))]); if (rec && rec.text) { LOC.rec = rec; LOC.ok = true; } }
   catch (e) { LOC.err = String(e.message || e); }
+  LOC.works = LOC.rec ? true : await locProbe();          // il browser riesce a tenere i dati da solo? (se no, si lavora su un file)
   render();
 })();
 </script>
