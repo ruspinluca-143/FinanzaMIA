@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zDyHfvb5CKGHR3KSX2uxcV75Gvb2yFNKndRwqHq/kfI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-G6GeUfGH9U+KeyCaS+Xc8qszVKidu7JuKXQQUv74W+o='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -914,14 +914,23 @@ function xirr(flows) {            // flussi: {t: ms, a: importo}, versamenti neg
   for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2, fm = npv(mid); if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; } }
   return (lo + hi) / 2;
 }
+const costBase = f => f.type === 'partenza' && (f.costo || /^Costo di carico/i.test(f.note || ''));          // partenza = prezzo pagato per i titoli: non sappiamo QUANDO li hai comprati
 function perfOf(accs) {
   const value = accs.reduce((t, a) => t + accValue(a), 0), contrib = accs.reduce((t, a) => t + netContrib(a), 0);
-  const flows = accs.flatMap(a => a.flows.map(f => ({ t: dayMs(f.date), a: -flowSign(f.type) * f.amount })));
-  const has = flows.length > 0, pnl = has ? value - contrib : null, pnlPct = has && contrib > 0 ? pnl / contrib : null;
+  const has = accs.some(a => a.flows.length), pnl = has ? value - contrib : null, pnlPct = has && contrib > 0 ? pnl / contrib : null;
+  // rendimento all'anno (XIRR): solo con date vere e almeno un anno di storia. Per i conti partiti dal prezzo pagato si parte
+  // dalla fotografia (snapshot) del primo giorno: dividere un guadagno di anni per pochi giorni darebbe numeri assurdi
+  const xf = []; let ok = true;
+  for (const a of accs) {
+    const cb = a.flows.find(costBase); let from = '';
+    if (cb) { const sn = S.snapshots.filter(n => n.date >= cb.date && n.accs && n.accs[a.id] != null).sort((p, q) => p.date < q.date ? -1 : 1)[0]; if (!sn) { ok = false; continue; } from = sn.date; xf.push({ t: dayMs(sn.date), a: -sn.accs[a.id] }); }
+    for (const f of a.flows) if (!costBase(f) && (!from || f.date > from)) xf.push({ t: dayMs(f.date), a: -flowSign(f.type) * f.amount });
+  }
   let x = null, span = 0;
-  if (has) { const t1 = dayMs(today()); span = (t1 - Math.min(...flows.map(f => f.t))) / 864e5; if (span >= 30) x = xirr(flows.concat([{ t: t1, a: value }])); }
-  return { value, contrib, pnl, pnlPct, xirr: x, span, has };
+  if (xf.length) { const t1 = dayMs(today()); span = (t1 - Math.min(...xf.map(f => f.t))) / 864e5; if (ok && span >= 365) x = xirr(xf.concat([{ t: t1, a: value }])); }
+  return { value, contrib, pnl, pnlPct, xirr: x, span, has, costBased: accs.some(a => a.flows.some(costBase)) };
 }
+const xirrWhy = p => !p.has ? 'aggiungi i movimenti del conto' : 'si calcola dopo un anno di storia (ora ' + pl(Math.max(0, Math.floor(p.span)), 'giorno', 'giorni') + '): per ora conta il guadagno sul versato';
 function parseMix(txt, fallback) {
   const raw = String(txt || '').split(/[,;]/).map(t => t.trim()).filter(Boolean);
   if (!raw.length) return [[fallback, 1]];
@@ -1276,9 +1285,9 @@ const tiles = arr => h('div', { class: 'tiles' }, arr.map((t, k) => h('div', { c
 /* ============ "parlante": ogni numero, se lo tocchi, dice che cosa vuol dire, come si calcola e da che cosa e' fatto ============ */
 const GLOSS = {
   'patrimonio totale': ['È tutto quello che hai, sommato: titoli e fondi al prezzo di oggi, più i soldi fermi sui conti, meno i debiti (per esempio la carta di credito).', 'Tocca un conto qui sotto per aprirlo e vedere da che cosa è fatto.'],
-  'versato netto': ['Sono i soldi tuoi che hai messo nei conti d\'investimento, meno quelli che hai ritirato. Non dipende da come vanno i mercati: è la base su cui si misura il guadagno.', 'Quando versi o ritiri soldi, registralo con "+ Operazione": così il guadagno resta giusto.'],
+  'versato netto': ['Sono i soldi tuoi che hai messo nei conti d\'investimento, meno quelli che hai ritirato. Per i conti importati dall\'estratto (Fineco, Directa, Fondo Cometa…) è il prezzo che hai pagato per i titoli più la liquidità, perché lo storico dei versamenti non lo conosciamo. Non dipende da come vanno i mercati: è la base su cui si misura il guadagno.', 'Quando versi o ritiri soldi, registralo con "+ Operazione": così il guadagno resta giusto.'],
   'guadagno / perdita': ['È quanto valgono oggi i conti d\'investimento meno quello che ci hai messo. Se è positivo, i tuoi soldi hanno lavorato per te.', 'Guardalo ogni qualche mese, non ogni giorno: nel breve i mercati vanno su e giù, conta la direzione nel tempo.'],
-  'rendimento annualizzato': ['È il guadagno trasformato in un tasso all\'anno, come quello di un conto deposito. Tiene conto di quando hai versato: un versamento di ieri ha avuto meno tempo per rendere di uno di tre anni fa (metodo XIRR).', 'Confrontalo con l\'inflazione (circa 2% all\'anno): se sei sopra, i tuoi soldi crescono davvero.'],
+  'rendimento annualizzato': ['È il guadagno trasformato in un tasso all\'anno, come quello di un conto deposito. Tiene conto di quando hai versato: un versamento di ieri ha avuto meno tempo per rendere di uno di tre anni fa (metodo XIRR). Compare solo dopo un anno di storia: prima, un buon mese "moltiplicato per dodici" darebbe numeri assurdi. Per i conti importati con il prezzo pagato si conta da quando l\'app li segue.', 'Confrontalo con l\'inflazione (circa 2% all\'anno): se sei sopra, i tuoi soldi crescono davvero.'],
   'guadagno sulle posizioni': ['È la differenza tra quanto valgono oggi i tuoi titoli e quanto li hai pagati. È un guadagno "sulla carta": diventa vero solo quando vendi, e allora si pagano le tasse.', 'Tocca un titolo nell\'elenco per vedere la sua storia.'],
   'ultimo snapshot': ['Uno snapshot è una fotografia del patrimonio in un giorno. Il grafico "Valore e versato nel tempo" si disegna unendo queste fotografie.', 'Registrane uno ogni volta che aggiorni i conti: più fotografie, grafico più preciso.'],
   'valore': ['Quanto vale oggi questo conto: i titoli al prezzo di oggi più la liquidità che c\'è sopra.', ''],
@@ -2809,8 +2818,8 @@ function tabPanoramica() {
       x: () => ({ num: tp.contrib, how: 'Somma di versamenti meno prelievi di ' + pl(pa.length, 'conto d\'investimento', 'conti d\'investimento') + ' = ' + eur(tp.contrib) + '. Per i conti senza storia conta il "valore di partenza" del giorno in cui hai cominciato a seguirli.', rows: perAcc(p => p.contrib).map(([a, , v]) => [a.name, v, '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto' }) },
     { l: 'Guadagno / perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato',
       x: () => ({ how: tp.pnl == null ? 'Servono i movimenti dei conti.' : eur(tp.value) + ' di valore oggi − ' + eur(tp.contrib) + ' versati = ' + seur(tp.pnl) + (fin(tp.pnlPct) ? ' (' + spct(tp.pnlPct) + ')' : '') + '.', rows: perAcc(p => p.pnl).map(([a, p, v]) => [a.name, v, fin(p.pnlPct) ? spct(p.pnlPct) : '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Chi ha guadagnato e chi ha perso', signed: true }) },
-    { l: 'Rendimento annualizzato', v: tp.xirr == null ? '—' : gl(tp.xirr, spct(tp.xirr)), s: tp.xirr == null ? 'serve almeno 1 mese di storia' : 'XIRR, tiene conto delle date dei versamenti',
-      x: () => ({ how: tp.xirr == null ? 'Serve almeno un mese di storia dal primo movimento: i conti seguiti da oggi lo mostreranno tra qualche settimana.' : 'Il tasso annuo che, applicato a ogni versamento dal suo giorno, porta esattamente al valore di oggi: ' + spct(tp.xirr) + ' all\'anno.', rows: perAcc(p => p.xirr).map(([a, , v]) => [a.name, v, '', openAcc(a), spct(v)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto', signed: true }) },
+    { l: 'Rendimento annualizzato', v: tp.xirr == null ? '—' : gl(tp.xirr, spct(tp.xirr)), s: tp.xirr == null ? xirrWhy(tp) : 'XIRR, tiene conto delle date dei versamenti',
+      x: () => ({ how: tp.xirr == null ? 'Compare dopo un anno di storia. Per i conti importati con il prezzo pagato (Fineco, Directa, Fondo Cometa) non sappiamo quando hai comprato: dividere il guadagno di anni per un solo mese darebbe numeri assurdi (per esempio +55% in un mese diventerebbe più del 20.000% "all\'anno"). Per ora guarda il guadagno sul versato.' : 'Il tasso annuo che, applicato a ogni versamento dal suo giorno, porta esattamente al valore di oggi: ' + spct(tp.xirr) + ' all\'anno.', rows: perAcc(p => p.xirr).map(([a, , v]) => [a.name, v, '', openAcc(a), spct(v)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto', signed: true }) },
     { l: 'Guadagno sulle posizioni', v: pp.length ? gl(pg, seur(pg)) : '—', s: pp.length ? spct(pg / pcost) + ' sul costo di ' + eur(pcost) + ' · ' + pp.length + ' posizioni con costo, ' + pct(pv / total) + ' del patrimonio' : 'inserisci il costo di carico delle posizioni (non realizzato)',
       x: () => ({ how: pp.length ? eur(pv) + ' di valore − ' + eur(pcost) + ' di costo = ' + seur(pg) + ', su ' + pl(pp.length, 'posizione', 'posizioni') + ' di cui conosci il prezzo pagato.' : '', rows: pp.slice().sort((x, y) => Math.abs(y.pnl) - Math.abs(x.pnl)).slice(0, 10).map(x => [x.name, x.pnl, x.acc + ' · ' + spct(x.pct), () => talkPos(x.a, x.p)]), rowsTitle: 'Le 10 posizioni che pesano di più sul risultato', signed: true }) },
     { l: 'Ultimo snapshot', v: lastSnap ? fmtDate(lastSnap) : 'nessuno', s: h('span', null, lastSnap ? daysSince(lastSnap) + ' giorni fa · ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); takeSnapshot(); render(); } }, 'registra oggi')) }
@@ -2922,7 +2931,7 @@ function viewAccount(id) {
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
-    { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? 'serve almeno 1 mese di storia' : '' }]));
+    { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   if (a.positions.length) {          // che cosa si aggiorna da solo in questo conto
     const x = autoInfo(a), li = ([, , i, v], ok) => h('li', null, h('span', null, (ok ? '⟳ ' : '✎ ') + i.name, h('small', null, ok ? ' · ' + (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
     el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Cosa si aggiorna da solo'), h('span', { class: 'pill ' + (x.fermi.length ? 'dn' : 'up') }, pct(x.share) + ' del valore')),
