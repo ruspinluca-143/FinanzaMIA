@@ -30,6 +30,13 @@
     {"nome":"Ether","classe":"Crypto","fonte":"coingecko","id":"ethereum"},
     {"nome":"Solana","classe":"Crypto","fonte":"coingecko","id":"solana"},
     {"nome":"Cardano","classe":"Crypto","fonte":"coingecko","id":"cardano"},
-    {"nome":"Cosmos","classe":"Crypto","fonte":"coingecko","id":"cosmos"}
+    {"nome":"Cosmos","classe":"Crypto","fonte":"coingecko","id":"cosmos"},
+    {"nome":"iShares Core MSCI Europe UCITS ETF EUR (Acc)","classe":"Azioni","fonte":"borsa_italiana","id":"IE00B4K48X80","tipo":"etf"},
+    {"nome":"WisdomTree Physical Gold EUR Daily Hedged","classe":"Materie prime","fonte":"borsa_italiana","id":"JE00B8DFY052","tipo":"etc-etn"},
+    {"nome":"WisdomTree Physical Solana","classe":"Crypto","fonte":"borsa_italiana","id":"GB00BNGJ9G01","tipo":"etc-etn"},
+    {"nome":"WisdomTree NASDAQ-100","classe":"Azioni","fonte":"borsa_italiana","id":"XS3003325795","tipo":"etc-etn"},
+    {"nome":"Amundi MSCI World SRI Climate Paris Aligned","classe":"Azioni","fonte":"borsa_italiana","id":"IE000Y77LGG9","tipo":"etf"},
+    {"nome":"Xtrackers S&P 500 Swap UCITS ETF 1C","classe":"Azioni","fonte":"borsa_italiana","id":"LU0490618542","tipo":"etf"},
+    {"nome":"Bitwise Physical Ethereum ETP","classe":"Crypto","fonte":"borsa_italiana","id":"DE000A3GMKD7","tipo":"etc-etn"}
   ]
 }

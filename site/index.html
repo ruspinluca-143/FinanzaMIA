@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PdWdpNeTJ31FlYdWrd/jrtTundlwfDqgOzNzu7deal4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-uidRDV0uj0PVmm1AAhJyhuuHPs3Z+MxmoihRA/aGyNo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -55,6 +55,9 @@ dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0
 .tb-t{grid-area:t;height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden}
 .tb-b{display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,var(--s1),#64d2ff);animation:grow .9s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 300ms)}
 .tb-b.neg{background:linear-gradient(90deg,#ff375f,#ff9f0a)}
+.box{padding:12px 14px;border-radius:14px;margin-top:10px;background:color-mix(in srgb,var(--s1) 6%,transparent);transition:background .25s}
+.box:hover{background:color-mix(in srgb,var(--s1) 10%,transparent)}
+.box-n{font-weight:650;font-variant-numeric:tabular-nums;margin-right:8px}
 .tb-v.gain{color:var(--gain)}
 .tb-v.loss{color:var(--loss)}
 #status{cursor:pointer}
@@ -362,13 +365,14 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento (soldi che entrano)'], ['prelievo', 'Prelievo (soldi che escono)'], ['partenza', 'Valore di partenza (inizio tracciamento)']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget() });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {} });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
-  for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; }
+  for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
+  d.boxes = d.boxes || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
 
@@ -481,6 +485,7 @@ function touch() {
   if (DEMO) { setStatus('Demo: nulla viene salvato'); return; }
   setStatus('Salvataggio…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => save(false), 600);          // a ogni modifica: copia sul dispositivo e, se c'e', anche sul file
   clSoon();          // ...e online, se attivo
+  snapSoon();          // e la fotografia del giorno, se i valori sono cambiati
 }
 function save(manual) { saveChain = saveChain.then(() => doSave(manual)).catch(() => {}); return saveChain; }
 async function doSave(manual) {
@@ -679,6 +684,7 @@ function cloudCard() {
     h('p', { class: 'muted' }, 'Ogni modifica va anche online (Supabase), cifrata con il tuo codice: con il codice ritrovi tutto su qualsiasi telefono o browser, anche se questo dimentica i dati. Online si tengono anche copie orarie delle ultime 60 versioni.'),
     h('div', { class: 'row' },
       CL.code ? btn('Salva online adesso', async () => { if (!CL.ready) await clAttach(); else { CL.pending = true; await clPush(); await clCheck(); } render(); }, 'pri') : btn('Attiva su questo dispositivo', () => clLogin(), 'pri'),
+      CL.code ? btn('Versioni precedenti…', histOpen) : null,
       CL.code ? btn('Togli il codice da questo dispositivo', clForget, 'danger') : null));
 }
 /* ---- "refresh" = salvataggio: in cima alla pagina, trascinando in basso (o toccando la scritta di stato) si salva subito, qui e online ---- */
@@ -716,9 +722,98 @@ window.addEventListener('online', () => { if (CL.pending || (CL.code && !CL.read
 document.addEventListener('visibilitychange', () => { if (!CLOUD_ON() || !S || DEMO) return; if (document.hidden) { if (CL.pending && CL.ready) { clearTimeout(CL.timer); clPush(true); } } else clCheck(); });
 window.addEventListener('pagehide', () => { if (CLOUD_ON() && S && CL.pending && CL.ready && !CL.busy) clPush(true); });
 
+/* ============ Face ID / impronta / Windows Hello (passkey di questo dispositivo): per entrare e per sbloccare ============ */
+const FID_LS = 'finanze-faceid';
+const FID = (() => { try { return JSON.parse(localStorage.getItem(FID_LS) || 'null') || {}; } catch { return {}; } })();
+const fidSave = () => { try { if (FID.id) localStorage.setItem(FID_LS, JSON.stringify(FID)); else localStorage.removeItem(FID_LS); } catch { /* niente */ } };
+const FID_OK = () => !!(ONLINE && window.isSecureContext && window.PublicKeyCredential && navigator.credentials);
+const b64u = u8 => b64(u8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64u = t => { const x = t.replace(/-/g, '+').replace(/_/g, '/'); return unb64(x + '='.repeat((4 - x.length % 4) % 4)); };
+async function fidEnable() {
+  if (!FID_OK()) { alert('Face ID funziona solo aprendo l\'app dal sito (https://ruspinluca-143.github.io/FinanzaMIA/), su iPhone o su un PC con Windows Hello.'); return; }
+  if (!(CLOUD_ON() && CL.code)) { alert('Prima attiva il salvataggio online: il codice serve come riserva se un giorno Face ID non va.'); return; }
+  try {
+    if (PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable && !(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())) { alert('Su questo dispositivo non risultano Face ID, impronta o Windows Hello attivi.'); return; }
+    const cred = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'Finanze' }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'Finanze', displayName: 'Finanze' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' }, timeout: 60000, attestation: 'none' } });
+    FID.id = b64u(new Uint8Array(cred.rawId)); FID.at = new Date().toISOString(); fidSave();
+    setStatus('Face ID attivo su questo dispositivo'); render();
+  } catch (e) { if (e && e.name === 'NotAllowedError') return; alert('Non sono riuscito ad attivarlo: ' + (e.message || e)); }
+}
+async function fidAsk() {          // true se il volto (o l'impronta, o Windows Hello) e' quello giusto
+  try { await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: unb64u(FID.id) }], userVerification: 'required', timeout: 60000 } }); return true; } catch { return false; }
+}
+function codeAsk(msg) {          // riserva: il codice del salvataggio online
+  return new Promise(res => {
+    let ok = false;
+    form('Entra con il codice', [{ key: 'c', label: 'Il tuo codice online', type: 'password', req: true, ac: 'current-password', hint: msg || 'Face ID non è andato: usa il codice del salvataggio online.' }], {}, o => { if (o.c !== CL.code) return 'Codice sbagliato.'; ok = true; res(true); },
+      h('input', { type: 'text', autocomplete: 'username', value: 'Finanze', style: 'display:none', 'aria-hidden': 'true', tabindex: '-1' }), 'Entra');
+    const d = [...document.querySelectorAll('dialog')].pop(); if (d) d.addEventListener('close', () => { if (!ok) res(false); });
+  });
+}
+async function fidGate() { if (!FID.id || !FID_OK()) return true; if (await fidAsk()) return true; return CL.code ? codeAsk() : false; }
+function fidOff() { if (!confirm('Tolgo Face ID da questo dispositivo? L\'app tornerà ad aprirsi con un tocco su Entra.')) return; FID.id = ''; fidSave(); render(); }
+function fidCard() {
+  if (DEMO) return null;
+  const on = !!FID.id;
+  return h('section', { class: 'card' }, h('h2', null, 'Face ID / impronta'),
+    h('p', null, on ? 'Attivo su questo dispositivo: serve il tuo volto (o l\'impronta, o Windows Hello sul PC) per entrare e dopo ' + pl(S.settings.autolock || 5, 'minuto', 'minuti') + ' di pausa.' : 'Non attivo su questo dispositivo.'),
+    h('p', { class: 'muted' }, 'È una serratura sulla porta: impedisce a chi prende in mano il telefono sbloccato di vedere i tuoi conti. Vale per un dispositivo alla volta. Se Face ID non va, si entra con il codice del salvataggio online.' + (FID_OK() ? '' : ' Si attiva solo aprendo l\'app dal sito, non dal file sul PC.')),
+    h('div', { class: 'row' }, on ? btn('Togli Face ID da questo dispositivo', fidOff, 'danger') : btn('Attiva Face ID', fidEnable, 'pri')));
+}
+
+/* ============ versioni precedenti online (copie orarie delle ultime 60 versioni, tabella finanze_storico) ============ */
+async function clDecrypt(text, code) {          // apre una copia online senza toccare la chiave in uso
+  const f = JSON.parse(text), key = await deriveKey(code, unb64(f.salt), f.iter), header = { app: f.app, v: f.v, kdf: f.kdf, iter: f.iter, salt: f.salt };
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv), additionalData: enc.encode(JSON.stringify(header)) }, key, unb64(f.ct));
+  const D = JSON.parse(dec.decode(pt)); migrate(D); return D;
+}
+const sumOf = D => { const keep = S; S = D; try { return { n: D.accounts.length, tot: totalValue() }; } finally { S = keep; } };
+async function histOpen() {
+  if (!(CLOUD_ON() && CL.code)) { alert('Serve il salvataggio online attivo su questo dispositivo.'); return; }
+  let r; try { r = await cloudRpc('finanze_storico_elenco', { p_codice: CL.code }); }
+  catch (e) { alert(/could not find|not find the function|PGRST202/i.test(String(e.message)) ? 'Manca un pezzo nel database: esegui una volta supabase-finanze-2.sql nel SQL Editor di Supabase.' : 'Online non risponde (' + (e.message || e) + ').'); return; }
+  if (!r || !r.ok) { clFail(r); return; }
+  const list = r.versioni || [], dlg = h('dialog', { class: 'wide' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
+  const look = async (v, b) => {
+    b.disabled = true; b.textContent = 'Apro…';
+    try {
+      const x = await cloudRpc('finanze_storico_leggi', { p_codice: CL.code, p_n: v.n }); if (!x || !x.ok || !x.dati) throw new Error('versione non trovata');
+      const D = await clDecrypt(x.dati, CL.code), s0 = sumOf(D), now = sumOf(S);
+      if (!confirm('Versione del ' + clHm(v.salvato) + ': ' + pl(s0.n, 'conto', 'conti') + ', ' + eur(s0.tot) + '.\nAdesso: ' + pl(now.n, 'conto', 'conti') + ', ' + eur(now.tot) + '.\n\nRipristino questa versione? Quella di adesso la scarico prima in una copia di sicurezza.')) { b.disabled = false; b.textContent = 'Guarda e ripristina'; return; }
+      try { download(await seal()); } catch { /* si continua */ }
+      S = D; CL.wiped = true; shut(); UI.tab = 'panoramica'; UI.acc = null; touch(); render(); setStatus('Ripristinata la versione del ' + clHm(v.salvato));
+    } catch (e) { b.disabled = false; b.textContent = 'Guarda e ripristina'; alert('Non riesco ad aprirla: ' + (e.message || e)); }
+  };
+  dlg.append(h('h3', null, 'Versioni precedenti online'), h('p', { class: 'muted' }, 'Una copia all\'ora mentre lavori, le ultime 60. Toccane una per vedere che cosa contiene e, se vuoi, rimetterla.'),
+    list.length ? table([{ t: 'Salvata il' }, { t: 'Versione', n: 1 }, { t: '' }], list.map(v => { const b = btn('Guarda e ripristina', () => look(v, b), 'sm'); return [clHm(v.salvato), String(v.versione), b]; })) : h('p', null, 'Ancora nessuna copia: la prima si fa dopo un\'ora di modifiche.'),
+    h('div', { class: 'dlgacts' }, btn('Chiudi', shut, 'pri')));
+  dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
+}
+
+/* ============ fotografia automatica: una al giorno (e aggiornata se i valori cambiano), cosi' grafico e rischio si riempiono da soli ============ */
+let snapT = null;
+function autoSnap() {
+  if (!S || DEMO || LOCKED || !S.accounts.length) return;
+  const cur = S.snapshots.find(x => x.date === today());
+  if (cur && Math.abs(cur.total - totalValue()) < 0.5) return;
+  takeSnapshot();
+}
+const snapSoon = (ms) => { clearTimeout(snapT); snapT = setTimeout(autoSnap, ms || 4000); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !DEMO) { snapSoon(3000); checkNewVersion(); } });
+
+/* ============ versione nuova dell'app: se sul sito c'e' un codice diverso, un tocco la carica (dopo aver salvato) ============ */
+const MY_HASH = (() => { const m = document.querySelector('meta[http-equiv="Content-Security-Policy"]'), x = m && /script-src '([^']+)'/.exec(m.content); return x ? x[1] : ''; })();
+let NEWVER = false, verAt = 0;
+async function checkNewVersion() {
+  if (!ONLINE || NEWVER || !MY_HASH || Date.now() - verAt < 5 * 60000) return; verAt = Date.now();
+  try { const t = await (await fetch('./', { cache: 'no-store' })).text(), x = /script-src '([^']+)'/.exec(t); if (x && x[1] !== MY_HASH) { NEWVER = true; if (!LOCKED) render(); } } catch { /* senza rete: niente */ }
+}
+async function updateNow() { try { clearTimeout(saveTimer); if (S && !DEMO) { await save(false); if (CL.pending && CL.ready) await clPush(); } } finally { location.reload(); } }
+const newVerBar = () => NEWVER ? h('div', { class: 'banner' }, h('span', null, 'C\'è una versione nuova dell\'app.'), btn('Aggiorna adesso', updateNow, 'pri sm')) : null;
+
 /* ============ blocco automatico ============ */
 async function lock() {
-  if (DEMO || !KEY || LOCKED || NOPW) return;          // senza passphrase non c'e' nulla da chiedere per sbloccare
+  if (DEMO || !KEY || LOCKED || (NOPW && !FID.id)) return;          // senza passphrase si blocca solo se c'e' Face ID
   if (DIRTY) { clearTimeout(saveTimer); await save(false); }
   document.querySelectorAll('dialog').forEach(d => { if (d.open) d.close(); d.remove(); });
   LOCKED = true; render();
@@ -772,10 +867,11 @@ function parseMix(txt, fallback) {
   return withNum.filter(x => x[1] > 0).map(x => [x[0], x[1] / sum]);
 }
 const mixStr = m => m.length === 1 ? m[0][0] : m.map(([k, w]) => k + ' ' + Math.round(w * 100) + '%').join(' · ');
-function exposure(dim) {
+function exposure(dim, noBox) {          // noBox: senza le casse separate (per esempio la cassa dei cani)
   const m = new Map(), lab = new Map();
   const add = (label, v) => { if (!fin(v) || v === 0) return; const k = String(label).toLowerCase(); if (!lab.has(k)) lab.set(k, label); m.set(k, (m.get(k) || 0) + v); };
   for (const a of S.accounts) {
+    if (noBox && a.box) continue;
     const cash = accCash(a);
     if (cash) add(dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : 'Liquidità', cash);
     for (const p of a.positions) {
@@ -888,7 +984,8 @@ const done = () => { touch(); render(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
-  const isNew = !a, v = a ? Object.assign({ freq: '' }, a, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26 };
+  const isNew = !a, v = a ? Object.assign({ freq: '', box: '' }, a, { estero: a.estero === true ? 'si' : a.estero === false ? 'no' : '', regime: a.regime || '' }, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26, estero: '', regime: '', box: '' };
+  const boxes = [...new Set(S.accounts.map(x => x.box).filter(Boolean))];
   form(isNew ? 'Nuovo conto' : 'Modifica conto', [
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
     { key: 'type', label: 'Tipo', type: 'select', options: Object.entries(TYPES).map(([k, t]) => [k, t.label]), ...(isNew ? { sync: i => { i.perf.checked = TYPES[i.type.value].perf; } } : {}) },
@@ -897,6 +994,9 @@ function editAccount(a) {
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
     { key: 'note', label: 'Note' },
     { key: 'freq', label: 'Ogni quanto lo aggiorni', type: 'select', options: [['', 'Non serve un promemoria'], ['mese', 'Ogni mese'], ['trimestre', 'Ogni 3 mesi']], hint: 'Passato quel tempo, in Panoramica compare "Da aggiornare".' },
+    { key: 'box', label: 'Cassa separata (facoltativa)', list: 'dl-box', ph: 'es. Cassa cani', hint: 'Soldi che non sono "tuoi" da investire: i conti con la stessa cassa si vedono insieme in Panoramica e non contano nel ribilanciamento.' },
+    { key: 'estero', label: 'Dove si trova il conto (per le tasse)', type: 'select', options: [['', 'Stima dal nome' + (a ? ' (ora: ' + (accForeign(a) ? 'estero' : 'Italia') + ')' : '')], ['no', 'In Italia'], ['si', 'All\'estero (va nel quadro RW)']] },
+    { key: 'regime', label: 'Tasse sui guadagni', type: 'select', options: [['', 'Stima'], ['amministrato', 'Le paga la banca (regime amministrato)'], ['dichiarativo', 'Le dichiaro io (regime dichiarativo)']] },
     { key: 'dpP', label: 'Solo conto deposito: capitale versato (€)', type: 'number' },
     { key: 'dpR', label: 'Solo conto deposito: tasso annuo lordo (%)', type: 'number' },
     { key: 'dpS', label: 'Solo conto deposito: data di inizio', type: 'date' },
@@ -906,10 +1006,10 @@ function editAccount(a) {
     if (!o.name) return 'Inserisci un nome.';
     let dep = null;
     if (o.type === 'deposito') { if (!(o.dpP > 0) || !o.dpS) return 'Per un conto deposito indica capitale e data di inizio.'; dep = { principal: o.dpP, rate: o.dpR || 0, start: o.dpS, end: o.dpE || '', taxPct: o.dpT ?? 26 }; }
-    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep, freq: o.freq || '' };
+    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep, freq: o.freq || '', box: (o.box || '').trim(), estero: o.estero === 'si' ? true : o.estero === 'no' ? false : undefined, regime: o.regime || undefined };
     if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], upd: today(), ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else { if (!dep && d.cash !== a.cash) a.upd = today(); Object.assign(a, d); }
     done();
-  }, ccyList());
+  }, h('span', null, ccyList(), h('datalist', { id: 'dl-box' }, boxes.concat(boxes.includes('Cassa cani') ? [] : ['Cassa cani']).map(b => h('option', { value: b })))));
 }
 /* ============ conti fermi (soldi sul conto, contanti, carte): una schermata sola per aggiornare i saldi ============ */
 const CASH_PRESETS = [['Revolut (conto)', 'banca', 'revolut'], ['BancoPosta', 'banca', 'bancoposta'], ['Contanti (portafoglio)', 'contanti', 'contanti'], ['Satispay', 'pagamenti', 'satispay'], ['PayPal', 'pagamenti', 'paypal']];
@@ -1790,7 +1890,9 @@ const kindOf = i => {
   if (/ucits|\betf\b|\betc\b|\betn\b|\betp\b|ishares|xtrackers|amundi|vanguard|invesco|wisdomtree|21shares|bitwise|lyxor|spdr|fondo|comparto|cometa|obbligaz|\bbond\b|\bbtp\b|\bbund\b/i.test(i.name)) return 'fondo';
   return 'azione';
 };
-const taxRateOf = i => i.tax >= 0 && i.tax != null ? i.tax : 26;
+const GOV_RE = /\b(btp|bot|cct|ctz)\b|t-?bond|treasury|\bbund\b|\boat\b|bonos|government\s*bond|titoli di stato/i;          // titoli di Stato (e fondi che li contengono): 12,5%
+const ETP_RE = /\betp\b|\betc\b|\betn\b|21shares|bitwise|wisdomtree|vaneck|coinshares/i;          // crypto "in Borsa" (ETP): titoli normali al 26%
+const taxRateOf = i => i.tax >= 0 && i.tax != null ? i.tax : GOV_RE.test(i.name) ? 12.5 : (/crypto/i.test(i.cls || '') && !ETP_RE.test(i.name)) ? (today() >= '2026-01-01' ? 33 : 26) : 26;          // crypto dirette: 33% dal 2026 (legge di bilancio 2025)
 function parseHoldings(txt) {          // "NVIDIA 5.2, Apple 4.6" -> [['NVIDIA', 5.2], ['Apple', 4.6]] (percentuali del fondo: NON si normalizzano). La virgola separa i titoli solo se segue un nome: "Apple 4,5, Microsoft 4" si legge bene
   return String(txt || '').split(/\s*[;\n]\s*|,\s*(?=[^\d\s])/).map(t => t.trim()).filter(Boolean).map(t => { const m = t.match(/^(.*?)[\s:=]+(\d+(?:[.,]\d+)?)\s*%?$/); return m && m[1].trim() ? [m[1].trim(), parseFloat(m[2].replace(',', '.'))] : null; }).filter(Boolean);
 }
@@ -1979,12 +2081,12 @@ function alerts() {
 }
 
 /* ============ scheda Analisi ============ */
-const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi e tasse'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
+const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi'], ['tasse', 'Tasse e dichiarazione'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
 function tabAnalisi() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le analisi.'));
   const sub = UI.sub || 'andamento';
   const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Analisi' }, AN_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.sub = k; render(); } }, l)));
-  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
+  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, tasse: anTasse, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
   return h('div', null, h('section', { class: 'card' }, h('h2', null, 'Analisi'), chips), body);
 }
 const histButtons = () => h('div', { class: 'row' }, ONLINE ? btn('Riscarica lo storico', () => loadOnlineData(), 'sm') : btn('Carica storico da file…', () => pickText('.csv,.txt,text/csv', t => { DATA.hist = parseHistory(t); render(); }), 'sm'));
@@ -2018,6 +2120,43 @@ function anConfronto() {
   return el;
 }
 
+/* ---- tasse e dichiarazione: stime con le regole italiane (2026), da verificare con il CAF o il commercialista ---- */
+const FOREIGN_RE = /revolut|trade\s*republic|nexo|metatrader|\bmt[45]\b|binance|coinbase|kraken|bitpanda|scalable|degiro|interactive|etoro|paypal|wise/i;
+const accForeign = a => a.estero != null ? a.estero : FOREIGN_RE.test(a.name);          // se non l'hai detto tu, si stima dal nome
+const accRegime = a => a.regime || (accForeign(a) ? 'dichiarativo' : 'amministrato');
+function anTasse() {
+  const el = h('div'), yr = +today().slice(0, 4), rows = [], perAcc = []; let imp = 0, latent = 0;
+  for (const a of S.accounts) {
+    const v = accValue(a), cash = accCash(a), posV = v - cash, fore = accForeign(a);
+    let what, x = 0;
+    if (a.type === 'pensione') what = 'Niente bollo: le tasse si pagano solo quando lo riscuoti (dal 15% al 9%)';
+    else if (a.type === 'crypto') { x = Math.max(0, v) * 0.002; what = fore ? 'Imposta sul valore delle crypto 0,2% (la dichiari tu)' : 'Bollo 0,2% (lo trattiene la piattaforma)'; }
+    else if (isCashAcc(a)) { x = cash > 5000 ? 34.2 : 0; what = (fore ? 'IVAFE' : 'Bollo') + ' 34,20 € solo se la giacenza media supera 5.000 €' + (x ? '' : ': non dovuto'); }
+    else { x = Math.max(0, posV) * 0.002 + (cash > 5000 ? 34.2 : 0); what = fore ? 'IVAFE 0,2% sui titoli (la paghi tu in dichiarazione)' : 'Bollo 0,2% sui titoli (lo trattiene la banca)'; }
+    imp += x; if (x) perAcc.push([a.name, x, what.split(' (')[0]]);
+    for (const p of a.positions) { const i = inst(p.instId); if (i && p.cost > 0) { const g = posValue(p) - p.cost; if (g > 0) latent += g * taxRateOf(i) / 100; } }
+    rows.push([h('a', { href: '#', onclick: e => { e.preventDefault(); editAccount(a); } }, a.name), (fore ? 'Estero' : 'Italia') + (a.estero == null ? ' (stima)' : ''), accRegime(a) === 'amministrato' ? 'Le paga la banca' : 'Le dichiari tu', what, x ? eur(x) : '—']);
+  }
+  const ops = OPS().filter(o => o.realized != null), byY = new Map();
+  for (const o of ops) { const y = +o.date.slice(0, 4), r = byY.get(y) || { plus: 0, minus: 0, tax: 0 }, i = S.instruments.find(z => z.name === o.instName); if (o.realized >= 0) { r.plus += o.realized; r.tax += o.realized * (i ? taxRateOf(i) : 26) / 100; } else r.minus += -o.realized; byY.set(y, r); }
+  const minusUsabili = [...byY].filter(([y]) => y >= yr - 4).reduce((t, [, r]) => t + r.minus, 0), cur = byY.get(yr) || { plus: 0, minus: 0, tax: 0 };
+  const foreign = S.accounts.filter(a => accForeign(a) && (accValue(a) !== 0 || S.snapshots.some(n => (n.accs || {})[a.id])));          // solo i conti esteri che hanno (o hanno avuto) dei soldi
+  el.append(tiles([
+    { l: 'Imposte annuali stimate', v: eur(imp), s: 'bollo, IVAFE e imposta sulle crypto, ogni anno', x: () => ({ say: 'Sono le imposte che si pagano ogni anno solo per il fatto di avere titoli e conti, anche se non vendi niente: 0,2% del valore dei titoli, 34,20 € sui conti con più di 5.000 € di giacenza media, 0,2% sulle crypto.', rows: perAcc.slice().sort((p, q) => q[1] - p[1]), rowsTitle: 'Conto per conto' }) },
+    { l: 'Tasse se vendessi tutto oggi', v: eur(latent), s: '26% sui guadagni, 12,5% sui titoli di Stato, 33% sulle crypto dal 2026', x: () => ({ say: 'Le tasse sui guadagni si pagano solo quando vendi. Questa è la stima se vendessi tutto oggi, posizione per posizione, con l\'aliquota giusta per ciascuna.' }) },
+    { l: 'Guadagni realizzati nel ' + yr, v: gl(cur.plus - cur.minus, seur(cur.plus - cur.minus)), s: 'tasse stimate ' + eur(cur.tax) + ' · dalle vendite registrate', x: () => ({ say: 'La somma dei guadagni e delle perdite delle vendite che hai registrato quest\'anno con "+ Operazione". Nei conti in regime amministrato le tasse le trattiene già la banca.' }) },
+    { l: 'Minusvalenze da usare', v: eur(minusUsabili), s: 'perdite degli ultimi 4 anni che possono ridurre le tasse future', x: () => ({ say: 'Se vendi in perdita, la perdita (minusvalenza) si può usare per pagare meno tasse su guadagni futuri, entro il quarto anno successivo. Attenzione: i guadagni degli ETF non possono usarla, quelli di azioni, obbligazioni, ETC/ETN e certificati sì.' }) }
+  ]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Conto per conto'), table([{ t: 'Conto' }, { t: 'Dove' }, { t: 'Tasse sui guadagni' }, { t: 'Imposta annuale' }, { t: 'Stima', n: 1 }], rows),
+    h('p', { class: 'muted' }, '"Estero (stima)" e "Le dichiari tu" sono ipotesi dal nome del conto: tocca il nome e correggi in "Modifica conto" (Paese e regime fiscale).')));
+  if (foreign.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Quadro RW (conti e crypto all\'estero)'),
+    h('p', null, 'Ogni anno, nella dichiarazione dei redditi, vanno indicati i conti, i titoli e le crypto tenuti all\'estero, con il valore al 31 dicembre (e i giorni di possesso). Lì si calcolano anche IVAFE e imposta sulle crypto, che si pagano con l\'F24 insieme al saldo IRPEF (di solito entro il 30 giugno).'),
+    table([{ t: 'Conto' }, { t: 'Valore oggi', n: 1 }, { t: 'Valore più alto registrato', n: 1 }], foreign.map(a => { const mx = Math.max(accValue(a), ...S.snapshots.map(n => (n.accs || {})[a.id] || 0)); return [a.name, eur(accValue(a)), eur(mx)]; })),
+    h('p', { class: 'muted' }, 'Il valore al 31 dicembre lo prendi dall\'estratto di fine anno di ogni conto: questa tabella serve da promemoria. Se un servizio ha un IBAN italiano o fa da sostituto d\'imposta, il quadro RW può non servire: chiedi al CAF.')));
+  if (byY.size) el.append(h('section', { class: 'card' }, h('h2', null, 'Vendite registrate, anno per anno'), table([{ t: 'Anno' }, { t: 'Guadagni', n: 1 }, { t: 'Perdite', n: 1 }, { t: 'Tasse stimate', n: 1 }, { t: 'Perdite usabili fino al', n: 1 }], [...byY].sort((a, b) => b[0] - a[0]).map(([y, r]) => [String(y), eur(r.plus), eur(r.minus), eur(r.tax), r.minus ? '31/12/' + (y + 4) : '—']))));
+  el.append(h('p', { class: 'muted' }, 'Stime con le regole italiane in vigore nel 2026 (bollo e IVAFE 0,2%, imposta sulle crypto 0,2%, aliquote 26% / 12,5% / 33% crypto): non sostituiscono il CAF o il commercialista.'));
+  return el;
+}
 function anCosti() {
   const el = h('div'), tot = totalValue(); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
   let ter = 0; const noTer = [], inv = ['broker', 'crypto', 'trading']; let bollo = 0, cash = 0, latent = 0, gainTot = 0; const bigTer = [];
@@ -2191,10 +2330,33 @@ function briefingCard() {
   return el;
 }
 
+/* ---- casse separate (es. Cassa cani): soldi messi da parte per uno scopo, che non sono da investire ---- */
+const boxTotal = () => S.accounts.filter(a => a.box).reduce((t, a) => t + accValue(a), 0);
+function boxesOf() { const m = new Map(); for (const a of S.accounts) if (a.box) { const b = m.get(a.box) || { name: a.box, accs: [], tot: 0 }; b.accs.push(a); b.tot += accValue(a); m.set(a.box, b); } return [...m.values()]; }
+function setBoxGoal(b) { const cur = (S.boxes[b.name] || {}).goal; form('Obiettivo – ' + b.name, [{ key: 'g', label: 'Quanto vuoi avere da parte (€)', type: 'number', hint: 'Lascia vuoto per non avere un obiettivo.' }], { g: cur ?? '' }, o => { S.boxes[b.name] = Object.assign(S.boxes[b.name] || {}, { goal: o.g > 0 ? o.g : null }); done(); }); }
+function boxesCard() {
+  const bs = boxesOf(); if (!bs.length) return null;
+  return h('section', { class: 'card' }, h('h2', null, 'Casse separate'), h('p', { class: 'muted' }, 'Soldi messi da parte per uno scopo: sono nel patrimonio, ma non contano come tuoi da investire né nel ribilanciamento. Una cassa si assegna da "Modifica conto".'),
+    bs.map(b => {
+      const g = (S.boxes[b.name] || {}).goal, k = g > 0 ? Math.min(1, b.tot / g) : null;
+      const say = 'I soldi della cassa "' + b.name + '", sommati da ' + pl(b.accs.length, 'conto', 'conti') + '.' + (g > 0 ? ' Sei al ' + pct(k) + ' dell\'obiettivo di ' + eur(g) + (b.tot < g ? ': mancano ' + eur(g - b.tot) + '.' : ': obiettivo raggiunto.') : '');
+      return h('div', { class: 'box tapme', role: 'button', tabindex: '0', onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); talk({ kind: 'Cassa separata', title: b.name, value: eur(b.tot), num: b.tot, say, rows: b.accs.map(a => [a.name, accValue(a), '', openAcc(a)]), rowsTitle: 'Dove sono (tocca per aprire)', tip: g > 0 ? '' : 'Metti un obiettivo: vedrai quanto manca, con la barra che si riempie.' }); } },
+        h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, b.name), h('span', { class: 'box-n' }, eur(b.tot)), btn(g > 0 ? 'Obiettivo ' + eur(g) : 'Metti un obiettivo', () => setBoxGoal(b), 'sm')),
+        k != null ? h('div', { class: 'tb-t', style: 'margin-top:8px;height:8px' }, h('span', { class: 'tb-b', style: '--w:' + (k * 100).toFixed(1) + '%' })) : null,
+        h('div', { class: 'muted', style: 'font-size:13px;margin-top:6px' }, b.accs.map(a => a.name + ' ' + eur(accValue(a))).join(' · ')));
+    }));
+}
+const MIXES = [['Prudente', 'Azioni 35, Obbligazioni 50, Liquidità 15', 'oscilla poco e cresce piano'], ['Equilibrato', 'Azioni 60, Obbligazioni 30, Crypto 3, Liquidità 7', 'la via di mezzo'], ['Dinamico', 'Azioni 80, Obbligazioni 10, Crypto 5, Liquidità 5', 'nel lungo periodo cresce di più, ma in un anno brutto può perdere anche il 30-40%']];
+function nextMoneyCard() {          // in Panoramica: dove mettere i prossimi soldi, in una riga
+  if (!(S.policy.target && S.policy.target.trim())) return null;
+  const amt = pnum(UI.newMoney) ?? (G().monthly > 0 ? G().monthly : 500), rb = rebalance(amt); if (!rb) return null;
+  const top = rb.filter(r => r.put > 0.5).slice(0, 3); if (!top.length) return null;
+  return h('div', { class: 'banner' }, h('span', null, 'Con i prossimi ' + eur(amt) + ': ' + top.map(r => eur(r.put) + ' in ' + r.label).join(', ') + '. Così ti avvicini alla tua divisione senza vendere nulla.'), btn('Dettagli', () => { UI.tab = 'analisi'; UI.sub = 'ribilancia'; render(); }, 'pri sm'));
+}
 /* ---- dove mettere i prossimi soldi: riporta il portafoglio verso la tua allocazione obiettivo senza vendere nulla ---- */
 function rebalance(amount) {
   if (!(S.policy.target && S.policy.target.trim())) return null;
-  const tot = totalValue(), ex = exposure('class'), tgt = parseMix(S.policy.target, ''), cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v])), tl = new Map(tgt.map(([k, w]) => [k.toLowerCase(), w])), names = new Map();
+  const tot = totalValue() - boxTotal(), ex = exposure('class', true), tgt = parseMix(S.policy.target, ''), cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v])), tl = new Map(tgt.map(([k, w]) => [k.toLowerCase(), w])), names = new Map();
   ex.forEach(([l]) => names.set(l.toLowerCase(), l)); tgt.forEach(([k]) => { if (!names.has(k.toLowerCase())) names.set(k.toLowerCase(), k); });
   const T2 = tot + amount, need = new Map(); let sum = 0;
   for (const k of names.keys()) { const d = Math.max(0, (tl.get(k) || 0) * T2 - (cur.get(k) || 0)); need.set(k, d); sum += d; }
@@ -2208,7 +2370,15 @@ function anRibilancia() {
   const inp = h('input', { type: 'number', step: 'any', class: 'pin', value: amt, 'aria-label': 'Importo da investire', onchange: e => { const v = pnum(e.target.value); UI.newMoney = v != null && v >= 0 ? v : amt; render(); } });
   const head = h('section', { class: 'card' }, h('h2', null, 'Dove mettere i prossimi soldi'), h('p', { class: 'muted' }, 'Quanto vuoi investire adesso? L\'app calcola come ripartirlo per avvicinare il portafoglio alla tua allocazione obiettivo, senza vendere nulla.'), h('label', { class: 'fld' }, h('span', null, 'Importo da investire (€)'), inp));
   const rb = rebalance(amt);
-  if (!rb) { el.append(head, h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Per questo calcolo serve l\'allocazione obiettivo: impostala in "Dati e sicurezza" (per esempio "Azioni 65, Obbligazioni 20, Crypto 5, Liquidità 10").'))); return el; }
+  const setT = t => { S.policy.target = t; done(); };
+  const own = () => form('La tua divisione', [{ key: 't', label: 'Classi e percentuali', ph: 'Azioni 65, Obbligazioni 20, Crypto 5, Liquidità 10', req: true, hint: 'Le classi sono quelle dell\'app: Azioni, Obbligazioni, Crypto, Liquidità, Materie prime.' }], { t: S.policy.target || '' }, o => { if (!parseMix(o.t, '').some(x => x[0])) return 'Scrivi per esempio: Azioni 65, Obbligazioni 20, Liquidità 15'; setT(o.t); });
+  if (!rb) {
+    el.append(head, h('section', { class: 'card' }, h('h2', null, 'Com\'è fatto il portafoglio che vuoi?'), h('p', { class: 'muted' }, 'Scegli una divisione di partenza: la cambi quando vuoi. Le casse separate (come la Cassa cani) non contano.'),
+      h('div', { class: 'row' }, MIXES.map(([n, t]) => btn(n, () => setT(t), 'pri')), btn('Scrivo la mia…', own)),
+      h('ul', null, MIXES.map(([n, t, d]) => h('li', null, h('b', null, n + ': '), t + ' — ' + d)))));
+    return el;
+  }
+  head.append(h('p', { class: 'muted' }, 'La tua divisione: ' + S.policy.target + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); own(); } }, 'cambia'), ' · scegli tra: ', MIXES.map(([n, t], k) => [k ? ', ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); setT(t); } }, n)])));
   const sug = k => { const c = S.instruments.filter(i => parseMix(i.cls, 'Non classificato')[0][0].toLowerCase() === k.toLowerCase() && S.accounts.some(a => a.positions.some(p => p.instId === i.id))).sort((a, b) => (a.ter ?? 9) - (b.ter ?? 9)); return c[0] ? c[0].name + (c[0].ter != null ? ' (TER ' + nfp.format(c[0].ter) + '%)' : '') : '—'; };
   el.append(head, h('section', { class: 'card' }, h('h2', null, 'Come ripartirli'),
     table([{ t: 'Classe' }, { t: 'Oggi', n: 1 }, { t: 'Obiettivo', n: 1 }, { t: 'Aggiungi', n: 1 }, { t: 'Dopo', n: 1 }, { t: 'Tra quelli che hai' }], rb.map(r => [r.label, pct(r.curPct), r.tgt ? pct(r.tgt) : '—', r.put > 0.5 ? h('b', null, eur(r.put)) : '—', pct(r.after), r.put > 0.5 ? sug(r.label) : ''])),
@@ -2338,11 +2508,11 @@ function render() {
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
   else {
     const vk = UI.tab + '|' + (UI.acc || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : UI.tab === 'piano' ? UI.psub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
-    $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), unsavedBar(), tabsBar(), h('div', { class: 'view' }, content())));
+    $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), unsavedBar(), newVerBar(), tabsBar(), h('div', { class: 'view' }, content())));
     window.scrollTo(0, y); afterRender();
   }
 }
-function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -2382,12 +2552,13 @@ function viewStart() {          // schermata iniziale: solo "Benvenuto" e un pul
   if (LOC.rec && !npOf(LOC.rec)) return viewUnlockLocal();          // caso raro: sul dispositivo c'e' un archivio con passphrase (creato prima)
   $app.replaceChildren(h('main', { class: 'start' },
     h('h1', null, 'Benvenuto'),
-    CAN_CRYPTO() ? null : h('div', { class: 'warn' }, NOCRYPTO),
+    CAN_CRYPTO() ? null : h('div', { class: 'warn' }, NOCRYPTO), newVerBar(),
     h('div', { class: 'cta' }, btn('Entra', enterApp, 'pri')),
     h('p', { class: 'muted', style: 'font-size:13px' }, 'Tutto quello che fai si salva da solo' + (CLOUD_ON() ? ', anche online. ' : '. '), h('a', { href: '#', onclick: e => { e.preventDefault(); startOpen(); } }, 'Ho una copia di sicurezza'))));
 }
 async function enterApp() {          // un clic: se c'e' gia' l'archivio su questo dispositivo lo apre, altrimenti ne crea uno nuovo e vuoto (senza passphrase, si salva da solo)
   if (!CAN_CRYPTO()) { alert(NOCRYPTO); return; }
+  if (FID.id && !(await fidGate())) return;          // Face ID attivo su questo dispositivo
   const hasLocal = !!(LOC.rec && npOf(LOC.rec));
   if (CLOUD_ON() && !hasLocal) {          // su questo dispositivo non c'e' nulla: prima si prendono i dati online (mai partire da un archivio vuoto)
     if (!CL.code) return clLogin();
@@ -2461,6 +2632,11 @@ function saveViewAsArchive() {
   });
 }
 function viewLock() {
+  if (NOPW && FID.id) {          // archivio senza passphrase con Face ID: si sblocca con il volto (o con il codice online)
+    const msg = h('p', { class: 'err' }), go = async () => { msg.textContent = ''; if (await fidGate()) { LOCKED = false; lastActivity = Date.now(); render(); } else msg.textContent = 'Non riconosciuto. Riprova.'; };
+    $app.replaceChildren(h('main', { class: 'start' }, h('h1', null, 'Bloccato'), h('p', { class: 'lead' }, 'I tuoi conti sono nascosti.'), h('div', { class: 'cta' }, btn('Sblocca con Face ID', go, 'pri')), msg));
+    return;
+  }
   const inp = h('input', { type: 'password', placeholder: 'Passphrase', autocomplete: 'current-password' }), msg = h('p', { class: 'err' });
   const go = async () => {
     const w = gateWait(); if (w) { msg.textContent = gateMsg(w); return; }
@@ -2492,7 +2668,7 @@ function tabPanoramica() {
     h('p', { class: 'muted' }, 'I file che ti preparo io (per esempio quelli di Fineco) contengono già tutto. Per i file scaricati dal broker l\'app ti fa vedere un\'anteprima.'));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
-  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
+  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), heroPill(tp), heroDelta(), boxTotal() ? h('div', { class: 'sub' }, 'Tuoi da investire, senza le casse separate: ' + eur(total - boxTotal())) : null, h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
@@ -2511,6 +2687,9 @@ function tabPanoramica() {
       x: () => ({ how: pp.length ? eur(pv) + ' di valore − ' + eur(pcost) + ' di costo = ' + seur(pg) + ', su ' + pl(pp.length, 'posizione', 'posizioni') + ' di cui conosci il prezzo pagato.' : '', rows: pp.slice().sort((x, y) => Math.abs(y.pnl) - Math.abs(x.pnl)).slice(0, 10).map(x => [x.name, x.pnl, x.acc + ' · ' + spct(x.pct), () => talkPos(x.a, x.p)]), rowsTitle: 'Le 10 posizioni che pesano di più sul risultato', signed: true }) },
     { l: 'Ultimo snapshot', v: lastSnap ? fmtDate(lastSnap) : 'nessuno', s: h('span', null, lastSnap ? daysSince(lastSnap) + ' giorni fa · ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); takeSnapshot(); render(); } }, 'registra oggi')) }
   ]));
+  const bxc = boxesCard(); if (bxc) el.append(bxc);
+  const nmc = nextMoneyCard(); if (nmc) el.append(nmc);
+  if (!DEMO && [4, 5, 6].includes(+today().slice(5, 7)) && S.settings.taxNudge !== today().slice(0, 4) && S.accounts.some(accForeign)) el.append(h('div', { class: 'banner' }, h('span', null, 'È il periodo della dichiarazione dei redditi: in Analisi → Tasse trovi i conti esteri da mettere nel quadro RW e le imposte stimate.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.taxNudge = today().slice(0, 4); done(); }, 'sm'), btn('Apri', () => { UI.tab = 'analisi'; UI.sub = 'tasse'; render(); }, 'pri sm'))));
   const warns = [], mf = missingFx(); if (mf.length) warns.push('Manca il tasso di cambio per ' + mf.join(', ') + ': quei valori sono contati 1:1 (scheda "Dati e sicurezza").');
   const stale = S.instruments.filter(i => S.accounts.some(a => a.positions.some(p => p.instId === i.id)) && daysSince(i.priceDate) > 14);
   if (stale.length) warns.push('Prezzo non aggiornato da più di 14 giorni: ' + stale.map(i => i.name).join(', ') + '.');
@@ -2653,7 +2832,7 @@ function tabDati() {
     btn('+ Aggiungi valuta', () => form('Tasso di cambio', [{ key: 'c', label: 'Valuta (es. USD)', req: true, list: 'dl-ccy' }, { key: 'r', label: 'Valore di 1 unità in €', type: 'number', req: true }], {}, o => { if (!(o.r > 0)) return 'Tasso non valido.'; S.fx[normCcy(o.c)] = o.r; done(); }, ccyList()), 'sm')));
   const snap = S.snapshots.slice().reverse().slice(0, 12);
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Snapshot (storico del patrimonio)'), btn('Registra snapshot di oggi', () => { takeSnapshot(); render(); }, 'pri')),
-    h('p', { class: 'muted' }, 'Fotografa i valori di oggi. Fallo dopo ogni aggiornamento dei prezzi: la storia non si può ricostruire in seguito.'),
+    h('p', { class: 'muted' }, 'Una fotografia dei valori al giorno. Si fa da sola ogni giorno che apri l\'app (e si aggiorna se i valori cambiano): la storia non si può ricostruire in seguito.'),
     table([{ t: 'Data' }, { t: 'Totale', n: 1 }, { t: 'Investimenti', n: 1 }, { t: '' }], snap.map(n => [fmtDate(n.date), eur(n.total), eur(n.perf), btn('Elimina', () => { S.snapshots = S.snapshots.filter(x => x !== n); done(); }, 'sm danger')]), 'Nessuno snapshot.')));
   const po = S.policy;
   el.append(h('section', { class: 'card' }, h('h2', null, 'Politica di investimento'), h('p', { class: 'muted' }, 'Facoltativa e modificabile quando vuoi. Serve a confrontare il portafoglio con i tuoi obiettivi.'),
@@ -2672,7 +2851,7 @@ function tabDati() {
     chk('amounts', 'Includi gli importi in euro (di base solo percentuali)'), chk('accNames', 'Includi i nomi dei conti (di base "Conto 1", "Conto 2"…)'), chk('instNames', 'Includi i nomi degli strumenti (servono per un\'analisi utile)'),
     h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
     h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
-  el.append(cloudCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
+  el.append(cloudCard() || '', fidCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
     h('ul', null, h('li', null, CLOUD_ON() ? 'Una sola connessione verso fuori: il salvataggio online (Supabase), che riceve soltanto la copia cifrata con il tuo codice. La policy del browser (CSP) vieta qualsiasi altro invio.' : 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
       DEMO ? null : h('li', null, 'Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) + (backupDays() ? ' (' + pl(backupDays(), 'giorno', 'giorni') + ' fa)' : ' (oggi)') : 'mai') + '. Se il browser cancellasse i dati del sito, quella copia è l\'unica cosa che ti salva.')),
     DEMO ? null : h('div', { class: 'row' },
@@ -3086,7 +3265,7 @@ if (ONLINE && 'serviceWorker' in navigator) window.addEventListener('load', () =
   try { const rec = await Promise.race([locGet(), new Promise(r => setTimeout(() => r(null), 2500))]); if (rec && rec.text) { LOC.rec = rec; LOC.ok = true; } }
   catch (e) { LOC.err = String(e.message || e); }
   LOC.works = LOC.rec ? true : await locProbe();          // il browser riesce a tenere i dati da solo? (se no, si lavora su un file)
-  render();
+  render(); checkNewVersion();
 })();
 </script>
 </body>
