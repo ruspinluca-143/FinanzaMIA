@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EtG4PyfzWZGqb6LHR9ahGqOjcU0B/oKOtFL07iq3G+c='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zDyHfvb5CKGHR3KSX2uxcV75Gvb2yFNKndRwqHq/kfI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -55,6 +55,71 @@ dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0
 .tb-t{grid-area:t;height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden}
 .tb-b{display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,var(--s1),#64d2ff);animation:grow .9s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 300ms)}
 .tb-b.neg{background:linear-gradient(90deg,#ff375f,#ff9f0a)}
+.fld{min-width:0}
+.fld input,.fld select,.fld textarea{width:100%;max-width:100%;min-width:0}
+/* conti: tre gruppi e un riquadro per conto */
+.g-fermi{--gc:#30b0c7}.g-investiti{--gc:var(--s1)}.g-pensione{--gc:#bf5af2}
+.conti-head .ch-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.ch-n{font-size:clamp(30px,6vw,44px);font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin:2px 0}
+.actbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.grp{margin:22px 0 8px}
+.grp-head{padding:4px 4px 10px;border-radius:14px}
+.grp-t{display:flex;align-items:baseline;gap:10px}
+.grp-t h2{margin:0;flex:1;display:flex;align-items:center;gap:8px}
+.grp-t h2::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--gc);box-shadow:0 0 0 4px color-mix(in srgb,var(--gc) 22%,transparent)}
+.grp-n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.grp-p{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.grp-bar,.ac-bar{height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 8%,transparent);overflow:hidden;margin-top:8px}
+.grp-bar i,.ac-bar i{display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,var(--gc),color-mix(in srgb,var(--gc) 55%,#fff));animation:grow 1s var(--ease) .2s both}
+.acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.acard{position:relative;text-align:left;background:var(--card);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px);border:1px solid var(--ring);border-radius:20px;padding:16px 16px 12px;box-shadow:var(--sh);cursor:pointer;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);animation:rise .55s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 80ms);-webkit-tap-highlight-color:transparent}
+.acard::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--gc);opacity:.85}
+.acard:hover{transform:translateY(-3px);box-shadow:var(--sh-h)}
+.acard:focus-visible{outline:2px solid var(--gc);outline-offset:2px}
+.ac-top{display:flex;align-items:center;gap:10px}
+.ac-ico{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;color:var(--gc);background:color-mix(in srgb,var(--gc) 14%,transparent);flex:none}
+.ac-name{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-tag{font-size:11px;font-weight:600;color:var(--gc);background:color-mix(in srgb,var(--gc) 12%,transparent);border-radius:99px;padding:2px 8px}
+.ac-val{font-size:26px;font-weight:700;letter-spacing:-.03em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.ac-sub{color:var(--muted);font-size:12.5px;margin-bottom:6px}
+.acard .pill{font-size:12.5px;padding:3px 10px;margin:2px 0 4px}
+.ac-auto{display:block;width:100%;text-align:left;margin-top:10px;padding:8px 10px;border:0;border-radius:12px;font:inherit;font-size:12.5px;line-height:1.35;color:var(--ink2);background:color-mix(in srgb,var(--ink) 5%,transparent)}
+button.ac-auto{cursor:pointer}
+.ac-auto.ok{color:var(--gain);background:color-mix(in srgb,var(--gain) 10%,transparent)}
+.ac-auto.mix{color:var(--ink2);background:color-mix(in srgb,#ff9f0a 12%,transparent)}
+/* piano: intestazione e controllo a segmenti */
+.phead .ph-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.ph-t h2{margin:0 0 4px}
+.ph-t p{margin:0;max-width:60ch}
+.btn.big{padding:10px 18px;font-size:15px;font-weight:600;flex:none}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;margin-top:16px;background:var(--seg);border-radius:14px}
+.seg-b{font:inherit;font-size:14px;font-weight:600;color:var(--ink2);background:none;border:0;border-radius:10px;padding:9px 6px;cursor:pointer;transition:background .25s,color .25s,box-shadow .25s}
+.seg-b[aria-pressed=true]{background:var(--thumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14),0 3px 10px rgba(0,0,0,.08)}
+/* + Operazione */
+dialog.opd{max-width:560px}
+.kinds{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0 4px}
+.kind{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px;border-radius:14px;background:var(--btn);border:2px solid transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:transform .25s var(--ease),border-color .25s,background .25s,color .25s}
+.kind svg{width:22px;height:22px}
+.kind:active{transform:scale(.95)}
+.kind[aria-pressed=true]{border-color:var(--s1);background:color-mix(in srgb,var(--s1) 12%,transparent);color:var(--s1)}
+.opdesc{margin:6px 0 0;font-size:13px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.opsum{margin:12px 0 0;padding:11px 13px;border-radius:12px;background:color-mix(in srgb,var(--s1) 8%,transparent);font-weight:600;font-size:14px;line-height:1.4}
+/* menu a sinistra */
+.menu-btn{display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:12px;background:var(--btn);color:var(--ink);cursor:pointer;flex:none}
+.drawer-bg{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fade .25s ease both}
+.drawer{position:fixed;top:0;bottom:0;left:0;z-index:71;width:min(330px,86vw);overflow:auto;padding:max(14px,env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));background:var(--card-s);border-right:1px solid var(--ring);box-shadow:20px 0 60px rgba(0,0,0,.25);animation:drin .32s var(--ease) both}
+.drawer-bg.out{animation:fade .25s ease reverse both}
+.drawer.out{animation:drin .26s var(--ease) reverse both}
+@keyframes drin{from{transform:translateX(-102%)}to{transform:none}}
+.dr-head{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px;font-size:18px}
+.dr-sec{font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 8px 6px}
+.mi{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 10px;border:0;border-radius:12px;background:none;color:var(--ink);font:inherit;font-size:15px;cursor:pointer;transition:background .2s}
+.mi:hover,.mi:focus-visible{background:color-mix(in srgb,var(--s1) 9%,transparent);outline:none}
+.mi svg{color:var(--s1);flex:none}
+.mi small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.dr-foot{margin:16px 10px 0;font-size:12px}
+@media (max-width:700px){.acards{grid-template-columns:1fr}.phead .ph-top{flex-direction:column}.phead .btn.big{width:100%}.conti-head .actbar .btn{flex:1;font-size:13px;padding:9px 6px;white-space:nowrap}.kind{font-size:11.5px}}
 .box{padding:12px 14px;border-radius:14px;margin-top:10px;background:color-mix(in srgb,var(--s1) 6%,transparent);transition:background .25s}
 .box:hover{background:color-mix(in srgb,var(--s1) 10%,transparent)}
 .box-n{font-weight:650;font-variant-numeric:tabular-nums;margin-right:8px}
@@ -256,7 +321,7 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(8,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
 .tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
@@ -1125,6 +1190,7 @@ function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce
     if (f && f.cambi && typeof f.cambi === 'object') for (const [c, r] of Object.entries(f.cambi)) if (/^[A-Z]{3}$/.test(c) && used.has(c) && typeof r === 'number' && r > 0 && r < 1000) S.fx[c] = r;
   } catch { /* il controllo vero lo fa planPrices */ }
   let P = planPrices(text); if (P.error) return 0;
+  for (const r of P.rows) { r.i.autoSrc = r.e.fonte || r.i.autoSrc || 'sito'; r.i.autoAt = today(); }          // questo strumento ha un prezzo automatico (si vede sotto ogni conto)
   let n = 0, last = '';
   for (const r of P.rows) if (!r.skip && r.use) { setPriceAt(r.i, r.np, r.e.data); n++; if (r.e.data > last) last = r.e.data; }
   for (const r of P.rows) {          // dati pubblici dell'ETF (costo annuo, benchmark, distribuzione): si completano solo se mancano
@@ -2513,7 +2579,7 @@ function tabMercati() {
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 let LASTVIEW = '', LASTTHUMB = null; const NUMS = new Map();
 function placeThumb(nav) {
-  const th = nav.querySelector('.thumb'), sel = nav.querySelector('[aria-selected=true]'); if (!th || !sel) return;
+  const th = nav.querySelector('.thumb'), sel = nav.querySelector('[aria-selected=true]'); if (th) th.style.opacity = sel ? '' : '0'; if (!th || !sel) return;          // vista del menu (es. Dati): nessuna scheda evidenziata
   const set = (x, w) => { th.style.setProperty('--tx', x + 'px'); th.style.setProperty('--tw', w + 'px'); }, x = sel.offsetLeft, w = sel.offsetWidth;
   if (LASTTHUMB && !REDUCED) { set(LASTTHUMB.x, LASTTHUMB.w); void th.offsetWidth; }     // parte dalla posizione di prima, poi scivola su quella nuova
   set(x, w); LASTTHUMB = { x, w };
@@ -2677,14 +2743,46 @@ function viewLock() {
   $app.replaceChildren(h('main', { class: 'start' }, h('h1', null, 'Bloccato'), h('p', { class: 'lead' }, 'I dati sono nascosti. Inserisci la passphrase per continuare.'), h('div', { class: 'pwrow' }, inp, pwToggle(inp)), h('div', { class: 'cta' }, btn('Sblocca', go, 'pri')), msg));
   inp.focus();
 }
+const HAMB = ['M4 7h16', 'M4 12h16', 'M4 17h16'];
 function topbar() {
-  return h('header', { class: 'top' }, h('div', { class: 'brand' }, 'Finanze'), h('div', { class: 'status', id: 'status', role: 'status', title: 'Tocca per salvare adesso', onclick: () => saveNow() }, STATUS),
-    h('div', { class: 'acts' },
-      btn(HIDE ? 'Mostra importi' : 'Nascondi importi', () => { HIDE = !HIDE; render(); }),
-      DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : [btn(FH ? 'Salva ora' : 'Scarica copia', () => save(true)), !FH && typeof navigator.canShare === 'function' ? btn('Salva in File', shareCopy, 'pri') : null, NOPW ? null : btn('Blocca', lock)]));
+  return h('header', { class: 'top' }, h('button', { type: 'button', class: 'menu-btn', 'aria-label': 'Apri il menu', onclick: openMenu }, s('svg', { viewBox: '0 0 24 24', width: 22, height: 22, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'aria-hidden': 'true' }, HAMB.map(d => s('path', { d })))),
+    h('div', { class: 'brand' }, 'Finanze'), h('div', { class: 'status', id: 'status', role: 'status', title: 'Tocca per salvare adesso', onclick: () => saveNow() }, STATUS),
+    h('div', { class: 'acts' }, DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : null));
+}
+/* ---- menu a sinistra: le funzioni di sistema (dati, salvataggi, sicurezza) e le viste meno usate ---- */
+const MICO = { op: ['M12 5v14', 'M5 12h14'], imp: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'], saldi: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], save: ['M5 4h11l3 3v13H5z', 'M8 4v5h7V4', 'M8 20v-6h8v6'], eye: ['M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z', 'M12 9a3 3 0 110 6 3 3 0 010-6z'], copy: ['M8 8h11v12H8z', 'M5 16V4h11'], lock: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], hist: ['M12 7v5l3 2', 'M4 12a8 8 0 108-8 8 8 0 00-7 4', 'M4 4v4h4'], out: ['M10 4H5v16h5', 'M15 8l4 4-4 4', 'M19 12H9'] };
+function openMenu() {
+  if (document.querySelector('.drawer')) return;
+  const bg = h('div', { class: 'drawer-bg' }), close = () => { bg.classList.add('out'); pan.classList.add('out'); setTimeout(() => { bg.remove(); pan.remove(); }, 260); document.removeEventListener('keydown', esc); };
+  const esc = e => { if (e.key === 'Escape') close(); };
+  const ico = d => s('svg', { viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, d.map(x => s('path', { d: x })));
+  const item = (label, d, fn, sub) => h('button', { type: 'button', class: 'mi', onclick: () => { close(); setTimeout(fn, 120); } }, ico(d), h('span', null, label, sub ? h('small', null, sub) : null));
+  const go = k => () => { UI.tab = k; UI.acc = null; render(); window.scrollTo(0, 0); };
+  const cloudSub = CLOUD_ON() ? (CL.state === 'ok' ? 'attivo · ' + clHm(CL.at) : CL.code ? 'attivo' : 'non attivo qui') : '';
+  const pan = h('nav', { class: 'drawer', 'aria-label': 'Menu' },
+    h('div', { class: 'dr-head' }, h('b', null, 'Finanze'), h('button', { type: 'button', class: 'btn sm', onclick: () => close() }, 'Chiudi')),
+    h('div', { class: 'dr-sec' }, 'Azioni rapide'),
+    DEMO ? null : item('Registra un\'operazione', MICO.op, () => editOperation({}), 'acquisto, vendita, versamento…'),
+    DEMO ? null : item('Importa i file dei conti', MICO.imp, () => pickBatch()),
+    DEMO ? null : item('Aggiorna i saldi', MICO.saldi, openBalances, 'conti correnti, contanti, carte'),
+    DEMO ? null : item('Salva adesso', MICO.save, saveNow, cloudSub ? 'online ' + cloudSub : ''),
+    item(HIDE ? 'Mostra gli importi' : 'Nascondi gli importi', MICO.eye, () => { HIDE = !HIDE; render(); }),
+    h('div', { class: 'dr-sec' }, 'Altre viste'),
+    item('Strumenti (i tuoi titoli)', ICONS.strumenti, go('strumenti')),
+    item('Allocazione (come sei diviso)', ICONS.allocazione, go('allocazione')),
+    h('div', { class: 'dr-sec' }, 'Sistema'),
+    item('Dati e sicurezza', ICONS.dati, go('dati'), 'salvataggio online, Face ID, tassi di cambio'),
+    DEMO || !CLOUD_ON() || !CL.code ? null : item('Versioni precedenti', MICO.hist, histOpen, 'copie orarie online'),
+    DEMO ? null : item(typeof navigator.canShare === 'function' ? 'Salva una copia in File' : 'Scarica una copia di sicurezza', MICO.copy, () => { if (typeof navigator.canShare === 'function') shareCopy(); else downloadCopy(); }),
+    !DEMO && (FID.id || !NOPW) ? item('Blocca adesso', MICO.lock, lock) : null,
+    DEMO ? item('Esci dalla demo', MICO.out, exitDemo) : item('Esci', MICO.out, async () => { try { clearTimeout(saveTimer); await save(false); if (CL.pending && CL.ready) await clPush(); } finally { location.reload(); } }, 'salva e torna alla schermata iniziale'),
+    h('div', { class: 'dr-foot muted' }, STATUS || ''));
+  bg.addEventListener('click', close); document.addEventListener('keydown', esc);
+  document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
 const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
+const MAIN_TABS = ['panoramica', 'conti', 'analisi', 'piano', 'mercati'];          // le altre viste sono nel menu a sinistra
+function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
@@ -2761,18 +2859,59 @@ function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni g
   return tiles(groupAccs().filter(g => g.accs.length).map(g => ({ l: g.l, v: eur(g.tot), s: (tot > 0 ? pct(g.tot / tot) + ' del totale · ' : '') + pl(g.accs.length, 'conto', 'conti'),
     x: () => ({ kind: 'Come sono divisi i tuoi soldi', num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)' }) })));
 }
+/* ---- che cosa si aggiorna da solo: per ogni conto, i titoli con il prezzo automatico e quelli fermi ---- */
+const FONTE = { borsa_italiana: 'Borsa Italiana', stockanalysis: 'Borsa USA (Finnhub)', coingecko: 'CoinGecko', sito: 'il sito' };
+const isAuto = i => !!(i && i.autoAt && daysSince(i.autoAt) <= 10);
+function autoInfo(a) {
+  const auto = [], fermi = []; let va = 0, vt = 0;
+  for (const p of a.positions) { const i = inst(p.instId); if (!i) continue; const v = posValue(p); vt += Math.abs(v); if (isAuto(i)) { auto.push([a, p, i, v]); va += Math.abs(v); } else fermi.push([a, p, i, v]); }
+  return { auto, fermi, share: vt > 0 ? va / vt : 0, cash: accCash(a) };
+}
+const fermoWhy = i => /valore totale/i.test(i.name) ? 'è un totale unico: lo aggiorni con l\'estratto' : i.cls && /obbligaz/i.test(i.cls) ? 'obbligazione senza prezzo pubblico seguito' : 'nessuna fonte pubblica seguita: lo aggiorni con l\'estratto';
+function autoLine(a) {          // una riga sotto il conto: quanti titoli si aggiornano da soli
+  if (!a.positions.length) return h('div', { class: 'ac-auto man' }, '✎ Saldo: lo aggiorni tu con "Aggiorna saldi"');
+  const x = autoInfo(a), n = x.auto.length, t = n + x.fermi.length;
+  return h('button', { type: 'button', class: 'ac-auto ' + (x.fermi.length ? (n ? 'mix' : 'man') : 'ok'), onclick: e => { e.stopPropagation(); tapFx(e.currentTarget); talkAuto(a); } },
+    n === t ? '⟳ Tutto automatico: ' + pl(t, 'titolo', 'titoli') : n ? '⟳ Automatici ' + n + ' su ' + t + ' (' + pct(x.share) + ' del valore) · fermi: ' + x.fermi.slice(0, 3).map(f => f[2].name.replace(/ \(valore totale\)/, '')).join(', ') + (x.fermi.length > 3 ? '…' : '') : '✎ Nessun prezzo automatico: lo aggiorni tu con l\'estratto');
+}
+function talkAuto(a) {
+  const x = autoInfo(a);
+  const li = ([, p, i, v], ok) => h('li', null, h('span', null, i.name, h('small', null, ok ? ' · ' + (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
+  talk({ kind: 'Aggiornamento automatico · ' + a.name, title: x.fermi.length ? (x.auto.length ? 'In parte automatico' : 'Lo aggiorni tu') : 'Tutto automatico', value: pct(x.share),
+    say: ilPct(x.share).replace(/^./, c => c.toUpperCase()) + ' del valore di questo conto si aggiorna da solo: ogni giorno l\'app prende il prezzo di oggi di quei titoli (Borsa Italiana, Borsa USA, CoinGecko) e lo moltiplica per le quantità che hai. Le quantità invece cambiano solo quando compri o vendi (con "+ Operazione") o quando importi l\'estratto.',
+    box: ['Si aggiornano da soli (' + x.auto.length + ')', x.auto.length ? h('ul', { class: 'list' }, x.auto.sort((p, q) => q[3] - p[3]).map(r => li(r, true))) : h('p', { class: 'muted' }, 'Nessuno.')],
+    how: x.fermi.length ? h('ul', { class: 'list' }, x.fermi.sort((p, q) => q[3] - p[3]).map(r => li(r, false))) : null,
+    tip: x.fermi.length ? 'I titoli fermi restano al valore dell\'ultimo estratto: quando mi mandi quello nuovo li aggiorno io. Se uno di questi ha un codice ISIN, dimmelo: provo ad aggiungerlo ai prezzi automatici.' : '' });
+}
+/* ---- la scheda Conti: tre gruppi, un riquadro per conto ---- */
+const ACC_ICO = { banca: ['M3 10l9-6 9 6', 'M5 10v8', 'M9.5 10v8', 'M14.5 10v8', 'M19 10v8', 'M3 20h18'], contanti: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], pagamenti: ['M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1z', 'M2 10h20', 'M6 14.5h4'], deposito: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], broker: ['M4 19l5-6 4 3 7-9', 'M15 7h5v5'], crypto: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M9.5 8h3.5a2 2 0 010 4H9.5h4a2 2 0 010 4h-4z', 'M11 6.5v1.5M11 16v1.5'], trading: ['M7 4v16', 'M5 8h4v6H5z', 'M17 4v16', 'M15 7h4v8h-4z'], pensione: ['M3 12a9 9 0 0118 0z', 'M12 12v6a2 2 0 01-4 0'], altro: ['M12 4a8 8 0 100 16 8 8 0 000-16z'] };
+const accIco = a => s('svg', { viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ACC_ICO[a.type] || ACC_ICO.altro).map(d => s('path', { d })));
+function accCard(a, total, k) {
+  const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); };
+  return h('div', { class: 'acard g-' + accGroup(a), role: 'button', tabindex: '0', style: '--i:' + k, onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); open(); }, onkeydown: e => { if (e.key === 'Enter') open(); } },
+    h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, accIco(a)), h('span', { class: 'ac-name' }, a.name), a.box ? h('span', { class: 'ac-tag' }, a.box) : null),
+    h('div', { class: 'ac-val' }, eur(v)),
+    h('div', { class: 'ac-sub' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (total > 0 ? ' · ' + pct(v / total) + ' del totale' : '') + (a.upd ? ' · agg. ' + fmtDate(a.upd) : '')),
+    a.perf && p.pnl != null ? h('div', null, h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + seur(p.pnl).replace('+', '') + (fin(p.pnlPct) ? ' · ' + spct(p.pnlPct) : ''))) : null,
+    h('div', { class: 'ac-bar' }, h('i', { style: '--w:' + (total > 0 ? Math.max(1, Math.abs(v) / total * 100) : 0).toFixed(1) + '%' })),
+    accGroup(a) === 'fermi' ? h('div', { class: 'ac-auto man' }, '✎ Saldo: lo aggiorni tu con "Aggiorna saldi"') : autoLine(a));
+}
 function tabConti() {
   if (UI.acc) return viewAccount(UI.acc);
-  const total = totalValue(), el = h('div');
-  const row = a => { const p = perfOf([a]); return [h('a', { href: '#', onclick: e => { e.preventDefault(); UI.acc = a.id; render(); } }, a.name), (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.box ? ' · ' + a.box : ''), eur(accValue(a)), a.perf && p.pnl != null ? gl(p.pnl, seur(p.pnl)) : '—', a.perf ? spct(p.xirr) : '—', rowActs(btn('Apri', () => { UI.acc = a.id; render(); }, 'sm'), btn('Modifica', () => editAccount(a), 'sm'), btn('Elimina', () => delAccount(a), 'sm danger'))]; };
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Conti'), btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount())),
-    S.accounts.length ? h('p', { class: 'muted' }, 'Totale: ' + eur(total) + ' in ' + pl(S.accounts.length, 'conto', 'conti') + ', divisi in soldi fermi, soldi investiti e fondo pensione.') : h('p', { class: 'muted' }, 'Nessun conto: creane uno.')));
-  if (!S.accounts.length) return el;
-  el.append(groupTiles());
-  for (const g of groupAccs()) if (g.accs.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, g.l), h('b', { class: 'box-n' }, eur(g.tot)), h('span', { class: 'muted' }, total > 0 ? pct(g.tot / total) : '')),
-    h('p', { class: 'muted' }, g.d),
-    table([{ t: 'Conto' }, { t: 'Tipo' }, { t: 'Valore', n: 1 }, { t: 'Guadagno', n: 1 }, { t: 'Annuo', n: 1 }, { t: '' }], g.accs.map(row))));
-  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; tutto il resto = fermi.'));
+  const total = totalValue(), el = h('div', { class: 'conti' });
+  el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'Tutti i tuoi conti'), h('div', { class: 'ch-n' }, eur(total)), h('div', { class: 'muted' }, pl(S.accounts.length, 'conto', 'conti') + ' · tocca un conto per aprirlo'))),
+    h('div', { class: 'actbar' }, btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount()))));
+  if (!S.accounts.length) { el.append(h('p', { class: 'muted' }, 'Nessun conto: creane uno o importa i file.')); return el; }
+  let k = 0;
+  for (const g of groupAccs()) if (g.accs.length) {
+    const share = total > 0 ? g.tot / total : 0;
+    el.append(h('section', { class: 'grp g-' + g.k },
+      h('div', { class: 'grp-head tapme', role: 'button', tabindex: '0', onclick: e => { tapFx(e.currentTarget); talk({ kind: 'Come sono divisi i tuoi soldi', title: g.l, value: eur(g.tot), num: g.tot, say: g.d + (total > 0 ? ' Quota sul patrimonio: ' + pct(share) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)' }); } },
+        h('div', { class: 'grp-t' }, h('h2', null, g.l), h('span', { class: 'grp-n' }, eur(g.tot)), h('span', { class: 'grp-p' }, pct(share))),
+        h('div', { class: 'grp-bar' }, h('i', { style: '--w:' + (share * 100).toFixed(1) + '%' }))),
+      h('div', { class: 'acards' }, g.accs.map(a => accCard(a, total, k++)))));
+  }
+  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; il resto = fermi. Tocca la riga ⟳ di un conto per vedere che cosa si aggiorna da solo.'));
   return el;
 }
 function viewAccount(id) {
@@ -2784,8 +2923,15 @@ function viewAccount(id) {
   el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? 'serve almeno 1 mese di storia' : '' }]));
-  if (a.type === 'pensione') el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
-  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
+  if (a.positions.length) {          // che cosa si aggiorna da solo in questo conto
+    const x = autoInfo(a), li = ([, , i, v], ok) => h('li', null, h('span', null, (ok ? '⟳ ' : '✎ ') + i.name, h('small', null, ok ? ' · ' + (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
+    el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Cosa si aggiorna da solo'), h('span', { class: 'pill ' + (x.fermi.length ? 'dn' : 'up') }, pct(x.share) + ' del valore')),
+      h('p', { class: 'muted' }, 'Ogni giorno l\'app prende il prezzo di oggi dei titoli con ⟳ e lo moltiplica per le tue quantità. Quelli con ✎ restano al valore dell\'ultimo estratto.'),
+      h('div', { class: 'two' }, h('div', null, h('h4', null, 'Automatici (' + x.auto.length + ')'), x.auto.length ? h('ul', { class: 'list' }, x.auto.sort((p, q) => q[3] - p[3]).map(r => li(r, true))) : h('p', { class: 'muted' }, 'Nessuno.')),
+        h('div', null, h('h4', null, 'Fermi, li aggiorni tu (' + x.fermi.length + ')'), x.fermi.length ? h('ul', { class: 'list' }, x.fermi.sort((p, q) => q[3] - p[3]).map(r => li(r, false))) : h('p', { class: 'muted' }, 'Nessuno: tutto si aggiorna da solo.')))));
+  }
+  if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
+  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? ' ⟳' : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
     table([{ t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Costo di carico', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: '' }], prow, 'Nessuna posizione. La liquidità si imposta con "Modifica conto".')));
   const frow = a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).map(f => [fmtDate(f.date), (FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0], (f.type === 'prelievo' ? '−' : '') + eur(f.amount), f.note || '', rowActs(btn('Modifica', () => editFlow(a, f), 'sm'), btn('Elimina', () => delFlow(a, f), 'sm danger'))]);
@@ -2986,30 +3132,56 @@ function undoOp(op) {
   if (u.price) { const i = inst(op.instId); if (i) { i.price = u.price.price; i.priceDate = u.price.priceDate; } }
   S.ops = OPS().filter(x => x !== op); done();
 }
+/* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
+const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']]];
 function editOperation(pre, after) {
   if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
   pre = pre || {};
-  const v = { accId: pre.accId || UI.acc || S.accounts[0].id, toId: pre.toId || '', kind: pre.kind || 'acquisto', date: pre.date || today(), instId: pre.instId || '', newName: '', newCcy: 'EUR', qty: pre.qty ?? null, price: pre.price ?? null, fee: null, amount: pre.amount ?? null, fromCash: pre.fromCash ?? true, note: pre.note || '' };
-  form('Registra operazione', [
-    { key: 'accId', label: 'Conto (per un trasferimento: quello di partenza)', type: 'select', options: S.accounts.map(a => [a.id, a.name]) },
-    { key: 'kind', label: 'Che cosa è successo', type: 'select', options: OP_KINDS },
-    { key: 'toId', label: 'Solo trasferimento: conto di arrivo', type: 'select', options: [['', '— scegli —'], ...S.accounts.map(a => [a.id, a.name])] },
-    { key: 'date', label: 'Data', type: 'date', req: true },
-    { key: 'instId', label: 'Acquisto o vendita: strumento', type: 'select', options: [['', '— uno nuovo (scrivilo sotto) —'], ...S.instruments.map(i => [i.id, i.name + ' (' + i.ccy + ')'])] },
-    { key: 'newName', label: 'Se lo strumento è nuovo: nome', ph: 'es. ETF Azionario Mondo' },
-    { key: 'newCcy', label: 'Se è nuovo: valuta', list: 'dl-ccy', ph: 'EUR' },
-    { key: 'qty', label: 'Acquisto o vendita: quantità', type: 'number', hint: 'se non la sai, lascia vuoto e scrivi l\'importo speso' },
-    { key: 'price', label: 'Acquisto o vendita: prezzo di una quota', type: 'number', hint: 'se lo lasci vuoto uso l\'ultimo prezzo che l\'app conosce (si aggiorna da solo mattina e sera)' },
-    { key: 'fee', label: 'Commissioni (€, facoltative)', type: 'number' },
-    { key: 'amount', label: 'Importo (€): per trasferimento, versamento, prelievo, oppure per un acquisto o una vendita se non conosci la quantità', type: 'number' },
-    { key: 'fromCash', label: 'Aggiorna anche la liquidità del conto', type: 'check', hint: 'sì se paghi con i soldi che sono già nel conto (non vale per i trasferimenti: lì la liquidità cambia sempre)' },
-    { key: 'note', label: 'Nota' }
-  ], v, o => {
-    const r = applyOp(o); if (r) return r;
-    done(); if (after) after();
-  }, ccyList());
+  let kind = pre.kind || 'acquisto';
+  const dlg = h('dialog', { class: 'opd' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, err = h('p', { class: 'err' }), sumEl = h('div', { class: 'opsum', 'aria-live': 'polite' });
+  const sel = (opts, val) => h('select', null, opts.map(([v, l]) => h('option', { value: v, selected: v === val }, l)));
+  const inp = (type, val, ph) => h('input', { type, step: type === 'number' ? 'any' : null, inputmode: type === 'number' ? 'decimal' : null, value: val ?? '', placeholder: ph || '' });
+  const accOpts = S.accounts.map(a => [a.id, a.name]);
+  const I = { accId: sel(accOpts, pre.accId || UI.acc || S.accounts[0].id), toId: sel([['', '— scegli —'], ...accOpts], pre.toId || ''),
+    instId: sel([['', '+ Uno strumento nuovo'], ...S.instruments.slice().sort((p, q) => p.name.localeCompare(q.name)).map(i => [i.id, i.name + ' (' + i.ccy + ')'])], pre.instId || ''),
+    newName: inp('text', '', 'es. ETF Azionario Mondo'), newCcy: inp('text', 'EUR', 'EUR'), qty: inp('number', pre.qty, 'es. 3'), price: inp('number', pre.price), fee: inp('number', null, '0'), amount: inp('number', pre.amount, 'es. 500'),
+    date: inp('date', pre.date || today()), note: inp('text', pre.note || '', 'facoltativa'), fromCash: h('input', { type: 'checkbox', checked: pre.fromCash ?? true }) };
+  I.newCcy.setAttribute('list', 'dl-ccy');
+  const accLbl = h('span', null, 'Conto'), amtLbl = h('span', null, 'Importo (€)'), desc = h('p', { class: 'muted opdesc' });
+  const fld = (lab, el, hint) => h('label', { class: 'fld' }, typeof lab === 'string' ? h('span', null, lab) : lab, el, hint ? h('small', null, hint) : null);
+  const W = {          // ogni blocco di campi e per quali operazioni si vede
+    acc: [h('div', null, fld(accLbl, I.accId)), 'all'], to: [h('div', null, fld('A quale conto', I.toId)), ['trasferimento']],
+    inst: [h('div', null, fld('Strumento', I.instId)), ['acquisto', 'vendita']], nuovo: [h('div', { class: 'g2' }, fld('Nome dello strumento nuovo', I.newName), fld('Valuta', I.newCcy)), ['acquisto']],
+    qp: [h('div', { class: 'g2' }, fld('Quantità', I.qty), fld('Prezzo di una quota', I.price)), ['acquisto', 'vendita']],
+    amt: [h('div', null, fld(amtLbl, I.amount)), 'all'], fee: [h('div', null, fld('Commissioni (€, facoltative)', I.fee)), ['acquisto', 'vendita']],
+    cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto'))), ['acquisto', 'vendita']],
+    dn: [h('div', { class: 'g2' }, fld('Data', I.date), fld('Nota', I.note)), 'all'] };
+  const kinds = h('div', { class: 'kinds', role: 'group', 'aria-label': 'Che cosa è successo' }, OP_UI.map(([k, l, , ico]) => h('button', { type: 'button', class: 'kind', 'data-k': k, onclick: () => { kind = k; sync(); } }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d }))), h('span', null, l))));
+  const num = el => { const x = parseFloat(String(el.value).replace(',', '.')); return isFinite(x) ? x : null; };
+  function sync() {
+    for (const b of kinds.children) b.setAttribute('aria-pressed', b.dataset.k === kind ? 'true' : 'false');
+    desc.textContent = OP_UI.find(x => x[0] === kind)[2] + '.';
+    for (const [key, [el, ks]] of Object.entries(W)) el.hidden = !(ks === 'all' || ks.includes(kind)) || (key === 'nuovo' && I.instId.value !== '');
+    const trade = kind === 'acquisto' || kind === 'vendita', i = inst(I.instId.value);
+    accLbl.textContent = kind === 'trasferimento' ? 'Da quale conto' : 'Conto';
+    amtLbl.textContent = trade ? 'Oppure: importo totale (€), se non sai la quantità' : 'Importo (€)';
+    I.price.placeholder = i && i.price > 0 ? 'ultimo noto: ' + nf2.format(i.price) + ' ' + i.ccy : 'es. 110';
+    const q = num(I.qty), pr = num(I.price) ?? (i ? i.price : null), am = num(I.amount), fe = num(I.fee) || 0, an = (S.accounts.find(a => a.id === I.accId.value) || {}).name || '', bn = (S.accounts.find(a => a.id === I.toId.value) || {}).name || '…';
+    const nm = i ? i.name : (I.newName.value.trim() || 'lo strumento');
+    sumEl.textContent = trade ? (q && pr ? (kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(pr) + ' ' + (i ? i.ccy : normCcy(I.newCcy.value)) + ' di ' + nm + (fe ? ' + ' + eur(fe, true) + ' di commissioni' : '') + ' · conto ' + an : am ? (kind === 'acquisto' ? 'Spendi ' : 'Incassi ') + eur(am, true) + ' in ' + nm + ' · conto ' + an : 'Scrivi la quantità (e il prezzo) oppure l\'importo.')
+      : am ? (kind === 'versamento' ? 'Entrano ' + eur(am, true) + ' in ' + an : kind === 'prelievo' ? 'Escono ' + eur(am, true) + ' da ' + an : 'Sposti ' + eur(am, true) + ' da ' + an + ' a ' + bn) : 'Scrivi l\'importo.';
+  }
+  for (const el of Object.values(I)) { el.addEventListener('input', sync); el.addEventListener('change', sync); }
+  const okb = h('button', { type: 'submit', class: 'btn pri' }, 'Registra');
+  const frm = h('form', { method: 'dialog' }, h('h3', null, 'Registra un\'operazione'), kinds, desc, Object.values(W).map(x => x[0]), sumEl, err, h('div', { class: 'dlgacts' }, h('button', { type: 'button', class: 'btn', onclick: shut }, 'Annulla'), okb), ccyList());
+  frm.addEventListener('submit', e => {
+    e.preventDefault();
+    const o = { accId: I.accId.value, toId: I.toId.value, kind, date: I.date.value || today(), instId: I.instId.value, newName: I.newName.value.trim(), newCcy: I.newCcy.value.trim() || 'EUR', qty: num(I.qty), price: num(I.price), fee: num(I.fee), amount: num(I.amount), fromCash: I.fromCash.checked, note: I.note.value.trim() };
+    const r = applyOp(o); if (r) { err.textContent = r; return; }
+    shut(); done(); if (after) after();
+  });
+  dlg.append(frm); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); sync(); dlg.showModal();
 }
-
 /* ============ acquisti programmati (PAC) e scadenze ============ */
 const PL = () => S.plans || (S.plans = []);
 const FREQ = [['mensile', 'Ogni mese', 1], ['bimestrale', 'Ogni 2 mesi', 2], ['trimestrale', 'Ogni 3 mesi', 3], ['semestrale', 'Ogni 6 mesi', 6], ['annuale', 'Ogni anno', 12]];
@@ -3271,8 +3443,11 @@ function piPrevisioni() {
 
 const PI_SUBS = [['appuntamenti', 'Appuntamenti'], ['budget', 'Budget'], ['previsioni', 'Previsioni']];
 function tabPiano() {
-  const sub = UI.psub || 'appuntamenti', chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Piano' }, PI_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.psub = k; render(); } }, l)));
-  return h('div', null, h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Piano'), btn('+ Operazione', () => editOperation({}), 'pri')), chips), ({ appuntamenti: piAppuntamenti, budget: piBudget, previsioni: piPrevisioni }[sub] || piAppuntamenti)());
+  const sub = UI.psub || 'appuntamenti';
+  const seg = h('div', { class: 'seg3', role: 'group', 'aria-label': 'Piano' }, PI_SUBS.map(([k, l]) => h('button', { type: 'button', class: 'seg-b', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.psub = k; render(); } }, l)));
+  const say = { appuntamenti: 'Acquisti e versamenti che fai a intervalli regolari: l\'app ti ricorda quando registrarli e li usa nelle previsioni.', budget: 'Entrate e spese di ogni mese: quanto ti resta da risparmiare o investire.', previsioni: 'Dove possono arrivare i tuoi soldi tra qualche mese o qualche anno, con le tue ipotesi.' }[sub] || '';
+  return h('div', null, h('section', { class: 'card phead' }, h('div', { class: 'ph-top' }, h('div', { class: 'ph-t' }, h('h2', null, 'Piano'), h('p', { class: 'muted' }, say)), btn('+ Operazione', () => editOperation({}), 'pri big')), seg),
+    ({ appuntamenti: piAppuntamenti, budget: piBudget, previsioni: piPrevisioni }[sub] || piAppuntamenti)());
 }
 
 /* ============ dati dimostrativi ============ */

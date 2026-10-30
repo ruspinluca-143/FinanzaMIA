@@ -1,4 +1,4 @@
-# Legge i prezzi PUBBLICI di ETF/ETC/ETN (Borsa Italiana) e crypto (CoinGecko) per gli strumenti di watchlist.json,
+﻿# Legge i prezzi PUBBLICI di ETF/ETC/ETN (Borsa Italiana) e crypto (CoinGecko) per gli strumenti di watchlist.json,
 # aggiorna rapporti\prezzi.json e accoda lo storico in rapporti\storico-prezzi.csv.
 # - Le azioni USA (fonte "stockanalysis") restano quelle dell'ultimo file, SALVO che sia impostata la variabile d'ambiente
 #   FINNHUB_KEY (chiave gratuita di finnhub.io, solo dati di mercato): allora si leggono dall'API ufficiale di Finnhub.
@@ -49,7 +49,7 @@ function Read-Borsa($n) {
   $ter = [regex]::Match($h, 'Commissioni totali annue</strong>.{0,300}?([\d\.,]+)\s*%', 'Singleline')                      # costi annui (TER), benchmark e distribuzione: servono all'app per costi e tasse
   $bm = [regex]::Match($h, '<strong>Benchmark</strong>.{0,300}?-right">\s*([^<]{1,80}?)\s*</span>', 'Singleline')
   $dv = [regex]::Match($h, '<strong>Dividendi</strong>.{0,300}?-right">\s*([^<]{1,30}?)\s*</span>', 'Singleline')
-  return [pscustomobject]@{ prezzo = $best.p; valuta = 'EUR'; data = $best.d; base = $best.base
+  return [pscustomobject]@{ prezzo = $best.p; valuta = $(if ($n.valuta) { [string]$n.valuta } else { 'EUR' }); data = $best.d; base = $best.base
     ter = $(if ($ter.Success) { ToNum $ter.Groups[1].Value } else { $null })
     bench = $(if ($bm.Success) { [Net.WebUtility]::HtmlDecode($bm.Groups[1].Value).Trim() } else { $null })
     div = $(if ($dv.Success) { [Net.WebUtility]::HtmlDecode($dv.Groups[1].Value).Trim() } else { $null }) }
@@ -135,6 +135,7 @@ $items = foreach ($r in $rows) {
   if ($null -ne $r['ter']) { $s += ',"ter":' + ([double]$r['ter']).ToString('R', $inv) }
   if ($r['bench']) { $s += ',"bench":' + (JStr ([string]$r['bench'])) }
   if ($r['div']) { $s += ',"div":' + (JStr ([string]$r['div'])) }
+  $fo = @($wl | Where-Object { $_.nome -eq $r.nome })[0]; if ($fo -and $fo.fonte) { $s += ',"fonte":' + (JStr ([string]$fo.fonte)) }
   '    ' + $s + '}'
 }
 # cambi ufficiali della BCE (euro per 1 unita' di valuta): servono all'app per i titoli quotati in dollari
