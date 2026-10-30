@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Rhs7UrZVcOMBUATWZxO656NUpSYDCQuNgFUKhSLmkH8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PdWdpNeTJ31FlYdWrd/jrtTundlwfDqgOzNzu7deal4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -25,6 +25,38 @@
 html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
 .ptr{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;transform:translate(-50%,-60px);z-index:60;padding:8px 16px;border-radius:999px;background:var(--card-s);color:var(--ink);font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;pointer-events:none;white-space:nowrap}
 .ptr.done{transition:transform .25s,opacity .25s}
+.tile.tap{cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+.tile.tap::after{content:'i';position:absolute;top:12px;right:12px;width:18px;height:18px;border-radius:50%;border:1px solid var(--ring);font:600 11px/16px var(--font);text-align:center;color:var(--ink2);opacity:.5;transition:opacity .3s,transform .3s var(--ease)}
+.tile.tap:hover::after{opacity:1;transform:scale(1.12)}
+.tile.tap:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.enter .tiles .tile{animation:rise .55s var(--ease) both;animation-delay:calc(var(--i,0)*60ms + 120ms)}
+.tapme{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hero-n.tapme{display:inline-block;transition:transform .3s var(--ease)}
+.hero-n.tapme:hover{transform:translateY(-2px)}
+.seg.pick{cursor:pointer}
+ul.list li.tapme,.dleg li.tapme{border-radius:10px;transition:background .25s}
+ul.list li.tapme:hover,.dleg li.tapme:hover{background:color-mix(in srgb,var(--s1) 8%,transparent)}
+dialog.talk{max-width:540px}
+dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0)*55ms + 80ms)}
+.talk-k{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--s1);margin-bottom:2px}
+.talk-n{font-size:clamp(34px,7vw,46px);font-weight:700;letter-spacing:-.04em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.talk-say{font-size:16px;line-height:1.5;margin:10px 0}
+.talk-box{margin:12px 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 7%,transparent)}
+.talk-box.tip{background:color-mix(in srgb,#30d158 11%,transparent)}
+.talk-box>b{display:block;font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:8px}
+.tbars{display:grid;gap:10px}
+.tbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l v" "t t";gap:4px 12px;align-items:baseline;text-align:left;background:none;border:0;padding:2px 0;margin:0;color:inherit;font:inherit;width:100%;border-radius:8px;animation:rise .45s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 220ms)}
+.tbar.go{cursor:pointer}
+.tbar.go:hover .tb-l{color:var(--lnk)}
+.tbar.go:active{transform:scale(.985)}
+.tb-l{grid-area:l;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-l small{color:var(--muted);margin-left:6px;font-size:12px}
+.tb-v{grid-area:v;font-weight:600;font-variant-numeric:tabular-nums;font-size:14px}
+.tb-t{grid-area:t;height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden}
+.tb-b{display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,var(--s1),#64d2ff);animation:grow .9s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 300ms)}
+.tb-b.neg{background:linear-gradient(90deg,#ff375f,#ff9f0a)}
+.tb-v.gain{color:var(--gain)}
+.tb-v.loss{color:var(--loss)}
 #status{cursor:pointer}
 a{color:var(--lnk);text-decoration:none}
 a:hover{text-decoration:underline}
@@ -760,7 +792,7 @@ function positionsPnl() {
   const out = [];
   for (const a of S.accounts) for (const p of a.positions) {
     const i = inst(p.instId); if (!i || !(p.cost > 0)) continue;
-    const v = posValue(p); out.push({ name: i.name, acc: a.name, v, pnl: v - p.cost, pct: (v - p.cost) / p.cost });
+    const v = posValue(p); out.push({ name: i.name, acc: a.name, v, pnl: v - p.cost, pct: (v - p.cost) / p.cost, a, p });
   }
   return out;
 }
@@ -1066,7 +1098,125 @@ function table(cols, rows, empty) {
     h('thead', null, h('tr', null, cols.map(c => h('th', { class: c.n ? 'num' : '' }, c.t)))),
     h('tbody', null, rows.map(r => h('tr', null, r.map((cell, i) => h('td', { class: cols[i].n ? 'num' : '', 'data-l': cols[i].t || '' }, cell)))))));      // data-l: sul telefono ogni riga diventa una scheda con le etichette
 }
-const tiles = arr => h('div', { class: 'tiles' }, arr.map(t => h('div', { class: 'tile' }, h('div', { class: 'lbl' }, t.l), h('div', { class: 'val' }, t.v), t.s ? h('div', { class: 'sub' }, t.s) : null)));
+const tiles = arr => h('div', { class: 'tiles' }, arr.map((t, k) => h('div', { class: 'tile tap', role: 'button', tabindex: '0', style: '--i:' + k, title: 'Tocca per capire che cosa vuol dire',
+  onclick: e => { if (e.target.closest('a,button')) return; tapFx(e.currentTarget); talkTile(t); }, onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); talkTile(t); } } },
+  h('div', { class: 'lbl' }, t.l), h('div', { class: 'val' }, t.v), t.s ? h('div', { class: 'sub' }, t.s) : null)));
+
+/* ============ "parlante": ogni numero, se lo tocchi, dice che cosa vuol dire, come si calcola e da che cosa e' fatto ============ */
+const GLOSS = {
+  'patrimonio totale': ['È tutto quello che hai, sommato: titoli e fondi al prezzo di oggi, più i soldi fermi sui conti, meno i debiti (per esempio la carta di credito).', 'Tocca un conto qui sotto per aprirlo e vedere da che cosa è fatto.'],
+  'versato netto': ['Sono i soldi tuoi che hai messo nei conti d\'investimento, meno quelli che hai ritirato. Non dipende da come vanno i mercati: è la base su cui si misura il guadagno.', 'Quando versi o ritiri soldi, registralo con "+ Operazione": così il guadagno resta giusto.'],
+  'guadagno / perdita': ['È quanto valgono oggi i conti d\'investimento meno quello che ci hai messo. Se è positivo, i tuoi soldi hanno lavorato per te.', 'Guardalo ogni qualche mese, non ogni giorno: nel breve i mercati vanno su e giù, conta la direzione nel tempo.'],
+  'rendimento annualizzato': ['È il guadagno trasformato in un tasso all\'anno, come quello di un conto deposito. Tiene conto di quando hai versato: un versamento di ieri ha avuto meno tempo per rendere di uno di tre anni fa (metodo XIRR).', 'Confrontalo con l\'inflazione (circa 2% all\'anno): se sei sopra, i tuoi soldi crescono davvero.'],
+  'guadagno sulle posizioni': ['È la differenza tra quanto valgono oggi i tuoi titoli e quanto li hai pagati. È un guadagno "sulla carta": diventa vero solo quando vendi, e allora si pagano le tasse.', 'Tocca un titolo nell\'elenco per vedere la sua storia.'],
+  'ultimo snapshot': ['Uno snapshot è una fotografia del patrimonio in un giorno. Il grafico "Valore e versato nel tempo" si disegna unendo queste fotografie.', 'Registrane uno ogni volta che aggiorni i conti: più fotografie, grafico più preciso.'],
+  'valore': ['Quanto vale oggi questo conto: i titoli al prezzo di oggi più la liquidità che c\'è sopra.', ''],
+  'il tuo portafoglio': ['Come è andato il tuo portafoglio nello stesso periodo del confronto.', ''],
+  'differenza': ['Quanto hai fatto meglio (se positivo) o peggio (se negativo) del confronto, a parità di date e di versamenti.', 'Se resti sotto per anni, un semplice ETF sul mondo potrebbe farti guadagnare di più con meno fatica.'],
+  'quanto ti costa ogni anno': ['Le spese annue di fondi ed ETF (TER) sommate. Si pagano da sole, togliendole dal valore del fondo: non le vedi mai in un estratto conto.', 'Un ETF che fa la stessa cosa con un costo più basso ti fa guadagnare la differenza ogni anno.'],
+  'tasse latenti': ['Le tasse che pagheresti se vendessi tutto oggi: 26% sui guadagni, 12,5% sui titoli di Stato. Finché non vendi non le paghi.', ''],
+  'fuori dall': ['La parte dei soldi che non è investita. Non perde valore in Borsa, ma l\'inflazione la consuma piano piano.', 'Tieni da parte qualche mese di spese per le emergenze; il resto può lavorare.'],
+  'prima posizione': ['Quanto pesa sul totale il singolo investimento più grande. Più è alto, più dipendi da come va quello.', 'Spesso si consiglia di non superare il 20-25% su un solo titolo (gli ETF molto diversificati sono un\'altra cosa).'],
+  'prime tre posizioni': ['Quanto pesano insieme i tre investimenti più grandi.', ''],
+  'posizioni "vere"': ['Quanti investimenti diversi hai davvero, tenendo conto dei pesi: dieci titoli di cui uno pesa il 90% valgono poco più di uno.', ''],
+  'crypto': ['La parte del patrimonio in criptovalute. Possono salire o scendere anche del 50% in pochi mesi.', 'Tienila a una quota che potresti perdere senza cambiare la tua vita.'],
+  'titoli singoli': ['La parte investita in azioni di singole società invece che in fondi: possono fare molto meglio o molto peggio del mercato.', ''],
+  'volatilità misurata': ['Quanto oscilla di solito il valore, in percentuale all\'anno, misurato sui tuoi snapshot. Più è alta, più il valore "balla".', ''],
+  'peggior calo': ['La discesa più forte dal punto più alto al punto più basso, nella storia che hai registrato.', 'Chiediti se un calo così, o il doppio, ti farebbe vendere nel momento peggiore.'],
+  'probabilità di centrare': ['Su migliaia di futuri simulati con le stesse ipotesi, in quanti raggiungi l\'obiettivo. Non è una promessa: serve a capire se l\'obiettivo è realistico.', ''],
+  'esito mediano': ['Il risultato "nel mezzo" delle simulazioni: metà dei futuri va meglio, metà peggio.', ''],
+  'fascia 10': ['In 8 futuri simulati su 10 il risultato cade dentro questa fascia.', ''],
+  'possibilità di finire sotto': ['In quanti futuri simulati, alla fine, hai meno di quanto hai versato.', ''],
+  'titoli diretti': ['Le azioni che possiedi direttamente.', ''],
+  'dentro i fondi': ['Le aziende che possiedi attraverso gli ETF, quando la loro composizione è nota.', ''],
+  'fondi senza composizione': ['I fondi di cui l\'app non conosce il contenuto: per questi non sa dire in quali aziende sei investito.', ''],
+  'decennale usa': ['Il rendimento dei titoli di Stato americani a 10 anni: è il "prezzo del denaro" nel mondo. Quando sale, di solito Borse e obbligazioni soffrono.', ''],
+  'paura / avidità crypto': ['Un indice da 0 (paura estrema) a 100 (avidità estrema) sull\'umore del mercato crypto. Agli estremi spesso il mercato cambia direzione.', ''],
+  'mercato crypto': ['Il valore di tutte le criptovalute insieme e come è cambiato nelle ultime 24 ore.', ''],
+  'stablecoin': ['Le crypto legate al dollaro, come USDC. Quando crescono, entrano soldi "pronti" nel mondo crypto.', ''],
+  'impegno medio al mese': ['Quanto ti impegnano in media al mese gli acquisti programmati (PAC e versamenti periodici).', ''],
+  'programmati': ['Quanti acquisti periodici hai impostato nel Piano.', ''],
+  'entrate al mese': ['Le entrate che hai scritto nel Budget, riportate a un mese (stipendio, dogsitter…).', ''],
+  'spese al mese': ['Le spese fisse e generali del Budget, riportate a un mese.', ''],
+  'acquisti programmati al mese': ['I soldi che ogni mese vanno nei PAC e nei versamenti programmati.', ''],
+  'ti resta al mese': ['Entrate meno spese meno acquisti programmati: è quello che puoi risparmiare o investire in più ogni mese.', 'Se è negativo, stai usando i risparmi: rivedi spese o PAC.'],
+  'patrimonio di oggi': ['Il punto di partenza delle previsioni: tutto quello che hai adesso.', ''],
+  'rendimento ipotizzato': ['Il rendimento all\'anno usato per le previsioni. È un\'ipotesi, non una promessa.', ''],
+  'rischio di restare senza liquidità': ['In quanti futuri simulati, prima o poi, i soldi liquidi finiscono sotto zero.', '']
+};
+const CLASS_SAY = { 'azioni': 'Quote di aziende: nel lungo periodo hanno reso di più, ma possono scendere anche del 30-50% in un anno brutto.', 'obbligazioni': 'Prestiti a Stati o aziende che pagano un interesse: oscillano meno delle azioni.', 'liquidità': 'Soldi fermi su conti e contanti: sicuri, ma l\'inflazione li consuma.', 'crypto': 'Criptovalute: molto volatili, possono raddoppiare o dimezzarsi in pochi mesi.', 'materie prime': 'Oro e simili: spesso tengono il valore quando le Borse scendono.', 'non classificato': 'Strumenti a cui non è stata data una classe: modificali da Strumenti.', 'usa': 'Stati Uniti: la Borsa più grande del mondo, piena di aziende tecnologiche.', 'europa': 'Paesi europei.', 'italia': 'Italia (per esempio i BTP).', 'mondo': 'Fondi che investono in tutto il mondo insieme.', 'emergenti': 'Paesi emergenti come Cina, India, Brasile: crescono di più, con più rischio.', 'n.d.': 'Area non indicata (per esempio crypto e oro, che non hanno un Paese).' };
+const gloss = l => { const k = String(l).toLowerCase(); for (const key in GLOSS) if (k.startsWith(key)) return { say: GLOSS[key][0], tip: GLOSS[key][1] }; return { say: '', tip: '' }; };
+const tapFx = el => { if (!REDUCED && el.animate) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(.96)' }, { transform: 'scale(1)' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' }); };
+const closeTalks = () => document.querySelectorAll('dialog.talk').forEach(d => { if (d.open) d.close(); d.remove(); });
+function countUp(el, to, fmt) {
+  const final = el.textContent, t0 = performance.now(), dur = 900; let stop = false;
+  const tick = now => { if (stop) return; const k = Math.min(1, (now - t0) / dur); el.textContent = k < 1 ? fmt(to * (1 - Math.pow(1 - k, 4))) : final; if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick); setTimeout(() => { stop = true; el.textContent = final; }, dur + 250);
+}
+function talkBars(rows, signed) {          // rows: [etichetta, valore, nota, azione al tocco, testo del valore]
+  const max = Math.max(...rows.map(r => Math.abs(r[1]) || 0), 1e-9);
+  return h('div', { class: 'tbars' }, rows.map((r, i) => { const [lab, v, note, go, txt] = r, neg = v < 0;
+    return h(go ? 'button' : 'div', { class: 'tbar' + (go ? ' go' : ''), type: go ? 'button' : null, style: '--i:' + i + ';--w:' + Math.max(Math.abs(v) / max * 100, 1.5).toFixed(1) + '%', onclick: go || null },
+      h('span', { class: 'tb-l' }, lab, note ? h('small', null, note) : null), h('span', { class: 'tb-v' + (signed ? (neg ? ' loss' : ' gain') : '') }, txt || (signed ? seur(v) : eur(v))),
+      h('span', { class: 'tb-t' }, h('span', { class: 'tb-b' + (neg ? ' neg' : '') })));
+  }));
+}
+function talk(o) {          // o = { kind, title, value, num, fmt, say, how, rows, rowsTitle, signed, tip }
+  closeTalks();
+  const dlg = h('dialog', { class: 'talk' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
+  const big = h('div', { class: 'talk-n' }, o.value && o.value.nodeType ? o.value.cloneNode(true) : (o.value ?? ''));
+  [o.kind ? h('div', { class: 'talk-k' }, o.kind) : null, h('h3', null, o.title), big,
+    o.say ? h('p', { class: 'talk-say' }, o.say) : null,
+    o.how ? h('div', { class: 'talk-box' }, h('b', null, 'Come si calcola'), h('div', null, o.how)) : null,
+    o.rows && o.rows.length ? h('div', { class: 'talk-box' }, o.rowsTitle ? h('b', null, o.rowsTitle) : null, talkBars(o.rows, o.signed)) : null,
+    o.tip ? h('div', { class: 'talk-box tip' }, h('b', null, 'Cosa puoi fare'), h('div', null, o.tip)) : null,
+    h('div', { class: 'dlgacts' }, btn('Ho capito', shut, 'pri'))].filter(Boolean).forEach((p, i) => { p.style.setProperty('--i', i); dlg.append(p); });
+  dlg.addEventListener('close', () => dlg.remove());
+  dlg.addEventListener('click', e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) shut(); });          // tocco fuori dalla scheda: si chiude
+  document.body.append(dlg); dlg.showModal();
+  if (fin(o.num) && !HIDE && !REDUCED) countUp(big, o.num, o.fmt || eur);
+}
+function talkTile(t) {
+  const x = typeof t.x === 'function' ? t.x() : (t.x || {}), g = gloss(t.l);
+  const sub = t.s == null ? '' : typeof t.s === 'string' ? t.s : t.s.textContent;
+  talk(Object.assign({ title: t.l, value: t.v, say: g.say, how: sub, tip: g.tip }, x));
+}
+const openAcc = a => () => { closeTalks(); UI.tab = 'conti'; UI.acc = a.id; render(); };
+function talkTotal() {
+  const tot = totalValue(), inv = S.accounts.filter(a => a.perf).reduce((t, a) => t + accValue(a), 0), debt = S.accounts.reduce((t, a) => t + Math.min(0, accValue(a)), 0), g = gloss('patrimonio totale');
+  talk({ kind: 'Patrimonio', title: 'Patrimonio totale', value: eur(tot), num: tot, say: g.say,
+    how: eur(inv) + ' nei conti d\'investimento + ' + eur(tot - inv - debt) + ' fermi su conti e contanti' + (debt < 0 ? ' − ' + eur(-debt) + ' di debiti' : '') + ' = ' + eur(tot) + '.',
+    rows: S.accounts.map(a => [a.name, accValue(a), TYPES[a.type] ? TYPES[a.type].label : '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto (tocca per aprirlo)', tip: g.tip });
+}
+function talkMix(dim, lab) {          // una fetta della ciambella: che cosa c'e' dentro
+  const k = String(lab).toLowerCase(), m = new Map(), tot = totalValue();
+  const add = (name, acc, v, go) => { if (!fin(v) || !v) return; const key = name + '|' + acc; const o = m.get(key) || [name, 0, acc, go]; o[1] += v; m.set(key, o); };
+  for (const a of S.accounts) {
+    const cash = accCash(a), cl = dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : 'Liquidità';
+    if (cash && cl.toLowerCase() === k) add('Liquidità', a.name, cash, openAcc(a));
+    for (const p of a.positions) {
+      const i = inst(p.instId); if (!i) continue; const v = posValue(p), go = () => talkPos(a, p);
+      if (dim === 'acc') { if (a.name.toLowerCase() === k) add(i.name, a.name, v, go); }
+      else if (dim === 'inst') { if (i.name.toLowerCase() === k) add(i.name, a.name, v, go); }
+      else if (dim === 'ccy') { if ((i.ccy || 'EUR').toLowerCase() === k) add(i.name, a.name, v, go); }
+      else for (const [c, w] of parseMix(dim === 'class' ? i.cls : i.area, 'Non classificato')) if (c.toLowerCase() === k) add(i.name, a.name, v * w, go);
+    }
+  }
+  const rows = [...m.values()].sort((x, y) => y[1] - x[1]), sum = rows.reduce((t, r) => t + r[1], 0);
+  const top = rows.slice(0, 12); if (rows.length > 12) top.push(['Altre ' + (rows.length - 12) + ' voci', rows.slice(12).reduce((t, r) => t + r[1], 0), '']);
+  talk({ kind: { class: 'Classe', area: 'Area', acc: 'Conto', inst: 'Strumento', ccy: 'Valuta' }[dim] || 'Gruppo', title: lab, value: eur(sum), num: sum,
+    say: (CLASS_SAY[k] ? CLASS_SAY[k] + ' ' : '') + (tot > 0 ? 'Pesa il ' + pct(sum / tot) + ' di tutto il patrimonio.' : ''),
+    how: lab === 'Altro' ? 'Raggruppa le voci più piccole della ciambella.' : 'Somma di ' + pl(rows.length, 'voce', 'voci') + '. I fondi misti contano per la loro parte (per esempio un fondo "Azioni 33, Obbligazioni 67" mette un terzo qui sotto Azioni).',
+    rows: top, rowsTitle: 'Da che cosa è fatta (tocca per i dettagli)' });
+}
+function talkPos(a, p) {
+  const i = inst(p.instId); if (!i) return; const v = posValue(p), tot = totalValue(), pnl = p.cost > 0 ? v - p.cost : null, mix = parseMix(i.cls, 'Non classificato');
+  talk({ kind: 'Posizione · ' + a.name, title: i.name, value: eur(v), num: v,
+    say: (pnl == null ? 'Oggi vale ' + eur(v) + '.' : 'L\'hai pagata ' + eur(p.cost) + ' e oggi vale ' + eur(v) + ': sei ' + (pnl >= 0 ? 'in guadagno di ' : 'in perdita di ') + eur(Math.abs(pnl)) + ' (' + spct(pnl / p.cost) + ').') + (tot > 0 ? ' Pesa il ' + pct(v / tot) + ' di tutto il patrimonio.' : ''),
+    how: (HIDE ? '' : nfq.format(p.qty) + ' × ' + nf2.format(i.price) + ' ' + i.ccy + (i.ccy !== 'EUR' ? ' × cambio' : '') + ' = ' + eur(v) + ' · ') + 'prezzo del ' + fmtDate(i.priceDate) + (i.code ? ' · codice ' + i.code : ''),
+    rows: mix.length > 1 ? mix.map(([c, w]) => [c, v * w, pct(w)]) : null, rowsTitle: 'Che cosa contiene',
+    tip: pnl != null && pnl < 0 ? 'Una perdita "sulla carta" diventa vera solo se vendi. Chiediti se il motivo per cui l\'hai comprata vale ancora.' : 'Se vendi, sul guadagno paghi il 26% di tasse (12,5% sui titoli di Stato).' });
+}
 const rowActs = (...b) => h('span', { class: 'acts' }, b);
 
 function niceTicks(a, b, n = 4) {
@@ -1127,7 +1277,7 @@ function bars(rows, total, tgt) {
 
 /* ============ grafici animati: ciambella e sparkline ============ */
 const PALETTE = ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff', '#ffd60a', '#5e5ce6'], OTHER = '#8e8e93';
-function donut(rows, title, vertical) {
+function donut(rows, title, vertical, onPick) {          // onPick(etichetta): toccando una fetta o una voce della legenda si apre la spiegazione
   let list = rows.filter(r => r[1] > 0);
   if (!list.length) return h('p', { class: 'muted' }, 'Nessun dato.');
   if (list.length > 8) list = list.slice(0, 7).concat([['Altro', list.slice(7).reduce((t, r) => t + r[1], 0)]]);
@@ -1141,8 +1291,9 @@ function donut(rows, title, vertical) {
   list.forEach(([lab, v], i) => {
     const len = Math.max(v / sum * C - gap, 0.6), c = s('circle', { class: 'seg', cx: 100, cy: 100, r: R, stroke: colors[i], 'stroke-dasharray': len.toFixed(2) + ' ' + C.toFixed(2), 'stroke-dashoffset': (-off).toFixed(2), style: '--len:' + len.toFixed(2) + ';--c:' + C.toFixed(2) + ';--i:' + i });
     c.addEventListener('pointerenter', () => hl(i)); c.addEventListener('pointerleave', () => hl(null));
+    if (onPick) { c.classList.add('pick'); c.addEventListener('click', () => { hl(i); onPick(lab); }); }
     off += v / sum * C; g.append(c); segs.push(c);
-    lis.push(h('li', { onpointerenter: () => hl(i), onpointerleave: () => hl(null) }, h('span', { class: 'sw', style: 'background:' + colors[i] }), h('span', { class: 'dl', title: lab }, lab), h('span', { class: 'num' }, pct(v / sum)), h('span', { class: 'num amt' }, eur(v))));
+    lis.push(h('li', { class: onPick ? 'tapme' : null, onpointerenter: () => hl(i), onpointerleave: () => hl(null), onclick: onPick ? e => { tapFx(e.currentTarget); hl(i); onPick(lab); } : null }, h('span', { class: 'sw', style: 'background:' + colors[i] }), h('span', { class: 'dl', title: lab }, lab), h('span', { class: 'num' }, pct(v / sum)), h('span', { class: 'num amt' }, eur(v))));
   });
   svg.append(cl, cv);
   return h('div', { class: 'donut' + (vertical ? ' v' : '') }, h('div', { class: 'dsvg' }, svg), h('ul', { class: 'dleg' }, lis));
@@ -2340,18 +2491,24 @@ function tabPanoramica() {
     h('div', { class: 'row' }, btn('Importa i file dei conti…', () => pickBatch(), 'pri'), btn('Saldi dei conti fermi', openBalances), btn('Crea un conto a mano', () => editAccount())),
     h('p', { class: 'muted' }, 'I file che ti preparo io (per esempio quelli di Fineco) contengono già tutto. Per i file scaricati dal broker l\'app ti fa vedere un\'anteprima.'));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
-  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl' }, 'Patrimonio totale'), h('div', { class: 'hero-n', 'data-num': total, 'data-key': 'tot' }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
+  const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
+  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), heroPill(tp), heroDelta(), h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); ONLINE ? pricesOnline() : pickPrices(); } }, ONLINE ? 'aggiorna prezzi' : 'aggiorna prezzi da file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); pickBatch(); } }, 'importa più file'), ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); editOperation({}); } }, 'registra operazione'))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
   const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
   if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
   const dueP = planDueAll(); if (dueP.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(dueP.length, 'acquisto programmato da registrare', 'acquisti programmati da registrare')), btn('Apri', () => { UI.tab = 'piano'; UI.psub = 'appuntamenti'; render(); }, 'pri sm')));
+  const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
   el.append(tiles([
-    { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti' },
-    { l: 'Guadagno / perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato' },
-    { l: 'Rendimento annualizzato', v: tp.xirr == null ? '—' : gl(tp.xirr, spct(tp.xirr)), s: tp.xirr == null ? 'serve almeno 1 mese di storia' : 'XIRR, tiene conto delle date dei versamenti' },
-    { l: 'Guadagno sulle posizioni', v: pp.length ? gl(pg, seur(pg)) : '—', s: pp.length ? spct(pg / pcost) + ' sul costo di ' + eur(pcost) + ' · ' + pp.length + ' posizioni con costo, ' + pct(pv / total) + ' del patrimonio' : 'inserisci il costo di carico delle posizioni (non realizzato)' },
+    { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti',
+      x: () => ({ num: tp.contrib, how: 'Somma di versamenti meno prelievi di ' + pl(pa.length, 'conto d\'investimento', 'conti d\'investimento') + ' = ' + eur(tp.contrib) + '. Per i conti senza storia conta il "valore di partenza" del giorno in cui hai cominciato a seguirli.', rows: perAcc(p => p.contrib).map(([a, , v]) => [a.name, v, '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto' }) },
+    { l: 'Guadagno / perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato',
+      x: () => ({ how: tp.pnl == null ? 'Servono i movimenti dei conti.' : eur(tp.value) + ' di valore oggi − ' + eur(tp.contrib) + ' versati = ' + seur(tp.pnl) + (fin(tp.pnlPct) ? ' (' + spct(tp.pnlPct) + ')' : '') + '.', rows: perAcc(p => p.pnl).map(([a, p, v]) => [a.name, v, fin(p.pnlPct) ? spct(p.pnlPct) : '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Chi ha guadagnato e chi ha perso', signed: true }) },
+    { l: 'Rendimento annualizzato', v: tp.xirr == null ? '—' : gl(tp.xirr, spct(tp.xirr)), s: tp.xirr == null ? 'serve almeno 1 mese di storia' : 'XIRR, tiene conto delle date dei versamenti',
+      x: () => ({ how: tp.xirr == null ? 'Serve almeno un mese di storia dal primo movimento: i conti seguiti da oggi lo mostreranno tra qualche settimana.' : 'Il tasso annuo che, applicato a ogni versamento dal suo giorno, porta esattamente al valore di oggi: ' + spct(tp.xirr) + ' all\'anno.', rows: perAcc(p => p.xirr).map(([a, , v]) => [a.name, v, '', openAcc(a), spct(v)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto', signed: true }) },
+    { l: 'Guadagno sulle posizioni', v: pp.length ? gl(pg, seur(pg)) : '—', s: pp.length ? spct(pg / pcost) + ' sul costo di ' + eur(pcost) + ' · ' + pp.length + ' posizioni con costo, ' + pct(pv / total) + ' del patrimonio' : 'inserisci il costo di carico delle posizioni (non realizzato)',
+      x: () => ({ how: pp.length ? eur(pv) + ' di valore − ' + eur(pcost) + ' di costo = ' + seur(pg) + ', su ' + pl(pp.length, 'posizione', 'posizioni') + ' di cui conosci il prezzo pagato.' : '', rows: pp.slice().sort((x, y) => Math.abs(y.pnl) - Math.abs(x.pnl)).slice(0, 10).map(x => [x.name, x.pnl, x.acc + ' · ' + spct(x.pct), () => talkPos(x.a, x.p)]), rowsTitle: 'Le 10 posizioni che pesano di più sul risultato', signed: true }) },
     { l: 'Ultimo snapshot', v: lastSnap ? fmtDate(lastSnap) : 'nessuno', s: h('span', null, lastSnap ? daysSince(lastSnap) + ' giorni fa · ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); takeSnapshot(); render(); } }, 'registra oggi')) }
   ]));
   const warns = [], mf = missingFx(); if (mf.length) warns.push('Manca il tasso di cambio per ' + mf.join(', ') + ': quei valori sono contati 1:1 (scheda "Dati e sicurezza").');
@@ -2374,10 +2531,10 @@ function tabPanoramica() {
   }
   const rows = S.accounts.map(a => { const p = perfOf([a]), v = accValue(a); return [h('a', { href: '#', onclick: e => { e.preventDefault(); UI.tab = 'conti'; UI.acc = a.id; render(); } }, a.name), eur(v), total > 0 ? pct(v / total) : '—', a.perf ? eur(p.contrib) : '—', a.perf && p.pnl != null ? gl(p.pnl, seur(p.pnl)) : '—', a.perf ? spct(p.pnlPct) : '—', a.perf ? spct(p.xirr) : '—']; });
   const dc = exposure('class'), da = exposure('area');
-  if (total > 0 && dc.length) el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Per classe'), donut(dc, 'Totale', true)), h('section', { class: 'card' }, h('h2', null, 'Per area'), donut(da, 'Totale', true))));
+  if (total > 0 && dc.length) el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Per classe'), donut(dc, 'Totale', true, lab => talkMix('class', lab))), h('section', { class: 'card' }, h('h2', null, 'Per area'), donut(da, 'Totale', true, lab => talkMix('area', lab)))));
   el.append(h('section', { class: 'card' }, h('h2', null, 'I tuoi conti'), table([{ t: 'Conto' }, { t: 'Valore', n: 1 }, { t: 'Peso', n: 1 }, { t: 'Versato netto', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: 'Annuo', n: 1 }], rows)));
   const good = pp.filter(x => x.pnl > 0).sort((a, b) => b.pnl - a.pnl).slice(0, 5), bad = pp.filter(x => x.pnl < 0).sort((a, b) => a.pnl - b.pnl).slice(0, 5);
-  const li = x => h('li', null, h('span', null, x.name, h('small', null, ' · ' + x.acc)), h('span', null, gl(x.pnl, seur(x.pnl)), h('small', null, ' ' + spct(x.pct))));
+  const li = x => h('li', { class: 'tapme', role: 'button', tabindex: '0', onclick: e => { tapFx(e.currentTarget); talkPos(x.a, x.p); } }, h('span', null, x.name, h('small', null, ' · ' + x.acc)), h('span', null, gl(x.pnl, seur(x.pnl)), h('small', null, ' ' + spct(x.pct))));
   el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Dove guadagni'), good.length ? h('ul', { class: 'list' }, good.map(li)) : h('p', { class: 'muted' }, pp.length ? 'Nessuna posizione in guadagno.' : 'Inserisci il costo di carico delle posizioni per vederlo.')),
     h('section', { class: 'card' }, h('h2', null, 'Dove perdi'), bad.length ? h('ul', { class: 'list' }, bad.map(li)) : h('p', { class: 'muted' }, pp.length ? 'Nessuna posizione in perdita.' : 'Inserisci il costo di carico delle posizioni per vederlo.'))));
   el.append(h('p', { class: 'muted' }, 'Guadagno = valore attuale − versato netto: comprende anche dividendi, interessi, commissioni e plusvalenze già realizzate. Per le singole posizioni è il guadagno non ancora realizzato.'));
@@ -2398,10 +2555,12 @@ function viewAccount(id) {
   const pf = perfOf([a]), el = h('div');
   el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
-  el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : '') }, { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—' },
+  const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
+  el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
+    { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? 'serve almeno 1 mese di storia' : '' }]));
   if (a.type === 'pensione') el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
-  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? i.name : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
+  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
     table([{ t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Costo di carico', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: '' }], prow, 'Nessuna posizione. La liquidità si imposta con "Modifica conto".')));
   const frow = a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).map(f => [fmtDate(f.date), (FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0], (f.type === 'prelievo' ? '−' : '') + eur(f.amount), f.note || '', rowActs(btn('Modifica', () => editFlow(a, f), 'sm'), btn('Elimina', () => delFlow(a, f), 'sm danger'))]);
@@ -2436,7 +2595,7 @@ function tabAllocazione() {
     for (const [k, w] of parseMix(S.policy.target, 'Non classificato')) { tgt.set(k.toLowerCase(), w); if (!have.has(k.toLowerCase())) rows.push([k, 0]); }
   }
   const el = h('section', { class: 'card' }, h('h2', null, 'Dove sei investito'), chips,
-    rows.length ? donut(rows, dims.find(d => d[0] === UI.dim)[1]) : null,
+    rows.length ? donut(rows, dims.find(d => d[0] === UI.dim)[1], false, ['class', 'area', 'acc', 'inst', 'ccy'].includes(UI.dim) ? lab => talkMix(UI.dim, lab) : null) : null,
     rows.length ? bars(rows, total, tgt) : h('p', { class: 'muted' }, 'Nessun dato: aggiungi conti e posizioni.'));
   if (UI.dim === 'inst' && rows.length >= 3 && total > 0) { const t3 = rows.slice(0, 3).reduce((t, r) => t + r[1], 0) / total; el.append(h('p', { class: 'muted' }, 'Concentrazione: le prime 3 posizioni valgono il ' + pct(t3) + ' del patrimonio.')); }
   el.append(h('p', { class: 'muted' }, 'Le percentuali per classe e area usano la composizione che hai scritto nella scheda di ogni strumento (es. "Azioni 60, Obbligazioni 40"). Se manca, lo strumento conta al 100% nella voce indicata.'));
