@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -54,7 +54,7 @@ jobs:
         if: steps.leggi.outcome == 'failure'
         run: echo "::warning::Piu della meta dei prezzi non si e letta (un sito potrebbe rifiutare il data center). Il sito resta con gli ultimi prezzi buoni."
       - name: Manda il recap sul telefono (se hai impostato NTFY_TOPIC)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'sveglia'))
         continue-on-error: true
         shell: pwsh
         env:
