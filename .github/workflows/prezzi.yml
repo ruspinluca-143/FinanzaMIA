@@ -24,7 +24,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Tieni attivo il salvataggio online (un progetto Supabase gratuito si sospende dopo 7 giorni senza uso)
         continue-on-error: true
-        run: curl -s -m 20 -X POST "https://ktjuglujopxalzbbrehw.supabase.co/rest/v1/rpc/finanze_stato" -H "apikey: sb_publishable_0jAhFRNGuE3GjX2R_dN2FQ_M2BkVUIL" -H "Content-Type: application/json" -d "{}"
+        run: |
+          curl -s -m 20 -X POST "https://ktjuglujopxalzbbrehw.supabase.co/rest/v1/rpc/finanze_stato" -H "apikey: sb_publishable_0jAhFRNGuE3GjX2R_dN2FQ_M2BkVUIL" -H "Content-Type: application/json" -d "{}"
       - name: Leggi i prezzi pubblici
         id: leggi
         continue-on-error: true
