@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+eAGEMSFGK3pAytm1D9wA+BId65HxvFazXC4ga7BkCg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BoVyLMiHxzt5TzUbiB97t5CVbKuvwcr9U4CivauXTy8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -120,6 +120,16 @@ dialog.opd{max-width:560px}
 .mi small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
 .dr-foot{margin:16px 10px 0;font-size:12px}
 @media (max-width:700px){.acards{grid-template-columns:1fr}.phead .ph-top{flex-direction:column}.phead .btn.big{width:100%}.conti-head .actbar .btn{flex:1;font-size:13px;padding:9px 6px;white-space:nowrap}.kind{font-size:11.5px}}
+/* esito del caricamento */
+.res{display:grid;justify-items:center;text-align:center;gap:6px;padding:8px 0 14px}
+.res h3{margin:4px 0 0;font-size:22px}
+.res p{margin:0;color:var(--ink2);max-width:52ch}
+.res-ico{display:grid;place-items:center;width:76px;height:76px;border-radius:50%;animation:pop .5s var(--ease) both}
+.res.good .res-ico{color:var(--gain);background:color-mix(in srgb,var(--gain) 14%,transparent)}
+.res.part .res-ico{color:#ff9f0a;background:color-mix(in srgb,#ff9f0a 16%,transparent)}
+.res.bad .res-ico{color:var(--loss);background:color-mix(in srgb,var(--loss) 14%,transparent)}
+.res-ico path{stroke-dasharray:1;animation:draw .7s var(--ease) .25s both}
+.res-dlg .dlgacts .btn.big{min-width:120px}
 .box{padding:12px 14px;border-radius:14px;margin-top:10px;background:color-mix(in srgb,var(--s1) 6%,transparent);transition:background .25s}
 .box:hover{background:color-mix(in srgb,var(--s1) 10%,transparent)}
 .box-n{font-weight:650;font-variant-numeric:tabular-nums;margin-right:8px}
@@ -1921,14 +1931,25 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   touch(); UI.tab = 'panoramica'; UI.acc = null; render(); showAutoResult(out, before);
   if (out.some(x => x.R) && !(CLOUD_ON() && CL.ready)) save(true);          // dopo un import si scarica sempre una copia in Download: se il browser dimenticasse i dati, con "Entra" scegli quel file e c'e' tutto
 }
-function showAutoResult(out, before) {
-  const dlg = h('dialog', { class: 'wide' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
-  const nref = out.reduce((t, x) => t + (x.refs || 0), 0);
-  dlg.append(h('h3', null, ok.length ? 'Fatto: ' + pl(ok.length, 'conto aggiornato', 'conti aggiornati') : nref ? 'Fatto: ' + pl(nref, 'strumento ora si stima da solo', 'strumenti ora si stimano da soli') : 'Nessun file importato'),
-    table([{ t: 'Conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Nota' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), x.cashOnly ? 'solo saldo' : x.R.removed ? pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : ''] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', x.skip])),
-    ok.length ? h('p', { class: 'muted' }, 'Totale dei conti importati: ' + eur(ok.reduce((t, x) => t + accValue(x.acc), 0)) + '. I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco. Ho anche scaricato una copia di sicurezza (cartella Download, nome "finanze-data-ora.finanze"): se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.') : null,
-    h('div', { class: 'dlgacts' }, ok.length ? btn('Annulla l\'importazione', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); }) : null, btn('Chiudi', shut, 'pri')));
+function showAutoResult(out, before) {          // esito del caricamento: chiaro a colpo d'occhio, con OK
+  const dlg = h('dialog', { class: 'wide res-dlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
+  const nref = out.reduce((t, x) => t + (x.refs || 0), 0), bad = out.filter(x => !x.R && !(x.refs > 0)), done1 = ok.length || nref;
+  const kind = done1 && !bad.length ? 'good' : done1 ? 'part' : 'bad';
+  const ico = kind === 'bad' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M9 9l6 6', 'M15 9l-6 6'] : kind === 'part' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M12 8v5', 'M12 16h.01'] : ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M7.5 12.5l3 3 6-6.5'];
+  const what = [ok.length ? pl(ok.length, 'conto aggiornato', 'conti aggiornati') : '', nref ? pl(nref, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') : ''].filter(Boolean).join(' · ');
+  const tot = ok.reduce((t, x) => t + accValue(x.acc), 0);
+  const saved = CLOUD_ON() && CL.ready ? 'È già tutto salvato, anche online.' : ok.length ? 'Ho anche scaricato una copia di sicurezza nella cartella Download: se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.' : '';
+  dlg.append(h('div', { class: 'res ' + kind },
+      h('span', { class: 'res-ico' }, s('svg', { viewBox: '0 0 24 24', width: 46, height: 46, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d, pathLength: 1 })))),
+      h('h3', null, kind === 'good' ? 'Caricamento riuscito' : kind === 'part' ? 'Caricamento riuscito in parte' : 'Caricamento non riuscito'),
+      h('p', null, what ? what + (ok.length ? ' · totale ' + eur(tot) : '') + '.' : 'Non ho caricato nulla.', bad.length ? ' ' + pl(bad.length, 'file non caricato', 'file non caricati') + ': trovi il motivo qui sotto.' : '')),
+    table([{ t: 'File o conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Esito' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), h('span', { class: 'gl gain' }, '✓ ' + (x.cashOnly ? 'saldo aggiornato' : x.R.removed ? 'aggiornato · ' + pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : 'aggiornato'))]
+      : x.refs > 0 ? [x.it.name, '—', '—', '—', h('span', { class: 'gl gain' }, '✓ ' + x.skip)] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', h('span', { class: 'gl loss' }, '✗ ' + x.skip)])),
+    h('p', { class: 'muted' }, [ok.length ? 'I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco.' : '', saved].filter(Boolean).join(' ')),
+    h('div', { class: 'dlgacts' }, ok.length || nref ? btn('Annulla il caricamento', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); setStatus('Caricamento annullato'); }) : null, btn('OK', shut, 'pri big')));
   dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
+  setStatus(kind === 'good' ? 'Caricamento riuscito: ' + what : kind === 'part' ? 'Caricamento riuscito in parte: ' + what : 'Caricamento non riuscito');
+  const okb = dlg.querySelector('.dlgacts .btn.pri'); if (okb) okb.focus();
 }
 function newAccountFromFile(fname, taken) {          // se il conto non esiste lo si propone dal nome del file: "fineco-dossier.csv" -> "Fineco Dossier", "fineco-advice-plus.csv" -> "Fineco Advice+"
   const toks = String(fname || '').replace(/\.[^.]+$/, '').split(/[^A-Za-z0-9À-ÿ]+/).filter(t => t && !/^(csv|export|exports|portafoglio|file|import|copia)$/i.test(t) && !/^\d{4}$/.test(t) && !/^\(?\d+\)?$/.test(t));
