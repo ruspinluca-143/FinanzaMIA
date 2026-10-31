@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-G6GeUfGH9U+KeyCaS+Xc8qszVKidu7JuKXQQUv74W+o='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+eAGEMSFGK3pAytm1D9wA+BId65HxvFazXC4ga7BkCg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1105,7 +1105,7 @@ function openBalances() {
 }
 function delAccount(a) { if (confirm('Eliminare il conto "' + a.name + '" con tutte le sue posizioni e i suoi movimenti?')) { S.accounts = S.accounts.filter(x => x !== a); UI.acc = null; done(); } }
 function editInstrument(i) {
-  const isNew = !i, v = i || { name: '', code: '', ccy: 'EUR', price: null, cls: '', area: '' };
+  const isNew = !i, v = i ? Object.assign({}, i, { segue: i.track ? i.track.txt : '' }) : { name: '', code: '', ccy: 'EUR', price: null, cls: '', area: '', segue: '' };
   const dl = (id, arr) => h('datalist', { id }, arr.map(x => h('option', { value: x })));
   form(isNew ? 'Nuovo strumento' : 'Modifica strumento', [
     { key: 'name', label: 'Nome', req: true, ph: 'es. ETF Azionario Mondo' },
@@ -1116,15 +1116,58 @@ function editInstrument(i) {
     { key: 'area', label: 'Area geografica (o composizione)', list: 'dl-area', ph: 'Mondo  oppure  USA 65, Europa 20, Emergenti 15' },
     { key: 'ter', label: 'Costo annuo del fondo (TER %)', type: 'number', hint: 'Per gli ETF lo legge da solo quando applichi i prezzi online' },
     { key: 'tax', label: 'Aliquota sulle plusvalenze (%)', type: 'number', hint: 'Vuoto = 26%. Per i titoli di Stato italiani si usa il 12,5%' },
-    { key: 'holdings', label: 'Principali titoli dentro (facoltativo)', type: 'textarea', ph: 'NVIDIA 5, Apple 4,5, Microsoft 4', hint: 'Percentuali del fondo, per vedere da cosa dipendi davvero (Analisi → Esposizione)' }
+    { key: 'holdings', label: 'Principali titoli dentro (facoltativo)', type: 'textarea', ph: 'NVIDIA 5, Apple 4,5, Microsoft 4', hint: 'Percentuali del fondo, per vedere da cosa dipendi davvero (Analisi → Esposizione)' },
+    { key: 'segue', label: 'Se non ha un prezzo pubblico: segue l\'andamento di', ph: 'es. IE00B4L5Y983 33, LU0378818131 67', hint: 'Codici di titoli con prezzo automatico e il loro peso in %, separati da virgola (punto per i decimali). Il resto fino a 100 resta fermo; "USD 60" = la parte che segue solo il dollaro. Ogni giorno il prezzo si stima da come si muovono loro.' }
   ], v, o => {
     if (!(o.price >= 0)) return 'Inserisci un prezzo valido.';
     if (!o.cls) return 'Indica almeno la classe di attività (es. Azioni).';
+    if (o.segue && !parseTrack(o.segue).length) return 'Riferimento non valido: scrivi per esempio "IE00B4L5Y983 33, LU0378818131 67".';
     const d = { name: o.name, code: o.code, ccy: normCcy(o.ccy), cls: o.cls, area: o.area || 'n.d.', ter: o.ter, tax: o.tax, holdings: o.holdings };
-    if (isNew) { const n = { id: uid(), price: o.price, priceDate: today(), hist: [{ d: today(), p: o.price }], ...d }; S.instruments.push(n); }
+    let t = i;
+    if (isNew) { t = { id: uid(), price: o.price, priceDate: today(), hist: [{ d: today(), p: o.price }], ...d }; S.instruments.push(t); }
     else { Object.assign(i, d); if (o.price !== i.price) setPrice(i, o.price); }
+    if ((o.segue || '') !== ((t.track && t.track.txt) || '')) setTrack(t, o.segue);
     done();
   }, h('div', null, ccyList(), dl('dl-cls', ['Azioni', 'Obbligazioni', 'Liquidità', 'Crypto', 'Materie prime', 'Immobiliare']), dl('dl-area', ['Mondo', 'USA', 'Europa', 'Italia', 'Asia', 'Emergenti', 'n.d.']), btn('Importa composizione da file (CSV dell\'emittente)…', importHoldings, 'sm')));
+}
+/* ============ "segue l'andamento di": per gli strumenti senza prezzo pubblico, una stima dal movimento di titoli simili ============ */
+// i.track = { txt, parts: [{ code, w, p0 }], p0, d0, last }: prezzo di oggi = p0 x (parte ferma + somma di peso x prezzo di oggi / prezzo all'aggancio)
+const parseTrack = txt => String(txt || '').split(',').map(t => t.trim()).filter(Boolean).map(t => { const m = t.match(/^(\S+)(?:\s+(\d+(?:[.,]\d+)?)\s*%?)?$/); return m ? { code: m[1], w: m[2] ? parseFloat(m[2].replace(',', '.')) : 100 } : null; }).filter(p => p && p.w > 0 && p.w <= 100);
+function refP(code) {          // prezzo di oggi del riferimento, in euro: dall'ultimo prezzi.json, oppure un cambio ("USD")
+  const c = String(code).toUpperCase();
+  if (/^[A-Z]{3}$/.test(c)) { const fx = fxRate(c); return fx ? { p: fx, d: today(), n: c } : null; }
+  const r = (S.refPrices || {})[String(code).toLowerCase()]; if (!r || !(r.p > 0)) return null;
+  const fx = fxRate(normCcy(r.c)); return fx ? { p: r.p * fx, d: r.d, n: r.n || code } : null;
+}
+function setTrack(i, txt) {          // imposta (o toglie) il riferimento e lo aggancia al prezzo di oggi
+  const parts = parseTrack(txt); if (!parts.length) { delete i.track; if (i.autoSrc === 'stima') { delete i.autoSrc; delete i.autoAt; } return; }
+  i.track = { txt: String(txt).trim(), parts: parts.map(p => ({ code: p.code, w: p.w, p0: (refP(p.code) || {}).p || null })), p0: i.price, d0: today(), last: i.price };
+}
+function applyTracks() {          // dopo ogni aggiornamento dei prezzi: nuova stima per gli strumenti che seguono un riferimento
+  let n = 0;
+  for (const i of S.instruments) {
+    const t = i.track; if (!t || !t.parts || !t.parts.length) continue;
+    if (Math.abs((t.last ?? i.price) - i.price) > 1e-9 * Math.max(1, i.price) || t.parts.some(p => !(p.p0 > 0))) {          // prezzo cambiato da fuori (estratto o a mano) o riferimento ancora senza prezzo: si riaggancia a oggi
+      t.p0 = i.price; t.d0 = today(); for (const p of t.parts) p.p0 = (refP(p.code) || {}).p || null; t.last = i.price;
+    }
+    let f = Math.max(0, 1 - t.parts.reduce((s, p) => s + p.w, 0) / 100), d = '';
+    for (const p of t.parts) { const r = refP(p.code); f += p.w / 100 * (r && p.p0 > 0 ? r.p / p.p0 : 1); if (r && r.d > d) d = r.d; }
+    const np = t.p0 * f;
+    if (fin(np) && np > 0 && Math.abs(np - i.price) > 1e-9 * Math.max(1, i.price)) { setPriceAt(i, np, d && d >= i.priceDate ? d : today()); n++; }
+    t.last = i.price; i.autoSrc = 'stima'; i.autoAt = today();
+  }
+  return n;
+}
+const trackDesc = i => i.track ? i.track.parts.map(p => { const r = refP(p.code), x = S.instruments.find(z => (z.code || '').toLowerCase() === p.code.toLowerCase()); return (x ? x.name : r ? r.n : p.code) + ' ' + nf0.format(p.w) + '%'; }).join(', ') : '';
+function applyRefFile(text) {          // file "riferimenti": Titolo;Segue (non tocca posizioni, quantita' o conti)
+  let n = 0; const miss = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    const [name, seg] = line.split(';').map(x => (x || '').trim()); if (!name || /^titolo$/i.test(name)) continue;
+    const i = S.instruments.find(z => z.name.toLowerCase() === name.toLowerCase() || (z.code && z.code.toLowerCase() === name.toLowerCase()));
+    if (!i) { miss.push(name); continue; }
+    setTrack(i, seg || ''); n++;
+  }
+  applyTracks(); return { n, miss };
 }
 function setPrice(i, v) {
   i.price = v; i.priceDate = today(); const last = i.hist[i.hist.length - 1];
@@ -1197,6 +1240,7 @@ function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce
   try {          // cambi ufficiali della BCE (euro per 1 unita'), solo per le valute che usi
     const f = JSON.parse(text), used = new Set([...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)]);
     if (f && f.cambi && typeof f.cambi === 'object') for (const [c, r] of Object.entries(f.cambi)) if (/^[A-Z]{3}$/.test(c) && used.has(c) && typeof r === 'number' && r > 0 && r < 1000) S.fx[c] = r;
+    if (f && Array.isArray(f.prezzi)) { S.refPrices = S.refPrices || {}; for (const e of f.prezzi) if (e && typeof e.id === 'string' && typeof e.prezzo === 'number' && e.prezzo > 0 && /^[A-Za-z]{3}$/.test(e.valuta || '')) S.refPrices[e.id.toLowerCase()] = { p: e.prezzo, c: e.valuta, d: e.data || '', n: e.nome || '' }; }          // prezzi dei riferimenti (anche di titoli che non possiedi)
   } catch { /* il controllo vero lo fa planPrices */ }
   let P = planPrices(text); if (P.error) return 0;
   for (const r of P.rows) { r.i.autoSrc = r.e.fonte || r.i.autoSrc || 'sito'; r.i.autoAt = today(); }          // questo strumento ha un prezzo automatico (si vede sotto ogni conto)
@@ -1207,6 +1251,7 @@ function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce
     if (typeof r.e.bench === 'string' && !r.i.bench) r.i.bench = r.e.bench;
     if (typeof r.e.div === 'string' && !r.i.div) r.i.div = r.e.div;
   }
+  n += applyTracks();          // stime per gli strumenti che seguono un riferimento
   if (n) { takeSnapshot(); setStatus('Prezzi aggiornati da soli: ' + pl(n, 'strumento', 'strumenti') + ' (quotazioni del ' + fmtDate(last) + ')'); }
   P = planPrices(text); const rest = P.rows.filter(x => !x.skip && !x.use).length; PRICE_BANNER = rest ? { text, n: rest, review: true } : null;
   if (S && !LOCKED) render();
@@ -1847,6 +1892,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   const before = JSON.stringify(S), out = [];
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
+    if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
     let acc = S.accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
@@ -1877,7 +1923,8 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
 }
 function showAutoResult(out, before) {
   const dlg = h('dialog', { class: 'wide' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
-  dlg.append(h('h3', null, ok.length ? 'Fatto: ' + pl(ok.length, 'conto aggiornato', 'conti aggiornati') : 'Nessun file importato'),
+  const nref = out.reduce((t, x) => t + (x.refs || 0), 0);
+  dlg.append(h('h3', null, ok.length ? 'Fatto: ' + pl(ok.length, 'conto aggiornato', 'conti aggiornati') : nref ? 'Fatto: ' + pl(nref, 'strumento ora si stima da solo', 'strumenti ora si stimano da soli') : 'Nessun file importato'),
     table([{ t: 'Conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Nota' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), x.cashOnly ? 'solo saldo' : x.R.removed ? pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : ''] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', x.skip])),
     ok.length ? h('p', { class: 'muted' }, 'Totale dei conti importati: ' + eur(ok.reduce((t, x) => t + accValue(x.acc), 0)) + '. I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco. Ho anche scaricato una copia di sicurezza (cartella Download, nome "finanze-data-ora.finanze"): se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.') : null,
     h('div', { class: 'dlgacts' }, ok.length ? btn('Annulla l\'importazione', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); }) : null, btn('Chiudi', shut, 'pri')));
@@ -2869,7 +2916,8 @@ function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni g
     x: () => ({ kind: 'Come sono divisi i tuoi soldi', num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)' }) })));
 }
 /* ---- che cosa si aggiorna da solo: per ogni conto, i titoli con il prezzo automatico e quelli fermi ---- */
-const FONTE = { borsa_italiana: 'Borsa Italiana', stockanalysis: 'Borsa USA (Finnhub)', coingecko: 'CoinGecko', sito: 'il sito' };
+const FONTE = { borsa_italiana: 'Borsa Italiana', stockanalysis: 'Borsa USA (Finnhub)', coingecko: 'CoinGecko', sito: 'il sito', stima: 'stima' };
+const srcText = i => i.autoSrc === 'stima' && i.track ? 'stima: segue ' + trackDesc(i) : (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate);
 const isAuto = i => !!(i && i.autoAt && daysSince(i.autoAt) <= 10);
 function autoInfo(a) {
   const auto = [], fermi = []; let va = 0, vt = 0;
@@ -2885,7 +2933,7 @@ function autoLine(a) {          // una riga sotto il conto: quanti titoli si agg
 }
 function talkAuto(a) {
   const x = autoInfo(a);
-  const li = ([, p, i, v], ok) => h('li', null, h('span', null, i.name, h('small', null, ok ? ' · ' + (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
+  const li = ([, p, i, v], ok) => h('li', null, h('span', null, i.name, h('small', null, ok ? ' · ' + srcText(i) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
   talk({ kind: 'Aggiornamento automatico · ' + a.name, title: x.fermi.length ? (x.auto.length ? 'In parte automatico' : 'Lo aggiorni tu') : 'Tutto automatico', value: pct(x.share),
     say: ilPct(x.share).replace(/^./, c => c.toUpperCase()) + ' del valore di questo conto si aggiorna da solo: ogni giorno l\'app prende il prezzo di oggi di quei titoli (Borsa Italiana, Borsa USA, CoinGecko) e lo moltiplica per le quantità che hai. Le quantità invece cambiano solo quando compri o vendi (con "+ Operazione") o quando importi l\'estratto.',
     box: ['Si aggiornano da soli (' + x.auto.length + ')', x.auto.length ? h('ul', { class: 'list' }, x.auto.sort((p, q) => q[3] - p[3]).map(r => li(r, true))) : h('p', { class: 'muted' }, 'Nessuno.')],
@@ -2933,14 +2981,14 @@ function viewAccount(id) {
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   if (a.positions.length) {          // che cosa si aggiorna da solo in questo conto
-    const x = autoInfo(a), li = ([, , i, v], ok) => h('li', null, h('span', null, (ok ? '⟳ ' : '✎ ') + i.name, h('small', null, ok ? ' · ' + (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
+    const x = autoInfo(a), li = ([, , i, v], ok) => h('li', null, h('span', null, (ok ? '⟳ ' : '✎ ') + i.name, h('small', null, ok ? ' · ' + srcText(i) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
     el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Cosa si aggiorna da solo'), h('span', { class: 'pill ' + (x.fermi.length ? 'dn' : 'up') }, pct(x.share) + ' del valore')),
       h('p', { class: 'muted' }, 'Ogni giorno l\'app prende il prezzo di oggi dei titoli con ⟳ e lo moltiplica per le tue quantità. Quelli con ✎ restano al valore dell\'ultimo estratto.'),
       h('div', { class: 'two' }, h('div', null, h('h4', null, 'Automatici (' + x.auto.length + ')'), x.auto.length ? h('ul', { class: 'list' }, x.auto.sort((p, q) => q[3] - p[3]).map(r => li(r, true))) : h('p', { class: 'muted' }, 'Nessuno.')),
         h('div', null, h('h4', null, 'Fermi, li aggiorni tu (' + x.fermi.length + ')'), x.fermi.length ? h('ul', { class: 'list' }, x.fermi.sort((p, q) => q[3] - p[3]).map(r => li(r, false))) : h('p', { class: 'muted' }, 'Nessuno: tutto si aggiorna da solo.')))));
   }
   if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
-  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? ' ⟳' : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
+  const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? (i.autoSrc === 'stima' ? ' ≈' : ' ⟳') : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
     table([{ t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Costo di carico', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: '' }], prow, 'Nessuna posizione. La liquidità si imposta con "Modifica conto".')));
   const frow = a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).map(f => [fmtDate(f.date), (FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0], (f.type === 'prelievo' ? '−' : '') + eur(f.amount), f.note || '', rowActs(btn('Modifica', () => editFlow(a, f), 'sm'), btn('Elimina', () => delFlow(a, f), 'sm danger'))]);
