@@ -1,7 +1,7 @@
 {
   "app": "finanze-prezzi",
   "versione": 1,
-  "generato": "2026-10-30T21:08:44+00:00",
+  "generato": "2026-10-31T11:01:01+00:00",
   "cambi": {"USD": 0.895095, "JPY": 0.005692, "GBP": 1.199328, "CHF": 1.087666, "AUD": 0.628773, "CAD": 0.640779},
   "prezzi": [
     {"nome":"iShares Core MSCI World UCITS ETF USD (Acc)","id":"IE00B4L5Y983","prezzo":129.69,"valuta":"EUR","data":"2026-10-30","ter":0.2,"bench":"MSCI TRN WORLD INDEX","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -28,12 +28,12 @@
     {"nome":"Apple","id":"aapl","prezzo":344.63,"valuta":"USD","data":"2026-10-30","fonte":"stockanalysis"},
     {"nome":"Alumis Inc","id":"alms","prezzo":6.73,"valuta":"USD","data":"2026-10-30","fonte":"stockanalysis"},
     {"nome":"Accenture","id":"acn","prezzo":258.24,"valuta":"USD","data":"2026-10-30","fonte":"stockanalysis"},
-    {"nome":"Bitcoin","id":"bitcoin","prezzo":68840,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
-    {"nome":"XRP","id":"ripple","prezzo":1.12,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
-    {"nome":"Ether","id":"ethereum","prezzo":2002.17,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
-    {"nome":"Solana","id":"solana","prezzo":85.21,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
-    {"nome":"Cardano","id":"cardano","prezzo":0.173391,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
-    {"nome":"Cosmos","id":"cosmos","prezzo":1.37,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"},
+    {"nome":"Bitcoin","id":"bitcoin","prezzo":69044,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
+    {"nome":"XRP","id":"ripple","prezzo":1.11,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
+    {"nome":"Ether","id":"ethereum","prezzo":2002.62,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
+    {"nome":"Solana","id":"solana","prezzo":85.29,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
+    {"nome":"Cardano","id":"cardano","prezzo":0.171462,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
+    {"nome":"Cosmos","id":"cosmos","prezzo":1.35,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"},
     {"nome":"iShares Core MSCI Europe UCITS ETF EUR (Acc)","id":"IE00B4K48X80","prezzo":105.3,"valuta":"EUR","data":"2026-10-30","ter":0.12,"bench":"MSCI DAILY NET TR E","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"WisdomTree Physical Gold EUR Daily Hedged","id":"JE00B8DFY052","prezzo":20.27,"valuta":"EUR","data":"2026-10-30","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"WisdomTree Physical Solana","id":"GB00BNGJ9G01","prezzo":11.976,"valuta":"EUR","data":"2026-10-30","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -58,6 +58,6 @@
     {"nome":"BTP Valore ott 2031","id":"IT0005735201","prezzo":101.01,"valuta":"EUR","data":"2026-10-30","fonte":"borsa_italiana"},
     {"nome":"T-Bond USA 4,75% nov 2053","id":"US912810TV08","prezzo":91.37,"valuta":"USD","data":"2026-10-30","fonte":"borsa_italiana"},
     {"nome":"Innodata Inc.","id":"inod","prezzo":43.81,"valuta":"USD","data":"2026-10-30","fonte":"stockanalysis"},
-    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.895815,"valuta":"EUR","data":"2026-10-30","fonte":"coingecko"}
+    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.892793,"valuta":"EUR","data":"2026-10-31","fonte":"coingecko"}
   ]
 }

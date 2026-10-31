@@ -800,3 +800,27 @@ timestamp;nome;id;prezzo;valuta;data;fonte
 2026-10-30T21:08:44+00:00;T-Bond USA 4,75% nov 2053;US912810TV08;91.37;USD;2026-10-30;borsa_italiana
 2026-10-30T21:08:44+00:00;Innodata Inc.;inod;43.81;USD;2026-10-30;stockanalysis
 2026-10-30T21:08:44+00:00;USD Coin (USDC);usd-coin;0.895815;EUR;2026-10-30;coingecko
+2026-10-31T11:01:01+00:00;NVIDIA;nvda;204.64;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;SpaceX;spcx;134.72;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Bending Spoons S.p.A.;bsp;45.52;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Broadcom;avgo;326.08;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Apple;aapl;344.63;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Alumis Inc;alms;6.73;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Accenture;acn;258.24;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Bitcoin;bitcoin;69044;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;XRP;ripple;1.11;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;Ether;ethereum;2002.62;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;Solana;solana;85.29;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;Cardano;cardano;0.171462;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;Cosmos;cosmos;1.35;EUR;2026-10-31;coingecko
+2026-10-31T11:01:01+00:00;Summit Midstream Corp;smc;31;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;nLIGHT;lasr;37.13;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Lumentum Holdings;lite;840.7;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Alphabet (Class A);googl;279.84;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Build-A-Bear Workshop;bbw;27.61;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Super Micro Computer Inc;smci;32.95;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;CoreWeave Inc.;crwv;54.87;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Sionna Therapeutics Inc;sion;3.87;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Innventure Inc;inv;0.3198;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;Innodata Inc.;inod;43.81;USD;2026-10-30;stockanalysis
+2026-10-31T11:01:01+00:00;USD Coin (USDC);usd-coin;0.892793;EUR;2026-10-31;coingecko
