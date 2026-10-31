@@ -67,6 +67,11 @@ if ($promemoria) {
   if (@(1, 4, 7, 10) -contains $roma.Month) { $t += ' Tocca anche ai conti trimestrali: mandami gli estratti di fine trimestre.' }
   $righe.Insert(0, $t)
 }
+# giorni dei PAC (promemoria-pac.json: solo i giorni del mese): "oggi c'e' un acquisto programmato, confermalo nell'app"
+$pf = Join-Path (Split-Path $Sito -Parent) 'promemoria-pac.json'; if (-not (Test-Path $pf)) { $pf = './promemoria-pac.json' }
+$oggiPac = $false
+if (Test-Path $pf) { try { $pc = Get-Content $pf -Raw | ConvertFrom-Json; $oggiPac = (@($pc.giorni) -contains $roma.Day) -or ($pc.trimestrale -and (@($pc.trimestrale.mesi) -contains $roma.Month) -and $roma.Day -eq [int]$pc.trimestrale.giorno) } catch { } }
+if ($oggiPac -and $Momento -eq 'sera') { $righe.Insert(0, 'Oggi ci sono acquisti programmati (PAC): quando sono stati eseguiti apri l''app, ti chiede di confermarli con Si o No.') }
 
 # articoli: 1-2 di ricerca (professori, banche centrali), 1 dagli Stati Uniti, 1 dall'Europa; i piu' recenti, con la fonte
 function Pick($fonti, $re, $n) {

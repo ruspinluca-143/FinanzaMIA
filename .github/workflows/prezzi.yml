@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'promemoria-pac.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write

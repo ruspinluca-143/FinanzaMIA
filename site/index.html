@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BoVyLMiHxzt5TzUbiB97t5CVbKuvwcr9U4CivauXTy8='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-M4VDB8A65Ann0CJ8gFWepfwONuHbXQnsjbqLRzYY8JM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -120,6 +120,18 @@ dialog.opd{max-width:560px}
 .mi small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
 .dr-foot{margin:16px 10px 0;font-size:12px}
 @media (max-width:700px){.acards{grid-template-columns:1fr}.phead .ph-top{flex-direction:column}.phead .btn.big{width:100%}.conti-head .actbar .btn{flex:1;font-size:13px;padding:9px 6px;white-space:nowrap}.kind{font-size:11.5px}}
+/* PAC da confermare */
+.duelist{display:grid;gap:10px;margin:12px 0}
+.due{padding:14px;border-radius:16px;border:1px solid var(--ring);background:color-mix(in srgb,var(--s1) 5%,transparent);animation:rise .45s var(--ease) both}
+.due-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.due-what{margin:8px 0;font-weight:600;line-height:1.4}
+.due-amt{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px;color:var(--ink2)}
+.due-amt input{width:130px}
+.due-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.due.ok{background:color-mix(in srgb,var(--gain) 10%,transparent);border-color:transparent}
+.due.no{background:color-mix(in srgb,var(--ink) 5%,transparent);border-color:transparent;color:var(--muted)}
+.due-done{font-weight:600}
+.due.ok .due-done{color:var(--gain)}
 /* esito del caricamento */
 .res{display:grid;justify-items:center;text-align:center;gap:6px;padding:8px 0 14px}
 .res h3{margin:4px 0 0;font-size:22px}
@@ -1902,6 +1914,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   const before = JSON.stringify(S), out = [];
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
+    if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
@@ -1933,10 +1946,10 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
 }
 function showAutoResult(out, before) {          // esito del caricamento: chiaro a colpo d'occhio, con OK
   const dlg = h('dialog', { class: 'wide res-dlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
-  const nref = out.reduce((t, x) => t + (x.refs || 0), 0), bad = out.filter(x => !x.R && !(x.refs > 0)), done1 = ok.length || nref;
+  const nref = out.reduce((t, x) => t + (x.plan ? 0 : x.refs || 0), 0), npl = out.reduce((t, x) => t + (x.plan ? x.refs || 0 : 0), 0), bad = out.filter(x => !x.R && !(x.refs > 0)), done1 = ok.length || nref || npl;
   const kind = done1 && !bad.length ? 'good' : done1 ? 'part' : 'bad';
   const ico = kind === 'bad' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M9 9l6 6', 'M15 9l-6 6'] : kind === 'part' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M12 8v5', 'M12 16h.01'] : ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M7.5 12.5l3 3 6-6.5'];
-  const what = [ok.length ? pl(ok.length, 'conto aggiornato', 'conti aggiornati') : '', nref ? pl(nref, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') : ''].filter(Boolean).join(' · ');
+  const what = [ok.length ? pl(ok.length, 'conto aggiornato', 'conti aggiornati') : '', nref ? pl(nref, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') : '', npl ? pl(npl, 'acquisto programmato caricato', 'acquisti programmati caricati') : ''].filter(Boolean).join(' · ');
   const tot = ok.reduce((t, x) => t + accValue(x.acc), 0);
   const saved = CLOUD_ON() && CL.ready ? 'È già tutto salvato, anche online.' : ok.length ? 'Ho anche scaricato una copia di sicurezza nella cartella Download: se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.' : '';
   dlg.append(h('div', { class: 'res ' + kind },
@@ -1946,7 +1959,7 @@ function showAutoResult(out, before) {          // esito del caricamento: chiaro
     table([{ t: 'File o conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Esito' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), h('span', { class: 'gl gain' }, '✓ ' + (x.cashOnly ? 'saldo aggiornato' : x.R.removed ? 'aggiornato · ' + pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : 'aggiornato'))]
       : x.refs > 0 ? [x.it.name, '—', '—', '—', h('span', { class: 'gl gain' }, '✓ ' + x.skip)] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', h('span', { class: 'gl loss' }, '✗ ' + x.skip)])),
     h('p', { class: 'muted' }, [ok.length ? 'I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco.' : '', saved].filter(Boolean).join(' ')),
-    h('div', { class: 'dlgacts' }, ok.length || nref ? btn('Annulla il caricamento', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); setStatus('Caricamento annullato'); }) : null, btn('OK', shut, 'pri big')));
+    h('div', { class: 'dlgacts' }, done1 ? btn('Annulla il caricamento', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); setStatus('Caricamento annullato'); }) : null, btn('OK', shut, 'pri big')));
   dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
   setStatus(kind === 'good' ? 'Caricamento riuscito: ' + what : kind === 'part' ? 'Caricamento riuscito in parte: ' + what : 'Caricamento non riuscito');
   const okb = dlg.querySelector('.dlgacts .btn.pri'); if (okb) okb.focus();
@@ -2684,7 +2697,7 @@ function render() {
     window.scrollTo(0, y); afterRender();
   }
 }
-function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -2878,7 +2891,7 @@ function tabPanoramica() {
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
   const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
   if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
-  const dueP = planDueAll(); if (dueP.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(dueP.length, 'acquisto programmato da registrare', 'acquisti programmati da registrare')), btn('Apri', () => { UI.tab = 'piano'; UI.psub = 'appuntamenti'; render(); }, 'pri sm')));
+  const dueP = planDueAll(); if (dueP.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(dueP.length, 'acquisto programmato da confermare: è stato preso davvero?', 'acquisti programmati da confermare: sono stati presi davvero?')), btn('Conferma', () => confirmDue(), 'pri sm')));
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
   el.append(groupTiles());          // soldi fermi, soldi investiti, fondo pensione
   el.append(tiles([
@@ -3283,6 +3296,74 @@ function planDueAll() {          // scadute o di oggi e non ancora registrate ne
   for (const p of PL()) { const dn = new Set(p.done || []); for (const d of occurrences(p.start, freqMonths(p.freq), p.day, p.since || p.start, t, p.end)) if (!dn.has(d)) out.push({ p, d }); }
   return out.sort((a, b) => a.d < b.d ? -1 : 1);
 }
+/* ---- acquisti programmati: l'app prepara la modifica e chiede "e' stato preso davvero?" (Si' = la registra, No = la salta) ---- */
+const priceOn = (i, d) => { const x = (i.hist || []).filter(z => z.d <= d && z.p > 0).sort((a, b) => a.d < b.d ? 1 : -1)[0]; return x ? x.p : i.price; };
+function planProposal(p, d, amt) {          // le operazioni che il PAC avrebbe fatto quel giorno, al prezzo di quel giorno
+  const amount = amt > 0 ? amt : p.amount, acc = S.accounts.find(a => a.id === p.accId); if (!acc) return { err: 'il conto di questo acquisto non c\'è più' };
+  const ops = [], from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '', note = p.label + ' del ' + fmtDate(d), r2 = v => Math.round(v * 100) / 100;
+  if (p.kind !== 'acquisto') { ops.push(from ? { accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount, note } : { accId: p.accId, kind: 'versamento', date: d, amount, fromCash: true, note }); return { ops, text: (from ? 'Sposti ' + eur(amount, true) + ' da ' + accName(from) + ' a ' : 'Entrano ' + eur(amount, true) + ' in ') + acc.name }; }
+  let i = p.instId ? inst(p.instId) : null; if (!i && (p.instName || p.instCode)) i = findInst(p.instName || '', p.instCode || '');
+  const r = !i && p.instCode ? (S.refPrices || {})[p.instCode.toLowerCase()] : null, ccy = i ? i.ccy : normCcy((r && r.c) || p.instCcy || 'EUR'), px = i ? priceOn(i, d) : r ? r.p : 0, fx = fxRate(ccy);
+  if (!(px > 0)) return { err: 'non conosco ancora il prezzo di ' + (i ? i.name : p.instName || 'questo strumento') + ': riprova dopo il prossimo aggiornamento dei prezzi' };
+  if (fx == null) return { err: 'manca il cambio ' + ccy };
+  const pe = px * fx, qty = p.whole ? Math.floor(amount / pe + 1e-9) : Math.round(amount / pe * 1e6) / 1e6;
+  if (!(qty > 0)) return { err: 'con ' + eur(amount, true) + ' non si compra nemmeno una quota (prezzo ' + nf2.format(px) + ' ' + ccy + ')' };
+  const spend = r2(qty * pe);
+  if (from) ops.push({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: spend, note });
+  else if (p.ext) ops.push({ accId: p.accId, kind: 'versamento', date: d, amount: spend, fromCash: true, note });
+  ops.push({ accId: p.accId, kind: 'acquisto', date: d, instId: i ? i.id : '', newName: i ? '' : (p.instName || p.instCode), newCcy: ccy, qty, price: px, fromCash: true, note, _code: i ? '' : p.instCode, _cls: p.instCls });
+  const how = from ? ' (i soldi partono da ' + accName(from) + ')' : p.ext ? ' (soldi che arrivano da fuori)' : ' (con la liquidità del conto)';
+  if (i && /valore totale/i.test(i.name)) return { ops, text: 'Aggiungi ' + eur(spend, true) + ' a ' + i.name.replace(/\s*\(valore totale\)/i, '') + ' · ' + acc.name + how };          // strumenti tenuti come valore unico (Robo-Advisor, Fondo Cometa)
+  return { ops, text: 'Compri ' + nfq.format(qty) + (p.whole ? ' ' + (qty === 1 ? 'quota' : 'quote') : '') + ' di ' + (i ? i.name : p.instName) + ' a ' + nf2.format(px) + ' ' + ccy + ' = ' + eur(spend, true) + ' · ' + acc.name + (from ? ' (i soldi partono da ' + accName(from) + ')' : p.ext ? ' (soldi che arrivano da fuori)' : ' (con la liquidità del conto)') };
+}
+function applyProposal(pr) {
+  for (const o of pr.ops) {
+    const m = applyOp(o); if (m) return m;
+    if (o._code || o._cls) { const i = findInst(o.newName || '', ''); if (i && !o.instId) { if (!i.code && o._code) i.code = o._code; if (!i.cls) i.cls = o._cls || 'Azioni'; if (!i.area) i.area = 'n.d.'; } }          // strumento nuovo (es. il primo acquisto di un PAC appena iniziato)
+  }
+  return '';
+}
+let DUE_ASKED = false;
+function confirmDue(auto) {
+  const due = planDueAll(); if (!due.length) { if (!auto) alert('Nessun acquisto programmato da confermare.'); return; }
+  const dlg = h('dialog', { class: 'wide duedlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); render(); }, head = h('p', { class: 'muted' }), list = h('div', { class: 'duelist' });
+  const left = () => { const n = list.querySelectorAll('.due:not(.ok):not(.no)').length; head.textContent = n ? 'Ho preparato ' + pl(n, 'modifica', 'modifiche') + '. Controlla l\'importo e dimmi se l\'acquisto è stato preso davvero: Sì lo registro, No lo salto.' : 'Fatto: niente altro da confermare.'; };
+  const row = ({ p, d }) => {
+    const amt = h('input', { type: 'number', step: 'any', inputmode: 'decimal', value: p.amount, 'aria-label': 'Importo in euro' }), info = h('div', { class: 'due-what' }), msg = h('div', { class: 'err' });
+    const upd = () => { const pr = planProposal(p, d, parseFloat(amt.value)); info.textContent = pr.err ? '⚠ ' + pr.err : pr.text; return pr; };
+    amt.addEventListener('input', upd);
+    const el = h('div', { class: 'due' }, h('div', { class: 'due-h' }, h('b', null, p.label), h('span', { class: 'muted' }, fmtDate(d) + ' · ' + accName(p.accId))), info,
+      h('label', { class: 'due-amt' }, h('span', null, 'Importo (€)'), amt), msg,
+      h('div', { class: 'due-acts' },
+        btn('Sì, è stato preso', () => { const pr = upd(); if (pr.err) { msg.textContent = pr.err; return; } const m = applyProposal(pr); if (m) { msg.textContent = m; return; } (p.done = p.done || []).push(d); touch(); el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Registrato: ' + pr.text)); left(); }, 'pri'),
+        btn('No, non è stato preso', () => { (p.done = p.done || []).push(d); (p.skipped = p.skipped || []).push(d); touch(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + p.label + ' del ' + fmtDate(d))); left(); }),
+        btn('Correggi a mano…', () => { shut(); registerDue(p, d); }, 'sm')));
+    upd(); return el;
+  };
+  due.forEach(x => list.append(row(x))); left();
+  dlg.append(h('h3', null, 'Acquisti programmati da confermare'), head, list, h('div', { class: 'dlgacts' }, btn('Chiudi', shut, 'pri')));
+  dlg.addEventListener('close', () => { dlg.remove(); render(); }); document.body.append(dlg); dlg.showModal();
+}
+function askDueSoon(tries) {          // all'ingresso: se ci sono PAC da confermare, la domanda arriva da sola (appena non ci sono altre finestre aperte)
+  if (DUE_ASKED || !S || DEMO) return;
+  setTimeout(() => { if (DUE_ASKED || !S || DEMO || LOCKED) return; if (document.querySelector('dialog[open]')) { if ((tries || 0) < 8) askDueSoon((tries || 0) + 1); return; } if (planDueAll().length) { DUE_ASKED = true; confirmDue(true); } }, 3500);
+}
+function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Codice;Importo;Frequenza;Giorno;Dal;Da conto;Tipo (non tocca conti e posizioni)
+  let n = 0; const miss = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    const c = line.split(';').map(x => (x || '').trim()); if (!c[0] || /^voce$/i.test(c[0])) continue;
+    const acc = S.accounts.find(a => a.name.toLowerCase() === (c[1] || '').toLowerCase()); if (!acc) { miss.push(c[0] + ' (conto "' + c[1] + '" non trovato)'); continue; }
+    const from = c[8] ? S.accounts.find(a => a.name.toLowerCase() === c[8].toLowerCase()) : null, i = c[2] || c[3] ? findInst(c[2], c[3]) : null, amount = parseNum(c[4], ',');
+    if (!(amount > 0)) { miss.push(c[0] + ' (importo non valido)'); continue; }
+    const fq = FREQ.find(f => f[0] === (c[5] || 'mensile').toLowerCase()) ? (c[5] || 'mensile').toLowerCase() : 'mensile', start = /^\d{4}-\d{2}-\d{2}$/.test(c[7] || '') ? c[7] : today();
+    const d = { label: c[0], kind: c[2] || c[3] ? 'acquisto' : 'versamento', accId: acc.id, fromAccId: from && from.id !== acc.id ? from.id : '', instId: i ? i.id : '', instName: i ? '' : c[2], instCode: c[3] || '', instCls: 'Azioni',
+      amount, freq: fq, day: Math.min(28, Math.max(1, parseInt(c[6], 10) || +start.slice(8, 10))), start, end: '', note: '', whole: /intere/i.test(c[9] || ''), ext: /fuori/i.test(c[9] || '') };
+    const old = PL().find(p => p.label.toLowerCase() === d.label.toLowerCase());
+    if (old) Object.assign(old, d); else PL().push({ id: uid(), ...d, since: today(), done: [] });
+    n++;
+  }
+  return { n, miss };
+}
 function registerDue(p, d) {
   const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '';
   const buy = after => { const q = Math.floor(p.amount / (i.price * fx)); editOperation({ accId: p.accId, kind: 'acquisto', date: d, instId: i.id, qty: q >= 1 ? q : null, note: p.label }, after); };
@@ -3304,20 +3385,22 @@ function editPlan(p) {
     { key: 'day', label: 'Giorno del mese (1-28)', type: 'number' },
     { key: 'start', label: 'Dal', type: 'date', req: true },
     { key: 'end', label: 'Fino al (facoltativo)', type: 'date' },
+    { key: 'whole', label: 'Solo quote intere', type: 'check', hint: 'come il PAC di Directa: con 115 € e un prezzo di 105 € compra 1 quota' },
+    { key: 'ext', label: 'I soldi arrivano da fuori', type: 'check', hint: 'per esempio il TFR versato dall\'azienda nel fondo pensione' },
     { key: 'note', label: 'Nota' }
   ], v, o => {
     if (!(o.amount > 0)) return 'L\'importo deve essere maggiore di zero.';
     if (o.end && o.end < o.start) return 'La data finale è prima di quella iniziale.';
-    const d = { label: o.label, kind: o.kind, accId: o.accId, fromAccId: o.fromAccId && o.fromAccId !== o.accId ? o.fromAccId : '', instId: o.instId, amount: o.amount, freq: o.freq, day: Math.min(28, Math.max(1, Math.round(o.day || +o.start.slice(8, 10)))), start: o.start, end: o.end || '', note: o.note };
+    const d = { label: o.label, kind: o.kind, accId: o.accId, fromAccId: o.fromAccId && o.fromAccId !== o.accId ? o.fromAccId : '', instId: o.instId, amount: o.amount, freq: o.freq, day: Math.min(28, Math.max(1, Math.round(o.day || +o.start.slice(8, 10)))), start: o.start, end: o.end || '', note: o.note, whole: !!o.whole, ext: !!o.ext };
     if (isNew) PL().push({ id: uid(), ...d, since: today(), done: [] }); else Object.assign(p, d);
     done();
   });
 }
 function piAppuntamenti() {
   const el = h('div'), due = planDueAll(), plans = PL(), perMonth = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0);
-  if (due.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Da registrare'),
-    h('p', { class: 'muted' }, 'Scadute o di oggi. Quando le hai eseguite premi "Registra": l\'app aggiorna posizione, costo medio e liquidità. Se non le hai fatte, salta.'),
-    table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Conto' }, { t: 'Importo', n: 1 }, { t: '' }], due.map(({ p, d }) => [fmtDate(d), p.label, accName(p.accId), eur(p.amount), rowActs(btn('Registra', () => registerDue(p, d), 'sm pri'), btn('Salta', () => { (p.done = p.done || []).push(d); done(); }, 'sm'))]))));
+  if (due.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Da confermare'), btn('Conferma…', () => confirmDue(), 'pri')),
+    h('p', { class: 'muted' }, 'Scaduti o di oggi. L\'app ha già preparato la modifica al prezzo di quel giorno: tu dici solo se l\'acquisto è stato preso davvero (Sì la registra, No la salta).'),
+    table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Conto' }, { t: 'Importo', n: 1 }], due.map(({ p, d }) => [fmtDate(d), p.label, accName(p.accId), eur(p.amount)]))));
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Acquisti programmati'), btn('+ Nuovo', () => editPlan(), 'pri')),
     plans.length ? tiles([{ l: 'Impegno medio al mese', v: eur(perMonth), s: eur(perMonth * 12) + ' in un anno' }, { l: 'Programmati', v: String(plans.length), s: plans.length === 1 ? 'acquisto periodico' : 'acquisti periodici' }]) : null,
     table([{ t: 'Voce' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }],
