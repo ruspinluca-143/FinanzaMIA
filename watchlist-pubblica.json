@@ -60,6 +60,13 @@
     {"nome":"Xtrackers MSCI World Value UCITS ETF (riferimento)","classe":"Azioni","fonte":"borsa_italiana","id":"IE00BL25JM42","tipo":"etf"},
     {"nome":"Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento)","classe":"Azioni","fonte":"borsa_italiana","id":"LU0908500753","tipo":"etf"},
     {"nome":"Amundi EUR Corporate Bond ESG UCITS ETF (riferimento)","classe":"Obbligazioni","fonte":"borsa_italiana","id":"LU1437018168","tipo":"etf"},
-    {"nome":"Centrus Energy","classe":"Azioni","fonte":"stockanalysis","id":"leu"}
+    {"nome":"Centrus Energy","classe":"Azioni","fonte":"stockanalysis","id":"leu"},
+    {"nome":"iShares MSCI USA Value Factor UCITS ETF (Acc)","classe":"Azioni","fonte":"onvista","id":"IE00BD1F4M44","tipo":"FUND","onvista":"112245460"},
+    {"nome":"iShares MSCI Korea UCITS ETF (Dist)","classe":"Azioni","fonte":"onvista","id":"IE00B0M63391","tipo":"FUND","onvista":"13008440"},
+    {"nome":"Paramount Skydance 2036 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US925524AX89","tipo":"BOND","onvista":"15464552"},
+    {"nome":"Whirlpool 2033 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US963320BE54","tipo":"BOND","onvista":"300468093"},
+    {"nome":"Apple 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US037833BH21","tipo":"BOND","onvista":"91807308"},
+    {"nome":"McDonald's 2052 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US58013MFT62","tipo":"BOND","onvista":"231292184"},
+    {"nome":"Goldman Sachs 4,75% 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US38148LAF31","tipo":"BOND","onvista":"92394102"}
   ]
 }

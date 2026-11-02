@@ -3,7 +3,7 @@
 # che ha un ISIN presente (cosi' un titolo nuovo si aggiorna senza che nessuno lo aggiunga a un elenco).
 # Solo dati pubblici di mercato. Non legge niente di tuo.
 # Uso:  pwsh ./catalogo.ps1 -Uscita ./site [-MaxPagine 400] [-SoloProva]
-param([string]$Uscita = './site', [int]$MaxPagine = 400, [switch]$SoloProva)
+param([string]$Uscita = './site', [int]$MaxPagine = 400, [int]$PagineCrypto = 40, [switch]$SoloProva)
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $inv = [Globalization.CultureInfo]::InvariantCulture
@@ -48,13 +48,15 @@ $n1 = Add-Pages $etf 'etf' $MaxPagine
 $n2 = Add-Pages $etc 'etc' $MaxPagine
 foreach ($b in 'mot/btp', 'mot/bot', 'mot/cct', 'mot/euro-obbligazioni', 'mot/obbligazioni-euro', 'extramot') { $null = Add-Pages ("https://www.borsaitaliana.it/borsa/obbligazioni/$b/lista.html?lang=it") 'obb' 40 }
 foreach ($k in @($voci.Keys)) { if ($voci[$k].x) { [void]$voci.Remove($k) } }
+foreach ($l in [char[]]'ABCDEFGHIJKLMNOPQRSTUVWXYZ0') { $null = Add-Pages ("https://www.borsaitaliana.it/borsa/azioni/listino-a-z.html?initial=$l&lang=it") 'az' 30 }          # azioni quotate a Milano (A-Z)
 if ($n1 -lt 500) { "Letti solo $n1 ETF (ne servono almeno 500): catalogo non aggiornato."; exit 1 }
 
 $crypto = New-Object Collections.Generic.List[object]
-foreach ($pg in 1, 2) {
-  try { $r = Invoke-RestMethod "https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=market_cap_desc&per_page=250&page=$pg" -UserAgent $ua -TimeoutSec 40
-    foreach ($c in $r) { if ($c.current_price -gt 0) { $crypto.Add([pscustomobject]@{ id = $c.id; s = ([string]$c.symbol).ToUpper(); n = $c.name; p = [double]$c.current_price }) } } } catch { Write-Host "  CoinGecko pagina ${pg}: $($_.Exception.Message)" }
-  Start-Sleep -Seconds 2
+foreach ($pg in 1..$PagineCrypto) {          # fino a 250 x PagineCrypto monete, per capitalizzazione
+  $r = $null; for ($k = 0; $k -lt 3 -and -not $r; $k++) { try { $r = Invoke-RestMethod "https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=market_cap_desc&per_page=250&page=$pg" -UserAgent $ua -TimeoutSec 40 } catch { if ("$($_.Exception.Message)" -match '429') { Start-Sleep -Seconds 40 } else { Start-Sleep -Seconds 3 } } }
+  if (-not $r -or -not @($r).Count) { Write-Host "  CoinGecko: ci si ferma alla pagina $pg"; break }
+  foreach ($c in @($r)) { if ($c.current_price -gt 0 -and $c.name) { $crypto.Add([pscustomobject]@{ id = $c.id; s = ([string]$c.symbol).ToUpper(); n = $c.name; p = [double]$c.current_price }) } }
+  Start-Sleep -Seconds 2.5
 }
 Write-Host "  crypto: $($crypto.Count)"
 $usa = New-Object Collections.Generic.List[object]

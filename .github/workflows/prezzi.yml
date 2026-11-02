@@ -52,10 +52,9 @@ jobs:
         continue-on-error: true
         shell: pwsh
         env:
-          EV: ${{ github.event_name }}
-          MSG: ${{ github.event.head_commit.message }}
         run: |
-          if ((-not (Test-Path ./site/catalogo.json)) -or $env:EV -ne 'push' -or $env:MSG -like '*sveglia*') { ./catalogo.ps1 -Uscita ./site } else { 'Catalogo: riuso quello di prima' }
+          $vecchio = $true; if (Test-Path ./site/catalogo.json) { $m = [regex]::Match((Get-Content ./site/catalogo.json -TotalCount 4) -join ' ', '\"generato\":\"([^\"]+)\"'); if ($m.Success) { $vecchio = ((Get-Date) - [DateTimeOffset]::Parse($m.Groups[1].Value).UtcDateTime.ToLocalTime()).TotalHours -gt 10 } }
+          if ($vecchio) { ./catalogo.ps1 -Uscita ./site } else { 'Catalogo recente: riuso quello di prima' }
       - name: Avviso se i mercati non si leggono
         if: steps.mercati.outcome == 'failure'
         run: echo "::warning::Nessuna fonte dei mercati si e letta. Il sito resta con l'ultimo file buono."

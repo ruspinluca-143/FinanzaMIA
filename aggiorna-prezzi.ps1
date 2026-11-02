@@ -55,6 +55,14 @@ function Read-Borsa($n) {
     div = $(if ($dv.Success) { [Net.WebUtility]::HtmlDecode($dv.Groups[1].Value).Trim() } else { $null }) }
 }
 
+function Read-Onvista($n) {          # qualsiasi ETF, azione o obbligazione per ISIN (fonte onvista.de): serve per i titoli che Borsa Italiana non quota
+  $ev = [string]$n.onvista; $ty = if ($n.tipo -match '^(FUND|STOCK|BOND|CERTIFICATE)$') { [string]$n.tipo } else { 'FUND' }
+  if (-not $ev) { $q = Invoke-RestMethod -Uri ('https://api.onvista.de/api/v1/instruments/query?searchValue=' + [Uri]::EscapeDataString($n.id) + '&limit=3') -UserAgent $ua -TimeoutSec 30; $x = @($q.list | Where-Object { $_.isin -eq $n.id })[0]; if (-not $x) { throw 'ISIN non trovato su onvista' }; $ev = [string]$x.entityValue; $ty = [string]$x.entityType }
+  $s = Invoke-RestMethod -Uri ("https://api.onvista.de/api/v1/instruments/$ty/$ev/snapshot") -UserAgent $ua -TimeoutSec 30
+  $q = $s.quote; if (-not $q -or -not ([double]$q.last -gt 0)) { throw 'prezzo non disponibile' }
+  $dt = ([DateTimeOffset]::Parse([string]$q.datetimeLast)).ToLocalTime().ToString('yyyy-MM-dd')
+  return [pscustomobject]@{ prezzo = [double]$q.last; valuta = [string]$q.isoCurrency; data = $dt; base = 'ultimo'; ter = $null; bench = $null; div = $null }
+}
 $wl = (Get-Content $wlPath -Raw -Encoding UTF8 | ConvertFrom-Json).strumenti
 $old = @{}
 if (Test-Path $pjPath) { try { foreach ($e in (Get-Content $pjPath -Raw -Encoding UTF8 | ConvertFrom-Json).prezzi) { $old[$e.nome] = $e } } catch { } }
@@ -65,7 +73,10 @@ foreach ($n in $todo) {
   try { $new[$n.nome] = Read-Borsa $n } catch { $fail.Add(('{0}: {1}' -f $n.nome, $_.Exception.Message)) }
   Start-Sleep -Milliseconds 600
 }
-$cg = @($wl | Where-Object { $_.fonte -eq 'coingecko' })
+foreach ($n in @($wl | Where-Object { $_.fonte -eq 'onvista' })) {
+  try { $new[$n.nome] = Read-Onvista $n } catch { $fail.Add(('{0}: {1}' -f $n.nome, $_.Exception.Message)) }
+  Start-Sleep -Milliseconds 500
+}$cg = @($wl | Where-Object { $_.fonte -eq 'coingecko' })
 if ($cg.Count) {
   try {
     $ids = ($cg | ForEach-Object { $_.id }) -join ','
