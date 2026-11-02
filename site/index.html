@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-OSb99HZvy2/8umGj1ju+4N6jL7rOFqjSqZ0F5hjYi6A='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UecWau4xW1eE0EkKz5y6W7oKgdij+xTeQFscMnWUZHc='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3634,7 +3634,51 @@ function aiCard() {
     h('p', { class: 'muted' }, 'Privacy: all\'AI vanno solo la frase che scrivi (con i nomi dei tuoi conti) o l\'immagine che scegli tu. Non parte mai niente da solo. Nel piano gratuito Google può usare questi dati per migliorare i suoi servizi: non mandare screenshot con dati personali che non vuoi condividere. La lettura degli screenshot è sperimentale: controlla sempre il riepilogo.'),
     h('p', null, h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener' }, 'Prendi la chiave gratuita su aistudio.google.com/apikey')),
     h('label', { class: 'fld' }, h('span', null, 'Chiave AI'), h('input', { type: 'password', value: key, placeholder: 'incolla qui la chiave', autocomplete: 'off', onchange: e => { S.settings.aiKey = e.target.value.trim(); done(); } })),
-    h('div', { class: 'row' }, key ? btn('Leggi uno screenshot…', aiScreenshot, 'pri') : null, key ? btn('Togli la chiave', () => { delete S.settings.aiKey; done(); }) : null));
+    h('div', { class: 'row' }, key ? btn('Leggi le operazioni da uno screenshot…', aiOpsStart, 'pri') : null, key ? btn('Leggi i saldi da uno screenshot…', aiScreenshot) : null, key ? btn('Togli la chiave', () => { delete S.settings.aiKey; done(); }) : null));
+}
+/* ============ operazioni da uno screenshot (AI): si controlla riga per riga prima di registrare ============ */
+function aiOpsStart() {
+  const cand = S.accounts.filter(a => !a.dep); if (!cand.length) { alert('Prima crea un conto.'); return; }
+  wzRun({ steps: () => [api => ({ q: 'Di quale conto sono le operazioni?', next: false, noBack: true, body: cand.map(a => wzOpt(a.name, (TYPES[a.type] || {}).label || '', () => { api.shut(); aiOpsPick(a); })) })] });
+}
+function aiOpsPick(a) {
+  const inp = h('input', { type: 'file', accept: 'image/*', style: 'display:none' });
+  inp.addEventListener('change', async () => {
+    const f = inp.files[0]; inp.remove(); if (!f) return;
+    try {
+      const b64 = await new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = ko; r.readAsDataURL(f); });
+      const j = await aiAsk([{ inlineData: { mimeType: f.type || 'image/png', data: b64 } }, { text: 'Oggi è ' + today() + '. Elenca le operazioni visibili nello screenshot.' }],
+        'Rispondi SOLO con JSON: {"operazioni":[{"data":"YYYY-MM-DD","tipo":"acquisto|vendita|versamento|prelievo","nome":"","isin":"","quote":numero o null,"prezzo":numero o null,"importo":numero o null}]}. Se la data non ha l\'anno usa quello di oggi. Importi e quote positivi. Solo cio\' che e\' scritto, niente invenzioni; ignora righe che non sono operazioni (dividendi, commissioni da sole).');
+      aiOpsReview(a, (j.operazioni || []).filter(x => x && OP_FLOW[x.tipo] && /^\d{4}-\d{2}-\d{2}$/.test(x.data || '')));
+    } catch (e) { alert('Lettura non riuscita: ' + (e.message || e)); }
+  });
+  document.body.append(inp); inp.click();
+}
+function aiOpsBuild(a, r) {          // da una riga letta dall'AI a un'operazione per applyOp; { err } se manca qualcosa
+  const o = { accId: a.id, kind: r.tipo, date: r.data, fromCash: true, note: 'Da screenshot' }, amt = +r.importo > 0 ? +r.importo : 0, qty = +r.quote > 0 ? +r.quote : 0;
+  if (r.tipo === 'versamento' || r.tipo === 'prelievo') { if (!(amt > 0)) return { err: 'manca l\'importo' }; o.amount = amt; return { o, text: (r.tipo === 'versamento' ? 'Versamento ' : 'Prelievo ') + eur(amt, true) }; }
+  let i = findInst(r.nome || '', r.isin || '');
+  if (i) o.instId = i.id;
+  else { const c = opCands(r.isin || r.nome || '', r.tipo === 'vendita' ? a.id : '', r.tipo)[0]; if (c && c.id) { o.instId = c.id; i = inst(c.id); } else if (c && r.tipo === 'acquisto') { o.newName = c.name; o.newCcy = c.ccy; o._code = c.code; o._cls = c.cls || 'Azioni'; o.price = +r.prezzo > 0 ? +r.prezzo : c.price; } else return { err: 'non riconosco il titolo "' + (r.nome || r.isin || '?') + '"' }; }
+  if (qty > 0) o.qty = qty; else if (amt > 0) o.amount = amt; else return { err: 'mancano quote e importo' };
+  if (+r.prezzo > 0 && !o.price) o.price = +r.prezzo; else if (!o.price && qty > 0 && amt > 0 && !(i && i.ccy !== 'EUR')) o.price = amt / qty;
+  return { o, text: (r.tipo === 'acquisto' ? 'Acquisto ' : 'Vendita ') + (qty > 0 ? nfq.format(qty) + ' × ' : '') + (i ? i.name : o.newName) + (amt > 0 ? ' · ' + eur(amt, true) : '') };
+}
+function aiOpsReview(a, list) {
+  if (!list.length) { alert('Nello screenshot non ho trovato operazioni.'); return; }
+  const same = (x, y) => x.accId === y.accId && x.date === y.date && x.kind === y.kind;
+  const rows = list.map(r => { const b = aiOpsBuild(a, r); if (b.err) return { r, err: b.err, use: false }; const dup = OPS().some(x => same(x, b.o) && ((b.o.instId && x.instId === b.o.instId) || (!b.o.instId && Math.abs((x.amount || 0) - (b.o.amount || 0)) < 0.01))); return { r, o: b.o, text: b.text, dup, use: !dup }; }).sort((x, y) => x.r.data.localeCompare(y.r.data));
+  let msg = '';
+  wzRun({ steps: () => [api => ({ q: 'Controlla le operazioni di ' + a.name, next: false, noBack: true,
+    body: [h('p', { class: 'muted' }, 'Le ha lette l\'AI: può sbagliare. Togli la spunta a quelle che non vanno. Quelle già registrate sono spente.'),
+      h('div', { class: 'duelist' }, rows.map(x => h('label', { class: 'chk', style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, h('input', { type: 'checkbox', checked: x.use, disabled: x.err ? '' : null, onchange: e => { x.use = e.target.checked; } }), h('span', null, h('b', null, fmtDate(x.r.data) + ' · '), x.text || ((x.r.tipo || '') + ' ' + (x.r.nome || '')), x.err ? h('small', { class: 'err' }, ' — ' + x.err) : x.dup ? h('small', null, ' — già registrata') : null)))),
+      msg ? h('p', { class: 'err' }, msg) : null,
+      h('div', { class: 'wz-nav' }, btn('Registra le spuntate', () => {
+        const pick = rows.filter(x => x.use && x.o); if (!pick.length) { msg = 'Nessuna operazione spuntata.'; api.redraw(); return; }
+        const before = JSON.stringify(S); let n = 0;
+        for (const x of pick) { const m = applyProposal({ ops: [x.o] }); if (m) { S = JSON.parse(before); msg = 'Mi fermo: ' + x.text + ' → ' + m + ' Non ho registrato niente.'; api.redraw(); return; } n++; }
+        done(); wzDone(api, n + (n === 1 ? ' operazione registrata' : ' operazioni registrate'), 'Le trovi in Operazioni di ' + a.name + '. Si annullano una alla volta dalla più recente.');
+      }, 'pri big'), btn('Annulla', api.shut))] })] });
 }
 /* ============ + Operazione GUIDATA: una domanda per volta, scelte grandi da toccare, l'app suggerisce e va avanti da sola ============ */
 const OP_FLOW = { acquisto: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], vendita: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], versamento: ['kind', 'conto', 'importo', 'riepilogo'], prelievo: ['kind', 'conto', 'importo', 'riepilogo'], trasferimento: ['kind', 'conto', 'verso', 'importo', 'riepilogo'] };
