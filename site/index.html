@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V1s26gnAjEqC/bUlhnThATJtW0S+Panv8KaOe1vtd50='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tNJ/lhap+AS+++Nmw26NCn6txDm+xfTb7c00sSlujSQ='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -175,7 +175,48 @@ section.card.fold .fold-head h2{margin-bottom:0}
 section.card.fold .fold-head{margin-bottom:0}
 .grp.fold>:not(.fold-head){display:none!important}
 .grp.fold{margin-bottom:0}
-.grp-head .grp-t h2{display:flex;align-items:center;gap:6px}/* esito del caricamento */
+.grp-head .grp-t h2{display:flex;align-items:center;gap:6px}/* procedura guidata */
+dialog.wz{max-width:520px;padding:18px 18px 16px}
+.wz-in{animation:rise .35s var(--ease) both}
+.wz-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px}
+.wz-prog{display:flex;gap:5px;margin:10px 0 4px}
+.wz-prog i{flex:1;height:5px;border-radius:5px;background:color-mix(in srgb,var(--ink) 10%,transparent);transition:background .4s}
+.wz-prog i.on{background:var(--s1)}
+.wz-q{font-size:22px;letter-spacing:-.02em;margin:14px 0 12px}
+.wz-b{display:grid;gap:9px}
+.wz-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;padding:14px 16px;border-radius:16px;border:1.5px solid var(--ring);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;transition:transform .2s var(--ease),border-color .2s,background .2s;animation:rise .35s var(--ease) both}
+.wz-opt:hover,.wz-opt:focus-visible{border-color:var(--s1);background:color-mix(in srgb,var(--s1) 7%,var(--card));outline:none}
+.wz-opt:active{transform:scale(.98)}
+.wz-opt.sel{border-color:var(--s1)}
+.wz-opt.soft{opacity:.85}
+.wz-opt.new{border-style:dashed}
+.wz-opt.kindopt{flex-direction:row;align-items:center;gap:14px}
+.wz-opt.kindopt svg{color:var(--s1);flex:none}
+.wz-tt{display:flex;flex-direction:column;gap:1px}
+.wz-t{font-weight:650;font-size:16px}
+.wz-t small{font-weight:400;color:var(--muted);font-size:12.5px}
+.wz-s{font-size:12.5px;color:var(--muted);line-height:1.35}
+.wz-search,.wz-num{width:100%;font:inherit;font-size:18px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--ring);background:var(--card-s);color:var(--ink)}
+.wz-num{font-size:30px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.wz-search:focus,.wz-num:focus{border-color:var(--s1);outline:none}
+.wz-res{display:grid;gap:8px}
+.wz-chip{padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 8%,transparent);display:grid;gap:2px}
+.wz-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wz-tabs{margin-top:2px}
+.wz-price{font-size:13.5px}
+.wz-more summary{cursor:pointer;color:var(--ink2);font-size:13.5px;margin:4px 0}
+.wz-warn{margin:0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,#ff9f0a 14%,transparent);font-weight:600;font-size:14px;line-height:1.4}
+.wz-sum{padding:16px;border-radius:18px;background:color-mix(in srgb,var(--s1) 9%,transparent)}
+.wz-sum-t{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.3}
+.wz-sum-s{margin-top:4px;color:var(--ink2);font-size:14px}
+.wz-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.wz-nav .big{margin-left:auto;min-width:140px}
+.wz-ok{display:grid;justify-items:center;gap:6px;text-align:center;padding:10px 0}
+.wz-ok svg{color:var(--gain);animation:pop .5s var(--ease) both}
+.wz-ok svg path{stroke-dasharray:1;animation:draw .6s var(--ease) .2s both}
+.wz-ok .wz-nav{width:100%;margin-top:12px}
+.wz-adv{text-align:center;margin-top:10px;font-size:13px}
+/* esito del caricamento */
 .res{display:grid;justify-items:center;text-align:center;gap:6px;padding:8px 0 14px}
 .res h3{margin:4px 0 0;font-size:22px}
 .res p{margin:0;color:var(--ink2);max-width:52ch}
@@ -3360,7 +3401,148 @@ function undoOp(op) {
 }
 /* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
 const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']]];
-function editOperation(pre, after) {
+/* ============ + Operazione GUIDATA: una domanda per volta, scelte grandi da toccare, l'app suggerisce e va avanti da sola ============ */
+const OP_FLOW = { acquisto: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], vendita: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], versamento: ['kind', 'conto', 'importo', 'riepilogo'], prelievo: ['kind', 'conto', 'importo', 'riepilogo'], trasferimento: ['kind', 'conto', 'verso', 'importo', 'riepilogo'] };
+function opCands(q, accId, kind) {          // titoli proposti: i tuoi, quelli con prezzo automatico e tutto il catalogo
+  const nq = normT(q), toks = nq.split(' ').filter(Boolean), held = new Map();
+  for (const a of S.accounts) for (const p of a.positions) { const l = held.get(p.instId) || []; l.push({ a, p }); held.set(p.instId, l); }
+  const own = S.instruments.map(i => ({ id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', held: held.get(i.id) || [], i }));
+  let list = own.filter(c => !toks.length || toks.every(k => normT(c.name + ' ' + c.code).includes(k)));
+  if (kind === 'vendita') return list.filter(c => c.held.some(x => x.a.id === accId)).sort((a, b) => a.name.localeCompare(b.name));
+  const known = new Set(S.instruments.flatMap(i => [normT(i.name), normT(i.code)]).filter(Boolean));
+  if (toks.length) {
+    list = list.concat(Object.entries(S.refPrices || {}).filter(([c, r]) => r && r.n && !/\(riferimento\)/i.test(r.n) && !known.has(normT(c)) && !known.has(normT(r.n)) && toks.every(k => normT(r.n + ' ' + c).includes(k))).map(([c, r]) => ({ id: '', name: r.n, code: /^[a-z]{2}[0-9a-z]{9}[0-9]$/i.test(c) ? c.toUpperCase() : c, ccy: normCcy(r.c), price: r.p, st: 'auto', held: [], cat: true, src: 'sito' })));
+    if (DATA.cat) {
+      const have = new Set(S.instruments.map(i => String(i.code || '').toLowerCase()).filter(Boolean));
+      list = list.concat(DATA.cat.list.filter(e => !have.has(e.isin.toLowerCase()) && toks.every(k => e.n.includes(k))).slice(0, 80).map(e => ({ id: '', name: e.name, code: e.isin, ccy: normCcy(e.c), price: e.p, st: 'auto', held: [], cat: true, cls: catCls(e.t, e.name), src: 'catalogo' })));
+      list = list.concat(DATA.cat.coins.filter(c => toks.every(k => c.n.includes(k)) && !S.instruments.some(i => normT(i.name) === normT(c.name))).slice(0, 6).map(c => ({ id: '', name: c.name, code: c.sym, ccy: 'EUR', price: c.p, st: 'auto', held: [], cat: true, cls: 'Crypto', src: 'catalogo' })));
+    }
+  } else list = list.filter(c => c.held.length);
+  const mine = c => c.held.some(x => x.a.id === accId) ? 0 : c.held.length ? 1 : 2;
+  return list.sort((a, b) => mine(a) - mine(b) || (normT(a.name).startsWith(nq) ? 0 : 1) - (normT(b.name).startsWith(nq) ? 0 : 1) || (b.st === 'auto') - (a.st === 'auto') || a.name.localeCompare(b.name));
+}
+function opWizard(pre, after) {
+  if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
+  pre = pre || {};
+  const st = { kind: '', accId: pre.accId || UI.acc || '', toId: '', c: null, nuovo: null, mode: 'qty', qty: null, eur: null, price: null, fee: null, date: today(), note: '', fromCash: true, how: '', q: '', editPrice: false }, hist = [];
+  let cur = 'kind', skipAcc = !!(pre.accId || UI.acc);
+  const dlg = h('dialog', { class: 'wz' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, view = h('div', { class: 'wz-view' });
+  const acc = () => S.accounts.find(a => a.id === st.accId), accTo = () => S.accounts.find(a => a.id === st.toId);
+  const num = v => { const x = parseFloat(String(v).replace(',', '.')); return isFinite(x) && x >= 0 ? x : null; };
+  const ccyOf = () => st.c ? st.c.ccy : st.nuovo ? normCcy(st.nuovo.ccy) : 'EUR', fx = () => fxRate(ccyOf()) ?? 1;
+  const priceNow = () => st.price != null ? st.price : st.c ? st.c.price : null;
+  const qtyNow = () => st.mode === 'qty' ? st.qty : (st.eur > 0 && priceNow() > 0 ? Math.round(st.eur / (priceNow() * fx()) * 1e6) / 1e6 : null);
+  const spend = () => { const q = qtyNow(), p = priceNow(); return (q > 0 && p > 0 ? q * p * fx() : st.mode === 'eur' ? st.eur || 0 : 0) + (st.fee || 0); };
+  const cashOf = a => Math.max(0, accCash(a));
+  const shortBy = () => { if (st.kind !== 'acquisto' || !st.fromCash || !acc()) return 0; const m = spend() - accCash(acc()); return m > 0.01 ? Math.ceil(m * 100) / 100 : 0; };
+  const flow = () => OP_FLOW[st.kind] || ['kind'];
+  function nextOf() { const f = flow().slice(); const i = f.indexOf(cur); let n = f[i + 1]; if (cur === 'quanto' && shortBy() > 0) return 'pagamento'; if (cur === 'pagamento') return 'riepilogo'; if (n === 'conto' && skipAcc) n = f[i + 2]; return n; }
+  const go = (n) => { hist.push(cur); cur = n; draw(); };
+  const back = () => { if (st.nuovo && cur === 'strumento') { st.nuovo = null; draw(); return; } const p = hist.pop(); if (p) { cur = p; draw(); } };
+  const nav = (okLabel, okFn, okOff) => h('div', { class: 'wz-nav' }, hist.length ? btn('← Indietro', back) : h('span'), okLabel ? h('button', { type: 'button', class: 'btn pri big', disabled: okOff ? '' : null, onclick: okFn }, okLabel) : h('span'));
+  const big = (title, sub, onclick, cls) => h('button', { type: 'button', class: 'wz-opt ' + (cls || ''), onclick }, h('span', { class: 'wz-t' }, title), sub ? h('span', { class: 'wz-s' }, sub) : null);
+  const numInput = (val, ph, on) => { const i = h('input', { type: 'number', step: 'any', inputmode: 'decimal', class: 'wz-num', placeholder: ph, value: val ?? '', 'aria-label': ph }); i.addEventListener('input', () => on(num(i.value), i)); i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = dlg.querySelector('.wz-nav .pri:not([disabled])'); if (b) b.click(); } }); return i; };
+  const QUEST = { kind: 'Che cosa è successo?', conto: st.kind === 'trasferimento' ? 'Da quale conto sono partiti i soldi?' : st.kind === 'vendita' ? 'Da quale conto hai venduto?' : st.kind === 'prelievo' ? 'Da quale conto sono usciti i soldi?' : st.kind === 'versamento' ? 'In quale conto sono entrati i soldi?' : 'In quale conto hai comprato?', verso: 'A quale conto sono arrivati?', strumento: st.kind === 'vendita' ? 'Quale titolo hai venduto?' : 'Quale titolo hai comprato?', quanto: st.kind === 'vendita' ? 'Quanto hai venduto?' : 'Quanto hai comprato?', importo: 'Quanto?', pagamento: 'Come sono arrivati i soldi mancanti?', riepilogo: 'Controlla e conferma' };
+  function body() {
+    const w = [];
+    if (cur === 'kind') { for (const [k, l, d, ico] of OP_UI) w.push(h('button', { type: 'button', class: 'wz-opt kindopt', onclick: () => { st.kind = k; go(nextOf()); } }, s('svg', { viewBox: '0 0 24 24', width: 26, height: 26, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(x => s('path', { d: x }))), h('span', { class: 'wz-tt' }, h('span', { class: 'wz-t' }, l), h('span', { class: 'wz-s' }, d)))); }
+    else if (cur === 'conto' || cur === 'verso') {
+      const isTo = cur === 'verso'; let list = S.accounts.filter(a => !a.dep && !(isTo && a.id === st.accId));
+      if (st.kind === 'vendita') list = list.filter(a => a.positions.length);
+      list.sort((x, y) => (accGroup(x) === 'investiti' ? 0 : 1) - (accGroup(y) === 'investiti' ? 0 : 1) || accValue(y) - accValue(x));
+      if (st.kind === 'acquisto' || isTo) list.sort((x, y) => (accGroup(x) === 'investiti' ? 0 : 1) - (accGroup(y) === 'investiti' ? 0 : 1));
+      if (st.kind === 'trasferimento' && !isTo) list.sort((x, y) => cashOf(y) - cashOf(x));
+      for (const a of list) w.push(big(a.name, (TYPES[a.type] ? TYPES[a.type].label : '') + ' · liquidità ' + eur(cashOf(a), true) + (a.box ? ' · ' + a.box : ''), () => { if (isTo) st.toId = a.id; else { st.accId = a.id; skipAcc = false; } go(nextOf()); }, (isTo ? st.toId : st.accId) === a.id ? 'sel' : ''));
+      if (!list.length) w.push(h('p', { class: 'muted' }, 'Nessun conto adatto: per vendere serve un conto con dei titoli.'));
+    }
+    else if (cur === 'strumento') {
+      if (st.nuovo) {
+        const n = st.nuovo, ni = (k, ph, type) => { const i = h('input', { type: type || 'text', step: type ? 'any' : null, inputmode: type ? 'decimal' : null, placeholder: ph, value: n[k] ?? '', 'aria-label': ph }); i.addEventListener('input', () => { n[k] = i.value; ok.disabled = !(n.name.trim() && num(n.price) > 0); }); return i; };
+        w.push(h('p', { class: 'muted' }, 'Non è nel catalogo: scrivimi i dati. Dopo, con «Chiedi di collegarli» (Strumenti), il prezzo diventerà automatico.'), h('label', { class: 'fld' }, h('span', null, 'Nome'), ni('name', 'es. iShares Core MSCI World')), h('label', { class: 'fld' }, h('span', null, 'ISIN (facoltativo)'), ni('code', 'es. IE00B4L5Y983')), h('div', { class: 'g2' }, h('label', { class: 'fld' }, h('span', null, 'Valuta'), ni('ccy', 'EUR')), h('label', { class: 'fld' }, h('span', null, 'Prezzo di una quota'), ni('price', 'es. 110', 'number')))); var ok = h('button', { type: 'button', class: 'btn pri big', disabled: n.name.trim() && num(n.price) > 0 ? null : '', onclick: () => { st.c = null; st.price = num(n.price); go(nextOf()); } }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), ok)); return w;
+      }
+      const inp = h('input', { type: 'search', class: 'wz-search', placeholder: st.kind === 'vendita' ? 'Cerca tra i tuoi titoli' : 'Scrivi nome, ISIN o crypto (es. msci world, IE00B4L5Y983, bitcoin)', autocomplete: 'off', value: st.q, enterkeyhint: 'search', 'aria-label': 'Cerca il titolo' }), res = h('div', { class: 'wz-res' });
+      const fill = () => {
+        res.replaceChildren(); st.q = inp.value; const list = opCands(inp.value, st.accId, st.kind), shown = list.slice(0, 7);
+        if (!inp.value.trim() && st.kind !== 'vendita') res.append(h('p', { class: 'muted' }, shown.length ? 'I tuoi titoli (o scrivi per cercare tra più di 13.000 strumenti):' : 'Scrivi il nome o l\'ISIN del titolo: ti suggerisco quelli che esistono.'));
+        for (const c of shown) { const here = c.held.find(x => x.a.id === st.accId); res.append(h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { st.c = c; st.price = null; st.nuovo = null; go(nextOf()); } },
+          h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null),
+          h('span', { class: 'wz-s' }, h('b', { class: 'st-' + c.st }, c.st === 'auto' ? '⟳ prezzo automatico' : c.st === 'stima' ? '≈ prezzo stimato' : '✎ prezzo a mano'), ' · oggi ' + nf2.format(c.price) + ' ' + c.ccy + (here ? ' · ne hai ' + nfq.format(here.p.qty) + ' qui' : c.held.length ? ' · ce l\'hai in ' + c.held.map(x => x.a.name).join(', ') : ' · nuovo per te')))); }
+        if (inp.value.trim() && st.kind !== 'vendita') { const qs = inp.value.replace(/\s+/g, ''), isin = /^[a-z]{2}[a-z0-9]{9}[0-9]$/i.test(qs); if (!shown.length || !isin || !list.some(c => String(c.code).toLowerCase() === qs.toLowerCase())) res.append(h('button', { type: 'button', class: 'wz-opt cand new', onclick: () => { st.nuovo = { name: isin ? '' : inp.value.trim(), code: isin ? qs.toUpperCase() : '', ccy: 'EUR', price: '' }; draw(); } }, h('span', { class: 'wz-t' }, '+ Non lo trovo: lo aggiungo io'), h('span', { class: 'wz-s' }, isin ? 'ISIN ' + qs.toUpperCase() + ' non è nel catalogo' : 'scrivo nome e prezzo a mano'))); }
+        if (!shown.length && st.kind === 'vendita') res.append(h('p', { class: 'muted' }, 'Nessun titolo trovato in questo conto.'));
+      };
+      inp.addEventListener('input', fill); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const f = res.querySelector('.cand:not(.new)'); if (f) f.click(); } });
+      w.push(inp, res); fill(); setTimeout(() => inp.focus(), 60);
+    }
+    else if (cur === 'quanto') {
+      const c = st.c, nm = c ? c.name : st.nuovo ? st.nuovo.name : '', pr = priceNow(), here = c && acc() ? (acc().positions.find(p => p.instId === c.id) || null) : null;
+      w.push(h('div', { class: 'wz-chip' }, h('b', null, nm), h('span', { class: 'wz-s' }, c ? (c.st === 'auto' ? '⟳ prezzo di oggi ' : c.st === 'stima' ? '≈ prezzo stimato ' : '✎ ultimo prezzo ') + nf2.format(c.price) + ' ' + c.ccy : 'prezzo ' + nf2.format(pr) + ' ' + ccyOf()), here ? h('span', { class: 'wz-s' }, 'In questo conto ne hai ' + nfq.format(here.qty)) : null));
+      const tabs = h('div', { class: 'seg3 wz-tabs', role: 'group' }, [['qty', 'Quante quote'], ['eur', 'Quanti euro']].map(([k, l]) => h('button', { type: 'button', class: 'seg-b', 'aria-pressed': st.mode === k ? 'true' : 'false', onclick: () => { st.mode = k; draw(); } }, l)));
+      tabs.style.gridTemplateColumns = '1fr 1fr';
+      const prev = h('div', { class: 'opsum' }); const refresh = () => { const q = qtyNow(), p = priceNow(); prev.textContent = q > 0 && p > 0 ? nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' = ' + eur(q * p * fx(), true) + (st.fee ? ' + ' + eur(st.fee, true) + ' di commissioni' : '') : 'Scrivi ' + (st.mode === 'qty' ? 'quante quote' : 'quanti euro') + '.'; nx.disabled = !(qtyNow() > 0 && priceNow() > 0); };
+      const main = numInput(st.mode === 'qty' ? st.qty : st.eur, st.mode === 'qty' ? 'Quante quote' : 'Quanti euro', v => { if (st.mode === 'qty') st.qty = v; else st.eur = v; refresh(); });
+      w.push(tabs, main);
+      if (st.kind === 'vendita' && here) w.push(btn('Tutte (' + nfq.format(here.qty) + ')', () => { st.mode = 'qty'; st.qty = here.qty; draw(); }, 'sm'));
+      const pLine = h('div', { class: 'wz-price' });
+      if (st.editPrice || !(pr > 0)) { pLine.append(h('label', { class: 'fld' }, h('span', null, 'Prezzo di una quota (' + ccyOf() + ')' + (c && c.price > 0 ? ' · oggi ' + nf2.format(c.price) : '')), numInput(st.price, 'es. ' + (c ? nf2.format(c.price) : '110'), v => { st.price = v; refresh(); }))); }
+      else pLine.append(h('span', { class: 'muted' }, 'Prezzo ' + nf2.format(pr) + ' ' + ccyOf() + (c && c.st === 'auto' ? ' (di oggi, automatico)' : ''), ' · '), h('a', { href: '#', onclick: e => { e.preventDefault(); st.editPrice = true; draw(); } }, 'ho pagato un altro prezzo'));
+      w.push(pLine, h('details', { class: 'wz-more' }, h('summary', null, 'Commissioni (facoltative)'), numInput(st.fee, 'Commissioni in €', v => { st.fee = v; refresh(); })), prev);
+      var nx = h('button', { type: 'button', class: 'btn pri big', onclick: () => go(nextOf()) }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), nx)); refresh(); setTimeout(() => main.focus(), 60); return w;
+    }
+    else if (cur === 'importo') {
+      const a = acc(), prev = h('div', { class: 'opsum' }); const refresh = () => { prev.textContent = st.eur > 0 ? (st.kind === 'versamento' ? 'Entrano ' : st.kind === 'prelievo' ? 'Escono ' : 'Sposti ') + eur(st.eur, true) + (st.kind === 'trasferimento' ? ' da ' + a.name + ' a ' + (accTo() ? accTo().name : '…') : ' · ' + a.name) : 'Scrivi l\'importo.'; nx.disabled = !(st.eur > 0); };
+      const main = numInput(st.eur, 'Importo in €', v => { st.eur = v; refresh(); }); w.push(main, h('div', { class: 'wz-chips' }, [50, 100, 200, 500, 1000].map(v => btn(eur(v), () => { st.eur = v; draw(); }, 'sm'))));
+      if (st.kind !== 'versamento' && a) w.push(h('p', { class: 'muted' }, 'Liquidità disponibile in ' + a.name + ': ' + eur(cashOf(a), true)));
+      w.push(prev); var nx = h('button', { type: 'button', class: 'btn pri big', onclick: () => go(nextOf()) }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), nx)); refresh(); setTimeout(() => main.focus(), 60); return w;
+    }
+    else if (cur === 'pagamento') {
+      const m = shortBy(), a = acc(), others = S.accounts.filter(x => x.id !== a.id && !x.dep && accCash(x) > 0.01).sort((x, y) => (x.box ? 1 : 0) - (y.box ? 1 : 0) || (accCash(x) + 0.01 >= m ? 0 : 1) - (accCash(y) + 0.01 >= m ? 0 : 1) || (accGroup(x) === 'fermi' ? 0 : 1) - (accGroup(y) === 'fermi' ? 0 : 1) || accCash(y) - accCash(x));
+      w.push(h('p', { class: 'wz-warn' }, '⚠ In ' + a.name + ' ci sono solo ' + eur(cashOf(a), true) + ' e l\'acquisto costa ' + eur(spend(), true) + ': mancano ' + eur(m, true) + '. Probabilmente li hai spostati da un altro conto: scegli quale e lo registro io prima dell\'acquisto.'));
+      for (const o of others) w.push(big('Spostati da ' + o.name, 'ci sono ' + eur(accCash(o), true) + (accCash(o) + 0.01 < m ? ' · non bastano' : ''), () => { st.how = 't:' + o.id; go('riepilogo'); }, o.box ? 'soft' : ''));
+      w.push(big('Soldi nuovi, versati da fuori', 'registro un versamento di ' + eur(m, true), () => { st.how = 'ext'; go('riepilogo'); }), big('Non toccare la liquidità', 'l\'ho già sistemata io', () => { st.how = 'no'; go('riepilogo'); }, 'soft'));
+    }
+    else if (cur === 'riepilogo') {
+      const q = qtyNow(), p = priceNow(), a = acc(), trade = st.kind === 'acquisto' || st.kind === 'vendita', nm = st.c ? st.c.name : st.nuovo ? st.nuovo.name : '';
+      const how = st.how.startsWith('t:') ? 'Spostati da ' + accName(st.how.slice(2)) : st.how === 'ext' ? 'Versati da fuori' : st.how === 'no' ? 'Liquidità non toccata' : '';
+      const line = trade ? (st.kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' di ' + nm : st.kind === 'versamento' ? 'Entrano ' + eur(st.eur, true) : st.kind === 'prelievo' ? 'Escono ' + eur(st.eur, true) : 'Sposti ' + eur(st.eur, true);
+      w.push(h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, line), h('div', { class: 'wz-sum-s' }, a.name + (st.kind === 'trasferimento' ? ' → ' + accTo().name : '') + (trade ? ' · totale ' + eur(spend(), true) : ''))));
+      if (how) w.push(h('p', { class: 'muted' }, '↳ ' + how + (st.how.startsWith('t:') ? ': registro prima il trasferimento di ' + eur(shortBy(), true) : '')));
+      const dt = h('input', { type: 'date', value: st.date, 'aria-label': 'Data' }); dt.addEventListener('input', () => { st.date = dt.value || today(); });
+      const nt = h('input', { type: 'text', placeholder: 'facoltativa', value: st.note, 'aria-label': 'Nota' }); nt.addEventListener('input', () => { st.note = nt.value; });
+      w.push(h('div', { class: 'g2' }, h('label', { class: 'fld' }, h('span', null, 'Data'), dt), h('label', { class: 'fld' }, h('span', null, 'Nota'), nt)));
+      if (trade && !st.how) { const cb = h('input', { type: 'checkbox', checked: st.fromCash }); cb.addEventListener('change', () => { st.fromCash = cb.checked; }); w.push(h('label', { class: 'chk' }, cb, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto')))); }
+      const err = h('p', { class: 'err' }); w.push(err);
+      const cf = h('button', { type: 'button', class: 'btn pri big', onclick: () => commit(err, cf) }, 'Conferma e registra'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), cf)); return w;
+    }
+    return w;
+  }
+  function commit(err, cf) {
+    const a = acc(), trade = st.kind === 'acquisto' || st.kind === 'vendita', q = qtyNow(), c = st.c, nu = st.nuovo;
+    const o = { accId: st.accId, toId: st.toId, kind: st.kind, date: st.date || today(), instId: c && c.id ? c.id : '', newName: trade && !(c && c.id) ? (c ? c.name : nu.name.trim()) : '', newCcy: trade ? ccyOf() : 'EUR', qty: trade ? q : null, price: trade ? priceNow() : null, fee: st.fee, amount: trade ? null : st.eur, fromCash: st.fromCash, note: st.note.trim() };
+    const how = st.how, miss = shortBy(); if (how === 'no') o.fromCash = false;
+    const r = applyOp(o); if (r) { err.textContent = r; return; }
+    if (trade && !o.instId) { const ni = findInst(o.newName, ''); if (ni) { const code = c ? c.code : nu.code; if (code && !ni.code) ni.code = code; if (!ni.cls) ni.cls = (c && c.cls) || (/bitcoin|ether|solana|xrp|ripple|cardano|cosmos|usdc|coin|crypto/i.test(o.newName) ? 'Crypto' : 'Azioni'); if (!ni.area) ni.area = 'n.d.'; if (c && c.src) { ni.autoSrc = c.src; ni.autoAt = today(); } } }
+    if (how.startsWith('t:')) { const m = applyOp({ accId: how.slice(2), toId: o.accId, kind: 'trasferimento', date: o.date, amount: miss, note: 'Per l\'acquisto di ' + (c ? c.name : nu.name) }); if (m) { err.textContent = 'Acquisto registrato, ma il trasferimento no: ' + m; done(); return; } }
+    else if (how === 'ext') { const m = applyOp({ accId: o.accId, kind: 'versamento', date: o.date, amount: miss, fromCash: true, note: 'Soldi versati per l\'acquisto' }); if (m) { err.textContent = 'Acquisto registrato, ma il versamento no: ' + m; done(); return; } }
+    done(); if (DATA.cat) applyCatalog();
+    const msg = h('div', { class: 'wz-ok' }, s('svg', { viewBox: '0 0 24 24', width: 54, height: 54, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d: 'M12 3a9 9 0 100 18 9 9 0 000-18z' }), s('path', { d: 'M7.5 12.5l3 3 6-6.5', pathLength: 1 })), h('h3', null, 'Registrato'), h('p', null, view.querySelector('.wz-sum-t').textContent + ' · ' + a.name), h('div', { class: 'wz-nav' }, btn('Registra un\'altra', () => { shut(); opWizard(pre, after); }), h('button', { type: 'button', class: 'btn pri big', onclick: () => { shut(); if (after) after(); } }, 'OK')));
+    view.replaceChildren(msg); setStatus('Operazione registrata'); if (after) setTimeout(() => {}, 0);
+  }
+  function draw() {
+    const f = flow(), idx = Math.max(0, f.indexOf(cur) < 0 ? f.length - 2 : f.indexOf(cur)), tot = f.length;
+    const bar = h('div', { class: 'wz-prog', 'aria-hidden': 'true' }, f.map((_, i) => h('i', { class: i <= idx ? 'on' : '' })));
+    const top = h('div', { class: 'wz-top' }, hist.length ? btn('← Indietro', back, 'sm') : h('span'), h('span', { class: 'wz-step muted' }, cur === 'riepilogo' ? 'Ultimo passo' : 'Passo ' + (idx + 1) + ' di ' + (tot - 1 || 1)), btn('✕', shut, 'sm'));
+    const b = body();
+    view.replaceChildren(top, bar, h('h3', { class: 'wz-q' }, QUEST[cur] || ''), h('div', { class: 'wz-b' }, b), cur === 'kind' ? h('p', { class: 'muted wz-adv' }, h('a', { href: '#', onclick: e => { e.preventDefault(); shut(); editOperationAdv(Object.assign({}, pre, { _adv: 1 }), after); } }, 'Preferisco il modulo completo')) : null);
+    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
+  }
+  if (pre.kind && OP_FLOW[pre.kind]) { st.kind = pre.kind; cur = nextOf(); }
+  dlg.append(view); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); draw(); dlg.showModal();
+}
+function editOperation(pre, after) {          // porta d'ingresso unica: guidata, tranne quando l'operazione e' gia' tutta compilata (es. un PAC da correggere)
+  if (pre && pre._adv || (pre && pre.kind && (pre.instId || pre.amount))) return editOperationAdv(pre, after);
+  return opWizard(pre, after);
+}
+function editOperationAdv(pre, after) {
   if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
   pre = pre || {};
   let kind = pre.kind || 'acquisto';
