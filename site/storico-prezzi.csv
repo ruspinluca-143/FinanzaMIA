@@ -1468,3 +1468,62 @@ timestamp;nome;id;prezzo;valuta;data;fonte
 2026-11-02T09:08:46+00:00;Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento);LU0908500753;319.25;EUR;2026-11-02;borsa_italiana
 2026-11-02T09:08:46+00:00;Amundi EUR Corporate Bond ESG UCITS ETF (riferimento);LU1437018168;53.72;EUR;2026-11-02;borsa_italiana
 2026-11-02T09:08:46+00:00;Centrus Energy;leu;103.29;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;iShares Core MSCI World UCITS ETF USD (Acc);IE00B4L5Y983;129.6;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi Core Nasdaq-100 Swap UCITS ETF Acc;LU1829221024;104.06;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Xtrackers II Global Government Bond UCITS ETF 1C EUR Hedged;LU0378818131;206.37;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Xtrackers II EUR Overnight Rate Swap UCITS ETF 1C;LU0290358497;150.6755;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi Euro Government Bond 0-6 M UCITS ETF;FR0010754200;127.6;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi S&P Eurozone Climate Paris Aligned UCITS ETF Acc;LU2195226068;41.38;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;iShares Core MSCI EM IMI UCITS ETF USD (Acc);IE00BKM4GZ66;45.33;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi MSCI Emerging Markets Swap II UCITS ETF;FR0010429068;18.028;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Invesco Physical Gold ETC;IE00B579F325;334.57;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;WisdomTree Core Physical Gold;JE00BN2CJ301;345.35;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi Euro Stoxx 50 II UCITS ETF-A;FR0007054358;70.25;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi Bl. Equal-weight Comm. ex-Agr. UCITS ETF;LU1829218749;37.6;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Vanguard FTSE Developed Europe UCITS ETF (EUR) Acc;IE00BK5BQX27;60.44;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;21Shares Bitcoin Core ETP;CH1199067674;16.556;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;WisdomTree World;XS3151433813;25.62;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Bitwise MSCI Digital Assets Select 20 ETP;DE000A3G3ZL3;81.23;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;L&G Global Brands UCITS ETF;IE0007HKA9K1;16.15;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;NVIDIA;nvda;204.64;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;SpaceX;spcx;134.72;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Bending Spoons S.p.A.;bsp;45.52;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Broadcom;avgo;326.08;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Apple;aapl;344.63;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Alumis Inc;alms;6.73;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Accenture;acn;258.24;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Bitcoin;bitcoin;69545;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;XRP;ripple;1.11;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;Ether;ethereum;2039.03;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;Solana;solana;83.98;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;Cardano;cardano;0.170324;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;Cosmos;cosmos;1.3;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;iShares Core MSCI Europe UCITS ETF EUR (Acc);IE00B4K48X80;105.46;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;WisdomTree Physical Gold EUR Daily Hedged;JE00B8DFY052;20.27;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;WisdomTree Physical Solana;GB00BNGJ9G01;12.062;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;WisdomTree NASDAQ-100;XS3003325795;37.405;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi MSCI World SRI Climate Paris Aligned;IE000Y77LGG9;122.7;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Xtrackers S&P 500 Swap UCITS ETF 1C;LU0490618542;137.79;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;Bitwise Physical Ethereum ETP;DE000A3GMKD7;18.364;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;Summit Midstream Corp;smc;31;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;nLIGHT;lasr;37.13;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Lumentum Holdings;lite;840.7;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Alphabet (Class A);googl;279.84;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Build-A-Bear Workshop;bbw;27.61;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Super Micro Computer Inc;smci;32.95;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;CoreWeave Inc.;crwv;54.87;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Sionna Therapeutics Inc;sion;3.87;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Innventure Inc;inv;0.3198;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;Amundi Core MSCI World UCITS ETF Acc;IE000BI8OT95;162.76;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Xtrackers MSCI Brazil UCITS ETF 1C;LU0292109344;54.21;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;iShares MSCI Global Semiconductors UCITS ETF Acc;IE000I8KRLL9;16.166;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;BTP 30/04/2045 1,5% Green;IT0005438004;60.4;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;BTP 1,7% set 2051;IT0005425233;54.98;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;BTP Valore ott 2031;IT0005735201;101.29;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Innodata Inc.;inod;43.81;USD;2026-10-30;stockanalysis
+2026-11-02T10:54:45+00:00;USD Coin (USDC);usd-coin;0.892045;EUR;2026-11-02;coingecko
+2026-11-02T10:54:45+00:00;Xtrackers MSCI Korea UCITS ETF (riferimento);LU0292100046;175.07;EUR;2026-10-30;borsa_italiana
+2026-11-02T10:54:45+00:00;Xtrackers MSCI World Value UCITS ETF (riferimento);IE00BL25JM42;72.71;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento);LU0908500753;319.75;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Amundi EUR Corporate Bond ESG UCITS ETF (riferimento);LU1437018168;53.72;EUR;2026-11-02;borsa_italiana
+2026-11-02T10:54:45+00:00;Centrus Energy;leu;103.29;USD;2026-10-30;stockanalysis
