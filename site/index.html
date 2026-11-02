@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-M4VDB8A65Ann0CJ8gFWepfwONuHbXQnsjbqLRzYY8JM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+ir/jpGPm7XtuTBScrkC0evjVGoISUWQPiMaVaDC1OQ='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -121,6 +121,17 @@ dialog.opd{max-width:560px}
 .dr-foot{margin:16px 10px 0;font-size:12px}
 @media (max-width:700px){.acards{grid-template-columns:1fr}.phead .ph-top{flex-direction:column}.phead .btn.big{width:100%}.conti-head .actbar .btn{flex:1;font-size:13px;padding:9px 6px;white-space:nowrap}.kind{font-size:11.5px}}
 /* PAC da confermare */
+.cbx{position:relative}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;max-height:300px;overflow:auto;background:var(--card-s);border:1px solid var(--ring);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.18);padding:4px;animation:rise .25s var(--ease) both}
+.sug-i{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);font:inherit;padding:9px 10px;border-radius:10px;cursor:pointer}
+.sug-i:hover,.sug-i:focus-visible{background:color-mix(in srgb,var(--s1) 10%,transparent);outline:none}
+.sug-n{display:block;font-weight:600;font-size:14px}
+.sug-n small{color:var(--muted);font-weight:400}
+.sug-m{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.sug-i.new .sug-n{color:var(--s1)}
+.st-auto{color:var(--gain);font-weight:600}.st-stima{color:#ff9f0a;font-weight:600}.st-man{color:var(--ink2);font-weight:600}
+.instinfo{font-size:12.5px;color:var(--ink2);margin:-6px 0 6px;line-height:1.4}
+.warnline{display:block;color:#c93400;margin-top:4px}
 .duelist{display:grid;gap:10px;margin:12px 0}
 .due{padding:14px;border-radius:16px;border:1px solid var(--ring);background:color-mix(in srgb,var(--s1) 5%,transparent);animation:rise .45s var(--ease) both}
 .due-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
@@ -3234,32 +3245,74 @@ function editOperation(pre, after) {
   const inp = (type, val, ph) => h('input', { type, step: type === 'number' ? 'any' : null, inputmode: type === 'number' ? 'decimal' : null, value: val ?? '', placeholder: ph || '' });
   const accOpts = S.accounts.map(a => [a.id, a.name]);
   const I = { accId: sel(accOpts, pre.accId || UI.acc || S.accounts[0].id), toId: sel([['', '— scegli —'], ...accOpts], pre.toId || ''),
-    instId: sel([['', '+ Uno strumento nuovo'], ...S.instruments.slice().sort((p, q) => p.name.localeCompare(q.name)).map(i => [i.id, i.name + ' (' + i.ccy + ')'])], pre.instId || ''),
+    instId: h('input', { type: 'hidden', value: pre.instId || '' }), q: h('input', { type: 'search', placeholder: 'Scrivi il nome o il codice (es. bitcoin, MSCI World)', autocomplete: 'off', enterkeyhint: 'search', value: pre.instId && inst(pre.instId) ? inst(pre.instId).name : '' }),
     newName: inp('text', '', 'es. ETF Azionario Mondo'), newCcy: inp('text', 'EUR', 'EUR'), qty: inp('number', pre.qty, 'es. 3'), price: inp('number', pre.price), fee: inp('number', null, '0'), amount: inp('number', pre.amount, 'es. 500'),
     date: inp('date', pre.date || today()), note: inp('text', pre.note || '', 'facoltativa'), fromCash: h('input', { type: 'checkbox', checked: pre.fromCash ?? true }) };
   I.newCcy.setAttribute('list', 'dl-ccy');
   const accLbl = h('span', null, 'Conto'), amtLbl = h('span', null, 'Importo (€)'), desc = h('p', { class: 'muted opdesc' });
   const fld = (lab, el, hint) => h('label', { class: 'fld' }, typeof lab === 'string' ? h('span', null, lab) : lab, el, hint ? h('small', null, hint) : null);
+  /* strumento: si cerca scrivendo, con i suggerimenti dei titoli che hai e di quelli che hanno gia' un prezzo automatico */
+  const sug = h('div', { class: 'sug', role: 'listbox', hidden: '' }), instInfo = h('div', { class: 'instinfo' }), cashWarn = h('small', { class: 'warnline' });
+  let ext = null;          // titolo che non hai ancora ma con prezzo automatico (dall'ultimo prezzi.json)
+  const newMode = () => !I.instId.value && !ext && !!I.q.value.trim();
+  const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function cands() {
+    const held = new Map(); for (const a of S.accounts) for (const p of a.positions) { const l = held.get(p.instId) || []; l.push(a); held.set(p.instId, l); }
+    const own = S.instruments.map(i => ({ id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', i, held: held.get(i.id) || [] }));
+    const known = new Set(S.instruments.flatMap(i => [norm(i.name), norm(i.code)]).filter(Boolean));
+    const xs = Object.entries(S.refPrices || {}).filter(([c, r]) => r && r.n && !/\(riferimento\)/i.test(r.n) && !known.has(norm(c)) && !known.has(norm(r.n))).map(([c, r]) => ({ id: '', name: r.n, code: /^[a-z]{2}[0-9a-z]{9}[0-9]$/i.test(c) ? c.toUpperCase() : c, ccy: normCcy(r.c), price: r.p, st: 'auto', held: [] }));
+    return own.concat(xs);
+  }
+  const stLabel = c => c.st === 'auto' ? '⟳ si aggiorna da solo' : c.st === 'stima' ? '≈ stimato da solo' : '✎ prezzo a mano';
+  function showSug() {
+    const t = norm(I.q.value.trim()), accId = I.accId.value, sell = kind === 'vendita';
+    let list = cands().filter(c => !t || norm(c.name).includes(t) || norm(c.code).includes(t));
+    if (sell) list = list.filter(c => c.held.some(a => a.id === accId));
+    list.sort((a, b) => (b.held.some(x => x.id === accId) - a.held.some(x => x.id === accId)) || (b.held.length > 0) - (a.held.length > 0) || (b.st === 'auto') - (a.st === 'auto') || a.name.localeCompare(b.name));
+    const items = list.slice(0, 8).map(c => h('button', { type: 'button', class: 'sug-i', role: 'option', onclick: () => pick(c) },
+      h('span', { class: 'sug-n' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null),
+      h('span', { class: 'sug-m' }, h('b', { class: 'st-' + c.st }, stLabel(c)), ' · ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(a => a.name).join(', ') : c.id ? '' : ' · non ce l\'hai ancora'))));
+    if (t && !sell && !list.some(c => norm(c.name) === t)) items.push(h('button', { type: 'button', class: 'sug-i new', onclick: () => { ext = null; I.instId.value = ''; I.newName.value = I.q.value.trim(); sug.hidden = true; sync(); I.qty.focus(); } }, h('span', { class: 'sug-n' }, '+ Strumento nuovo: «' + I.q.value.trim() + '»'), h('span', { class: 'sug-m' }, 'non ha un prezzo automatico: il prezzo lo scrivi tu')));
+    sug.replaceChildren(...items); sug.hidden = !items.length;
+  }
+  function pick(c) {
+    I.q.value = c.name; sug.hidden = true;
+    if (c.id) { I.instId.value = c.id; ext = null; } else { I.instId.value = ''; ext = c; I.newName.value = ''; }
+    if (c.price > 0) I.price.value = Math.round(c.price * 1e6) / 1e6;          // prezzo di oggi gia' scritto: lo cambi solo se hai pagato diverso
+    sync(); setTimeout(() => (num(I.qty) ? I.amount : I.qty).focus(), 30);
+  }
+  function instSay(i, x) {          // la riga "parlante" sotto lo strumento
+    const c = i ? cands().find(z => z.id === i.id) : x; if (!c) return newMode() ? [h('span', { class: 'st-man' }, '✎ Strumento nuovo senza prezzo automatico: scrivi tu prezzo e valuta.')] : [];
+    const accId = I.accId.value, here = c.held.find(a => a.id === accId), pos = here && i ? here.positions.find(p => p.instId === i.id) : null;
+    return [h('b', { class: 'st-' + c.st }, stLabel(c)), c.st === 'auto' ? ' (' + (i ? (FONTE[i.autoSrc] || 'sito') : 'prezzi del sito') + ')' : c.st === 'stima' ? ' (segue ' + trackDesc(i) + ')' : ' (lo aggiorni tu con l\'estratto)',
+      ' · prezzo di oggi ' + nf2.format(c.price) + ' ' + c.ccy, pos ? ' · in questo conto ne hai già ' + nfq.format(pos.qty) : c.held.length ? ' · ce l\'hai in ' + c.held.map(a => a.name).join(', ') : ' · in questo conto sarà nuovo'];
+  }
+  I.q.addEventListener('input', () => { I.instId.value = ''; ext = null; showSug(); });
+  I.q.addEventListener('focus', showSug);
+  I.q.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const f = sug.querySelector('.sug-i'); if (f) f.click(); } else if (e.key === 'Escape') sug.hidden = true; });
+  I.accId.addEventListener('change', () => { if (!sug.hidden) showSug(); });
   const W = {          // ogni blocco di campi e per quali operazioni si vede
     acc: [h('div', null, fld(accLbl, I.accId)), 'all'], to: [h('div', null, fld('A quale conto', I.toId)), ['trasferimento']],
-    inst: [h('div', null, fld('Strumento', I.instId)), ['acquisto', 'vendita']], nuovo: [h('div', { class: 'g2' }, fld('Nome dello strumento nuovo', I.newName), fld('Valuta', I.newCcy)), ['acquisto']],
+    inst: [h('div', null, h('label', { class: 'fld' }, h('span', null, 'Strumento'), h('div', { class: 'cbx' }, I.q, sug)), instInfo), ['acquisto', 'vendita']], nuovo: [h('div', { class: 'g2' }, fld('Nome dello strumento nuovo', I.newName), fld('Valuta', I.newCcy)), ['acquisto']],
     qp: [h('div', { class: 'g2' }, fld('Quantità', I.qty), fld('Prezzo di una quota', I.price)), ['acquisto', 'vendita']],
     amt: [h('div', null, fld(amtLbl, I.amount)), 'all'], fee: [h('div', null, fld('Commissioni (€, facoltative)', I.fee)), ['acquisto', 'vendita']],
-    cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto'))), ['acquisto', 'vendita']],
+    cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto')), cashWarn), ['acquisto', 'vendita']],
     dn: [h('div', { class: 'g2' }, fld('Data', I.date), fld('Nota', I.note)), 'all'] };
   const kinds = h('div', { class: 'kinds', role: 'group', 'aria-label': 'Che cosa è successo' }, OP_UI.map(([k, l, , ico]) => h('button', { type: 'button', class: 'kind', 'data-k': k, onclick: () => { kind = k; sync(); } }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d }))), h('span', null, l))));
   const num = el => { const x = parseFloat(String(el.value).replace(',', '.')); return isFinite(x) ? x : null; };
   function sync() {
     for (const b of kinds.children) b.setAttribute('aria-pressed', b.dataset.k === kind ? 'true' : 'false');
     desc.textContent = OP_UI.find(x => x[0] === kind)[2] + '.';
-    for (const [key, [el, ks]] of Object.entries(W)) el.hidden = !(ks === 'all' || ks.includes(kind)) || (key === 'nuovo' && I.instId.value !== '');
+    for (const [key, [el, ks]] of Object.entries(W)) el.hidden = !(ks === 'all' || ks.includes(kind)) || (key === 'nuovo' && !newMode());
     const trade = kind === 'acquisto' || kind === 'vendita', i = inst(I.instId.value);
     accLbl.textContent = kind === 'trasferimento' ? 'Da quale conto' : 'Conto';
     amtLbl.textContent = trade ? 'Oppure: importo totale (€), se non sai la quantità' : 'Importo (€)';
-    I.price.placeholder = i && i.price > 0 ? 'ultimo noto: ' + nf2.format(i.price) + ' ' + i.ccy : 'es. 110';
+    I.price.placeholder = i && i.price > 0 ? 'oggi: ' + nf2.format(i.price) + ' ' + i.ccy : ext ? 'oggi: ' + nf2.format(ext.price) + ' ' + ext.ccy : 'es. 110';
+    instInfo.replaceChildren(...instSay(i, ext));
     const q = num(I.qty), pr = num(I.price) ?? (i ? i.price : null), am = num(I.amount), fe = num(I.fee) || 0, an = (S.accounts.find(a => a.id === I.accId.value) || {}).name || '', bn = (S.accounts.find(a => a.id === I.toId.value) || {}).name || '…';
-    const nm = i ? i.name : (I.newName.value.trim() || 'lo strumento');
-    sumEl.textContent = trade ? (q && pr ? (kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(pr) + ' ' + (i ? i.ccy : normCcy(I.newCcy.value)) + ' di ' + nm + (fe ? ' + ' + eur(fe, true) + ' di commissioni' : '') + ' · conto ' + an : am ? (kind === 'acquisto' ? 'Spendi ' : 'Incassi ') + eur(am, true) + ' in ' + nm + ' · conto ' + an : 'Scrivi la quantità (e il prezzo) oppure l\'importo.')
+    const nm = i ? i.name : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim() || 'lo strumento'), acc = S.accounts.find(a => a.id === I.accId.value), spend = (q && pr ? q * pr * (fxRate(i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) ?? 1) : am || 0) + fe;
+    cashWarn.textContent = kind === 'acquisto' && I.fromCash.checked && acc && spend > accCash(acc) + 0.01 ? '⚠ In ' + acc.name + ' ci sono solo ' + eur(accCash(acc), true) + ' di liquidità: se per comprare hai versato soldi nuovi, togli la spunta qui sopra (oppure registra prima un versamento).' : '';
+    sumEl.textContent = trade ? (q && pr ? (kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(pr) + ' ' + (i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) + ' di ' + nm + (fe ? ' + ' + eur(fe, true) + ' di commissioni' : '') + ' · conto ' + an : am ? (kind === 'acquisto' ? 'Spendi ' : 'Incassi ') + eur(am, true) + ' in ' + nm + ' · conto ' + an : 'Scrivi la quantità (e il prezzo) oppure l\'importo.')
       : am ? (kind === 'versamento' ? 'Entrano ' + eur(am, true) + ' in ' + an : kind === 'prelievo' ? 'Escono ' + eur(am, true) + ' da ' + an : 'Sposti ' + eur(am, true) + ' da ' + an + ' a ' + bn) : 'Scrivi l\'importo.';
   }
   for (const el of Object.values(I)) { el.addEventListener('input', sync); el.addEventListener('change', sync); }
@@ -3267,8 +3320,9 @@ function editOperation(pre, after) {
   const frm = h('form', { method: 'dialog' }, h('h3', null, 'Registra un\'operazione'), kinds, desc, Object.values(W).map(x => x[0]), sumEl, err, h('div', { class: 'dlgacts' }, h('button', { type: 'button', class: 'btn', onclick: shut }, 'Annulla'), okb), ccyList());
   frm.addEventListener('submit', e => {
     e.preventDefault();
-    const o = { accId: I.accId.value, toId: I.toId.value, kind, date: I.date.value || today(), instId: I.instId.value, newName: I.newName.value.trim(), newCcy: I.newCcy.value.trim() || 'EUR', qty: num(I.qty), price: num(I.price), fee: num(I.fee), amount: num(I.amount), fromCash: I.fromCash.checked, note: I.note.value.trim() };
+    const o = { accId: I.accId.value, toId: I.toId.value, kind, date: I.date.value || today(), instId: I.instId.value, newName: I.instId.value ? '' : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim()), newCcy: ext ? ext.ccy : (I.newCcy.value.trim() || 'EUR'), qty: num(I.qty), price: num(I.price), fee: num(I.fee), amount: num(I.amount), fromCash: I.fromCash.checked, note: I.note.value.trim() };
     const r = applyOp(o); if (r) { err.textContent = r; return; }
+    if (ext && !o.instId) { const ni = findInst(ext.name, ''); if (ni) { if (!ni.code) ni.code = ext.code; if (!ni.cls) ni.cls = /bitcoin|ether|solana|xrp|ripple|cardano|cosmos|usdc|coin|crypto/i.test(ext.name + ' ' + ext.code) ? 'Crypto' : 'Azioni'; if (!ni.area) ni.area = 'n.d.'; } }          // titolo nuovo ma gia' con prezzo automatico: si collega da solo
     shut(); done(); if (after) after();
   });
   dlg.append(frm); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); sync(); dlg.showModal();
