@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tNJ/lhap+AS+++Nmw26NCn6txDm+xfTb7c00sSlujSQ='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-OSb99HZvy2/8umGj1ju+4N6jL7rOFqjSqZ0F5hjYi6A='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -216,6 +216,12 @@ dialog.wz{max-width:520px;padding:18px 18px 16px}
 .wz-ok svg path{stroke-dasharray:1;animation:draw .6s var(--ease) .2s both}
 .wz-ok .wz-nav{width:100%;margin-top:12px}
 .wz-adv{text-align:center;margin-top:10px;font-size:13px}
+.todos{display:grid;gap:8px}
+.todo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:14px;background:color-mix(in srgb,var(--s1) 6%,transparent);animation:rise .35s var(--ease) both}
+.todo-t{display:grid;gap:1px;min-width:0}
+.todo-t b{font-size:14.5px}
+.todo-ok{font-weight:650;color:var(--gain);margin:4px 0}
+.wz-chips.left{justify-content:flex-start}
 /* esito del caricamento */
 .res{display:grid;justify-items:center;text-align:center;gap:6px;padding:8px 0 14px}
 .res h3{margin:4px 0 0;font-size:22px}
@@ -537,14 +543,14 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento (soldi che entrano)'], ['prelievo', 'Prelievo (soldi che escono)'], ['partenza', 'Valore di partenza (inizio tracciamento)']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {} });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [] });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
-  d.boxes = d.boxes || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
+  d.boxes = d.boxes || {}; d.goals = d.goals || [];          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
 
@@ -1197,7 +1203,87 @@ const CASH_PRESETS = [['Revolut (conto)', 'banca', 'revolut'], ['BancoPosta', 'b
 const isCashAcc = a => !a.perf && !a.dep;          // conti fermi: banche, contanti, carte e pagamenti
 const FREQ_DAYS = { mese: 31, trimestre: 92 };
 const accDue = a => { if (!a.freq || !a.upd || !FREQ_DAYS[a.freq]) return null; const d = daysSince(a.upd); return d >= FREQ_DAYS[a.freq] ? d : null; };          // giorni dall'ultimo aggiornamento, se e' scaduto
-function openBalances() {
+/* ============ procedure guidate (motore comune): una domanda per volta, avanti e indietro ============ */
+function wzRun(cfg) {          // cfg = { steps: () => [api => ({ q, body, valid, next, nextLabel, onNext, focus, noBack, err })], onClose }
+  const dlg = h('dialog', { class: 'wz' }), view = h('div', { class: 'wz-view' }); let i = 0;
+  const shut = () => { if (dlg.open) dlg.close(); dlg.remove(); if (cfg.onClose) cfg.onClose(); };
+  const api = { dlg, view, shut, nextBtn: null, get i() { return i; }, redraw: () => draw(), next() { i = Math.min(i + 1, cfg.steps().length - 1); draw(); }, back() { if (i > 0) { i--; draw(); } }, jump(n) { i = n; draw(); } };
+  function draw() {
+    const L = cfg.steps(); i = Math.min(i, L.length - 1);
+    const d = L[i](api), n = L.length, canBack = i > 0 && !d.noBack;
+    const nxt = d.next === false ? null : h('button', { type: 'button', class: 'btn pri big', disabled: d.valid === false ? '' : null, onclick: async () => { if (d.onNext) { const r = await d.onNext(api); if (r === false) return; } else api.next(); } }, d.nextLabel || (i === n - 1 ? 'Fine' : 'Avanti'));
+    api.nextBtn = nxt;
+    view.replaceChildren(
+      h('div', { class: 'wz-top' }, canBack ? btn('← Indietro', api.back, 'sm') : h('span'), h('span', { class: 'wz-step muted' }, 'Passo ' + (i + 1) + ' di ' + n), btn('✕', shut, 'sm')),
+      h('div', { class: 'wz-prog', 'aria-hidden': 'true' }, L.map((_, k) => h('i', { class: k <= i ? 'on' : '' }))),
+      h('h3', { class: 'wz-q' }, d.q || ''), h('div', { class: 'wz-b' }, d.body || []), d.err ? h('p', { class: 'err' }, d.err) : null,
+      h('div', { class: 'wz-nav' }, canBack ? btn('← Indietro', api.back) : h('span'), nxt || h('span')));
+    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
+    if (d.focus) setTimeout(() => { const f = view.querySelector(d.focus); if (f) f.focus(); }, 60);
+  }
+  dlg.append(view); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); draw(); dlg.showModal(); return api;
+}
+const wzNum = (val, ph, on, neg) => { const x = h('input', { type: 'number', step: 'any', inputmode: neg ? 'text' : 'decimal', class: 'wz-num', placeholder: ph, value: val ?? '', 'aria-label': ph }); x.addEventListener('input', () => { const v = parseFloat(String(x.value).replace(',', '.')); on(isFinite(v) && (neg || v >= 0) ? v : null); }); x.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('dialog.wz .wz-nav .pri:not([disabled])'); if (b) b.click(); } }); return x; };
+const wzOpt = (title, sub, onclick, cls) => h('button', { type: 'button', class: 'wz-opt ' + (cls || ''), onclick }, h('span', { class: 'wz-t' }, title), sub ? h('span', { class: 'wz-s' }, sub) : null);
+const wzChips = (vals, fmt, on) => h('div', { class: 'wz-chips' }, vals.map(v => btn(fmt(v), () => on(v), 'sm')));
+const wzDone = (api, title, text, acts) => { api.view.replaceChildren(h('div', { class: 'wz-ok' }, s('svg', { viewBox: '0 0 24 24', width: 54, height: 54, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d: 'M12 3a9 9 0 100 18 9 9 0 000-18z' }), s('path', { d: 'M7.5 12.5l3 3 6-6.5', pathLength: 1 })), h('h3', null, title), h('p', null, text), h('div', { class: 'wz-nav' }, (acts || []).map(a => btn(a[0], () => { api.shut(); a[1](); })), h('button', { type: 'button', class: 'btn pri big', onclick: api.shut }, 'OK')))); };
+
+/* ============ "Cosa devo fare oggi?": una lista sola di azioni da toccare ============ */
+function todoItems() {
+  const t = [], held = new Set(S.accounts.flatMap(a => a.positions.map(p => p.instId)));
+  const due = planDueAll(); if (due.length) t.push({ t: pl(due.length, 'acquisto programmato da confermare', 'acquisti programmati da confermare'), s: 'è stato preso davvero?', b: 'Conferma', f: () => confirmDue() });
+  const dueA = S.accounts.map(a => [a, accDue(a)]).filter(x => x[1] != null); if (dueA.length) t.push({ t: pl(dueA.length, 'conto da aggiornare', 'conti da aggiornare'), s: dueA.slice(0, 3).map(x => x[0].name).join(', ') + (dueA.length > 3 ? '…' : ''), b: 'Aggiorna', f: () => balancesWizard() });
+  const man = S.instruments.filter(i => held.has(i.id) && !isAuto(i) && !i.track && !/valore totale|^altre crypto/i.test(i.name)); if (man.length) t.push({ t: pl(man.length, 'titolo senza prezzo automatico', 'titoli senza prezzo automatico'), s: man.slice(0, 3).map(i => i.name).join(', ') + (man.length > 3 ? '…' : ''), b: 'Collega', f: () => askLink() });
+  const al = alerts(); if (al.length) t.push({ t: al[0].replace(/[«»]/g, ''), s: al.length > 1 ? 'e altri ' + (al.length - 1) + ' avvisi' : '', b: 'Vedi', f: () => { UI.tab = 'analisi'; UI.sub = 'regole'; render(); } });
+  if (!(S.policy.target || '').trim() && S.accounts.length) t.push({ t: 'Scegli come vuoi dividere i soldi', s: 'così ti dico dove mettere i prossimi', b: 'Scegli', f: () => { UI.tab = 'analisi'; UI.sub = 'ribilancia'; render(); } });
+  if (!(S.goals || []).length && S.accounts.length) t.push({ t: 'Metti un obiettivo', s: 'per esempio la casa o la pensione', b: 'Crea', f: () => goalWizard() });
+  if (CLOUD_ON() && !CL.code && !DEMO) t.push({ t: 'Attiva il salvataggio online', s: 'così i dati non si perdono mai', b: 'Attiva', f: () => clLogin() });
+  if (!DEMO && backupDays() >= 30 && !(CLOUD_ON() && CL.state === 'ok')) t.push({ t: 'Fai una copia di sicurezza', s: 'da ' + backupDays() + ' giorni non ne fai una', b: 'Scarica', f: () => (typeof navigator.canShare === 'function' ? shareCopy() : downloadCopy()) });
+  return t;
+}
+function todoCard() {
+  const items = todoItems(), top = items.slice(0, 5);
+  return h('section', { class: 'card todo-card' }, h('h2', null, 'Cosa devo fare oggi?'),
+    items.length ? h('div', { class: 'todos' }, top.map(x => h('div', { class: 'todo' }, h('div', { class: 'todo-t' }, h('b', null, x.t), x.s ? h('span', { class: 'wz-s' }, x.s) : null), btn(x.b, x.f, 'pri sm'))), items.length > 5 ? h('p', { class: 'muted' }, 'e altre ' + (items.length - 5) + ' cose meno urgenti') : null)
+      : h('p', { class: 'todo-ok' }, '✓ Tutto a posto: oggi non c\'è niente da fare.'));
+}
+
+/* ============ aggiornamento dei saldi guidato: un conto per volta ============ */
+function balancesWizard() {
+  const have = S.accounts.filter(isCashAcc).sort((a, b) => (accDue(b) != null) - (accDue(a) != null) || a.name.localeCompare(b.name));
+  const vals = new Map(), add = new Map(), extra = () => CASH_PRESETS.filter(p => !have.some(a => a.name.toLowerCase().includes(p[2])));
+  const stepAcc = a => api => ({ q: 'Quanto c\'è adesso su ' + a.name + '?', focus: '.wz-num', valid: true,
+    body: [h('div', { class: 'wz-chip' }, h('b', null, 'Ultimo saldo: ' + eur(a.cash || 0, true)), h('span', { class: 'wz-s' }, a.upd ? 'aggiornato il ' + fmtDate(a.upd) + (accDue(a) != null ? ' · è ora di aggiornarlo' : '') : 'mai aggiornato')),
+      wzNum(vals.has(a.id) ? vals.get(a.id) : a.cash || 0, 'Saldo in €', v => { if (v == null) vals.delete(a.id); else vals.set(a.id, v); if (api.nextBtn) api.nextBtn.disabled = v == null; }, true),
+      h('div', { class: 'wz-chips' }, btn('Non è cambiato', () => { vals.set(a.id, a.cash || 0); api.next(); }, 'sm'), btn('Salta questo conto', () => { vals.delete(a.id); api.next(); }, 'sm'))] });
+  const stepNew = api => ({ q: 'Vuoi aggiungere un altro conto fermo?', nextLabel: 'Avanti', valid: true,
+    body: extra().length ? [h('p', { class: 'muted' }, 'Tocca quelli che usi: ti chiedo quanti soldi ci sono.'), h('div', { class: 'wz-chips' }, extra().map(p => h('button', { type: 'button', class: 'btn sm' + (add.has(p[0]) ? ' pri' : ''), onclick: () => { if (add.has(p[0])) add.delete(p[0]); else add.set(p[0], null); api.redraw(); } }, (add.has(p[0]) ? '✓ ' : '+ ') + p[0]))),
+      ...[...add.keys()].map(k => h('label', { class: 'fld' }, h('span', null, k + ' (€)'), wzNum(add.get(k), 'Saldo in €', v => add.set(k, v), true)))] : [h('p', { class: 'muted' }, 'Hai già tutti i conti fermi più comuni.')] });
+  const stepSum = api => { const rows = []; for (const a of have) if (vals.has(a.id) && vals.get(a.id) !== (a.cash || 0)) rows.push([a.name, vals.get(a.id) - (a.cash || 0), eur(a.cash || 0, true) + ' → ' + eur(vals.get(a.id), true)]); for (const [k, v] of add) if (v != null) rows.push([k + ' (nuovo)', v, eur(v, true)]);
+    return { q: 'Controlla e conferma', nextLabel: 'Conferma e salva', valid: true, body: [rows.length ? talkBars(rows.map(r => [r[0], r[1], '', null, r[2]]), true) : h('p', { class: 'muted' }, 'Nessuna modifica: i saldi sono tutti uguali.'), h('p', { class: 'muted' }, h('a', { href: '#', onclick: e => { e.preventDefault(); api.shut(); openBalancesTable(); } }, 'Preferisco la tabella unica'))],
+      onNext: a2 => { let n = 0; for (const a of have) if (vals.has(a.id)) { if (vals.get(a.id) !== (a.cash || 0)) n++; a.cash = vals.get(a.id); a.upd = today(); if (!a.freq) a.freq = 'mese'; }
+        for (const [k, v] of add) if (v != null) { const p = CASH_PRESETS.find(z => z[0] === k); S.accounts.push({ id: uid(), name: k, type: p[1], perf: false, cash: v, cashCcy: 'EUR', note: '', positions: [], flows: [], imports: [], freq: 'mese', upd: today() }); n++; }
+        takeSnapshot(); done(); wzDone(a2, 'Saldi aggiornati', n ? pl(n, 'conto aggiornato', 'conti aggiornati') + '. Il patrimonio è ' + eur(totalValue()) + '.' : 'Tutto uguale a prima.'); return false; } }; };
+  if (!have.length && !extra().length) { alert('Non ci sono conti fermi da aggiornare.'); return; }
+  return wzRun({ steps: () => [...have.map(stepAcc), stepNew, stepSum] });
+}
+
+/* ============ prima volta: "Che conti hai?" ============ */
+const ONB = [['Conti e soldi che usi', [['Revolut (conto)', 'banca'], ['BancoPosta', 'banca'], ['Un altro conto corrente', 'banca'], ['Satispay', 'pagamenti'], ['PayPal', 'pagamenti'], ['Carta di credito', 'pagamenti'], ['Contanti', 'contanti']]],
+  ['Dove investi', [['Fineco', 'broker'], ['Directa', 'broker'], ['Trade Republic', 'broker'], ['Revolut Investimenti', 'broker'], ['Revolut Crypto', 'crypto'], ['Nexo', 'crypto'], ['MetaTrader 5', 'trading']]], ['Pensione', [['Fondo pensione', 'pensione']]]];
+function onboard() {
+  const pick = new Map(), bal = new Map(); let custom = '';
+  const sel = () => [...pick.entries()];
+  const s1 = api => ({ q: 'Che conti hai?', valid: pick.size > 0, nextLabel: 'Avanti', body: [h('p', { class: 'muted' }, 'Tocca quelli che hai: li creo io. Poi ti dico cosa serve per ognuno.'), ...ONB.map(([t, l]) => h('div', null, h('h4', null, t), h('div', { class: 'wz-chips left' }, l.map(([n, ty]) => h('button', { type: 'button', class: 'btn sm' + (pick.has(n) ? ' pri' : ''), onclick: () => { if (pick.has(n)) pick.delete(n); else pick.set(n, ty); api.redraw(); } }, (pick.has(n) ? '✓ ' : '+ ') + n))))),
+    h('label', { class: 'fld' }, h('span', null, 'Un altro nome?'), h('input', { type: 'text', placeholder: 'es. Scalable Capital', value: custom, oninput: e => { custom = e.target.value; } }), btn('+ Aggiungi', () => { const n = custom.trim(); if (n) { pick.set(n, /crypto|coin|nexo|binance/i.test(n) ? 'crypto' : /pension|cometa/i.test(n) ? 'pensione' : /banca|conto|carta|paypal|satispay/i.test(n) ? 'banca' : 'broker'); custom = ''; api.redraw(); } }, 'sm'))] });
+  const s2 = api => { const fermi = sel().filter(([, t]) => ['banca', 'pagamenti', 'contanti'].includes(t)); return { q: 'Quanti soldi ci sono adesso?', valid: true, nextLabel: 'Avanti', body: fermi.length ? [h('p', { class: 'muted' }, 'Per i conti fermi basta il saldo di oggi. Se è una carta con debito, scrivi il numero con il meno.'), ...fermi.map(([n]) => h('label', { class: 'fld' }, h('span', null, n + ' (€)'), wzNum(bal.get(n), 'Saldo in €', v => bal.set(n, v), true)))] : [h('p', { class: 'muted' }, 'Nessun conto fermo: andiamo avanti.')] }; };
+  const s3 = api => { const inv = sel().filter(([, t]) => ['broker', 'crypto', 'trading', 'pensione'].includes(t)); return { q: 'Per gli investimenti serve un file o uno screenshot', nextLabel: 'Crea i conti', valid: true, body: [inv.length ? h('ul', { class: 'list' }, inv.map(([n, t]) => h('li', null, h('span', null, h('b', null, n), h('small', null, t === 'pensione' ? ' · schermata «Posizione» dell\'app del fondo' : t === 'crypto' ? ' · l\'elenco delle monete con le quantità' : ' · l\'elenco dei titoli con quantità e valore'))))) : h('p', { class: 'muted' }, 'Non hai conti d\'investimento: nessun file da mandare.'), h('p', { class: 'muted' }, 'Dopo aver creato i conti puoi caricare i file (menu ☰ → Importa i file dei conti) oppure mandarmi gli screenshot e te li preparo io.')],
+    onNext: a2 => { let n = 0; for (const [name, type] of sel()) { if (S.accounts.some(a => a.name.toLowerCase() === name.toLowerCase())) continue; const cash = ['banca', 'pagamenti', 'contanti'].includes(type) ? (bal.get(name) ?? 0) : 0; S.accounts.push({ id: uid(), name, type, perf: TYPES[type].perf, cash, cashCcy: 'EUR', note: '', positions: [], flows: [], imports: [], freq: ['broker', 'pensione'].includes(type) ? 'trimestre' : 'mese', upd: today(), ...(/cassa\s*cani/i.test(name) ? { box: 'Cassa cani' } : {}) }); n++; }
+      takeSnapshot(); UI.tab = 'conti'; done(); wzDone(a2, 'Conti creati', pl(n, 'conto creato', 'conti creati') + '. Ora importa i file degli investimenti.', [['Importa i file', () => pickBatch()]]); return false; } }; };
+  return wzRun({ steps: () => [s1, s2, s3] });
+}
+function openBalances() { return balancesWizard(); }
+function openBalancesTable() {
   const have = S.accounts.filter(isCashAcc), extra = CASH_PRESETS.filter(p => !have.some(a => a.name.toLowerCase().includes(p[2])));
   const fields = [...have.map(a => ({ key: 'a_' + a.id, label: a.name + ' (€)', type: 'number' })), ...extra.map((p, k) => ({ key: 'n_' + k, label: p[0] + ' (€)', type: 'number', hint: have.length || k ? '' : 'Scrivi quanti soldi ci sono adesso. I conti che non usi lasciali vuoti: non vengono creati.' }))];
   const vals = {}; for (const a of have) vals['a_' + a.id] = a.cash || 0;
@@ -1502,6 +1588,7 @@ function talk(o) {          // o = { kind, title, value, num, fmt, say, how, row
     o.how ? h('div', { class: 'talk-box' }, h('b', null, 'Come si calcola'), h('div', null, o.how)) : null,
     o.rows && o.rows.length ? h('div', { class: 'talk-box' }, o.rowsTitle ? h('b', null, o.rowsTitle) : null, talkBars(o.rows, o.signed)) : null,
     o.tip ? h('div', { class: 'talk-box tip' }, h('b', null, 'Cosa puoi fare'), h('div', null, o.tip)) : null,
+    o.acts && o.acts.length ? h('div', { class: 'talk-acts' }, o.acts.map(([l, f, c]) => btn(l, () => { shut(); f(); }, 'sm ' + (c || '')))) : null,
     h('div', { class: 'dlgacts' }, btn('Ho capito', shut, 'pri'))].filter(Boolean).forEach((p, i) => { p.style.setProperty('--i', i); dlg.append(p); });
   dlg.addEventListener('close', () => dlg.remove());
   dlg.addEventListener('click', e => { const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) shut(); });          // tocco fuori dalla scheda: si chiude
@@ -1547,7 +1634,7 @@ function talkPos(a, p) {
     say: (pnl == null ? 'Oggi vale ' + eur(v) + '.' : 'L\'hai pagata ' + eur(p.cost) + ' e oggi vale ' + eur(v) + ': sei ' + (pnl >= 0 ? 'in guadagno di ' : 'in perdita di ') + eur(Math.abs(pnl)) + ' (' + spct(pnl / p.cost) + ').') + (tot > 0 ? ' Pesa ' + ilPct(v / tot) + ' di tutto il patrimonio.' : ''),
     how: (HIDE ? '' : nfq.format(p.qty) + ' × ' + nf2.format(i.price) + ' ' + i.ccy + (i.ccy !== 'EUR' ? ' × cambio' : '') + ' = ' + eur(v) + ' · ') + 'prezzo del ' + fmtDate(i.priceDate) + (i.code ? ' · codice ' + i.code : ''),
     rows: mix.length > 1 ? mix.map(([c, w]) => [c, v * w, pct(w)]) : null, rowsTitle: 'Che cosa contiene',
-    tip: pnl != null && pnl < 0 ? 'Una perdita "sulla carta" diventa vera solo se vendi. Chiediti se il motivo per cui l\'hai comprata vale ancora.' : 'Se vendi, sul guadagno paghi il 26% di tasse (12,5% sui titoli di Stato).' });
+    tip: pnl != null && pnl < 0 ? 'Una perdita "sulla carta" diventa vera solo se vendi. Chiediti se il motivo per cui l\'hai comprata vale ancora.' : 'Se vendi, sul guadagno paghi il 26% di tasse (12,5% sui titoli di Stato).', acts: [['Compra ancora', () => opWizard({ kind: 'acquisto', accId: a.id, c: candOf(i), _wz: 1 })], ['Vendi', () => opWizard({ kind: 'vendita', accId: a.id, c: candOf(i), _wz: 1 })], ['Scheda del titolo', () => talkInstrument(i)]] });
 }
 const rowActs = (...b) => h('span', { class: 'acts' }, b);
 
@@ -2004,12 +2091,12 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
     let acc = S.accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
     const dup = acc && (acc.imports || []).find(x => x.hash === it.hash); if (dup) { out.push({ it, acc, skip: 'già importato il ' + fmtDate(dup.date) }); continue; }
-    const created = !acc; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; if (/cassa\s*cani/i.test(name)) acc.box = 'Cassa cani'; S.accounts.push(acc); }
+    const created = !acc, prev = acc ? JSON.stringify(acc) : null; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; if (/cassa\s*cani/i.test(name)) acc.box = 'Cassa cani'; S.accounts.push(acc); }
     if (!it.fin.clean.trim()) {          // blocco senza righe: e' un conto fermo (banca, risparmi...), conta solo il saldo
       const v = parseNum(m.liquidita || '', ','); if (!fin(v)) { if (created) S.accounts = S.accounts.filter(a => a !== acc); out.push({ it, acc, skip: 'manca il saldo (liquidita=...)' }); continue; }
       acc.cash = v; if (m.valuta) acc.cashCcy = normCcy(m.valuta); if (FREQ_DAYS[m.frequenza]) acc.freq = m.frequenza; acc.upd = today();
       (acc.imports || (acc.imports = [])).push({ id: uid(), date: today(), file: it.name, hash: it.hash });
-      out.push({ it, acc, R: { flows: 0, dup: 0, pos: 0, removed: 0, created: [] }, created, cashOnly: true }); continue;
+      out.push({ it, acc, R: { flows: 0, dup: 0, pos: 0, removed: 0, created: [] }, created, prev, cashOnly: true }); continue;
     }
     const clean = it.fin.clean, rows = csvParse(clean, detectDelim(clean));
     const W = { acc, fname: it.name, hash: it.hash, delim: detectDelim(clean), rows, hdr: guessHeaderRow(rows), mode: 'pos', map: null, typeMap: {}, typeCounts: new Map(), dec: ',', dfmt: 'dmy', repl: 'replace', drop: true, fmtTouched: false, queue: null, closed: false, recipe: false };
@@ -2023,10 +2110,15 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
       const cost = P.pos.reduce((t, p) => t + (p.costEur || 0), 0), forced = m.importopartenza ? parseNum(m.importopartenza, ',') : NaN, base = fin(forced) && forced > 0 ? forced : cost + Math.max(0, acc.cash || 0);
       if (base > 0) acc.flows.push({ id: uid(), date: m.partenza, type: 'partenza', amount: +base.toFixed(2), note: fin(forced) && forced > 0 ? 'Valore del conto alla data del file (costo di carico non disponibile)' : 'Costo di carico e liquidità alla data del file' });
     }
-    out.push({ it, acc, R, created });
+    out.push({ it, acc, R, created, prev });
   }
   touch(); UI.tab = 'panoramica'; UI.acc = null; render(); showAutoResult(out, before);
   if (out.some(x => x.R) && !(CLOUD_ON() && CL.ready)) save(true);          // dopo un import si scarica sempre una copia in Download: se il browser dimenticasse i dati, con "Entra" scegli quel file e c'e' tutto
+}
+function undoOne(x, cell) {          // annulla il caricamento di UN solo conto (gli altri restano)
+  const i = S.accounts.findIndex(a => a.id === x.acc.id); if (i < 0) return;
+  if (x.prev === null || x.prev === undefined) S.accounts.splice(i, 1); else S.accounts[i] = JSON.parse(x.prev);
+  UI.acc = null; done(); cell.replaceChildren(h('span', { class: 'gl loss' }, '↩ annullato'));
 }
 function showAutoResult(out, before) {          // esito del caricamento: chiaro a colpo d'occhio, con OK
   const dlg = h('dialog', { class: 'wide res-dlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
@@ -2040,7 +2132,7 @@ function showAutoResult(out, before) {          // esito del caricamento: chiaro
       h('span', { class: 'res-ico' }, s('svg', { viewBox: '0 0 24 24', width: 46, height: 46, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d, pathLength: 1 })))),
       h('h3', null, kind === 'good' ? 'Caricamento riuscito' : kind === 'part' ? 'Caricamento riuscito in parte' : 'Caricamento non riuscito'),
       h('p', null, what ? what + (ok.length ? ' · totale ' + eur(tot) : '') + '.' : 'Non ho caricato nulla.', bad.length ? ' ' + pl(bad.length, 'file non caricato', 'file non caricati') + ': trovi il motivo qui sotto.' : '')),
-    table([{ t: 'File o conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Esito' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), h('span', { class: 'gl gain' }, '✓ ' + (x.cashOnly ? 'saldo aggiornato' : x.R.removed ? 'aggiornato · ' + pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : 'aggiornato'))]
+    table([{ t: 'File o conto' }, { t: 'Posizioni', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Liquidità', n: 1 }, { t: 'Esito' }], out.map(x => x.R ? [x.acc.name + (x.created ? ' (nuovo)' : ''), String(x.acc.positions.length), eur(accValue(x.acc)), eur(accCash(x.acc)), (() => { const c = h('span', { class: 'okcell' }); c.append(h('span', { class: 'gl gain' }, '✓ ' + (x.cashOnly ? 'saldo aggiornato' : x.R.removed ? 'aggiornato · ' + pl(x.R.removed, 'posizione tolta', 'posizioni tolte') : 'aggiornato')), ' ', btn('Annulla questo', () => undoOne(x, c), 'sm danger')); return c; })()]
       : x.refs > 0 ? [x.it.name, '—', '—', '—', h('span', { class: 'gl gain' }, '✓ ' + x.skip)] : [x.acc ? x.acc.name : x.it.name, '—', '—', '—', h('span', { class: 'gl loss' }, '✗ ' + x.skip)])),
     h('p', { class: 'muted' }, [ok.length ? 'I prezzi si aggiornano da soli. Se qualcosa non torna puoi annullare tutto con un tocco.' : '', saved].filter(Boolean).join(' ')),
     h('div', { class: 'dlgacts' }, done1 ? btn('Annulla il caricamento', () => { shut(); S = JSON.parse(before); migrate(S); UI.acc = null; done(); setStatus('Caricamento annullato'); }) : null, btn('OK', shut, 'pri big')));
@@ -3002,6 +3094,9 @@ function openMenu() {
     h('div', { class: 'dr-head' }, h('b', null, 'Finanze'), h('button', { type: 'button', class: 'btn sm', onclick: () => close() }, 'Chiudi')),
     h('div', { class: 'dr-sec' }, 'Azioni rapide'),
     DEMO ? null : item('Registra un\'operazione', MICO.op, () => editOperation({}), 'acquisto, vendita, versamento…'),
+    DEMO ? null : item('Scrivi cosa è successo', MICO.op, () => askBox(), 'una frase e ci penso io'),
+    DEMO ? null : item('Nuovo PAC', MICO.op, () => pacWizard(), 'un acquisto che si ripete'),
+    DEMO ? null : item('Nuovo obiettivo', MICO.save, () => goalWizard(), 'casa, pensione, viaggio…'),
     DEMO ? null : item('Importa i file dei conti', MICO.imp, () => pickBatch()),
     DEMO ? null : item('Aggiorna i saldi', MICO.saldi, openBalances, 'conti correnti, contanti, carte'),
     DEMO ? null : item('Salva adesso', MICO.save, saveNow, cloudSub ? 'online ' + cloudSub : ''),
@@ -3033,7 +3128,7 @@ function content() { return { panoramica: tabPanoramica, conti: tabConti, strume
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
     h('p', null, 'Scegli i file dei tuoi conti (oppure trascinali su questa pagina): i conti, le posizioni e la liquidità si creano da soli.'),
-    h('div', { class: 'row' }, btn('Importa i file dei conti…', () => pickBatch(), 'pri'), btn('Saldi dei conti fermi', openBalances), btn('Crea un conto a mano', () => editAccount())),
+    h('div', { class: 'row' }, btn('Cominciamo: che conti hai?', onboard, 'pri big'), btn('Importa i file dei conti…', () => pickBatch()), btn('Crea un conto a mano', () => editAccount())),
     h('p', { class: 'muted' }, 'I file che ti preparo io (per esempio quelli di Fineco) contengono già tutto. Per i file scaricati dal broker l\'app ti fa vedere un\'anteprima.'));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
@@ -3043,7 +3138,8 @@ function tabPanoramica() {
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
   const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
   if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
-  const dueP = planDueAll(); if (dueP.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(dueP.length, 'acquisto programmato da confermare: è stato preso davvero?', 'acquisti programmati da confermare: sono stati presi davvero?')), btn('Conferma', () => confirmDue(), 'pri sm')));
+  if (!DEMO) el.append(todoCard());          // una lista sola di cose da fare oggi
+  if (!DEMO) { const gc = goalsCard(); if (gc) el.append(gc); }
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
   el.append(groupTiles());          // soldi fermi, soldi investiti, fondo pensione
   el.append(tiles([
@@ -3218,7 +3314,7 @@ function askLink() {          // "Chiedi di collegarli": un piccolo file con i t
 }
 function tabStrumenti() {
   const rows = S.instruments.map(i => { const old = daysSince(i.priceDate) > 14;
-    return [i.name + (i.code ? ' · ' + i.code : ''), i.ccy, h('input', { type: 'number', step: 'any', class: 'pin', value: i.price, 'aria-label': 'Prezzo ' + i.name, onchange: e => { const v = parseFloat(e.target.value); if (v >= 0) { setPrice(i, v); done(); } else render(); } }), (old ? '⚠ ' : '') + fmtDate(i.priceDate), mixStr(parseMix(i.cls, 'Non classificato')), mixStr(parseMix(i.area, 'n.d.')), rowActs(btn('Modifica', () => editInstrument(i), 'sm'), btn('Elimina', () => delInstrument(i), 'sm danger'))]; });
+    return [h('button', { type: 'button', class: 'lnk', onclick: () => talkInstrument(i) }, i.name + (i.code ? ' · ' + i.code : '')), i.ccy, h('input', { type: 'number', step: 'any', class: 'pin', value: i.price, 'aria-label': 'Prezzo ' + i.name, onchange: e => { const v = parseFloat(e.target.value); if (v >= 0) { setPrice(i, v); done(); } else render(); } }), (old ? '⚠ ' : '') + fmtDate(i.priceDate), mixStr(parseMix(i.cls, 'Non classificato')), mixStr(parseMix(i.area, 'n.d.')), rowActs(btn('Modifica', () => editInstrument(i), 'sm'), btn('Elimina', () => delInstrument(i), 'sm danger'))]; });
   return h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Strumenti e prezzi'), ONLINE ? btn('Aggiorna prezzi online', pricesOnline) : null, btn('Aggiorna prezzi da file…', () => pickPrices()), btn('Chiedi di collegarli', askLink), btn('+ Nuovo strumento', () => editInstrument(), 'pri')),
     h('p', { class: 'muted' }, 'Aggiorna qui i prezzi (scrivi il nuovo valore e premi Invio) oppure carica il file prezzi.json che il rapporto del mattino scrive in FinanzeApp\\rapporti: l\'app tiene la storia dei prezzi per i calcoli di rischio futuri. Poi registra uno snapshot dalla Panoramica.'),
     table([{ t: 'Strumento' }, { t: 'Valuta' }, { t: 'Prezzo', n: 1 }, { t: 'Aggiornato' }, { t: 'Classe' }, { t: 'Area' }, { t: '' }], rows, 'Nessuno strumento: creane uno (ETF, azione, crypto, fondo a quote…).'));
@@ -3285,6 +3381,7 @@ function buildSummary(o) {
 
 function tabDati() {
   const el = h('div');
+  if (!DEMO) el.append(aiCard());
   const ccys = [...new Set([...Object.keys(S.fx), ...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)].filter(c => c && c !== 'EUR'))];
   el.append(h('section', { class: 'card' }, h('h2', null, 'Tassi di cambio'), h('p', { class: 'muted' }, 'Quanti euro vale 1 unità della valuta. Si aggiornano a mano.'),
     ccys.length ? table([{ t: 'Valuta' }, { t: '1 unità = … €', n: 1 }], ccys.map(c => [c, h('input', { type: 'number', step: 'any', class: 'pin', value: S.fx[c] || '', onchange: e => { const v = parseFloat(e.target.value); if (v > 0) S.fx[c] = v; else delete S.fx[c]; done(); } })])) : h('p', { class: 'muted' }, 'Nessuna valuta estera in uso.'),
@@ -3401,6 +3498,144 @@ function undoOp(op) {
 }
 /* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
 const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']]];
+/* ============ obiettivi: poche domande, una barra che si riempie ============ */
+const goalStart = () => Math.max(0, totalValue() - boxTotal());
+const goalRate = r => Math.pow(1 + r, 1 / 12) - 1;
+const goalFuture = (start, m, years, rate) => { const n = Math.round(years * 12), r = goalRate(rate); return r === 0 ? start + m * n : start * Math.pow(1 + r, n) + m * (Math.pow(1 + r, n) - 1) / r; };
+const goalNeed = (target, start, years, rate) => { const n = Math.round(years * 12), r = goalRate(rate), need = target - start * Math.pow(1 + r, n); return need <= 0 ? 0 : r === 0 ? need / n : need * r / (Math.pow(1 + r, n) - 1); };
+const goalMonths = (target, start, m, rate) => { let v = start; const r = goalRate(rate); for (let k = 0; k < 1200; k++) { if (v >= target) return k; v = v * (1 + r) + m; } return null; };
+function goalWizard() {
+  const g = { name: '', target: null, years: null, monthly: null, custom: '' };
+  const sNome = api => ({ q: 'Per che cosa risparmi?', valid: !!g.name.trim(), body: [h('div', { class: 'wz-chips left' }, ['Casa', 'Pensione', 'Viaggio', 'Emergenze', 'Auto', 'Studi dei figli'].map(n => h('button', { type: 'button', class: 'btn sm' + (g.name === n ? ' pri' : ''), onclick: () => { g.name = n; api.next(); } }, n))), h('label', { class: 'fld' }, h('span', null, 'Oppure scrivi tu'), h('input', { type: 'text', placeholder: 'es. Anticipo del mutuo', value: g.name, oninput: e => { g.name = e.target.value; if (api.nextBtn) api.nextBtn.disabled = !g.name.trim(); } }))] });
+  const sImp = api => ({ q: 'Quanto vuoi avere?', focus: '.wz-num', valid: g.target > 0, body: [wzNum(g.target, 'Importo in €', v => { g.target = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), wzChips([10000, 25000, 50000, 100000, 250000], v => eur(v), v => { g.target = v; api.next(); })] });
+  const sQuando = api => ({ q: 'Tra quanti anni?', focus: '.wz-num', valid: g.years > 0, body: [wzNum(g.years, 'Anni', v => { g.years = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), wzChips([1, 3, 5, 10, 15, 20, 30], v => v + (v === 1 ? ' anno' : ' anni'), v => { g.years = v; api.next(); })] });
+  const sMese = api => { const need = goalNeed(g.target, goalStart(), g.years, 0.05); return { q: 'Quanto puoi mettere da parte al mese?', focus: '.wz-num', valid: g.monthly != null, body: [h('div', { class: 'wz-chip' }, h('b', null, need > 0 ? 'Per arrivarci con un rendimento del 5% all\'anno servirebbero circa ' + eur(need) + ' al mese.' : 'Con quello che hai già, e il 5% all\'anno, ci arrivi anche senza versare altro.'), h('span', { class: 'wz-s' }, 'Parto dai tuoi ' + eur(goalStart()) + ' (senza le casse separate). È un\'ipotesi, non una promessa.')), wzNum(g.monthly, 'Euro al mese', v => { g.monthly = v; if (api.nextBtn) api.nextBtn.disabled = v == null; }), wzChips(need > 0 ? [Math.round(need / 50) * 50 || 50, 100, 250, 500] : [0], v => eur(v), v => { g.monthly = v; api.next(); })] }; };
+  const sSum = api => { const st = goalStart(), rows = [[0.03, 'prudente 3%'], [0.05, 'medio 5%'], [0.07, 'ottimista 7%']].map(([r, l]) => [l, goalFuture(st, g.monthly, g.years, r)]);
+    return { q: 'Ecco dove puoi arrivare', nextLabel: 'Salva l\'obiettivo', valid: true, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, g.name + ': ' + eur(g.target) + ' tra ' + g.years + (g.years === 1 ? ' anno' : ' anni')), h('div', { class: 'wz-sum-s' }, 'versando ' + eur(g.monthly) + ' al mese')), talkBars(rows.map(([l, v]) => [l, v, v >= g.target ? 'obiettivo raggiunto' : 'mancano ' + eur(g.target - v), null, eur(v)]), false), h('p', { class: 'muted' }, 'Sono tre ipotesi di rendimento all\'anno, senza tasse e senza imprevisti: servono a capire l\'ordine di grandezza.')],
+      onNext: a2 => { (S.goals = S.goals || []).push({ id: uid(), name: g.name.trim(), target: g.target, year: new Date().getFullYear() + Math.round(g.years), monthly: g.monthly, created: today() }); done(); wzDone(a2, 'Obiettivo salvato', g.name + ' compare in Panoramica con la sua barra.'); return false; } }; };
+  return wzRun({ steps: () => [sNome, sImp, sQuando, sMese, sSum] });
+}
+function goalsCard() {
+  const gs = S.goals || []; if (!gs.length) return null; const st = goalStart();
+  return h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Obiettivi'), btn('+ Nuovo', () => goalWizard(), 'sm pri')),
+    gs.map(x => { const k = Math.min(1, st / x.target), yrs = Math.max(0.1, x.year - new Date().getFullYear() - (new Date().getMonth() / 12)), mo = goalMonths(x.target, st, x.monthly || 0, 0.05), eta = mo == null ? null : new Date(new Date().getFullYear(), new Date().getMonth() + mo, 1), inTime = mo != null && (mo / 12) <= yrs + 0.05;
+      const need = goalNeed(x.target, st, yrs, 0.05);
+      return h('div', { class: 'goal tapme', role: 'button', tabindex: '0', onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); talk({ kind: 'Obiettivo', title: x.name, value: eur(x.target), num: x.target, say: st >= x.target ? 'Hai già raggiunto la cifra: bravo!' : 'Hai ' + eur(st) + ' (' + pct(k) + ' dell\'obiettivo) e ti mancano ' + eur(x.target - st) + '. Versando ' + eur(x.monthly || 0) + ' al mese, con il 5% all\'anno' + (eta ? ' ci arrivi verso il ' + eta.getFullYear() + (inTime ? ': in tempo.' : ': dopo la scadenza del ' + x.year + '.') : ' non ci arrivi nei prossimi 100 anni.'), how: 'Per arrivarci nel ' + x.year + ' servirebbero circa ' + eur(need) + ' al mese (ipotesi: 5% all\'anno).', acts: [['Cambia l\'obiettivo', () => { S.goals = S.goals.filter(z => z !== x); done(); goalWizard(); }], ['Elimina', () => { if (confirm('Eliminare l\'obiettivo "' + x.name + '"?')) { S.goals = S.goals.filter(z => z !== x); done(); } }, 'danger']] }); } },
+        h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, x.name), h('span', { class: 'box-n' }, eur(st) + ' / ' + eur(x.target))),
+        h('div', { class: 'tb-t', style: 'margin:8px 0;height:9px' }, h('span', { class: 'tb-b', style: '--w:' + Math.max(1, k * 100).toFixed(1) + '%' })),
+        h('div', { class: 'muted', style: 'font-size:13px' }, st >= x.target ? '✓ Raggiunto' : (inTime ? '✓ In tempo' : '⚠ In ritardo') + ' · scadenza ' + x.year + (inTime ? '' : ' · servirebbero ' + eur(need) + ' al mese')));
+    }));
+}
+
+/* ============ nuovo PAC guidato ============ */
+function candOf(i) { const held = []; for (const a of S.accounts) { const p = a.positions.find(z => z.instId === i.id); if (p) held.push({ a, p }); } return { id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', held }; }
+function pacWizard(pre) {
+  pre = pre || {}; const p = { c: pre.c || null, amount: null, fi: 0, day: 5, accId: '', fromId: '__same', whole: false, q: '' };
+  const nextDate = day => { const t = new Date(), d = new Date(t.getFullYear(), t.getMonth() + (day >= t.getDate() ? 0 : 1), 1); return ymd(new Date(d.getFullYear(), d.getMonth(), Math.min(day, 28))); };
+  const sTit = api => { const res = h('div', { class: 'wz-res' }), inp = h('input', { type: 'search', class: 'wz-search', placeholder: 'Scrivi nome, ISIN o crypto', autocomplete: 'off', value: p.q, 'aria-label': 'Cerca il titolo' });
+    const fill = () => { p.q = inp.value; res.replaceChildren(...opCands(inp.value, '', 'acquisto').slice(0, 7).map(c => h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { p.c = c; if (!p.accId && c.held[0]) p.accId = c.held[0].a.id; api.next(); } }, h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null), h('span', { class: 'wz-s' }, (c.st === 'auto' ? '⟳ prezzo automatico' : c.st === 'stima' ? '≈ prezzo stimato' : '✎ prezzo a mano') + ' · oggi ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(x => x.a.name).join(', ') : ''))))); };
+    inp.addEventListener('input', fill); fill(); return { q: 'Che cosa compri ogni volta?', focus: '.wz-search', valid: !!p.c, body: [p.c ? h('div', { class: 'wz-chip' }, h('b', null, 'Scelto: ' + p.c.name), h('span', { class: 'wz-s' }, 'scrivi per cambiarlo, oppure premi Avanti')) : null, inp, res].filter(Boolean) }; };
+  const sImp = api => ({ q: 'Quanto compri per volta?', focus: '.wz-num', valid: p.amount > 0, body: [wzNum(p.amount, 'Euro per volta', v => { p.amount = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), wzChips([25, 50, 100, 200, 500], v => eur(v), v => { p.amount = v; api.next(); })] });
+  const sFreq = api => ({ q: 'Ogni quanto?', next: false, body: FREQ.map((f, k) => wzOpt(f[1], null, () => { p.fi = k; api.next(); }, p.fi === k ? 'sel' : '')) });
+  const sDay = api => ({ q: 'In che giorno del mese?', focus: '.wz-num', valid: p.day >= 1 && p.day <= 28, body: [wzNum(p.day, 'Giorno (1-28)', v => { p.day = v; if (api.nextBtn) api.nextBtn.disabled = !(v >= 1 && v <= 28); }), wzChips([1, 2, 5, 8, 10, 15, 20, 23, 28], v => 'il ' + v, v => { p.day = v; api.next(); })] });
+  const sConto = api => ({ q: 'In quale conto lo compri?', next: false, body: S.accounts.filter(a => !a.dep && accGroup(a) !== 'fermi').concat(S.accounts.filter(a => !a.dep && accGroup(a) === 'fermi')).map(a => wzOpt(a.name, (TYPES[a.type] || {}).label + ' · liquidità ' + eur(Math.max(0, accCash(a)), true), () => { p.accId = a.id; api.next(); }, p.accId === a.id ? 'sel' : '')) });
+  const sDa = api => ({ q: 'Da dove partono i soldi?', next: false, body: [wzOpt('Sono già nel conto', 'si usa la sua liquidità', () => { p.fromId = '__same'; api.next(); }), ...S.accounts.filter(a => a.id !== p.accId && !a.dep && accGroup(a) === 'fermi' && !a.box).map(a => wzOpt('Dal conto ' + a.name, 'liquidità ' + eur(Math.max(0, accCash(a)), true) + ' · prima registro il trasferimento', () => { p.fromId = a.id; api.next(); })), wzOpt('Arrivano da fuori', 'per esempio il TFR o lo stipendio versato direttamente', () => { p.fromId = '__ext'; api.next(); }, 'soft')] });
+  const sSum = api => { const f = FREQ[p.fi], perM = p.amount / f[2], year = perM * 12, name = p.c.name, acc = S.accounts.find(a => a.id === p.accId);
+    return { q: 'Controlla e conferma', nextLabel: 'Crea il PAC', valid: !!acc, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, eur(p.amount) + ' di ' + name + ' ' + f[1].toLowerCase() + ', il ' + p.day), h('div', { class: 'wz-sum-s' }, (acc ? acc.name : '') + ' · ' + (p.fromId === '__same' ? 'con la sua liquidità' : p.fromId === '__ext' ? 'soldi da fuori' : 'dal conto ' + accName(p.fromId)))),
+      talkBars([['In un anno versi', year, '', null, eur(year)], ['In 10 anni versi', year * 10, '', null, eur(year * 10)], ['In 10 anni, ipotesi 5% all\'anno', goalFuture(0, perM, 10, 0.05), 'non è una promessa', null, eur(goalFuture(0, perM, 10, 0.05))]], false),
+      h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.whole, onchange: e => { p.whole = e.target.checked; } }), h('span', null, 'Solo quote intere', h('small', null, ' — come il PAC di Directa: compra solo quote complete'))), h('p', { class: 'muted' }, 'Il giorno del PAC ti chiedo se è stato preso davvero: solo con il tuo sì lo registro.')],
+      onNext: a2 => { const c = p.c; (S.plans = S.plans || []).push({ id: uid(), label: 'PAC ' + String(name).replace(/ucits|etf|acc\b|\(.*?\)/gi, '').replace(/\s+/g, ' ').trim().slice(0, 28), kind: 'acquisto', accId: p.accId, fromAccId: ['__same', '__ext'].includes(p.fromId) ? '' : p.fromId, instId: c.id || '', instName: c.id ? '' : c.name, instCode: c.id ? '' : c.code, instCcy: c.ccy, instCls: c.cls || 'Azioni', amount: p.amount, freq: f[0], day: p.day, start: nextDate(p.day), end: '', note: '', whole: p.whole, ext: p.fromId === '__ext', since: today(), done: [] }); done(); wzDone(a2, 'PAC creato', 'Il prossimo è il ' + fmtDate(nextDate(p.day)) + '. Lo trovi in Piano → Appuntamenti.'); return false; } }; };
+  return wzRun({ steps: () => [sTit, sImp, sFreq, sDay, sConto, sDa, sSum] });
+}
+
+/* ============ scheda del titolo ============ */
+function sparkNode(hist) {
+  const pts = (hist || []).filter(x => x.p > 0).slice(-80); if (pts.length < 2) return h('p', { class: 'muted' }, 'Lo storico dei prezzi è appena iniziato: il grafico si disegna man mano.');
+  const W = 300, H = 64, lo = Math.min(...pts.map(x => x.p)), hi = Math.max(...pts.map(x => x.p)), X = k => k / (pts.length - 1) * W, Y = v => H - 6 - (v - lo) / ((hi - lo) || 1) * (H - 14);
+  return s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'spark2', 'aria-label': 'Andamento dei prezzi', preserveAspectRatio: 'none' }, s('path', { d: 'M' + pts.map((x, k) => X(k).toFixed(1) + ' ' + Y(x.p).toFixed(1)).join(' L'), fill: 'none', stroke: pts[pts.length - 1].p >= pts[0].p ? 'var(--gain)' : 'var(--loss)', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke' }));
+}
+function talkInstrument(i) {
+  const heldIn = S.accounts.map(a => [a, a.positions.find(p => p.instId === i.id)]).filter(x => x[1]), tot = heldIn.reduce((t, x) => t + posValue(x[1]), 0), c = candOf(i), h0 = (i.hist || []).filter(x => x.p > 0), ch = h0.length > 1 ? h0[h0.length - 1].p / h0[0].p - 1 : null;
+  talk({ kind: 'Titolo' + (i.code ? ' · ' + i.code : ''), title: i.name, value: nf2.format(i.price) + ' ' + i.ccy, say: (isAuto(i) ? (i.autoSrc === 'stima' ? '≈ Il prezzo è una stima: ' + trackDesc(i) + '. ' : '⟳ Il prezzo si aggiorna da solo (' + (FONTE[i.autoSrc] || 'sito') + '). ') : '✎ Il prezzo lo aggiorni tu con l\'estratto. ') + (tot ? 'Ne hai per ' + eur(tot) + (totalValue() > 0 ? ', cioè ' + pct(tot / totalValue()) + ' del patrimonio' : '') + '.' : 'Non ce l\'hai in nessun conto.'), box: ['Andamento' + (ch != null ? ' (' + spct(ch) + ' da quando lo seguo)' : ''), sparkNode(i.hist)],
+    rows: heldIn.map(([a, p]) => [a.name, posValue(p), nfq.format(p.qty) + ' quote', openAcc(a)]), rowsTitle: 'Dove ce l\'hai',
+    acts: [['Compra ancora', () => opWizard({ kind: 'acquisto', accId: heldIn[0] ? heldIn[0][0].id : '', c, _wz: 1 })], heldIn.length ? ['Vendi', () => opWizard({ kind: 'vendita', accId: heldIn[0][0].id, c, _wz: 1 })] : null, ['Fanne un PAC', () => pacWizard({ c })], ['Modifica', () => editInstrument(i)]].filter(Boolean) });
+}
+/* ============ assistente a parole (senza AI) + aiuto AI gratuito facoltativo ============ */
+const AI_HOST = 'https://generativelanguage.googleapis.com';
+const numIt = t => { t = String(t).trim(); if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, ''); const v = parseFloat(t); return isFinite(v) ? v : null; };
+function parseSentence(text) {
+  const raw = String(text || ''), low = ' ' + normT(raw) + ' ', out = {};
+  const kinds = [['trasferimento', /\b(trasfer|girat|girato|sposta|spostat)/], ['vendita', /\b(vend|vendut)/], ['acquisto', /\b(compr|acquist)/], ['prelievo', /\b(prelev|ritir)/], ['versamento', /\b(versa|versat|messo|deposit|bonific|ricaric)/]];
+  for (const [k, re] of kinds) if (re.test(low)) { out.kind = k; break; }
+  let m = raw.match(/(\d[\d.,]*)\s*(?:€|euro|eur)\b/i) || raw.match(/€\s*(\d[\d.,]*)/);
+  if (m) out.eur = numIt(m[1]);
+  else { m = raw.match(/(\d[\d.,]*)\s*(?:quote|quota|azioni|pezzi|unit)/i); if (m) out.qty = numIt(m[1]); else { m = raw.match(/\b(\d[\d.,]*)\b/); if (m && out.kind && out.kind !== 'acquisto' && out.kind !== 'vendita') out.eur = numIt(m[1]); } }
+  const hits = S.accounts.map(a => { const toks = normT(a.name).split(' ').filter(t => t.length > 2); const pos = toks.map(t => low.indexOf(' ' + t)).filter(p => p >= 0); return pos.length ? { a, pos: Math.min(...pos), n: pos.length } : null; }).filter(Boolean).sort((x, y) => x.pos - y.pos);
+  if (out.kind === 'trasferimento' && hits.length >= 2) { const dv = /\bda\b/.test(low) && low.indexOf(' da ') < hits[1].pos ? hits : hits.slice().reverse(); out.accId = dv[0].a.id; out.toId = dv[1].a.id; }
+  else if (hits.length) out.accId = hits[0].a.id;
+  if (out.kind === 'acquisto' || out.kind === 'vendita') {
+    let rest = normT(raw); for (const x of hits) for (const t of normT(x.a.name).split(' ')) rest = rest.replace(new RegExp('\\b' + t + '\\b', 'g'), ' ');
+    rest = rest.replace(/\b(ho|di|su|in|da|il|la|lo|un|una|uno|del|della|dei|delle|quote|quota|azioni|euro|eur|compr\w*|acquist\w*|vend\w*|per|con|nel|sul|conto|stamattina|oggi|ieri)\b/g, ' ').replace(/[\d.,€]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (rest.length >= 2) { const c = opCands(rest, out.kind === 'vendita' ? out.accId : '', out.kind)[0]; if (c) out.c = c; }
+  }
+  return out;
+}
+function runSentence(p, text) {
+  if (!p.kind) { return 'Non ho capito che operazione è. Prova con: "ho comprato 2 quote di Bitcoin su Trade Republic" o "ho versato 500 euro su Fineco".'; }
+  shutAll(); opWizard(Object.assign({ _wz: 1 }, p), null); return '';
+}
+function shutAll() { document.querySelectorAll('dialog.wz').forEach(d => { try { d.close(); } catch (e) { } d.remove(); }); }
+async function aiAsk(parts, sys) {
+  const key = (S.settings || {}).aiKey; if (!key) throw new Error('Manca la chiave AI (Dati e sicurezza).');
+  const r = await fetch(AI_HOST + '/v1beta/models/gemini-flash-latest:generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json' } }) });
+  if (!r.ok) throw new Error('L\'AI ha risposto con errore ' + r.status + (r.status === 429 ? ' (limite gratuito raggiunto: riprova tra poco)' : ''));
+  const j = await r.json(), t = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
+  if (!t) throw new Error('L\'AI non ha dato una risposta utile.'); return JSON.parse(t);
+}
+async function aiSentence(text) {          // all'AI vanno SOLO la frase e i nomi dei conti: nessun importo, nessuna posizione
+  const j = await aiAsk([{ text }], 'Estrai da una frase in italiano una operazione finanziaria. Rispondi SOLO con JSON: {"kind":"acquisto|vendita|versamento|prelievo|trasferimento|null","account":"nome del conto o null","toAccount":"conto di destinazione o null","instrument":"nome o ISIN dello strumento o null","eur":numero o null,"qty":numero o null}. Conti possibili: ' + S.accounts.map(a => a.name).join(', '));
+  const f = n => { if (!n) return null; const q = normT(n); return S.accounts.find(a => normT(a.name) === q) || S.accounts.find(a => normT(a.name).includes(q) || q.includes(normT(a.name))) || null; };
+  const out = {}; if (OP_FLOW[j.kind]) out.kind = j.kind; const a = f(j.account), b = f(j.toAccount); if (a) out.accId = a.id; if (b) out.toId = b.id;
+  if (j.eur > 0) out.eur = +j.eur; if (j.qty > 0) out.qty = +j.qty;
+  if (j.instrument && (out.kind === 'acquisto' || out.kind === 'vendita')) { const c = opCands(String(j.instrument), out.kind === 'vendita' ? out.accId : '', out.kind)[0]; if (c) out.c = c; }
+  return out;
+}
+function askBox() {
+  let txt = '', msg = '', busy = false;
+  const hasAi = !!(S.settings || {}).aiKey;
+  wzRun({ steps: () => [api => ({ q: 'Scrivi che cosa è successo', next: false, noBack: true, focus: 'textarea',
+    body: [h('textarea', { class: 'wz-ask', rows: 3, placeholder: 'es. ho comprato 2 quote di Bitcoin su Trade Republic', 'aria-label': 'Che cosa è successo', oninput: e => { txt = e.target.value; } }, txt),
+      h('div', { class: 'wz-chips left' }, ['Ho versato 500 euro su Fineco', 'Ho comprato 1 Bitcoin su Trade Republic', 'Ho venduto 3 quote di Vanguard su Directa'].map(x => h('button', { type: 'button', class: 'btn sm', onclick: () => { txt = x; api.redraw(); } }, x))),
+      msg ? h('p', { class: 'err' }, msg) : null,
+      h('div', { class: 'wz-nav' }, btn('Capito', () => { msg = runSentence(parseSentence(txt), txt); if (msg) api.redraw(); }, 'pri big'),
+        hasAi ? btn(busy ? 'Chiedo all\'AI…' : 'Chiedi all\'AI', async () => { if (busy || !txt.trim()) return; busy = true; msg = ''; api.redraw(); try { const p = await aiSentence(txt); busy = false; msg = runSentence(p, txt); if (msg) api.redraw(); } catch (e) { busy = false; msg = String(e.message || e); api.redraw(); } }) : null)] })] });
+}
+async function aiScreenshot() {
+  const inp = h('input', { type: 'file', accept: 'image/*', style: 'display:none' });
+  inp.addEventListener('change', async () => {
+    const f = inp.files[0]; inp.remove(); if (!f) return;
+    try {
+      const b64 = await new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = ko; r.readAsDataURL(f); });
+      const j = await aiAsk([{ inlineData: { mimeType: f.type || 'image/png', data: b64 } }, { text: 'Leggi lo screenshot di un conto di investimento.' }], 'Rispondi SOLO con JSON: {"conto":"nome del conto o null","liquidita":numero o null,"posizioni":[{"nome":"","isin":"","quote":numero,"prezzo":numero o null,"valore":numero o null}]}. Solo cio\' che e\' scritto nello screenshot, niente invenzioni.');
+      const rows = (j.posizioni || []).filter(p => p && p.nome && p.quote > 0);
+      if (!rows.length && j.liquidita == null) { alert('Nello screenshot non ho trovato né posizioni né liquidità.'); return; }
+      const acc = S.accounts.find(a => j.conto && normT(a.name).includes(normT(j.conto))) || null;
+      const name = acc ? acc.name : (j.conto || 'Conto da screenshot');
+      const csv = '#Finanze;conto=' + name + (j.liquidita != null ? ';liquidita=' + j.liquidita : '') + '\n' + 'nome;isin;quote;prezzo\n' + rows.map(p => [p.nome, p.isin || '', p.quote, p.prezzo != null ? p.prezzo : (p.valore && p.quote ? p.valore / p.quote : '')].join(';').replace(/\n/g, ' ')).join('\n');
+      importFiles([new File([csv], 'screenshot-ai.csv', { type: 'text/csv' })]);
+    } catch (e) { alert('Lettura non riuscita: ' + (e.message || e)); }
+  });
+  document.body.append(inp); inp.click();
+}
+function aiCard() {
+  const key = (S.settings || {}).aiKey || '';
+  return h('section', { class: 'card' }, h('h2', null, 'Aiuto dell\'AI (facoltativo, gratuito)'),
+    h('p', { class: 'muted' }, 'Senza AI l\'app capisce già le frasi semplici ("Scrivi cosa è successo"). Con una chiave gratuita di Google Gemini capisce anche frasi più libere e può leggere uno screenshot del conto.'),
+    h('p', { class: 'muted' }, 'Privacy: all\'AI vanno solo la frase che scrivi (con i nomi dei tuoi conti) o l\'immagine che scegli tu. Non parte mai niente da solo. Nel piano gratuito Google può usare questi dati per migliorare i suoi servizi: non mandare screenshot con dati personali che non vuoi condividere. La lettura degli screenshot è sperimentale: controlla sempre il riepilogo.'),
+    h('p', null, h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener' }, 'Prendi la chiave gratuita su aistudio.google.com/apikey')),
+    h('label', { class: 'fld' }, h('span', null, 'Chiave AI'), h('input', { type: 'password', value: key, placeholder: 'incolla qui la chiave', autocomplete: 'off', onchange: e => { S.settings.aiKey = e.target.value.trim(); done(); } })),
+    h('div', { class: 'row' }, key ? btn('Leggi uno screenshot…', aiScreenshot, 'pri') : null, key ? btn('Togli la chiave', () => { delete S.settings.aiKey; done(); }) : null));
+}
 /* ============ + Operazione GUIDATA: una domanda per volta, scelte grandi da toccare, l'app suggerisce e va avanti da sola ============ */
 const OP_FLOW = { acquisto: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], vendita: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], versamento: ['kind', 'conto', 'importo', 'riepilogo'], prelievo: ['kind', 'conto', 'importo', 'riepilogo'], trasferimento: ['kind', 'conto', 'verso', 'importo', 'riepilogo'] };
 function opCands(q, accId, kind) {          // titoli proposti: i tuoi, quelli con prezzo automatico e tutto il catalogo
@@ -3524,7 +3759,7 @@ function opWizard(pre, after) {
     if (how.startsWith('t:')) { const m = applyOp({ accId: how.slice(2), toId: o.accId, kind: 'trasferimento', date: o.date, amount: miss, note: 'Per l\'acquisto di ' + (c ? c.name : nu.name) }); if (m) { err.textContent = 'Acquisto registrato, ma il trasferimento no: ' + m; done(); return; } }
     else if (how === 'ext') { const m = applyOp({ accId: o.accId, kind: 'versamento', date: o.date, amount: miss, fromCash: true, note: 'Soldi versati per l\'acquisto' }); if (m) { err.textContent = 'Acquisto registrato, ma il versamento no: ' + m; done(); return; } }
     done(); if (DATA.cat) applyCatalog();
-    const msg = h('div', { class: 'wz-ok' }, s('svg', { viewBox: '0 0 24 24', width: 54, height: 54, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d: 'M12 3a9 9 0 100 18 9 9 0 000-18z' }), s('path', { d: 'M7.5 12.5l3 3 6-6.5', pathLength: 1 })), h('h3', null, 'Registrato'), h('p', null, view.querySelector('.wz-sum-t').textContent + ' · ' + a.name), h('div', { class: 'wz-nav' }, btn('Registra un\'altra', () => { shut(); opWizard(pre, after); }), h('button', { type: 'button', class: 'btn pri big', onclick: () => { shut(); if (after) after(); } }, 'OK')));
+    const msg = h('div', { class: 'wz-ok' }, s('svg', { viewBox: '0 0 24 24', width: 54, height: 54, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d: 'M12 3a9 9 0 100 18 9 9 0 000-18z' }), s('path', { d: 'M7.5 12.5l3 3 6-6.5', pathLength: 1 })), h('h3', null, 'Registrato'), h('p', null, view.querySelector('.wz-sum-t').textContent + ' · ' + a.name), h('div', { class: 'wz-nav' }, btn('Registra un\'altra', () => { shut(); opWizard(pre, after); }), st.kind === 'acquisto' ? btn('Fanne un PAC', () => { shut(); const ni = o.instId ? inst(o.instId) : findInst(o.newName, ''); pacWizard({ c: ni ? candOf(ni) : c }); }) : null, h('button', { type: 'button', class: 'btn pri big', onclick: () => { shut(); if (after) after(); } }, 'OK')));
     view.replaceChildren(msg); setStatus('Operazione registrata'); if (after) setTimeout(() => {}, 0);
   }
   function draw() {
@@ -3535,10 +3770,19 @@ function opWizard(pre, after) {
     view.replaceChildren(top, bar, h('h3', { class: 'wz-q' }, QUEST[cur] || ''), h('div', { class: 'wz-b' }, b), cur === 'kind' ? h('p', { class: 'muted wz-adv' }, h('a', { href: '#', onclick: e => { e.preventDefault(); shut(); editOperationAdv(Object.assign({}, pre, { _adv: 1 }), after); } }, 'Preferisco il modulo completo')) : null);
     view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
   }
-  if (pre.kind && OP_FLOW[pre.kind]) { st.kind = pre.kind; cur = nextOf(); }
+  if (pre.kind && OP_FLOW[pre.kind]) {          // l'operazione puo' arrivare gia' compilata in parte (da un titolo, da una frase): si parte dal primo dato che manca
+    st.kind = pre.kind; if (pre.accId) { st.accId = pre.accId; skipAcc = true; } if (pre.toId) st.toId = pre.toId; if (pre.c) st.c = pre.c; if (pre.price > 0) st.price = pre.price;
+    if (pre.qty > 0) { st.qty = pre.qty; st.mode = 'qty'; } else if (pre.eur > 0) { st.eur = pre.eur; if (st.kind === 'acquisto' || st.kind === 'vendita') st.mode = 'eur'; }
+    if (pre.date) st.date = pre.date; if (pre.note) st.note = pre.note;
+    const have = { conto: !!st.accId, verso: !!st.toId, strumento: !!(st.c || st.nuovo), quanto: qtyNow() > 0 && priceNow() > 0, importo: st.eur > 0 };
+    let first = flow().slice(1).find(k => !have[k] && k !== 'riepilogo') || 'riepilogo'; if (first === 'riepilogo' && shortBy() > 0) first = 'pagamento';
+    hist.push('kind'); cur = first;
+  }
   dlg.append(view); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); draw(); dlg.showModal();
 }
-function editOperation(pre, after) {          // porta d'ingresso unica: guidata, tranne quando l'operazione e' gia' tutta compilata (es. un PAC da correggere)
+function editOperation(pre, after) {          // porta d'ingresso unica
+  if (pre && pre._wz) return opWizard(pre, after);
+  // guidata, tranne quando l'operazione e' gia' tutta compilata (es. un PAC da correggere)
   if (pre && pre._adv || (pre && pre.kind && (pre.instId || pre.amount))) return editOperationAdv(pre, after);
   return opWizard(pre, after);
 }
@@ -3688,7 +3932,7 @@ function planProposal(p, d, amt) {          // le operazioni che il PAC avrebbe 
   const ops = [], from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '', note = p.label + ' del ' + fmtDate(d), r2 = v => Math.round(v * 100) / 100;
   if (p.kind !== 'acquisto') { ops.push(from ? { accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount, note } : { accId: p.accId, kind: 'versamento', date: d, amount, fromCash: true, note }); return { ops, text: (from ? 'Sposti ' + eur(amount, true) + ' da ' + accName(from) + ' a ' : 'Entrano ' + eur(amount, true) + ' in ') + acc.name }; }
   let i = p.instId ? inst(p.instId) : null; if (!i && (p.instName || p.instCode)) i = findInst(p.instName || '', p.instCode || '');
-  const r = !i && p.instCode ? (S.refPrices || {})[p.instCode.toLowerCase()] : null, ccy = i ? i.ccy : normCcy((r && r.c) || p.instCcy || 'EUR'), px = i ? priceOn(i, d) : r ? r.p : 0, fx = fxRate(ccy);
+  const ce = !i && p.instCode && DATA.cat ? DATA.cat.byIsin.get(String(p.instCode).toLowerCase()) : null, r = !i && p.instCode ? ((S.refPrices || {})[p.instCode.toLowerCase()] || (ce ? { p: ce.p, c: ce.c } : null)) : null, ccy = i ? i.ccy : normCcy((r && r.c) || p.instCcy || 'EUR'), px = i ? priceOn(i, d) : r ? r.p : 0, fx = fxRate(ccy);
   if (!(px > 0)) return { err: 'non conosco ancora il prezzo di ' + (i ? i.name : p.instName || 'questo strumento') + ': riprova dopo il prossimo aggiornamento dei prezzi' };
   if (fx == null) return { err: 'manca il cambio ' + ccy };
   const pe = px * fx, qty = p.whole ? Math.floor(amount / pe + 1e-9) : Math.round(amount / pe * 1e6) / 1e6;
@@ -3786,7 +4030,7 @@ function piAppuntamenti() {
   if (due.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Da confermare'), btn('Conferma…', () => confirmDue(), 'pri')),
     h('p', { class: 'muted' }, 'Scaduti o di oggi. L\'app ha già preparato la modifica al prezzo di quel giorno: tu dici solo se l\'acquisto è stato preso davvero (Sì la registra, No la salta).'),
     table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Conto' }, { t: 'Importo', n: 1 }], due.map(({ p, d }) => [fmtDate(d), p.label, accName(p.accId), eur(p.amount)]))));
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Acquisti programmati'), btn('+ Nuovo', () => editPlan(), 'pri')),
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Acquisti programmati'), btn('+ Nuovo', () => pacWizard(), 'pri')),
     plans.length ? tiles([{ l: 'Impegno medio al mese', v: eur(perMonth), s: eur(perMonth * 12) + ' in un anno' }, { l: 'Programmati', v: String(plans.length), s: plans.length === 1 ? 'acquisto periodico' : 'acquisti periodici' }]) : null,
     table([{ t: 'Voce' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }],
       plans.map(p => { const nx = planNext(p, 1)[0]; return [p.label, accName(p.accId), p.instId && inst(p.instId) ? inst(p.instId).name : '—', eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }),
