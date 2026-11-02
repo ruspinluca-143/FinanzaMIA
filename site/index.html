@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RH3c42hA/BLY0e7vA7GYcSdiSVv13OG/eUPU/IUCPRM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aCKt4NT9JizsTLgn8toJTXtscHabEgmLvE/Fegi08zI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2147,11 +2147,47 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm, az] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json')]);
+  const [hh, mm, az, ct] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json')]);
+  if (ct) { try { setCatalog(JSON.parse(ct)); } catch { /* file non valido: ignorato */ } }
   if (hh) DATA.hist = parseHistory(hh);
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
   if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
-  if (S && !LOCKED && (hh || mm || az)) render();
+  if (S && !DEMO && DATA.cat) { const n = applyCatalog(); if (n) { touch(); setStatus('Prezzi dal catalogo: ' + pl(n, 'strumento aggiornato', 'strumenti aggiornati')); } }
+  if (S && !LOCKED && (hh || mm || az || ct)) render();
+}
+/* ============ catalogo: i prezzi di TUTTI gli ETF, ETC/ETN, BTP e obbligazioni quotati in Italia e delle crypto principali (catalogo.json, scritto dal sito) ============ */
+const normT = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+function catCls(tipo, name) {          // classe di partenza per un titolo preso dal catalogo (si cambia da Strumenti)
+  const n = String(name || '');
+  if (/bitcoin|ethereum|solana|crypto|digital asset|blockchain/i.test(n) && tipo !== 'obb') return 'Crypto';
+  if (tipo === 'obb' || /\b(bond|bonds|govt|govies?|treasury|treasuries|gilts?|obblig|corporate|credit|aggregate|high yield|inflation|tips|btp|bund)\b/i.test(n)) return 'Obbligazioni';
+  if (/money market|overnight|monetar|liquidity|€str|ester\b|short term cash/i.test(n)) return 'Monetario';
+  if (/\b(gold|oro|silver|argento|platinum|palladium|copper|oil|brent|wti|crude|commodit|agricult|wheat|natural gas)\b/i.test(n) || tipo === 'etc') return /\b(gold|oro|silver|argento|platinum|palladium|copper|oil|brent|wti|crude|commodit|agricult|wheat|natural gas)\b/i.test(n) ? 'Materie prime' : 'Azioni';
+  return 'Azioni';
+}
+function setCatalog(j) {
+  if (!j || j.app !== 'finanze-catalogo' || !Array.isArray(j.voci)) return;
+  const byIsin = new Map(), list = [];
+  for (const v of j.voci) { if (!Array.isArray(v) || !(v[2] > 0)) continue; const e = { isin: v[0], name: v[1], p: v[2], c: v[3] || 'EUR', d: v[4] || '', t: v[5] || 'etf', n: normT(v[1] + ' ' + v[0]) }; byIsin.set(String(v[0]).toLowerCase(), e); list.push(e); }
+  const coins = (j.crypto || []).filter(c => Array.isArray(c) && c[3] > 0).map(c => ({ id: c[0], sym: c[1], name: c[2], p: c[3], n: normT(c[2] + ' ' + c[1]) }));
+  DATA.cat = { byIsin, list, coins, at: j.generato || '' };
+}
+function applyCatalog() {          // ogni strumento con un ISIN presente nel catalogo (o con lo stesso nome) prende da solo il prezzo di oggi
+  const C = DATA.cat; if (!C) return 0; let n = 0, nm = new Map(C.list.map(e => [normT(e.name), e]));
+  for (const i of S.instruments) {
+    if (i.track || (i.autoAt === today() && i.autoSrc && i.autoSrc !== 'catalogo' && i.autoSrc !== 'stima')) continue;          // chi ha gia' un prezzo automatico di oggi o una stima resta com'e'
+    if (/valore totale/i.test(i.name)) continue;
+    let e = i.code ? C.byIsin.get(String(i.code).toLowerCase()) : null, coin = null;
+    if (!e && !i.code && normCcy(i.ccy) === 'EUR' && !/crypto/i.test(i.cls || '')) { e = nm.get(normT(i.name)); if (e) i.code = e.isin; }          // stesso nome identico: si collega anche l'ISIN
+    if (!e && /crypto/i.test(i.cls || '') && normCcy(i.ccy) === 'EUR') coin = C.coins.find(c => normT(c.name) === normT(i.name) || (i.code && c.sym.toLowerCase() === String(i.code).toLowerCase()));
+    const p = e ? e.p : coin ? coin.p : 0; if (!(p > 0) || (e && normCcy(e.c) !== normCcy(i.ccy))) continue;
+    const d = e && e.d ? e.d : today(); if (i.priceDate && d < i.priceDate) continue;
+    if (i.price > 0 && Math.abs(p / i.price - 1) > 0.3) continue;          // salto sospetto: non lo applico da solo
+    if (Math.abs(p - i.price) > 1e-9 * Math.max(1, i.price) || d !== i.priceDate) { setPriceAt(i, p, d); n++; }
+    i.autoSrc = 'catalogo'; i.autoAt = today();
+    if (e && e.t && i.cls === '' ) i.cls = catCls(e.t, e.name);
+  }
+  return n;
 }
 
 /* ---- grafici semplici ---- */
@@ -2963,7 +2999,7 @@ function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni g
     x: () => ({ kind: 'Come sono divisi i tuoi soldi', num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)' }) })));
 }
 /* ---- che cosa si aggiorna da solo: per ogni conto, i titoli con il prezzo automatico e quelli fermi ---- */
-const FONTE = { borsa_italiana: 'Borsa Italiana', stockanalysis: 'Borsa USA (Finnhub)', coingecko: 'CoinGecko', sito: 'il sito', stima: 'stima' };
+const FONTE = { borsa_italiana: 'Borsa Italiana', stockanalysis: 'Borsa USA (Finnhub)', coingecko: 'CoinGecko', sito: 'il sito', stima: 'stima', catalogo: 'catalogo di Borsa Italiana e CoinGecko' };
 const srcText = i => i.autoSrc === 'stima' && i.track ? 'stima: segue ' + trackDesc(i) : (FONTE[i.autoSrc] || i.autoSrc) + ' · prezzo del ' + fmtDate(i.priceDate);
 const isAuto = i => !!(i && i.autoAt && daysSince(i.autoAt) <= 10);
 function autoInfo(a) {
@@ -3274,14 +3310,20 @@ function editOperation(pre, after) {
     const own = S.instruments.map(i => ({ id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', i, held: held.get(i.id) || [] }));
     const known = new Set(S.instruments.flatMap(i => [norm(i.name), norm(i.code)]).filter(Boolean));
     const xs = Object.entries(S.refPrices || {}).filter(([c, r]) => r && r.n && !/\(riferimento\)/i.test(r.n) && !known.has(norm(c)) && !known.has(norm(r.n))).map(([c, r]) => ({ id: '', name: r.n, code: /^[a-z]{2}[0-9a-z]{9}[0-9]$/i.test(c) ? c.toUpperCase() : c, ccy: normCcy(r.c), price: r.p, st: 'auto', held: [] }));
-    return own.concat(xs);
+    let cs = []; const nt = normT(I.q.value), toks = nt.split(' ').filter(Boolean);          // dal catalogo: qualsiasi ETF, ETC, BTP, obbligazione o crypto principale, anche se non ce l'hai ancora
+    if (DATA.cat && nt.length >= 2) {
+      const have = new Set(S.instruments.map(i => String(i.code || '').toLowerCase()).filter(Boolean));
+      cs = DATA.cat.list.filter(e => !have.has(e.isin.toLowerCase()) && toks.every(k => e.n.includes(k))).slice(0, 60).map(e => ({ id: '', name: e.name, code: e.isin, ccy: normCcy(e.c), price: e.p, st: 'auto', held: [], cat: true, cls: catCls(e.t, e.name), src: 'catalogo' }));
+      cs = cs.concat(DATA.cat.coins.filter(c => toks.every(k => c.n.includes(k)) && !S.instruments.some(i => normT(i.name) === normT(c.name))).slice(0, 5).map(c => ({ id: '', name: c.name, code: c.sym, ccy: 'EUR', price: c.p, st: 'auto', held: [], cat: true, cls: 'Crypto', src: 'catalogo' })));
+    }
+    return own.concat(xs, cs);
   }
   const stLabel = c => c.st === 'auto' ? '⟳ si aggiorna da solo' : c.st === 'stima' ? '≈ stimato da solo' : '✎ prezzo a mano';
   function showSug() {
     const t = norm(I.q.value.trim()), accId = I.accId.value, sell = kind === 'vendita';
-    let list = cands().filter(c => !t || norm(c.name).includes(t) || norm(c.code).includes(t));
+    let list = cands().filter(c => c.cat || !t || norm(c.name).includes(t) || norm(c.code).includes(t));
     if (sell) list = list.filter(c => c.held.some(a => a.id === accId));
-    list.sort((a, b) => (b.held.some(x => x.id === accId) - a.held.some(x => x.id === accId)) || (b.held.length > 0) - (a.held.length > 0) || (b.st === 'auto') - (a.st === 'auto') || a.name.localeCompare(b.name));
+    list.sort((a, b) => (b.held.some(x => x.id === accId) - a.held.some(x => x.id === accId)) || (b.held.length > 0) - (a.held.length > 0) || (norm(a.name).startsWith(t) ? 0 : 1) - (norm(b.name).startsWith(t) ? 0 : 1) || (b.st === 'auto') - (a.st === 'auto') || a.name.localeCompare(b.name));
     const items = list.slice(0, 8).map(c => h('button', { type: 'button', class: 'sug-i', role: 'option', onclick: () => pick(c) },
       h('span', { class: 'sug-n' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null),
       h('span', { class: 'sug-m' }, h('b', { class: 'st-' + c.st }, stLabel(c)), ' · ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(a => a.name).join(', ') : c.id ? '' : ' · non ce l\'hai ancora'))));
@@ -3339,7 +3381,7 @@ function editOperation(pre, after) {
     const r = applyOp(o); if (r) { err.textContent = r; return; }
     if (how.startsWith('t:')) { const m = applyOp({ accId: how.slice(2), toId: o.accId, kind: 'trasferimento', date: o.date, amount: SHORT, note: 'Per l\'acquisto di ' + (inst(o.instId) ? inst(o.instId).name : o.newName || 'uno strumento') }); if (m) { err.textContent = 'Acquisto registrato, ma il trasferimento no: ' + m; done(); return; } }
     else if (how === 'ext') { const m = applyOp({ accId: o.accId, kind: 'versamento', date: o.date, amount: SHORT, fromCash: true, note: 'Soldi versati per l\'acquisto' }); if (m) { err.textContent = 'Acquisto registrato, ma il versamento no: ' + m; done(); return; } }
-    if (ext && !o.instId) { const ni = findInst(ext.name, ''); if (ni) { if (!ni.code) ni.code = ext.code; if (!ni.cls) ni.cls = /bitcoin|ether|solana|xrp|ripple|cardano|cosmos|usdc|coin|crypto/i.test(ext.name + ' ' + ext.code) ? 'Crypto' : 'Azioni'; if (!ni.area) ni.area = 'n.d.'; } }          // titolo nuovo ma gia' con prezzo automatico: si collega da solo
+    if (ext && !o.instId) { const ni = findInst(ext.name, ''); if (ni) { if (!ni.code) ni.code = ext.code; if (!ni.cls) ni.cls = ext.cls || (/bitcoin|ether|solana|xrp|ripple|cardano|cosmos|usdc|coin|crypto/i.test(ext.name + ' ' + ext.code) ? 'Crypto' : 'Azioni'); if (!ni.area) ni.area = 'n.d.'; ni.autoSrc = ext.src || 'sito'; ni.autoAt = today(); } }          // titolo nuovo ma gia' con prezzo automatico: si collega da solo
     shut(); done(); if (after) after();
   });
   dlg.append(frm); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); sync(); dlg.showModal();
