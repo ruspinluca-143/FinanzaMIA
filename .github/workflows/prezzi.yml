@@ -51,7 +51,6 @@ jobs:
         id: catalogo
         continue-on-error: true
         shell: pwsh
-        env:
         run: |
           $vecchio = $true; if (Test-Path ./site/catalogo.json) { $m = [regex]::Match((Get-Content ./site/catalogo.json -TotalCount 4) -join ' ', '\"generato\":\"([^\"]+)\"'); if ($m.Success) { $vecchio = ((Get-Date) - [DateTimeOffset]::Parse($m.Groups[1].Value).UtcDateTime.ToLocalTime()).TotalHours -gt 10 } }
           if ($vecchio) { ./catalogo.ps1 -Uscita ./site } else { 'Catalogo recente: riuso quello di prima' }
