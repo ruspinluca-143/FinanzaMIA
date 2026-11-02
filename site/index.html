@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-XNbjX0sCI4D68KG6b5bEACHWZHaniqNAlcL1eS1BDoQ='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V1s26gnAjEqC/bUlhnThATJtW0S+Panv8KaOe1vtd50='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -160,7 +160,22 @@ dialog.opd{max-width:560px}
 @media (max-width:700px){.acards{grid-template-columns:1fr 1fr;gap:9px}.acard{padding:10px 10px 9px}.acard .ac-val{font-size:18px}}
 .cq-row{display:flex;align-items:center;gap:10px;margin-top:12px}
 .cq{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 14px;border-radius:99px;border:1px solid var(--ring);background:var(--card-s);color:var(--ink)}
-.dlgtop{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:3;margin:-6px 0 10px;padding:6px 0;background:var(--card-s)}/* esito del caricamento */
+.dlgtop{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:3;margin:-6px 0 10px;padding:6px 0;background:var(--card-s)}.ac-mv{display:flex;gap:6px;margin:4px 0 0}
+.mv{flex:1;border:0;border-radius:10px;padding:6px 0;font-size:14px;cursor:pointer;background:var(--btn);color:var(--ink);transition:transform .2s var(--ease),background .2s}
+.mv:active{transform:scale(.92);background:color-mix(in srgb,var(--s1) 20%,transparent)}
+.mv:hover{background:color-mix(in srgb,var(--s1) 14%,transparent)}
+.fold-t{cursor:pointer;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.fold-btn{display:inline-grid;place-items:center;width:26px;height:26px;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer;flex:none;padding:0;transition:transform .3s var(--ease),background .2s}
+.fold-btn:hover{background:var(--btn)}
+.fold-btn svg{transition:transform .3s var(--ease)}
+section.fold .fold-btn svg{transform:rotate(-90deg)}
+section.card.fold>:not(.fold-head){display:none!important}
+section.card.fold{padding-bottom:14px}
+section.card.fold .fold-head h2{margin-bottom:0}
+section.card.fold .fold-head{margin-bottom:0}
+.grp.fold>:not(.fold-head){display:none!important}
+.grp.fold{margin-bottom:0}
+.grp-head .grp-t h2{display:flex;align-items:center;gap:6px}/* esito del caricamento */
 .res{display:grid;justify-items:center;text-align:center;gap:6px;padding:8px 0 14px}
 .res h3{margin:4px 0 0;font-size:22px}
 .res p{margin:0;color:var(--ink2);max-width:52ch}
@@ -2750,7 +2765,28 @@ function runNumbers() {
     setTimeout(() => { stop = true; el.textContent = final; }, dur + 200);      // rete di sicurezza se i fotogrammi non partono (scheda in secondo piano): dopo, l'animazione non scrive piu
   }
 }
-function afterRender() { const nav = $app.querySelector('.tabs'); if (nav) placeThumb(nav); runNumbers(); }
+/* ---- ogni sezione si puo' chiudere (tocco sul titolo): meno scorrimento, ricerca piu' veloce; la scelta resta salvata ---- */
+const foldKey = (t) => UI.tab + '|' + (UI.tab === 'analisi' ? UI.sub || '' : UI.tab === 'piano' ? UI.psub || '' : UI.tab === 'conti' && UI.acc ? 'conto' : '') + '|' + t;
+function foldInit() {
+  if (!S || DEMO && false) return; const F = (S.settings.fold = S.settings.fold || {});
+  const prep = (sec, head, titleEl, name) => {
+    if (!head || !titleEl || sec.dataset.fold) return; const key = foldKey(name || titleEl.textContent.trim()); sec.dataset.fold = key; head.classList.add('fold-head');
+    const ch = h('button', { type: 'button', class: 'fold-btn', 'aria-label': 'Chiudi o apri la sezione', 'aria-expanded': 'true' }, s('svg', { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d: 'M6 9l6 6 6-6' })));
+    const set = (closed, save) => { sec.classList.toggle('fold', closed); ch.setAttribute('aria-expanded', closed ? 'false' : 'true'); if (save) { if (closed) F[key] = 1; else delete F[key]; touch(); } };
+    const flip = e => { if (e.target.closest('a,input,select,textarea') || (e.target.closest('button') && !e.target.closest('.fold-btn'))) return; set(!sec.classList.contains('fold'), true); };
+    ch.addEventListener('click', e => { e.stopPropagation(); flip(e); }); titleEl.addEventListener('click', flip); titleEl.classList.add('fold-t'); titleEl.prepend(ch);
+    if (F[key]) set(true, false);
+  };
+  for (const sec of $app.querySelectorAll('.view section.card:not(.hero):not(.conti-head)')) {
+    const t = [...sec.children].find(c => c.tagName === 'H2' || (c.classList && c.classList.contains('row') && c.querySelector('h2')));
+    if (t) prep(sec, t, t.tagName === 'H2' ? t : t.querySelector('h2'), (t.tagName === 'H2' ? t : t.querySelector('h2')).textContent);
+  }
+  for (const g of $app.querySelectorAll('.conti .grp')) { const hd = g.querySelector('.grp-head'), h2 = hd && hd.querySelector('h2'); if (hd && h2) prep(g, hd, h2, h2.textContent); }
+}
+function foldAll(closed) {          // dal menu: chiude o apre tutte le sezioni della scheda che stai guardando
+  document.querySelectorAll('[data-fold]').forEach(sec => { const b = sec.querySelector('.fold-btn'); if (b && sec.classList.contains('fold') !== closed) b.click(); });
+}
+function afterRender() { const nav = $app.querySelector('.tabs'); if (nav) placeThumb(nav); runNumbers(); foldInit(); }
 window.addEventListener('resize', () => { const nav = $app.querySelector('.tabs'); if (nav) { LASTTHUMB = null; placeThumb(nav); } });
 function render() {
   const y = window.scrollY;
@@ -2929,6 +2965,9 @@ function openMenu() {
     DEMO ? null : item('Aggiorna i saldi', MICO.saldi, openBalances, 'conti correnti, contanti, carte'),
     DEMO ? null : item('Salva adesso', MICO.save, saveNow, cloudSub ? 'online ' + cloudSub : ''),
     item(HIDE ? 'Mostra gli importi' : 'Nascondi gli importi', MICO.eye, () => { HIDE = !HIDE; render(); }),
+    h('div', { class: 'dr-sec' }, 'Sezioni di questa scheda'),
+    item('Chiudi tutte le sezioni', ['M6 9l6 6 6-6'], () => foldAll(true), 'per vedere solo i titoli'),
+    item('Apri tutte le sezioni', ['M6 15l6-6 6 6'], () => foldAll(false)),
     h('div', { class: 'dr-sec' }, 'Altre viste'),
     item('Strumenti (i tuoi titoli)', ICONS.strumenti, go('strumenti')),
     item('Allocazione (come sei diviso)', ICONS.allocazione, go('allocazione')),
@@ -3015,7 +3054,7 @@ function tabPanoramica() {
 /* ---- i conti divisi in tre gruppi: soldi fermi, soldi investiti, fondo pensione ---- */
 const ACC_GROUPS = [['fermi', 'Soldi fermi', 'Conti correnti, contanti, carte e conti deposito: soldi pronti da usare, che non salgono e non scendono con i mercati (le carte di credito contano come debito).'], ['investiti', 'Soldi investiti', 'Broker, crypto e trading: titoli, ETF e crypto che cambiano valore ogni giorno.'], ['pensione', 'Fondo pensione', 'TFR e versamenti per la pensione: crescono nel tempo e si possono ritirare solo in casi precisi (pensione, prima casa, spese mediche).']];
 const accGroup = a => a.type === 'pensione' ? 'pensione' : ['broker', 'crypto', 'trading'].includes(a.type) ? 'investiti' : 'fermi';
-const groupAccs = () => ACC_GROUPS.map(([k, l, d]) => { const accs = S.accounts.filter(a => accGroup(a) === k).sort((x, y) => accValue(y) - accValue(x)); return { k, l, d, accs, tot: accs.reduce((t, a) => t + accValue(a), 0) }; });
+const groupAccs = () => ACC_GROUPS.map(([k, l, d]) => { const accs = S.accounts.filter(a => accGroup(a) === k).sort((x, y) => (x.ord ?? 1e9) - (y.ord ?? 1e9) || accValue(y) - accValue(x)); return { k, l, d, accs, tot: accs.reduce((t, a) => t + accValue(a), 0) }; });
 function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni gruppo e da quali conti
   const tot = totalValue();
   return tiles(groupAccs().filter(g => g.accs.length).map(g => ({ l: g.l, v: eur(g.tot), s: (tot > 0 ? pct(g.tot / tot) + ' del totale · ' : '') + pl(g.accs.length, 'conto', 'conti'),
@@ -3049,11 +3088,16 @@ function talkAuto(a) {
 /* ---- la scheda Conti: tre gruppi, un riquadro per conto ---- */
 const ACC_ICO = { banca: ['M3 10l9-6 9 6', 'M5 10v8', 'M9.5 10v8', 'M14.5 10v8', 'M19 10v8', 'M3 20h18'], contanti: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], pagamenti: ['M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1z', 'M2 10h20', 'M6 14.5h4'], deposito: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], broker: ['M4 19l5-6 4 3 7-9', 'M15 7h5v5'], crypto: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M9.5 8h3.5a2 2 0 010 4H9.5h4a2 2 0 010 4h-4z', 'M11 6.5v1.5M11 16v1.5'], trading: ['M7 4v16', 'M5 8h4v6H5z', 'M17 4v16', 'M15 7h4v8h-4z'], pensione: ['M3 12a9 9 0 0118 0z', 'M12 12v6a2 2 0 01-4 0'], altro: ['M12 4a8 8 0 100 16 8 8 0 000-16z'] };
 const accIco = a => s('svg', { viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ACC_ICO[a.type] || ACC_ICO.altro).map(d => s('path', { d })));
+function moveAcc(a, dir) {          // sposta un conto avanti (-1) o indietro (+1) nel suo gruppo; l'ordine resta salvato
+  const g = groupAccs().find(x => x.k === accGroup(a)), list = g.accs.slice(), i = list.indexOf(a), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]]; list.forEach((x, n) => { x.ord = n; }); touch(); render();
+}
 function accCard(a, total, k) {          // riquadro quadrato e compatto: due per riga sul telefono
   const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); }, grp = accGroup(a), x = grp === 'fermi' || !a.positions.length ? null : autoInfo(a), nA = x ? x.auto.length : 0, nT = x ? x.auto.length + x.fermi.length : 0;
   const badge = !x ? h('div', { class: 'ac-auto man' }, '✎ saldo a mano') : h('button', { type: 'button', class: 'ac-auto ' + (x.fermi.length ? (nA ? 'mix' : 'man') : 'ok'), onclick: e => { e.stopPropagation(); tapFx(e.currentTarget); talkAuto(a); } }, nA === nT ? '⟳ tutto automatico' : nA ? '⟳ ' + nA + ' su ' + nT + ' automatici' : '✎ prezzi a mano');
   const card = h('div', { class: 'acard g-' + grp, role: 'button', tabindex: '0', style: '--i:' + k, 'data-s': normT([a.name, TYPES[a.type] ? TYPES[a.type].label : a.type, a.box, (ACC_GROUPS.find(g => g[0] === grp) || [])[1], a.note].filter(Boolean).join(' ')), onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); open(); }, onkeydown: e => { if (e.key === 'Enter') open(); } },
     h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, accIco(a)), a.box ? h('span', { class: 'ac-tag' }, a.box) : null),
+    UI.reorder ? h('div', { class: 'ac-mv' }, h('button', { type: 'button', class: 'mv', 'aria-label': 'Sposta prima', onclick: e => { e.stopPropagation(); moveAcc(a, -1); } }, '◀'), h('button', { type: 'button', class: 'mv', 'aria-label': 'Sposta dopo', onclick: e => { e.stopPropagation(); moveAcc(a, 1); } }, '▶')) : null,
     h('div', { class: 'ac-name', title: a.name }, a.name),
     h('div', { class: 'ac-val' }, eur(v)),
     a.perf && p.pnl != null ? h('div', null, h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + (fin(p.pnlPct) ? spct(p.pnlPct).replace('+', '') : seur(p.pnl).replace('+', '')))) : h('div', { class: 'ac-sub' }, total > 0 ? pct(v / total) + ' del totale' : ''),
@@ -3072,7 +3116,8 @@ function tabConti() {
   const sq = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca un conto (nome, tipo, cassa…)', 'aria-label': 'Cerca un conto', autocomplete: 'off', enterkeyhint: 'search', value: UI.contiQ || '', oninput: e => filterConti(e.target.value) });
   el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'Tutti i tuoi conti'), h('div', { class: 'ch-n' }, eur(total)), h('div', { class: 'muted' }, pl(S.accounts.length, 'conto', 'conti') + ' · tocca un conto per aprirlo'))),
     S.accounts.length > 3 ? h('div', { class: 'cq-row' }, sq, h('span', { class: 'cq-n muted' })) : null,
-    h('div', { class: 'actbar' }, btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount()))));
+    h('div', { class: 'actbar' }, btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount()), S.accounts.length > 1 ? btn(UI.reorder ? 'Fatto' : 'Riordina', () => { UI.reorder = !UI.reorder; render(); }, UI.reorder ? 'pri' : '') : null),
+    UI.reorder ? h('p', { class: 'muted' }, 'Tocca ◀ ▶ su un conto per spostarlo prima o dopo, dentro il suo gruppo. L\'ordine resta salvato. Premi Fatto quando hai finito.') : null));
   if (!S.accounts.length) { el.append(h('p', { class: 'muted' }, 'Nessun conto: creane uno o importa i file.')); return el; }
   let k = 0;
   for (const g of groupAccs()) if (g.accs.length) {
