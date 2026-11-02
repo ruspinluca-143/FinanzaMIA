@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UecWau4xW1eE0EkKz5y6W7oKgdij+xTeQFscMnWUZHc='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tVZ8OBWKJqM27amUrWzI8HXX1uiwuvR3ResoW75wErw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1480,7 +1480,7 @@ function openPrices(P, fname) {
 }
 function editPosition(a, p) {
   if (!S.instruments.length) { alert('Crea prima almeno uno strumento (scheda "Strumenti").'); return; }
-  const isNew = !p, v = p || { instId: S.instruments[0].id, qty: null, cost: null };
+  const isNew = !p, v = p ? Object.assign({}, p, ...(p.parts || []).map((x, k) => ({ ['part' + k]: x.amount }))) : { instId: S.instruments[0].id, qty: null, cost: null };
   form(isNew ? 'Nuova posizione in ' + a.name : 'Modifica posizione', [
     { key: 'instId', label: 'Strumento', type: 'select', options: S.instruments.map(i => [i.id, i.name + ' (' + i.ccy + ')']) },
     { key: 'qty', label: 'Quantità (per fondi a quote: numero di quote)', type: 'number', req: true },
@@ -3530,21 +3530,23 @@ function goalsCard() {
 /* ============ nuovo PAC guidato ============ */
 function candOf(i) { const held = []; for (const a of S.accounts) { const p = a.positions.find(z => z.instId === i.id); if (p) held.push({ a, p }); } return { id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', held }; }
 function pacWizard(pre) {
-  pre = pre || {}; const p = { c: pre.c || null, amount: null, fi: 0, day: 5, accId: '', fromId: '__same', whole: false, q: '' };
+  pre = pre || {}; const p = { parts: pre.c ? [{ c: pre.c, amount: null }] : [], c: pre.c || null, amount: null, fi: 0, day: 5, accId: '', fromId: '__same', whole: false, q: '' };
   const nextDate = day => { const t = new Date(), d = new Date(t.getFullYear(), t.getMonth() + (day >= t.getDate() ? 0 : 1), 1); return ymd(new Date(d.getFullYear(), d.getMonth(), Math.min(day, 28))); };
   const sTit = api => { const res = h('div', { class: 'wz-res' }), inp = h('input', { type: 'search', class: 'wz-search', placeholder: 'Scrivi nome, ISIN o crypto', autocomplete: 'off', value: p.q, 'aria-label': 'Cerca il titolo' });
-    const fill = () => { p.q = inp.value; res.replaceChildren(...opCands(inp.value, '', 'acquisto').slice(0, 7).map(c => h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { p.c = c; if (!p.accId && c.held[0]) p.accId = c.held[0].a.id; api.next(); } }, h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null), h('span', { class: 'wz-s' }, (c.st === 'auto' ? '⟳ prezzo automatico' : c.st === 'stima' ? '≈ prezzo stimato' : '✎ prezzo a mano') + ' · oggi ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(x => x.a.name).join(', ') : ''))))); };
-    inp.addEventListener('input', fill); fill(); return { q: 'Che cosa compri ogni volta?', focus: '.wz-search', valid: !!p.c, body: [p.c ? h('div', { class: 'wz-chip' }, h('b', null, 'Scelto: ' + p.c.name), h('span', { class: 'wz-s' }, 'scrivi per cambiarlo, oppure premi Avanti')) : null, inp, res].filter(Boolean) }; };
-  const sImp = api => ({ q: 'Quanto compri per volta?', focus: '.wz-num', valid: p.amount > 0, body: [wzNum(p.amount, 'Euro per volta', v => { p.amount = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), wzChips([25, 50, 100, 200, 500], v => eur(v), v => { p.amount = v; api.next(); })] });
+    const fill = () => { p.q = inp.value; res.replaceChildren(...opCands(inp.value, '', 'acquisto').slice(0, 7).map(c => h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { if (!p.parts.some(x => (x.c.id && x.c.id === c.id) || (!x.c.id && x.c.code === c.code && x.c.name === c.name))) p.parts.push({ c, amount: null }); if (!p.accId && c.held[0]) p.accId = c.held[0].a.id; api.next(); } }, h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null), h('span', { class: 'wz-s' }, (c.st === 'auto' ? '⟳ prezzo automatico' : c.st === 'stima' ? '≈ prezzo stimato' : '✎ prezzo a mano') + ' · oggi ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(x => x.a.name).join(', ') : ''))))); };
+    inp.addEventListener('input', fill); fill(); return { q: p.parts.length ? 'Aggiungi un altro strumento (o premi Avanti)' : 'Che cosa compri ogni volta?', focus: '.wz-search', valid: p.parts.length > 0, body: [p.parts.length ? h('div', { class: 'wz-chip' }, h('b', null, 'Scelti: ' + p.parts.map(x => x.c.name).join(' + ')), h('span', { class: 'wz-s' }, 'un PAC può avere più strumenti: cercane un altro, oppure premi Avanti')) : null, inp, res].filter(Boolean) }; };
+  const sImp = api => { const ok = () => p.parts.length > 0 && p.parts.every(x => x.amount > 0), one = p.parts.length === 1;
+    return { q: one ? 'Quanto compri per volta?' : 'Quanto per ciascuno strumento, ogni volta?', focus: '.wz-num', valid: ok(), body: [...p.parts.map((x, k) => h('div', { class: 'wz-part' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, x.c.name), p.parts.length > 1 ? btn('Togli', () => { p.parts.splice(k, 1); api.redraw(); }, 'sm') : null), wzNum(x.amount, 'Euro per volta', v => { x.amount = v; if (api.nextBtn) api.nextBtn.disabled = !ok(); }), one ? wzChips([25, 50, 100, 200, 500], v => eur(v), v => { x.amount = v; api.next(); }) : null)), btn('+ Aggiungi un altro strumento', () => api.jump(0), 'sm')] }; };
   const sFreq = api => ({ q: 'Ogni quanto?', next: false, body: FREQ.map((f, k) => wzOpt(f[1], null, () => { p.fi = k; api.next(); }, p.fi === k ? 'sel' : '')) });
   const sDay = api => ({ q: 'In che giorno del mese?', focus: '.wz-num', valid: p.day >= 1 && p.day <= 28, body: [wzNum(p.day, 'Giorno (1-28)', v => { p.day = v; if (api.nextBtn) api.nextBtn.disabled = !(v >= 1 && v <= 28); }), wzChips([1, 2, 5, 8, 10, 15, 20, 23, 28], v => 'il ' + v, v => { p.day = v; api.next(); })] });
   const sConto = api => ({ q: 'In quale conto lo compri?', next: false, body: S.accounts.filter(a => !a.dep && accGroup(a) !== 'fermi').concat(S.accounts.filter(a => !a.dep && accGroup(a) === 'fermi')).map(a => wzOpt(a.name, (TYPES[a.type] || {}).label + ' · liquidità ' + eur(Math.max(0, accCash(a)), true), () => { p.accId = a.id; api.next(); }, p.accId === a.id ? 'sel' : '')) });
   const sDa = api => ({ q: 'Da dove partono i soldi?', next: false, body: [wzOpt('Sono già nel conto', 'si usa la sua liquidità', () => { p.fromId = '__same'; api.next(); }), ...S.accounts.filter(a => a.id !== p.accId && !a.dep && accGroup(a) === 'fermi' && !a.box).map(a => wzOpt('Dal conto ' + a.name, 'liquidità ' + eur(Math.max(0, accCash(a)), true) + ' · prima registro il trasferimento', () => { p.fromId = a.id; api.next(); })), wzOpt('Arrivano da fuori', 'per esempio il TFR o lo stipendio versato direttamente', () => { p.fromId = '__ext'; api.next(); }, 'soft')] });
-  const sSum = api => { const f = FREQ[p.fi], perM = p.amount / f[2], year = perM * 12, name = p.c.name, acc = S.accounts.find(a => a.id === p.accId);
-    return { q: 'Controlla e conferma', nextLabel: 'Crea il PAC', valid: !!acc, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, eur(p.amount) + ' di ' + name + ' ' + f[1].toLowerCase() + ', il ' + p.day), h('div', { class: 'wz-sum-s' }, (acc ? acc.name : '') + ' · ' + (p.fromId === '__same' ? 'con la sua liquidità' : p.fromId === '__ext' ? 'soldi da fuori' : 'dal conto ' + accName(p.fromId)))),
+  const sSum = api => { p.amount = p.parts.reduce((t, x) => t + (x.amount || 0), 0); const f = FREQ[p.fi], perM = p.amount / f[2], year = perM * 12, name = p.parts.length > 1 ? p.parts.length + ' strumenti' : p.parts[0].c.name, acc = S.accounts.find(a => a.id === p.accId);
+    return { q: 'Controlla e conferma', nextLabel: 'Crea il PAC', valid: !!acc, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, eur(p.amount) + ' di ' + name + ' ' + f[1].toLowerCase() + ', il ' + p.day), p.parts.length > 1 ? h('ul', null, p.parts.map(x => h('li', null, eur(x.amount) + ' · ' + x.c.name))) : null, h('div', { class: 'wz-sum-s' }, (acc ? acc.name : '') + ' · ' + (p.fromId === '__same' ? 'con la sua liquidità' : p.fromId === '__ext' ? 'soldi da fuori' : 'dal conto ' + accName(p.fromId)))),
       talkBars([['In un anno versi', year, '', null, eur(year)], ['In 10 anni versi', year * 10, '', null, eur(year * 10)], ['In 10 anni, ipotesi 5% all\'anno', goalFuture(0, perM, 10, 0.05), 'non è una promessa', null, eur(goalFuture(0, perM, 10, 0.05))]], false),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.whole, onchange: e => { p.whole = e.target.checked; } }), h('span', null, 'Solo quote intere', h('small', null, ' — come il PAC di Directa: compra solo quote complete'))), h('p', { class: 'muted' }, 'Il giorno del PAC ti chiedo se è stato preso davvero: solo con il tuo sì lo registro.')],
-      onNext: a2 => { const c = p.c; (S.plans = S.plans || []).push({ id: uid(), label: 'PAC ' + String(name).replace(/ucits|etf|acc\b|\(.*?\)/gi, '').replace(/\s+/g, ' ').trim().slice(0, 28), kind: 'acquisto', accId: p.accId, fromAccId: ['__same', '__ext'].includes(p.fromId) ? '' : p.fromId, instId: c.id || '', instName: c.id ? '' : c.name, instCode: c.id ? '' : c.code, instCcy: c.ccy, instCls: c.cls || 'Azioni', amount: p.amount, freq: f[0], day: p.day, start: nextDate(p.day), end: '', note: '', whole: p.whole, ext: p.fromId === '__ext', since: today(), done: [] }); done(); wzDone(a2, 'PAC creato', 'Il prossimo è il ' + fmtDate(nextDate(p.day)) + '. Lo trovi in Piano → Appuntamenti.'); return false; } }; };
+      onNext: a2 => { const cl = x => ({ instId: x.c.id || '', instName: x.c.id ? '' : x.c.name, instCode: x.c.id ? '' : x.c.code, instCcy: x.c.ccy, instCls: x.c.cls || 'Azioni', amount: x.amount }), multi = p.parts.length > 1, c = p.parts[0].c, short = n => String(n).replace(/ucits|etf|acc\b|\(.*?\)/gi, '').replace(/\s+/g, ' ').trim().slice(0, 28);
+        (S.plans = S.plans || []).push(Object.assign({ id: uid(), label: multi ? 'PAC ' + acc.name : 'PAC ' + short(c.name), kind: 'acquisto', accId: p.accId, fromAccId: ['__same', '__ext'].includes(p.fromId) ? '' : p.fromId, amount: p.amount, freq: f[0], day: p.day, start: nextDate(p.day), end: '', note: '', whole: p.whole, ext: p.fromId === '__ext', since: today(), done: [] }, multi ? { parts: p.parts.map(cl), instId: '' } : cl(p.parts[0]))); done(); wzDone(a2, 'PAC creato', 'Il prossimo è il ' + fmtDate(nextDate(p.day)) + '. Lo trovi in Piano → Appuntamenti.'); return false; } }; };
   return wzRun({ steps: () => [sTit, sImp, sFreq, sDay, sConto, sDa, sSum] });
 }
 
@@ -3971,7 +3973,17 @@ function planDueAll() {          // scadute o di oggi e non ancora registrate ne
 }
 /* ---- acquisti programmati: l'app prepara la modifica e chiede "e' stato preso davvero?" (Si' = la registra, No = la salta) ---- */
 const priceOn = (i, d) => { const x = (i.hist || []).filter(z => z.d <= d && z.p > 0).sort((a, b) => a.d < b.d ? 1 : -1)[0]; return x ? x.p : i.price; };
-function planProposal(p, d, amt) {          // le operazioni che il PAC avrebbe fatto quel giorno, al prezzo di quel giorno
+function planProposal(p, d, amt) {          // un PAC puo' avere piu' strumenti (p.parts): un solo spostamento di soldi e tanti acquisti
+  if (!(p.parts && p.parts.length)) return planProposalOne(p, d, amt);
+  const k = amt > 0 ? amt / p.amount : 1, subs = p.parts.map(x => planProposalOne(Object.assign({}, p, { parts: null, instId: x.instId || '', instName: x.instName || '', instCode: x.instCode || '', instCcy: x.instCcy || '', instCls: x.instCls || '', amount: x.amount }), d, x.amount * k));
+  const bad = subs.find(s => s.err); if (bad) return { err: bad.err };
+  const buys = subs.flatMap(s => s.ops.filter(o => o.kind === 'acquisto')), mv = [];
+  for (const o of subs.flatMap(s => s.ops.filter(x => x.kind !== 'acquisto'))) { const e = mv.find(z => z.kind === o.kind && z.accId === o.accId && z.toId === o.toId); if (e) e.amount += o.amount; else mv.push(Object.assign({}, o)); }
+  for (const o of mv) o.amount = Math.round(o.amount * 100) / 100;
+  const t0 = subs[0].text, head = / \([^()]*\)$/.test(t0) ? t0.slice(t0.lastIndexOf(' (')) : '';
+  return { ops: mv.concat(buys), text: subs.map(s => s.text.replace(/ \([^()]*\)$/, '')).join(' + ') + head };
+}
+function planProposalOne(p, d, amt) {          // le operazioni che il PAC avrebbe fatto quel giorno, al prezzo di quel giorno, per uno strumento
   const amount = amt > 0 ? amt : p.amount, acc = S.accounts.find(a => a.id === p.accId); if (!acc) return { err: 'il conto di questo acquisto non c\'è più' };
   const ops = [], from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '', note = p.label + ' del ' + fmtDate(d), r2 = v => Math.round(v * 100) / 100;
   if (p.kind !== 'acquisto') { ops.push(from ? { accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount, note } : { accId: p.accId, kind: 'versamento', date: d, amount, fromCash: true, note }); return { ops, text: (from ? 'Sposti ' + eur(amount, true) + ' da ' + accName(from) + ' a ' : 'Entrano ' + eur(amount, true) + ' in ') + acc.name }; }
@@ -4046,14 +4058,13 @@ function registerDue(p, d) {
 }
 function editPlan(p) {
   if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
-  const isNew = !p, v = p || { label: '', kind: 'acquisto', accId: S.accounts[0].id, fromAccId: '', instId: '', amount: null, freq: 'mensile', day: 5, start: today(), end: '', note: '' };
+  const isNew = !p, v = p ? Object.assign({}, p, ...(p.parts || []).map((x, k) => ({ ['part' + k]: x.amount }))) : { label: '', kind: 'acquisto', accId: S.accounts[0].id, fromAccId: '', instId: '', amount: null, freq: 'mensile', day: 5, start: today(), end: '', note: '' };
   form(isNew ? 'Nuovo acquisto programmato' : 'Modifica acquisto programmato', [
     { key: 'label', label: 'Nome', req: true, ph: 'es. PAC ETF mondo' },
     { key: 'kind', label: 'Che cos\'è', type: 'select', options: [['acquisto', 'Acquisto di uno strumento'], ['versamento', 'Versamento sul conto']] },
     { key: 'accId', label: 'Conto di arrivo (dove finiscono i soldi o l\'acquisto)', type: 'select', options: S.accounts.map(a => [a.id, a.name]) },
     { key: 'fromAccId', label: 'Conto di partenza (facoltativo)', type: 'select', options: [['', '— i soldi sono già lì o arrivano da fuori —'], ...S.accounts.map(a => [a.id, a.name])], hint: 'per esempio il conto corrente da cui parte il bonifico verso il broker' },
-    { key: 'instId', label: 'Strumento (per gli acquisti)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] },
-    { key: 'amount', label: 'Importo ogni volta (€)', type: 'number', req: true },
+    ...(p && p.parts ? p.parts.map((x, k) => ({ key: 'part' + k, label: 'Ogni volta: ' + (x.instId && inst(x.instId) ? inst(x.instId).name : x.instName || x.instCode) + ' (€, 0 = toglilo)', type: 'number' })) : [{ key: 'instId', label: 'Strumento (per gli acquisti)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] }, { key: 'amount', label: 'Importo ogni volta (€)', type: 'number', req: true }]),
     { key: 'freq', label: 'Frequenza', type: 'select', options: FREQ.map(f => [f[0], f[1]]) },
     { key: 'day', label: 'Giorno del mese (1-28)', type: 'number' },
     { key: 'start', label: 'Dal', type: 'date', req: true },
@@ -4062,13 +4073,19 @@ function editPlan(p) {
     { key: 'ext', label: 'I soldi arrivano da fuori', type: 'check', hint: 'per esempio il TFR versato dall\'azienda nel fondo pensione' },
     { key: 'note', label: 'Nota' }
   ], v, o => {
+    const np = p && p.parts ? p.parts.map((x, k) => Object.assign({}, x, { amount: +o['part' + k] || 0 })).filter(x => x.amount > 0) : null; if (np) { if (!np.length) return 'Lascia almeno uno strumento con un importo.'; o.amount = np.reduce((s, x) => s + x.amount, 0); o.instId = ''; }
     if (!(o.amount > 0)) return 'L\'importo deve essere maggiore di zero.';
     if (o.end && o.end < o.start) return 'La data finale è prima di quella iniziale.';
-    const d = { label: o.label, kind: o.kind, accId: o.accId, fromAccId: o.fromAccId && o.fromAccId !== o.accId ? o.fromAccId : '', instId: o.instId, amount: o.amount, freq: o.freq, day: Math.min(28, Math.max(1, Math.round(o.day || +o.start.slice(8, 10)))), start: o.start, end: o.end || '', note: o.note, whole: !!o.whole, ext: !!o.ext };
+    const d = { label: o.label, kind: o.kind, accId: o.accId, fromAccId: o.fromAccId && o.fromAccId !== o.accId ? o.fromAccId : '', instId: o.instId, amount: o.amount, freq: o.freq, day: Math.min(28, Math.max(1, Math.round(o.day || +o.start.slice(8, 10)))), start: o.start, end: o.end || '', note: o.note, whole: !!o.whole, ext: !!o.ext }; if (np) d.parts = np;
     if (isNew) PL().push({ id: uid(), ...d, since: today(), done: [] }); else Object.assign(p, d);
     done();
   });
 }
+function partsText(p) { return p.parts && p.parts.length ? p.parts.map(x => { const i = x.instId ? inst(x.instId) : null; return eur(x.amount) + ' ' + (i ? i.name : x.instName || x.instCode || '?'); }).join(' + ') : (p.instId && inst(p.instId) ? inst(p.instId).name : (p.instName || '—')); }
+function planGroups(plans) {          // i PAC sono raggruppati per conto: sotto il nome del conto, quanto ci entra al mese e che cosa compra
+  if (!plans.length) return null; const ids = [...new Set(plans.map(p => p.accId))].sort((a, b) => S.accounts.findIndex(x => x.id === a) - S.accounts.findIndex(x => x.id === b));
+  return h('div', null, ids.map(id => { const list = plans.filter(p => p.accId === id), pm = list.reduce((s, p) => s + p.amount / freqMonths(p.freq), 0);
+    return h('div', { class: 'plan-grp' }, h('h3', { class: 'plan-h' }, accName(id), h('small', { class: 'muted' }, ' · ' + eur(pm) + ' al mese')), table([{ t: 'Voce' }, { t: 'Che cosa compra' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }], list.map(p => { const nx = planNext(p, 1)[0]; return [p.label, partsText(p), eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }))); })); }
 function piAppuntamenti() {
   const el = h('div'), due = planDueAll(), plans = PL(), perMonth = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0);
   if (due.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Da confermare'), btn('Conferma…', () => confirmDue(), 'pri')),
@@ -4076,9 +4093,7 @@ function piAppuntamenti() {
     table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Conto' }, { t: 'Importo', n: 1 }], due.map(({ p, d }) => [fmtDate(d), p.label, accName(p.accId), eur(p.amount)]))));
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Acquisti programmati'), btn('+ Nuovo', () => pacWizard(), 'pri')),
     plans.length ? tiles([{ l: 'Impegno medio al mese', v: eur(perMonth), s: eur(perMonth * 12) + ' in un anno' }, { l: 'Programmati', v: String(plans.length), s: plans.length === 1 ? 'acquisto periodico' : 'acquisti periodici' }]) : null,
-    table([{ t: 'Voce' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }],
-      plans.map(p => { const nx = planNext(p, 1)[0]; return [p.label, accName(p.accId), p.instId && inst(p.instId) ? inst(p.instId).name : '—', eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }),
-      'Ancora nessun acquisto programmato: aggiungi i PAC e i versamenti periodici che hai.'),
+    planGroups(plans) || h('p', { class: 'muted' }, 'Ancora nessun acquisto programmato: aggiungi i PAC e i versamenti periodici che hai.'),
     h('p', { class: 'muted' }, 'Li scrivi una volta sola: poi l\'app ti ricorda quando registrarli e li usa nelle previsioni.')));
   if (plans.length) {
     const now = new Date(), rows = [];
