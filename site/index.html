@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+ir/jpGPm7XtuTBScrkC0evjVGoISUWQPiMaVaDC1OQ='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RH3c42hA/BLY0e7vA7GYcSdiSVv13OG/eUPU/IUCPRM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -132,6 +132,8 @@ dialog.opd{max-width:560px}
 .st-auto{color:var(--gain);font-weight:600}.st-stima{color:#ff9f0a;font-weight:600}.st-man{color:var(--ink2);font-weight:600}
 .instinfo{font-size:12.5px;color:var(--ink2);margin:-6px 0 6px;line-height:1.4}
 .warnline{display:block;color:#c93400;margin-top:4px}
+.shortbox{margin:10px 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,#ff9f0a 14%,transparent);border:1px solid color-mix(in srgb,#ff9f0a 40%,transparent)}
+.shorttxt{font-weight:600;font-size:14px;line-height:1.4}
 .duelist{display:grid;gap:10px;margin:12px 0}
 .due{padding:14px;border-radius:16px;border:1px solid var(--ring);background:color-mix(in srgb,var(--s1) 5%,transparent);animation:rise .45s var(--ease) both}
 .due-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
@@ -1931,7 +1933,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
     let acc = S.accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
     const dup = acc && (acc.imports || []).find(x => x.hash === it.hash); if (dup) { out.push({ it, acc, skip: 'già importato il ' + fmtDate(dup.date) }); continue; }
-    const created = !acc; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; S.accounts.push(acc); }
+    const created = !acc; if (!acc) { const type = TYPES[m.tipo] ? m.tipo : newAccountFromFile(name).type; acc = { id: uid(), name, type, perf: TYPES[type].perf, cash: 0, cashCcy: normCcy(m.valuta), note: '', positions: [], flows: [], imports: [] }; if (/cassa\s*cani/i.test(name)) acc.box = 'Cassa cani'; S.accounts.push(acc); }
     if (!it.fin.clean.trim()) {          // blocco senza righe: e' un conto fermo (banca, risparmi...), conta solo il saldo
       const v = parseNum(m.liquidita || '', ','); if (!fin(v)) { if (created) S.accounts = S.accounts.filter(a => a !== acc); out.push({ it, acc, skip: 'manca il saldo (liquidita=...)' }); continue; }
       acc.cash = v; if (m.valuta) acc.cashCcy = normCcy(m.valuta); if (FREQ_DAYS[m.frequenza]) acc.freq = m.frequenza; acc.upd = today();
@@ -3252,7 +3254,18 @@ function editOperation(pre, after) {
   const accLbl = h('span', null, 'Conto'), amtLbl = h('span', null, 'Importo (€)'), desc = h('p', { class: 'muted opdesc' });
   const fld = (lab, el, hint) => h('label', { class: 'fld' }, typeof lab === 'string' ? h('span', null, lab) : lab, el, hint ? h('small', null, hint) : null);
   /* strumento: si cerca scrivendo, con i suggerimenti dei titoli che hai e di quelli che hanno gia' un prezzo automatico */
-  const sug = h('div', { class: 'sug', role: 'listbox', hidden: '' }), instInfo = h('div', { class: 'instinfo' }), cashWarn = h('small', { class: 'warnline' });
+  const sug = h('div', { class: 'sug', role: 'listbox', hidden: '' }), instInfo = h('div', { class: 'instinfo' });
+  /* liquidita' che non basta: l'app propone di registrare prima il trasferimento (o il versamento) dei soldi mancanti */
+  const howSel = h('select', { 'aria-label': 'Come sono arrivati i soldi mancanti' }), shortTxt = h('div', { class: 'shorttxt' }), shortBox = h('div', { class: 'shortbox', hidden: '' }, shortTxt, h('label', { class: 'fld' }, h('span', null, 'Come sono arrivati questi soldi?'), howSel));
+  let SHORT = 0;
+  function syncShort(spend) {
+    const acc = S.accounts.find(a => a.id === I.accId.value), miss = kind === 'acquisto' && I.fromCash.checked && acc ? spend - accCash(acc) : 0;
+    SHORT = miss > 0.01 ? Math.ceil(miss * 100) / 100 : 0; shortBox.hidden = !SHORT; if (!SHORT) return;
+    const prev = howSel.value, others = S.accounts.filter(a => a.id !== acc.id && !a.dep && accCash(a) > 0.01).sort((x, y) => (x.box ? 1 : 0) - (y.box ? 1 : 0) || (accCash(x) + 0.01 >= SHORT ? 0 : 1) - (accCash(y) + 0.01 >= SHORT ? 0 : 1) || (accGroup(x) === 'fermi' ? 0 : 1) - (accGroup(y) === 'fermi' ? 0 : 1) || accCash(y) - accCash(x));          // prima i conti tuoi con abbastanza soldi; le casse separate (es. Cassa cani) in fondo
+    const opts = others.map(a => ['t:' + a.id, 'Li ho spostati da ' + a.name + ' (ci sono ' + eur(accCash(a), true) + ')' + (accCash(a) + 0.01 < SHORT ? ' · non bastano' : '')]).concat([['ext', 'Sono soldi nuovi che ho versato da fuori'], ['no', 'Non toccare la liquidità (l\'ho già sistemata io)']]);
+    howSel.replaceChildren(...opts.map(([v, l]) => h('option', { value: v }, l))); howSel.value = opts.some(o => o[0] === prev) ? prev : opts[0][0];
+    shortTxt.textContent = '⚠ In ' + acc.name + ' ci sono solo ' + eur(Math.max(0, accCash(acc)), true) + ' e l\'acquisto costa ' + eur(spend, true) + ': mancano ' + eur(SHORT, true) + '. Probabilmente hai spostato dei soldi da un altro conto: scegli quale e lo registro io prima dell\'acquisto.';
+  }
   let ext = null;          // titolo che non hai ancora ma con prezzo automatico (dall'ultimo prezzi.json)
   const newMode = () => !I.instId.value && !ext && !!I.q.value.trim();
   const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -3296,7 +3309,7 @@ function editOperation(pre, after) {
     inst: [h('div', null, h('label', { class: 'fld' }, h('span', null, 'Strumento'), h('div', { class: 'cbx' }, I.q, sug)), instInfo), ['acquisto', 'vendita']], nuovo: [h('div', { class: 'g2' }, fld('Nome dello strumento nuovo', I.newName), fld('Valuta', I.newCcy)), ['acquisto']],
     qp: [h('div', { class: 'g2' }, fld('Quantità', I.qty), fld('Prezzo di una quota', I.price)), ['acquisto', 'vendita']],
     amt: [h('div', null, fld(amtLbl, I.amount)), 'all'], fee: [h('div', null, fld('Commissioni (€, facoltative)', I.fee)), ['acquisto', 'vendita']],
-    cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto')), cashWarn), ['acquisto', 'vendita']],
+    cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto'))), ['acquisto', 'vendita']], short: [shortBox, ['acquisto']],
     dn: [h('div', { class: 'g2' }, fld('Data', I.date), fld('Nota', I.note)), 'all'] };
   const kinds = h('div', { class: 'kinds', role: 'group', 'aria-label': 'Che cosa è successo' }, OP_UI.map(([k, l, , ico]) => h('button', { type: 'button', class: 'kind', 'data-k': k, onclick: () => { kind = k; sync(); } }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d }))), h('span', null, l))));
   const num = el => { const x = parseFloat(String(el.value).replace(',', '.')); return isFinite(x) ? x : null; };
@@ -3311,7 +3324,7 @@ function editOperation(pre, after) {
     instInfo.replaceChildren(...instSay(i, ext));
     const q = num(I.qty), pr = num(I.price) ?? (i ? i.price : null), am = num(I.amount), fe = num(I.fee) || 0, an = (S.accounts.find(a => a.id === I.accId.value) || {}).name || '', bn = (S.accounts.find(a => a.id === I.toId.value) || {}).name || '…';
     const nm = i ? i.name : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim() || 'lo strumento'), acc = S.accounts.find(a => a.id === I.accId.value), spend = (q && pr ? q * pr * (fxRate(i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) ?? 1) : am || 0) + fe;
-    cashWarn.textContent = kind === 'acquisto' && I.fromCash.checked && acc && spend > accCash(acc) + 0.01 ? '⚠ In ' + acc.name + ' ci sono solo ' + eur(accCash(acc), true) + ' di liquidità: se per comprare hai versato soldi nuovi, togli la spunta qui sopra (oppure registra prima un versamento).' : '';
+    syncShort(spend);
     sumEl.textContent = trade ? (q && pr ? (kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(pr) + ' ' + (i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) + ' di ' + nm + (fe ? ' + ' + eur(fe, true) + ' di commissioni' : '') + ' · conto ' + an : am ? (kind === 'acquisto' ? 'Spendi ' : 'Incassi ') + eur(am, true) + ' in ' + nm + ' · conto ' + an : 'Scrivi la quantità (e il prezzo) oppure l\'importo.')
       : am ? (kind === 'versamento' ? 'Entrano ' + eur(am, true) + ' in ' + an : kind === 'prelievo' ? 'Escono ' + eur(am, true) + ' da ' + an : 'Sposti ' + eur(am, true) + ' da ' + an + ' a ' + bn) : 'Scrivi l\'importo.';
   }
@@ -3321,7 +3334,11 @@ function editOperation(pre, after) {
   frm.addEventListener('submit', e => {
     e.preventDefault();
     const o = { accId: I.accId.value, toId: I.toId.value, kind, date: I.date.value || today(), instId: I.instId.value, newName: I.instId.value ? '' : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim()), newCcy: ext ? ext.ccy : (I.newCcy.value.trim() || 'EUR'), qty: num(I.qty), price: num(I.price), fee: num(I.fee), amount: num(I.amount), fromCash: I.fromCash.checked, note: I.note.value.trim() };
+    const how = SHORT && !shortBox.hidden ? howSel.value : '';
+    if (how === 'no') o.fromCash = false;          // la liquidita' l'hai gia' sistemata tu: non la tocco
     const r = applyOp(o); if (r) { err.textContent = r; return; }
+    if (how.startsWith('t:')) { const m = applyOp({ accId: how.slice(2), toId: o.accId, kind: 'trasferimento', date: o.date, amount: SHORT, note: 'Per l\'acquisto di ' + (inst(o.instId) ? inst(o.instId).name : o.newName || 'uno strumento') }); if (m) { err.textContent = 'Acquisto registrato, ma il trasferimento no: ' + m; done(); return; } }
+    else if (how === 'ext') { const m = applyOp({ accId: o.accId, kind: 'versamento', date: o.date, amount: SHORT, fromCash: true, note: 'Soldi versati per l\'acquisto' }); if (m) { err.textContent = 'Acquisto registrato, ma il versamento no: ' + m; done(); return; } }
     if (ext && !o.instId) { const ni = findInst(ext.name, ''); if (ni) { if (!ni.code) ni.code = ext.code; if (!ni.cls) ni.cls = /bitcoin|ether|solana|xrp|ripple|cardano|cosmos|usdc|coin|crypto/i.test(ext.name + ' ' + ext.code) ? 'Crypto' : 'Azioni'; if (!ni.area) ni.area = 'n.d.'; } }          // titolo nuovo ma gia' con prezzo automatico: si collega da solo
     shut(); done(); if (after) after();
   });
