@@ -69,6 +69,8 @@
     {"nome":"McDonald's 2052 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US58013MFT62","tipo":"BOND","onvista":"231292184"},
     {"nome":"Goldman Sachs 4,75% 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US38148LAF31","tipo":"BOND","onvista":"92394102"},
     {"nome":"Sunrise Energy Metals Ltd.","classe":"Azioni","fonte":"onvista","id":"AU0000143729","tipo":"STOCK","onvista":"18465709"},
-    {"nome":"Apollo Global Private Markets ELTIF","classe":"Azioni","fonte":"onvista","id":"LU3170240538","tipo":"FUND","onvista":"307695737"}
+    {"nome":"Apollo Global Private Markets ELTIF","classe":"Azioni","fonte":"onvista","id":"LU3170240538","tipo":"FUND","onvista":"307695737"},
+    {"nome":"Corning Inc.","classe":"Azioni","fonte":"onvista","id":"US2193501051","tipo":"STOCK","onvista":"85444"},
+    {"nome":"Marvell Technology Inc.","classe":"Azioni","fonte":"onvista","id":"US5738741041","tipo":"STOCK","onvista":"95703"}
   ]
 }

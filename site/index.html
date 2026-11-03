@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-g+eNNIfca0bJOdKDjAerGTUoIzGekBPlA5EIuaA5DiM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-iBpjTfaYHvYasHD0MA7WSDXDt8VDebzWoLlbPGrISyA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2092,6 +2092,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
     if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.replaced ? ' · ' + pl(r.replaced, 'PAC singolo assorbito', 'PAC singoli assorbiti') : '') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
+    if (it.fin.meta.operazioni) { const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
@@ -2128,10 +2129,10 @@ function undoOne(x, cell) {          // annulla il caricamento di UN solo conto 
 }
 function showAutoResult(out, before) {          // esito del caricamento: chiaro a colpo d'occhio, con OK
   const dlg = h('dialog', { class: 'wide res-dlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); }, ok = out.filter(x => x.R);
-  const nref = out.reduce((t, x) => t + (x.plan ? 0 : x.refs || 0), 0), npl = out.reduce((t, x) => t + (x.plan ? x.refs || 0 : 0), 0), bad = out.filter(x => !x.R && !(x.refs > 0)), done1 = ok.length || nref || npl;
+  const nref = out.reduce((t, x) => t + (x.plan || x.ops ? 0 : x.refs || 0), 0), nop = out.reduce((t, x) => t + (x.ops ? x.refs || 0 : 0), 0), npl = out.reduce((t, x) => t + (x.plan ? x.refs || 0 : 0), 0), bad = out.filter(x => !x.R && !(x.refs > 0)), done1 = ok.length || nref || npl || nop;
   const kind = done1 && !bad.length ? 'good' : done1 ? 'part' : 'bad';
   const ico = kind === 'bad' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M9 9l6 6', 'M15 9l-6 6'] : kind === 'part' ? ['M12 4a8 8 0 100 16 8 8 0 000-16z', 'M12 8v5', 'M12 16h.01'] : ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M7.5 12.5l3 3 6-6.5'];
-  const what = [ok.length ? pl(ok.length, 'conto aggiornato', 'conti aggiornati') : '', nref ? pl(nref, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') : '', npl ? pl(npl, 'acquisto programmato caricato', 'acquisti programmati caricati') : ''].filter(Boolean).join(' · ');
+  const what = [ok.length ? pl(ok.length, 'conto aggiornato', 'conti aggiornati') : '', nref ? pl(nref, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') : '', npl ? pl(npl, 'acquisto programmato caricato', 'acquisti programmati caricati') : '', nop ? pl(nop, 'operazione registrata', 'operazioni registrate') : ''].filter(Boolean).join(' · ');
   const tot = ok.reduce((t, x) => t + accValue(x.acc), 0);
   const saved = CLOUD_ON() && CL.ready ? 'È già tutto salvato, anche online.' : ok.length ? 'Ho anche scaricato una copia di sicurezza nella cartella Download: se un giorno l\'app non ritrovasse i dati, premi "Entra" e scegli quel file.' : '';
   dlg.append(h('div', { class: 'res ' + kind },
@@ -4163,6 +4164,34 @@ function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Co
     n++;
   }
   return { n, miss, replaced };
+}function applyOpsFile(text) {          // file "operazioni": Data;Conto;Tipo;Strumento;Codice;Quote;Prezzo;Valuta;Importo;Da conto. Registra acquisti/vendite/versamenti/prelievi gia' avvenuti; le commissioni sono la differenza tra l'importo addebitato e quote x prezzo
+  let n = 0, dup = 0; const miss = [], r2 = v => Math.round(v * 100) / 100;
+  for (const line of String(text).split(/\r?\n/)) {
+    const c = line.split(';').map(x => (x || '').trim()); if (!c[0] || /^data$/i.test(c[0]) || c[0][0] === '#') continue;
+    const [date, an, kind, name, code, q, pr, cc, tot, from] = c, label = (name || kind || '?') + ' del ' + date;
+    const acc = S.accounts.find(a => a.name.toLowerCase() === (an || '').toLowerCase());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) { miss.push(label + ' (data non valida)'); continue; }
+    if (!acc) { miss.push(label + ' (conto "' + an + '" non trovato)'); continue; }
+    if (!OP_FLOW[kind]) { miss.push(label + ' (tipo "' + kind + '" non valido)'); continue; }
+    const ccy = normCcy(cc || 'EUR'), fx = fxRate(ccy), qty = parseNum(q, ','), price = parseNum(pr, ','), total = parseNum(tot, ',');
+    if (fx == null) { miss.push(label + ' (manca il cambio ' + ccy + ')'); continue; }
+    const fromAcc = from ? S.accounts.find(a => a.name.toLowerCase() === from.toLowerCase()) : null; const ops = [];
+    if (kind === 'versamento' || kind === 'prelievo') {
+      if (!(total > 0)) { miss.push(label + ' (importo mancante)'); continue; }
+      if (OPS().some(x => x.accId === acc.id && x.date === date && x.kind === kind && Math.abs((x.amount || 0) - total * fx) < 0.01)) { dup++; continue; }
+      ops.push({ accId: acc.id, kind, date, amount: r2(total * fx), fromCash: true, note: 'Da file' });
+    } else if (kind === 'acquisto' || kind === 'vendita') {
+      const i = findInst(name, code);
+      if (!(qty > 0) || !(price > 0 || (i && i.price > 0))) { miss.push(label + ' (servono quote e prezzo)'); continue; }
+      if (kind === 'vendita' && !i) { miss.push(label + ' (strumento non trovato)'); continue; }
+      const px = price > 0 ? price : i.price, feeEur = total > 0 ? Math.max(0, (total - qty * px) * fx) : 0, spend = qty * px * fx + feeEur;
+      if (OPS().some(x => x.accId === acc.id && x.date === date && x.kind === kind && Math.abs((x.qty || 0) - qty) < 1e-6 && (i ? x.instId === i.id : normT(x.instName || '') === normT(name)))) { dup++; continue; }
+      if (kind === 'acquisto' && fromAcc && fromAcc.id !== acc.id) ops.push({ accId: fromAcc.id, toId: acc.id, kind: 'trasferimento', date, amount: r2(spend), note: 'Per l\'acquisto di ' + name });
+      ops.push({ accId: acc.id, kind, date, instId: i ? i.id : '', newName: i ? '' : name, newCcy: ccy, qty, price: px, fee: r2(feeEur), fromCash: true, note: 'Da file', _code: i ? '' : code, _cls: 'Azioni' });
+    } else { miss.push(label + ' (tipo non gestito nei file)'); continue; }
+    const m = applyProposal({ ops }); if (m) miss.push(label + ' (' + m + ')'); else n++;
+  }
+  return { n, dup, miss };
 }function registerDue(p, d) {
   const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '';
   const buy = after => { const q = Math.floor(p.amount / (i.price * fx)); editOperation({ accId: p.accId, kind: 'acquisto', date: d, instId: i.id, qty: q >= 1 ? q : null, note: p.label }, after); };
