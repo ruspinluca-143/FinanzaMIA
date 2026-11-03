@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3AevGVEdNcZxO79oPeuDO/J5zpUsUIMAgQguFQLtt4s='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8ROg6Q/tE5REepf7xjlREOJY19IWggL3ceBYAfHy6DY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1458,7 +1458,7 @@ function openPrices(P, fname) {
   const px = n => fin(n) ? n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: n < 1 ? 6 : 4 }) : '—';
   const snap = h('input', { type: 'checkbox', checked: true }), ok = btn('', null, 'pri');
   const boxes = P.rows.map(r => r.skip ? null : h('input', { type: 'checkbox', checked: r.use, 'aria-label': 'Applica ' + r.i.name, onchange: upd }));
-  function upd() { const n = boxes.filter(b => b && b.checked).length; ok.textContent = n ? 'Applica ' + pl(n, 'prezzo', 'prezzi') : 'Nessun prezzo da applicare'; ok.disabled = !n; }
+  function upd() { const n = boxes.filter(b => b && b.checked).length; ok.textContent = n ? 'Applica ' + pl(n, 'prezzo', 'prezzi') : P.rows.some(r => !r.skip) ? 'Spunta i prezzi da applicare' : 'Nessun prezzo da applicare'; ok.disabled = !n; }
   ok.onclick = () => {
     let n = 0; P.rows.forEach((r, k) => { if (boxes[k] && boxes[k].checked) { setPriceAt(r.i, r.np, r.e.data); n++; } });
     for (const r of P.rows) {          // dati pubblici dell'ETF (costo annuo, benchmark, distribuzione): si completano solo se mancano
@@ -1472,6 +1472,7 @@ function openPrices(P, fname) {
   const rows = P.rows.map((r, k) => [boxes[k] || '—', r.i.name, px(r.i.price) + ' ' + r.i.ccy, r.skip ? '—' : px(r.np) + ' ' + r.i.ccy, r.skip || r.chg == null ? '—' : gl(r.chg, spct(r.chg)), fmtDate(r.e.data), r.skip || r.note]);
   dlg.append(h('h3', null, 'Aggiorna prezzi da file'),
     h('p', { class: 'muted' }, fname + ' · ' + (P.gen ? 'generato il ' + P.gen.toLocaleString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'senza data') + ' · ' + pl(P.n, 'prezzo', 'prezzi') + ' nel file, ' + pl(P.rows.length, 'trovato', 'trovati') + ' nell\'app'),
+    P.rows.some(r => !r.skip && !r.use) ? h('div', { class: 'warn' }, 'Questi prezzi cambiano moltissimo rispetto a quello che hai: possono essere giusti (titolo che ha fatto un balzo) o un errore della fonte. Controlla il titolo, METTI LA SPUNTA a quelli che vuoi applicare e premi Applica. Quelli senza spunta restano al prezzo di prima.') : null,
     P.warns.length ? h('div', { class: 'warn' }, h('ul', null, P.warns.map(w => h('li', null, w)))) : null,
     table([{ t: '' }, { t: 'Strumento' }, { t: 'Prezzo attuale', n: 1 }, { t: 'Nuovo prezzo', n: 1 }, { t: 'Variazione', n: 1 }, { t: 'Quotazione del' }, { t: 'Nota' }], rows, 'Nessuno strumento del file corrisponde a uno strumento dell\'app.'),
     P.unseen.length ? h('details', null, h('summary', { class: 'muted' }, pl(P.unseen.length, 'strumento con posizioni non è nel file', 'strumenti con posizioni non sono nel file') + ': restano al prezzo di prima'), h('p', { class: 'muted' }, P.unseen.map(i => i.name).join(' · '))) : null,
@@ -3071,7 +3072,10 @@ function viewLock() {
 function dlgTopBar(dlg) {
   if (dlg.querySelector(':scope .dlgtop')) return; const acts = dlg.querySelector('.dlgacts'); if (!acts) return;
   const bar = h('div', { class: 'dlgtop' });
-  for (const b of acts.querySelectorAll('button')) bar.append(h('button', { type: 'button', class: b.className + ' sm', onclick: () => b.click() }, b.textContent));
+  for (const b of acts.querySelectorAll('button')) {          // la copia in alto segue il pulsante originale (testo e "spento"): se cambia sotto, cambia anche qui
+    const c = h('button', { type: 'button', class: b.className + ' sm', onclick: () => b.click() }, b.textContent); c.disabled = b.disabled; bar.append(c);
+    new MutationObserver(() => { if (!c.isConnected) return; c.textContent = b.textContent; c.disabled = b.disabled; }).observe(b, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+  }
   if (!bar.children.length) return; const host = dlg.querySelector('form') || dlg; host.insertBefore(bar, host.firstChild);
 }
 new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.tagName === 'DIALOG') setTimeout(() => dlgTopBar(n), 0); }).observe(document.body, { childList: true });
