@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9034dTzXm9+4AZOY1LUhQNKf0BWSMKyQuv/DEXYCqX4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-oAOnBtL+0NJrlOxKe8gYhsqBi+bCyrj2bRiyfJNgNNA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -433,7 +433,7 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
 .tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
@@ -3231,13 +3231,13 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'consigli', 'analisi', 'piano'];          // le altre viste sono nel menu a sinistra
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'conti', 'pac', 'consigli', 'analisi', 'piano'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const ICONS = { pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, consigli: tabConsigli, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, consigli: tabConsigli, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
 function tabPanoramica() {
@@ -4243,19 +4243,22 @@ function planGroups(plans) {          // i PAC sono raggruppati per conto: sotto
   if (!plans.length) return null; const ids = [...new Set(plans.map(p => p.accId))].sort((a, b) => S.accounts.findIndex(x => x.id === a) - S.accounts.findIndex(x => x.id === b));
   return h('div', null, ids.map(id => { const list = plans.filter(p => p.accId === id), pm = list.reduce((s, p) => s + p.amount / freqMonths(p.freq), 0);
     return h('div', { class: 'plan-grp' }, h('h3', { class: 'plan-h' }, accName(id), h('small', { class: 'muted' }, ' · ' + eur(pm) + ' al mese')), table([{ t: 'Voce' }, { t: 'Che cosa compra' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }], list.map(p => { const nx = planNext(p, 1)[0]; return [p.label, partsText(p), eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }))); })); }
-function pacManager() {          // "I miei PAC": vederli per conto e gestirli senza girare per le schede
+function pacBlock(inDialog) {          // il contenuto di "I miei PAC": riepilogo, acquisti da confermare, elenco per conto
+  const plans = PL(), pm = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0), due = planDueAll();
+  return [
+    plans.length ? h('p', { class: 'muted' }, pl(plans.length, 'PAC', 'PAC') + ' · circa ' + eur(pm) + ' al mese, ' + eur(pm * 12) + ' in un anno.') : null,
+    due.length ? h('div', { class: 'banner' }, h('span', null, pl(due.length, 'acquisto da confermare', 'acquisti da confermare')), btn('Conferma…', () => { if (inDialog) inDialog(); confirmDue(); }, 'sm pri')) : null,
+    planGroups(plans) || h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.')].filter(Boolean);
+}
+function tabPac() {
+  return h('div', null, h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'I miei PAC'), btn('+ Nuovo PAC', () => pacWizard(), 'pri sm')), ...pacBlock(null),
+    PL().length ? h('p', { class: 'muted' }, 'Il calendario dei prossimi 12 mesi è in ', h('a', { href: '#', onclick: e => { e.preventDefault(); UI.tab = 'piano'; render(); } }, 'Piano'), '.') : null));
+}
+function pacManager() {          // la stessa cosa in una finestra, dal menu
   if (document.querySelector('dialog.pacs')) return;
   const dlg = h('dialog', { class: 'wide pacs' }), body = h('div'), shut = () => { PAC_UI = null; if (dlg.open) dlg.close(); dlg.remove(); };
   PAC_UI = () => { if (!dlg.isConnected) { PAC_UI = null; return; } draw(); };
-  function draw() {
-    const plans = PL(), pm = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0), due = planDueAll();
-    body.replaceChildren(...[
-      h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'I miei PAC'), btn('Chiudi', shut, 'sm')),
-      plans.length ? h('p', { class: 'muted' }, pl(plans.length, 'PAC', 'PAC') + ' · circa ' + eur(pm) + ' al mese, ' + eur(pm * 12) + ' in un anno.') : null,
-      due.length ? h('div', { class: 'banner' }, h('span', null, pl(due.length, 'acquisto da confermare', 'acquisti da confermare')), btn('Conferma…', () => { shut(); confirmDue(); }, 'sm pri')) : null,
-      planGroups(plans) || h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.'),
-      h('div', { class: 'dlgacts' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'))].filter(Boolean));
-  }
+  function draw() { body.replaceChildren(h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'I miei PAC'), btn('Chiudi', shut, 'sm')), ...pacBlock(shut), h('div', { class: 'dlgacts' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'))); }
   dlg.append(body); dlg.addEventListener('close', () => { PAC_UI = null; dlg.remove(); }); draw(); document.body.append(dlg); dlg.showModal();
 }function piAppuntamenti() {
   const el = h('div'), due = planDueAll(), plans = PL(), perMonth = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0);
