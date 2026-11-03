@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5cI60XhtgsC07B9+tRdQouMuYN++9MaDZ4fkEqDNp9E='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3AevGVEdNcZxO79oPeuDO/J5zpUsUIMAgQguFQLtt4s='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2086,7 +2086,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   const before = JSON.stringify(S), out = [];
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
-    if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
+    if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.replaced ? ' · ' + pl(r.replaced, 'PAC singolo assorbito', 'PAC singoli assorbiti') : '') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
@@ -4042,23 +4042,26 @@ function askDueSoon(tries) {          // all'ingresso: se ci sono PAC da conferm
   if (DUE_ASKED || !S || DEMO) return;
   setTimeout(() => { if (DUE_ASKED || !S || DEMO || LOCKED) return; if (document.querySelector('dialog[open]')) { if ((tries || 0) < 8) askDueSoon((tries || 0) + 1); return; } if (planDueAll().length) { DUE_ASKED = true; confirmDue(true); } }, 3500);
 }
-function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Codice;Importo;Frequenza;Giorno;Dal;Da conto;Tipo (non tocca conti e posizioni)
-  let n = 0; const miss = [];
-  for (const line of String(text).split(/\r?\n/)) {
-    const c = line.split(';').map(x => (x || '').trim()); if (!c[0] || /^voce$/i.test(c[0])) continue;
-    const acc = S.accounts.find(a => a.name.toLowerCase() === (c[1] || '').toLowerCase()); if (!acc) { miss.push(c[0] + ' (conto "' + c[1] + '" non trovato)'); continue; }
-    const from = c[8] ? S.accounts.find(a => a.name.toLowerCase() === c[8].toLowerCase()) : null, i = c[2] || c[3] ? findInst(c[2], c[3]) : null, amount = parseNum(c[4], ',');
-    if (!(amount > 0)) { miss.push(c[0] + ' (importo non valido)'); continue; }
-    const fq = FREQ.find(f => f[0] === (c[5] || 'mensile').toLowerCase()) ? (c[5] || 'mensile').toLowerCase() : 'mensile', start = /^\d{4}-\d{2}-\d{2}$/.test(c[7] || '') ? c[7] : today();
-    const d = { label: c[0], kind: c[2] || c[3] ? 'acquisto' : 'versamento', accId: acc.id, fromAccId: from && from.id !== acc.id ? from.id : '', instId: i ? i.id : '', instName: i ? '' : c[2], instCode: c[3] || '', instCls: 'Azioni',
-      amount, freq: fq, day: Math.min(28, Math.max(1, parseInt(c[6], 10) || +start.slice(8, 10))), start, end: '', note: '', whole: /intere/i.test(c[9] || ''), ext: /fuori/i.test(c[9] || '') };
-    const old = PL().find(p => p.label.toLowerCase() === d.label.toLowerCase());
-    if (old) Object.assign(old, d); else PL().push({ id: uid(), ...d, since: today(), done: [] });
+function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Codice;Importo;Frequenza;Giorno;Dal;Da conto;Tipo (non tocca conti e posizioni). Piu' righe con la stessa Voce = un solo PAC con piu' strumenti. Nel Tipo: "quote intere", "da fuori", "dal giorno" (chiede conferma dei PAC dal giorno "Dal" in poi)
+  let n = 0, replaced = 0; const miss = [], groups = new Map();
+  for (const line of String(text).split(/\r?\n/)) { const c = line.split(';').map(x => (x || '').trim()); if (!c[0] || /^voce$/i.test(c[0]) || c[0][0] === '#') continue; const key = c[0].toLowerCase(); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(c); }
+  for (const rows of groups.values()) {
+    const c = rows[0], acc = S.accounts.find(a => a.name.toLowerCase() === (c[1] || '').toLowerCase()); if (!acc) { miss.push(c[0] + ' (conto "' + c[1] + '" non trovato)'); continue; }
+    const from = c[8] ? S.accounts.find(a => a.name.toLowerCase() === c[8].toLowerCase()) : null;
+    const parts = rows.map(r => { const i = r[2] || r[3] ? findInst(r[2], r[3]) : null; return { r, i, amount: parseNum(r[4], ',') }; });
+    if (parts.some(x => !(x.amount > 0))) { miss.push(c[0] + ' (importo non valido)'); continue; }
+    const fq = FREQ.find(f => f[0] === (c[5] || 'mensile').toLowerCase()) ? (c[5] || 'mensile').toLowerCase() : 'mensile', start = /^\d{4}-\d{2}-\d{2}$/.test(c[7] || '') ? c[7] : today(), multi = rows.length > 1, buy = !!(c[2] || c[3]);
+    const pr = x => ({ instId: x.i ? x.i.id : '', instName: x.i ? '' : x.r[2], instCode: x.r[3] || '', instCls: 'Azioni', amount: x.amount });
+    const d = Object.assign({ label: c[0], kind: buy ? 'acquisto' : 'versamento', accId: acc.id, fromAccId: from && from.id !== acc.id ? from.id : '', amount: parts.reduce((s, x) => s + x.amount, 0), freq: fq, day: Math.min(28, Math.max(1, parseInt(c[6], 10) || +start.slice(8, 10))), start, end: '', note: '', whole: /intere/i.test(c[9] || ''), ext: /fuori/i.test(c[9] || '') }, multi ? { parts: parts.map(pr), instId: '', instName: '', instCode: '', instCls: 'Azioni' } : pr(parts[0]));
+    if (multi) for (const q of PL().filter(z => z.accId === acc.id && !z.parts && z.kind === 'acquisto' && z.label.toLowerCase() !== d.label.toLowerCase())) {          // i PAC singoli degli stessi strumenti diventano parte di questo
+      if (d.parts.some(x => (x.instId && x.instId === q.instId) || (x.instCode && q.instCode && x.instCode.toLowerCase() === q.instCode.toLowerCase()) || (x.instName && q.instName && normT(x.instName) === normT(q.instName)))) { S.plans = PL().filter(z => z !== q); replaced++; }
+    }
+    const since = /dal giorno/i.test(c[9] || '') ? start : today(), old = PL().find(p => p.label.toLowerCase() === d.label.toLowerCase());
+    if (old) { Object.assign(old, d); if (!multi) delete old.parts; } else PL().push({ id: uid(), ...d, since, done: [] });
     n++;
   }
-  return { n, miss };
-}
-function registerDue(p, d) {
+  return { n, miss, replaced };
+}function registerDue(p, d) {
   const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '';
   const buy = after => { const q = Math.floor(p.amount / (i.price * fx)); editOperation({ accId: p.accId, kind: 'acquisto', date: d, instId: i.id, qty: q >= 1 ? q : null, note: p.label }, after); };
   if (p.kind === 'acquisto' && i) { if (from) editOperation({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: p.amount, note: p.label }, () => buy(mark)); else buy(mark); }          // con un conto di origine: prima il trasferimento, poi l'acquisto
