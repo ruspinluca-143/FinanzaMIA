@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8ROg6Q/tE5REepf7xjlREOJY19IWggL3ceBYAfHy6DY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-X2Nm+qMljRCm0XoVz//ScPH5rGBjaH/1lMUAkZYLoDI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -461,7 +461,9 @@ dialog[open]{animation:sheet .45s var(--ease)}
 .dlgacts{flex-wrap:wrap}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-</style>
+.lnk{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;text-decoration:underline dotted;cursor:pointer}
+.goal{padding:10px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.spark2{width:100%;height:64px;display:block}.talk-acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cls{padding:12px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.cls-s{font-size:14px;margin-top:4px}.ad-pos{color:var(--gain)}.ad-neg{color:var(--loss)}.dv{position:relative;height:10px;border-radius:6px;background:rgba(127,127,127,.18);margin:8px 0}.dv:after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:rgba(127,127,127,.55)}.dv-b{position:absolute;top:0;bottom:0;border-radius:6px}.jud{font-weight:600;font-size:14px}.mood{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:6px 0}.mood-t{font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.04em}.tema{padding:10px 0;border-top:1px solid var(--line,#ddd)}.srcs{font-size:13px}.att{padding-left:18px}.att li{margin:8px 0}.fonti{padding-left:18px}.fonti li{margin:6px 0}.mn{padding:10px 0;border-top:1px solid var(--line,#ddd)}.ideas{margin-top:6px}.idea{padding:6px 10px;margin:6px 0;border-radius:12px;background:rgba(127,127,127,.09)}.wz-part{padding:8px 0;border-top:1px solid var(--line,#ddd)}.plan-h{margin:14px 0 4px}</style>
 </head>
 <body>
 <div id="app"><p class="boot">Caricamento… Se vedi solo questa scritta, lo script è stato bloccato dal browser: esegui sigilla.ps1.</p></div>
@@ -2312,13 +2314,14 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm, az, ct] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json')]);
+  const [hh, mm, az, ct, an] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json')]);
+  if (an) { try { const j = normAnalisi(JSON.parse(an)); if (j) DATA.analisi = j; } catch { /* file non valido: ignorato */ } }
   if (ct) { try { setCatalog(JSON.parse(ct)); } catch { /* file non valido: ignorato */ } }
   if (hh) DATA.hist = parseHistory(hh);
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
   if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
   if (S && !DEMO && DATA.cat) { const n = applyCatalog(); if (n) { touch(); setStatus('Prezzi dal catalogo: ' + pl(n, 'strumento aggiornato', 'strumenti aggiornati')); } }
-  if (S && !LOCKED && (hh || mm || az || ct)) render();
+  if (S && !LOCKED && (hh || mm || az || ct || an)) render();
 }
 /* ============ catalogo: i prezzi di TUTTI gli ETF, ETC/ETN, BTP e obbligazioni quotati in Italia e delle crypto principali (catalogo.json, scritto dal sito) ============ */
 const normT = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -2759,8 +2762,8 @@ function anRibilancia() {
   head.append(h('p', { class: 'muted' }, 'La tua divisione: ' + S.policy.target + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); own(); } }, 'cambia'), ' · scegli tra: ', MIXES.map(([n, t], k) => [k ? ', ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); setT(t); } }, n)])));
   const sug = k => { const c = S.instruments.filter(i => parseMix(i.cls, 'Non classificato')[0][0].toLowerCase() === k.toLowerCase() && S.accounts.some(a => a.positions.some(p => p.instId === i.id))).sort((a, b) => (a.ter ?? 9) - (b.ter ?? 9)); return c[0] ? c[0].name + (c[0].ter != null ? ' (TER ' + nfp.format(c[0].ter) + '%)' : '') : '—'; };
   el.append(head, h('section', { class: 'card' }, h('h2', null, 'Come ripartirli'),
-    table([{ t: 'Classe' }, { t: 'Oggi', n: 1 }, { t: 'Obiettivo', n: 1 }, { t: 'Aggiungi', n: 1 }, { t: 'Dopo', n: 1 }, { t: 'Tra quelli che hai' }], rb.map(r => [r.label, pct(r.curPct), r.tgt ? pct(r.tgt) : '—', r.put > 0.5 ? h('b', null, eur(r.put)) : '—', pct(r.after), r.put > 0.5 ? sug(r.label) : ''])),
-    h('p', { class: 'muted' }, 'È un calcolo di ripartizione, non una raccomandazione: non considera costi, tasse, orizzonte né il momento di mercato. Gli strumenti li scegli tu; qui sono indicati, tra quelli che già possiedi, quelli con il costo annuo più basso.')));
+    table([{ t: 'Classe' }, { t: 'Oggi', n: 1 }, { t: 'Obiettivo', n: 1 }, { t: 'Aggiungi', n: 1 }, { t: 'Dopo', n: 1 }, { t: 'Tra quelli che hai' }], rb.map(r => [r.label, pct(r.curPct), r.tgt ? pct(r.tgt) : '—', r.put > 0.5 ? h('b', null, eur(r.put)) : '—', pct(r.after), r.put > 0.5 ? h('div', null, sug(r.label) !== '—' ? h('div', null, 'Tra quelli che hai: ', sug(r.label)) : null, ideasNode(r.label)) : ''])),
+    h('p', { class: 'muted' }, 'È un calcolo di ripartizione, non una raccomandazione: non considera costi, tasse, orizzonte né il momento di mercato. Per ogni classe ti propongo strumenti semplici e a costo basso (con prezzo di oggi): sono idee, la scelta è tua. Nella scheda Consigli le leggi con l\'analisi del giorno.'), btn('Apri i Consigli di oggi', () => { UI.tab = 'consigli'; render(); }, 'pri')));
   return el;
 }
 
@@ -2786,6 +2789,95 @@ function importHoldings() {
 }
 const normName = n => String(n).toLowerCase().replace(/\b(inc|corp|corporation|ltd|plc|sa|ag|nv|co|company|class [a-c]|cl [a-c]|ordinary shares?|ord shs|holdings?)\b/g, ' ').replace(/[^a-z0-9àèéìòù ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
+/* ============ Consigli: l'analisi di ogni mattina (scritta dall'AI) e che cosa vuol dire per te ============ */
+function normAnalisi(j) {
+  if (!j || j.app !== 'finanze-analisi' || !Array.isArray(j.classi)) return null;
+  const arr = x => Array.isArray(x) ? x : x == null ? [] : [x];
+  for (const k of ['classi', 'temi', 'attenzione', 'idee', 'indicatori', 'fonti']) j[k] = arr(j[k]);
+  for (const x of [...j.classi, ...j.temi]) x.fonti = arr(x.fonti);
+  return j;
+}
+const FALLBACK_IDEE = {
+  'Azioni': [['IE00BK5BQT80', 'Un solo ETF su migliaia di aziende di tutto il mondo, ad accumulo e a costo basso.'], ['IE00B4L5Y983', 'Mercati sviluppati di tutto il mondo, ad accumulo e a costo basso.']],
+  'Obbligazioni': [['IE00BDBRDM35', 'Obbligazioni di tutto il mondo coperte dal cambio verso l\'euro: diversificato.'], ['IE00B4WXJJ64', 'Titoli di Stato dell\'area euro (scadenze lunghe: più sensibili ai tassi).']],
+  'Liquidità': [['LU0290358497', 'Segue il tasso a un giorno in euro: rischio molto basso, un cuscinetto che rende qualcosa.']],
+  'Monetario': [['LU0290358497', 'Segue il tasso a un giorno in euro: rischio molto basso.']],
+  'Materie prime': [['IE00B4ND3602', 'Oro fisico quotato in euro: solo come piccola quota di protezione.']]
+};
+const judLabel = g => g >= 2 ? 'Molto favorevole' : g === 1 ? 'Favorevole' : g === 0 ? 'Neutrale' : g === -1 ? 'Prudenza' : 'Da evitare';
+const judColor = g => g > 0 ? 'var(--gain)' : g < 0 ? 'var(--loss)' : 'var(--muted, #888)';
+const safeUrl = u => /^https?:\/\/[^\s<>"']+$/i.test(String(u || '')) ? u : null;
+function srcLinks(an, idx) {
+  const out = (idx || []).map(k => an.fonti[k]).filter(Boolean).map((f, n) => { const u = safeUrl(f.url); return u ? h('a', { href: u, target: '_blank', rel: 'noopener noreferrer', class: 'src' }, f.testata + (f.data ? ' · ' + fmtDate(f.data) : '')) : h('span', { class: 'src' }, f.testata); });
+  return out.length ? h('div', { class: 'srcs' }, h('small', { class: 'muted' }, 'Fonti: '), out.flatMap((a, n) => n ? [' · ', a] : [a])) : null;
+}
+function myClass(cls) {          // quanto pesa una classe nel tuo portafoglio e qual e' il tuo obiettivo (le casse separate non contano)
+  const tot = totalValue() - boxTotal(), names = cls === 'Liquidità' ? ['liquidità', 'monetario'] : [cls.toLowerCase()];
+  const cur = tot > 0 ? exposure('class', true).filter(([l]) => names.includes(l.toLowerCase())).reduce((t, [, v]) => t + v, 0) / tot : 0;
+  const tg = S.policy.target && S.policy.target.trim() ? parseMix(S.policy.target, '').filter(([k]) => names.includes(k.toLowerCase())).reduce((t, [, w]) => t + w, 0) : null;
+  return { cur, tgt: tg };
+}
+function adviceFor(g, my) {
+  const gap = my.tgt != null ? my.tgt - my.cur : null;
+  if (gap == null) return g > 0 ? ['Valuta di aggiungere', 'pos'] : g < 0 ? ['Per ora non aggiungere', 'neg'] : ['Mantieni', 'neu'];
+  if (gap > 0.03) return g >= 0 ? ['Aggiungi, a rate', 'pos'] : ['Aspetta o vai molto piano', 'neu'];
+  if (gap < -0.03) return ['Non aggiungere: sei sopra', 'neg'];
+  return ['Mantieni', 'neu'];
+}
+function ideaCand(isin) { try { return opCands(isin, '', 'acquisto').find(c => normT(c.code) === normT(isin)) || null; } catch { return null; } }
+function ideasFor(label) {
+  const key = String(label).toLowerCase(), AI = DATA.analisi ? DATA.analisi.idee.filter(x => String(x.classe).toLowerCase() === key) : [];
+  const src = AI.length ? AI.map(x => ({ isin: x.isin, why: x.perche })) : (FALLBACK_IDEE[label] || []).map(([isin, why]) => ({ isin, why }));
+  return src.map(x => Object.assign({}, x, { c: ideaCand(x.isin) })).filter(x => x.c).slice(0, 2);
+}
+function ideasNode(label) {
+  const list = ideasFor(label); if (!list.length) return null;
+  return h('div', { class: 'ideas' }, list.map(x => h('div', { class: 'idea' }, h('div', null, h('b', null, x.c.name), h('small', { class: 'muted' }, ' · ' + x.c.code + ' · ' + nf2.format(x.c.price) + ' ' + x.c.ccy), h('div', { class: 'muted', style: 'font-size:13px' }, x.why)),
+    h('div', { class: 'row', style: 'gap:6px;margin:4px 0 8px' }, btn('Compra', () => opWizard({ kind: 'acquisto', c: x.c, _wz: 1 }), 'sm pri'), btn('Fanne un PAC', () => pacWizard({ c: x.c }), 'sm')))));
+}
+function analisiAge(an) { return an && an.data ? Math.round((dayMs(today()) - dayMs(an.data)) / 864e5) : null; }
+function analisiBanner() {
+  const an = DATA.analisi; if (!an) return null;
+  return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
+}
+function tabConsigli() {
+  const el = h('div'), an = DATA.analisi;
+  if (!an) { el.append(h('section', { class: 'card' }, h('h2', null, 'Consigli'), h('p', { class: 'muted' }, ONLINE ? 'L\'analisi di oggi non è ancora disponibile: la scrive un\'AI ogni mattina leggendo le testate economiche. Riprova tra poco.' : 'L\'analisi giornaliera si vede dal sito online.'), btn('Riscarica', () => loadOnlineData(), 'sm')), consigliSoldi()); return el; }
+  const age = analisiAge(an);
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'L\'analisi di oggi'), btn('Riscarica', () => loadOnlineData(), 'sm')),
+    h('p', { class: 'muted' }, 'Scritta dall\'AI il ' + fmtDate(an.data) + ' leggendo ' + pl(an.fonti.length, 'articolo', 'articoli') + ' delle testate economiche e i dati dei mercati.'),
+    age > 2 ? h('div', { class: 'warn' }, 'Questa analisi ha ' + age + ' giorni: l\'ultima non è ancora arrivata. Non decidere su dati vecchi.') : null,
+    h('div', { class: 'mood' }, h('span', { class: 'mood-t', style: 'color:' + judColor(an.umore ? an.umore.valore : 0) }, an.umore ? an.umore.etichetta : ''), h('b', null, an.titolo)),
+    h('p', null, an.sintesi)));
+  const rows = an.classi.map(c => { const my = myClass(c.classe), ad = adviceFor(c.giudizio, my), g = c.giudizio, w = Math.min(2, Math.abs(g)) * 25 || 2;
+    return h('div', { class: 'cls tapme', role: 'button', tabindex: '0', onclick: ev => { tapFx(ev.currentTarget); talk({ kind: 'Analisi · ' + c.classe, title: c.etichetta || judLabel(g), value: ad[0], say: c.perche, box: ['Che cosa fare', c.mossa || ''], rows: my.tgt != null ? [['Tu oggi', my.cur, 'peso nel portafoglio', null, pct(my.cur)], ['Il tuo obiettivo', my.tgt, '', null, pct(my.tgt)]] : null, rowsTitle: 'Il tuo portafoglio', acts: ideasFor(c.classe).map(x => ['Idea: ' + x.c.name.slice(0, 26), () => opWizard({ kind: 'acquisto', c: x.c, _wz: 1 })]), tip: srcLinks(an, c.fonti) }); } },
+      h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, c.classe), h('span', { class: 'jud', style: 'color:' + judColor(g) }, c.etichetta || judLabel(g))),
+      h('div', { class: 'dv', 'aria-hidden': 'true' }, h('i', { class: 'dv-b', style: 'left:' + (g >= 0 ? 50 : 50 - w) + '%;width:' + w + '%;background:' + judColor(g) })),
+      h('div', { class: 'cls-s' }, my.tgt != null ? 'Tu ' + pct(my.cur) + ' · obiettivo ' + pct(my.tgt) + ' → ' : 'Tu ' + pct(my.cur) + ' → ', h('b', { class: 'ad-' + ad[1] }, ad[0])));
+  });
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Dove conviene e dove no'), h('p', { class: 'muted' }, 'A sinistra prudenza, a destra favorevole. Tocca una classe per leggere perché, che cosa fare e le fonti.'), rows));
+  el.append(consigliSoldi());
+  if (an.attenzione.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Attenzione a…'), h('ul', { class: 'att' }, an.attenzione.map(x => h('li', null, h('b', null, x.titolo), h('div', { class: 'muted' }, x.perche))))));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'I temi di oggi'), an.temi.map(t => h('div', { class: 'tema' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, t.titolo), h('span', { class: 'jud', style: 'color:' + judColor(t.giudizio) }, judLabel(t.giudizio))), h('p', { style: 'margin:4px 0' }, t.perche), srcLinks(an, t.fonti)))));
+  if (an.indicatori.length) el.append(tiles(an.indicatori.map(i => ({ l: i.nome, v: i.valore, s: i.nota || '' }))));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Cosa ho letto'), h('ul', { class: 'fonti' }, an.fonti.map(f => h('li', null, safeUrl(f.url) ? h('a', { href: f.url, target: '_blank', rel: 'noopener noreferrer' }, f.titolo) : f.titolo, h('small', { class: 'muted' }, ' · ' + f.testata + (f.data ? ' · ' + fmtDate(f.data) : ''))))),
+    h('p', { class: 'muted' }, an.limiti || ''), h('p', { class: 'muted' }, 'Non è consulenza finanziaria personalizzata: è una lettura delle notizie del giorno fatta da un\'AI, che può sbagliare. Le decisioni sono tue.')));
+  return el;
+}
+function consigliSoldi() {
+  const amt = pnum(UI.newMoney) ?? (G().monthly > 0 ? G().monthly : 500), rb = rebalance(amt);
+  const inp = h('input', { type: 'number', step: 'any', class: 'pin', value: amt, 'aria-label': 'Importo da investire', onchange: e => { const v = pnum(e.target.value); UI.newMoney = v != null && v >= 0 ? v : amt; render(); } });
+  const sec = h('section', { class: 'card' }, h('h2', null, 'Con i tuoi soldi: che cosa compro?'), h('label', { class: 'fld' }, h('span', null, 'Quanto vuoi investire adesso (€)'), inp));
+  if (!rb) { sec.append(h('p', { class: 'muted' }, 'Per consigliarti dove mettere i soldi mi serve la divisione che vuoi (per esempio Equilibrato).'), btn('Scegli la tua divisione', () => { UI.tab = 'analisi'; UI.sub = 'ribilancia'; render(); }, 'pri')); return sec; }
+  const an = DATA.analisi, jud = k => { const c = an && an.classi.find(x => String(x.classe).toLowerCase() === k.toLowerCase()); return c ? c.giudizio : null; };
+  const list = rb.filter(r => r.put > 0.5);
+  sec.append(h('p', { class: 'muted' }, 'Parto dalla tua divisione (' + S.policy.target + ') e la aggiusto con l\'analisi di oggi. Non vendi nulla.'));
+  if (!list.length) sec.append(h('p', null, 'Sei già a posto: non serve aggiungere.'));
+  for (const r of list) { const g = jud(r.label), note = g == null ? '' : g < 0 ? ' · l\'analisi di oggi consiglia prudenza: meglio a rate' : g > 0 ? ' · l\'analisi di oggi è favorevole' : '';
+    sec.append(h('div', { class: 'mn' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, eur(r.put) + ' in ' + r.label), h('span', { class: 'muted' }, pct(r.curPct) + ' → ' + pct(r.after))), h('div', { class: 'muted', style: 'font-size:13px' }, 'Oggi ' + pct(r.curPct) + ', obiettivo ' + (r.tgt ? pct(r.tgt) : '—') + note), ideasNode(r.label) || h('div', { class: 'muted' }, 'Scegli tu lo strumento (tra quelli che hai o uno nuovo).')));
+  }
+  return sec;
+}
 /* ============ scheda Mercati ============ */
 const upcoming = (m, n) => asArr(m.indicatori && m.indicatori.calendario).filter(e => e.data >= today()).slice(0, n);
 const whenIn = d => { const n = Math.round((dayMs(d) - dayMs(today())) / 864e5); return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; };
@@ -3113,6 +3205,7 @@ function openMenu() {
     h('div', { class: 'dr-sec' }, 'Altre viste'),
     item('Strumenti (i tuoi titoli)', ICONS.strumenti, go('strumenti')),
     item('Allocazione (come sei diviso)', ICONS.allocazione, go('allocazione')),
+    item('Mercati (notizie e dati)', ICONS.mercati, go('mercati')),
     h('div', { class: 'dr-sec' }, 'Sistema'),
     item('Dati e sicurezza', ICONS.dati, go('dati'), 'salvataggio online, Face ID, tassi di cambio'),
     DEMO || !CLOUD_ON() || !CL.code ? null : item('Versioni precedenti', MICO.hist, histOpen, 'copie orarie online'),
@@ -3123,13 +3216,13 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'analisi', 'piano', 'mercati'];          // le altre viste sono nel menu a sinistra
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'conti', 'consigli', 'analisi', 'piano'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const ICONS = { consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, consigli: tabConsigli, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
@@ -3145,6 +3238,7 @@ function tabPanoramica() {
   const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
   if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
   if (!DEMO) el.append(todoCard());          // una lista sola di cose da fare oggi
+  { const ab = analisiBanner(); if (ab) el.append(ab); }
   if (!DEMO) { const gc = goalsCard(); if (gc) el.append(gc); }
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
   el.append(groupTiles());          // soldi fermi, soldi investiti, fondo pensione
