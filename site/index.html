@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tVZ8OBWKJqM27amUrWzI8HXX1uiwuvR3ResoW75wErw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5cI60XhtgsC07B9+tRdQouMuYN++9MaDZ4fkEqDNp9E='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1167,7 +1167,8 @@ function suggestPass() {          // 10 sillabe pronunciabili (consonante + voca
 }
 const ccyList = () => h('datalist', { id: 'dl-ccy' }, ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD'].map(c => h('option', { value: c })));
 const normCcy = c => (String(c || 'EUR').trim().toUpperCase().slice(0, 3)) || 'EUR';
-const done = () => { touch(); render(); };
+let PAC_UI = null;
+const done = () => { touch(); render(); if (PAC_UI) PAC_UI(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
@@ -3095,6 +3096,7 @@ function openMenu() {
     h('div', { class: 'dr-sec' }, 'Azioni rapide'),
     DEMO ? null : item('Registra un\'operazione', MICO.op, () => editOperation({}), 'acquisto, vendita, versamento…'),
     DEMO ? null : item('Scrivi cosa è successo', MICO.op, () => askBox(), 'una frase e ci penso io'),
+    DEMO ? null : item('I miei PAC', MICO.op, () => pacManager(), PL().length ? pl(PL().length, 'PAC attivo', 'PAC attivi') + ' · vedi e gestisci' : 'vedi e gestisci i PAC'),
     DEMO ? null : item('Nuovo PAC', MICO.op, () => pacWizard(), 'un acquisto che si ripete'),
     DEMO ? null : item('Nuovo obiettivo', MICO.save, () => goalWizard(), 'casa, pensione, viaggio…'),
     DEMO ? null : item('Importa i file dei conti', MICO.imp, () => pickBatch()),
@@ -3295,7 +3297,7 @@ function tabConti() {
   const mineOps = OPS().filter(x => x.accId === a.id || x.toId === a.id).slice().reverse();
   if (mineOps.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Operazioni registrate'),
     table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Importo', n: 1 }, { t: '' }],
-      mineOps.slice(0, 10).map((x, k) => [fmtDate(x.date), OP_LABEL[x.kind] || x.kind, x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), k === 0 ? rowActs(btn('Annulla', () => undoOp(x), 'sm danger')) : ''])),
+      mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), OP_LABEL[x.kind] || x.kind, x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
     h('p', { class: 'muted' }, 'Si può annullare soltanto l\'ultima operazione del conto: serve se hai sbagliato un numero.')));
   const last = a.imports && a.imports[a.imports.length - 1];
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
@@ -3439,14 +3441,14 @@ function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), 
     if (!(o.amount > 0)) return 'Inserisci l\'importo.'; if (a.dep || b.dep) return 'Un conto deposito non si muove da qui: usa "Modifica conto".';
     const fee = o.fee > 0 ? o.fee : 0, bfx = fxRate(b.cashCcy) ?? 1, note = o.note || ('Trasferimento ' + a.name + ' → ' + b.name);
     u.toId = b.id; u.toCash = b.cash || 0; u.flowIds = [];
-    a.cash = (a.cash || 0) - (o.amount + fee) / cfx; b.cash = (b.cash || 0) + o.amount / bfx;
+    a.cash = (a.cash || 0) - (o.amount + fee) / cfx; b.cash = (b.cash || 0) + o.amount / bfx; u.dCash = -(o.amount + fee) / cfx; u.dTo = o.amount / bfx;
     if (a.perf) { const f = { id: uid(), date: o.date, type: 'prelievo', amount: o.amount, note }; a.flows.push(f); u.flowIds.push([a.id, f.id]); }
     if (b.perf) { const f = { id: uid(), date: o.date, type: 'versamento', amount: o.amount, note }; b.flows.push(f); u.flowIds.push([b.id, f.id]); }
     Object.assign(op, { toId: b.id, amount: o.amount, fee });
   } else if (o.kind === 'versamento' || o.kind === 'prelievo') {
     if (!(o.amount > 0)) return 'Inserisci l\'importo.';
     const f = { id: uid(), date: o.date, type: o.kind, amount: o.amount, note: o.note || 'Operazione' }; a.flows.push(f); u.flowId = f.id;
-    if (o.fromCash) a.cash = (a.cash || 0) + (o.kind === 'versamento' ? 1 : -1) * o.amount / cfx;
+    u.dCash = 0; if (o.fromCash) { u.dCash = (o.kind === 'versamento' ? 1 : -1) * o.amount / cfx; a.cash = (a.cash || 0) + u.dCash; }
     op.amount = o.amount;
   } else {
     let i = o.instId ? inst(o.instId) : null, price = o.price > 0 ? o.price : (i && i.price > 0 ? i.price : 0), qty = o.qty > 0 ? o.qty : 0;          // senza prezzo si usa l'ultimo che l'app conosce (si aggiorna da solo mattina e sera)
@@ -3465,14 +3467,14 @@ function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), 
     if (o.kind === 'acquisto') {
       if (p) { u.pos = { id: p.id, qty: p.qty, cost: p.cost || 0 }; p.qty += qty; p.cost = (p.cost || 0) + gross + fee; }
       else { p = { id: uid(), instId: i.id, qty, cost: gross + fee }; a.positions.push(p); u.posNew = p.id; }
-      if (o.fromCash) a.cash = (a.cash || 0) - (gross + fee) / cfx;
+      u.dCash = 0; if (o.fromCash) { u.dCash = -(gross + fee) / cfx; a.cash = (a.cash || 0) + u.dCash; }
     } else {
       if (!p || qty > p.qty * (1 + 1e-9)) return fail('In questo conto hai ' + (p ? nfq.format(p.qty) : 'nessuna quota') + ' di questo strumento: non puoi venderne ' + nfq.format(qty) + '.');
       u.pos = { id: p.id, qty: p.qty, cost: p.cost || 0 }; const out = (p.cost || 0) * (qty / p.qty);
       if (p.cost > 0) op.realized = gross - fee - out;          // guadagno o perdita realizzata, se il costo di carico era noto
       p.qty -= qty; p.cost = Math.max(0, (p.cost || 0) - out);
       if (p.qty < 1e-9) { u.removed = true; a.positions = a.positions.filter(x => x !== p); }
-      if (o.fromCash) a.cash = (a.cash || 0) + (gross - fee) / cfx;
+      u.out = out; u.dCash = 0; if (o.fromCash) { u.dCash = (gross - fee) / cfx; a.cash = (a.cash || 0) + u.dCash; }
     }
     if (o.price > 0 && o.date >= i.priceDate) { u.price = { price: i.price, priceDate: i.priceDate }; setPriceAt(i, price, o.date); }          // il prezzo che hai scritto tu e' una quotazione vera di quel giorno; se non l'hai scritto non si tocca
     Object.assign(op, { instId: i.id, instName: i.name, qty, price, ccy: i.ccy, fee, gross });
@@ -3480,23 +3482,30 @@ function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), 
   a.upd = today(); const bb = op.toId && S.accounts.find(x => x.id === op.toId); if (bb) bb.upd = today();          // un'operazione registrata e' un aggiornamento del conto
   op.undo = u; OPS().push(op); return null;
 }
-function undoOp(op) {
-  const a = S.accounts.find(x => x.id === op.accId);
-  for (const id of [op.accId, op.toId].filter(Boolean)) { const mine = OPS().filter(x => x.accId === id || x.toId === id); if (mine[mine.length - 1] !== op) { alert('Si può annullare soltanto l\'ultima operazione di ogni conto.'); return; } }
-  if (!confirm('Annullo questa operazione e ripristino il conto com\'era prima?')) return;
-  const u = op.undo || {};
-  if (u.toId) { const b = S.accounts.find(x => x.id === u.toId); if (b) b.cash = u.toCash ?? b.cash; for (const [aid, fid] of u.flowIds || []) { const ac = S.accounts.find(x => x.id === aid); if (ac) ac.flows = ac.flows.filter(f => f.id !== fid); } }
-  if (a) {
-    a.cash = u.cash ?? a.cash;
-    if (u.flowId) a.flows = a.flows.filter(f => f.id !== u.flowId);
-    if (u.posNew) a.positions = a.positions.filter(p => p.id !== u.posNew);
-    else if (u.pos) { let p = a.positions.find(x => x.id === u.pos.id); if (!p) { p = { id: u.pos.id, instId: op.instId, qty: 0, cost: 0 }; a.positions.push(p); } p.qty = u.pos.qty; p.cost = u.pos.cost; }
+function undoOp(op) {          // si puo' eliminare qualunque operazione, anche una in mezzo: si annullano i suoi effetti (liquidita', quote, costo), le altre restano
+  const a = S.accounts.find(x => x.id === op.accId), b = op.toId ? S.accounts.find(x => x.id === op.toId) : null, u = op.undo || {};
+  const last = [op.accId, op.toId].filter(Boolean).every(id => { const mine = OPS().filter(x => x.accId === id || x.toId === id); return mine[mine.length - 1] === op; });
+  const trade = op.kind === 'acquisto' || op.kind === 'vendita', p = a && trade ? a.positions.find(x => x.instId === op.instId) : null;
+  if (op.kind === 'acquisto' && a && (!p || p.qty < op.qty * (1 - 1e-9))) { alert('Dopo questo acquisto hai venduto delle quote: elimina prima la vendita, poi questo acquisto.'); return; }
+  if (!confirm(last ? 'Annullo questa operazione e ripristino il conto com\'era prima?' : 'Elimino questa operazione e correggo il conto (liquidità e quote). Le operazioni fatte dopo restano come sono. Procedo?')) return;
+  const cfx = a ? (fxRate(a.cashCcy) ?? 1) : 1, bfx = b ? (fxRate(b.cashCcy) ?? 1) : 1;
+  if (u.dCash === undefined && last) { if (a) a.cash = u.cash ?? a.cash; if (b) b.cash = u.toCash ?? b.cash; }          // operazioni registrate con le versioni vecchie: se e' l'ultima si torna alla fotografia di allora
+  else {
+    const dA = u.dCash !== undefined ? u.dCash : op.kind === 'trasferimento' ? -((op.amount || 0) + (op.fee || 0)) / cfx : op.kind === 'acquisto' ? -(op.gross + (op.fee || 0)) / cfx : op.kind === 'vendita' ? (op.gross - (op.fee || 0)) / cfx : op.kind === 'versamento' ? (op.amount || 0) / cfx : -(op.amount || 0) / cfx;
+    const dB = u.dTo !== undefined ? u.dTo : (op.amount || 0) / bfx;
+    if (a) a.cash = (a.cash || 0) - dA; if (b && op.kind === 'trasferimento') b.cash = (b.cash || 0) - dB;
   }
-  if (u.instNew && !S.accounts.some(x => x.positions.some(p => p.instId === u.instNew))) S.instruments = S.instruments.filter(i => i.id !== u.instNew);
-  if (u.price) { const i = inst(op.instId); if (i) { i.price = u.price.price; i.priceDate = u.price.priceDate; } }
+  for (const [aid, fid] of u.flowIds || []) { const ac = S.accounts.find(x => x.id === aid); if (ac) ac.flows = ac.flows.filter(f => f.id !== fid); }
+  if (a && u.flowId) a.flows = a.flows.filter(f => f.id !== u.flowId);
+  if (a && op.kind === 'acquisto') { p.qty -= op.qty; p.cost = Math.max(0, (p.cost || 0) - (op.gross + (op.fee || 0))); if (p.qty < 1e-9) a.positions = a.positions.filter(x => x !== p); }
+  if (a && op.kind === 'vendita') {
+    const out = u.out != null ? u.out : u.pos && u.pos.qty > 0 ? u.pos.cost * (op.qty / u.pos.qty) : 0;
+    if (p) { p.qty += op.qty; p.cost = (p.cost || 0) + out; } else a.positions.push({ id: u.pos ? u.pos.id : uid(), instId: op.instId, qty: op.qty, cost: out });
+  }
+  if (u.instNew && !S.accounts.some(x => x.positions.some(q => q.instId === u.instNew))) S.instruments = S.instruments.filter(i => i.id !== u.instNew);
+  if (u.price && last) { const i = inst(op.instId); if (i) { i.price = u.price.price; i.priceDate = u.price.priceDate; } }
   S.ops = OPS().filter(x => x !== op); done();
-}
-/* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
+}/* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
 const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']]];
 /* ============ obiettivi: poche domande, una barra che si riempie ============ */
 const goalStart = () => Math.max(0, totalValue() - boxTotal());
@@ -3789,7 +3798,7 @@ function opWizard(pre, after) {
       if (how) w.push(h('p', { class: 'muted' }, '↳ ' + how + (st.how.startsWith('t:') ? ': registro prima il trasferimento di ' + eur(shortBy(), true) : '')));
       const dt = h('input', { type: 'date', value: st.date, 'aria-label': 'Data' }); dt.addEventListener('input', () => { st.date = dt.value || today(); });
       const nt = h('input', { type: 'text', placeholder: 'facoltativa', value: st.note, 'aria-label': 'Nota' }); nt.addEventListener('input', () => { st.note = nt.value; });
-      w.push(h('div', { class: 'g2' }, h('label', { class: 'fld' }, h('span', null, 'Data'), dt), h('label', { class: 'fld' }, h('span', null, 'Nota'), nt)));
+      w.push(h('label', { class: 'fld' }, h('span', null, 'Data'), dt));
       if (trade && !st.how) { const cb = h('input', { type: 'checkbox', checked: st.fromCash }); cb.addEventListener('change', () => { st.fromCash = cb.checked; }); w.push(h('label', { class: 'chk' }, cb, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto')))); }
       const err = h('p', { class: 'err' }); w.push(err);
       const cf = h('button', { type: 'button', class: 'btn pri big', onclick: () => commit(err, cf) }, 'Conferma e registra'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), cf)); return w;
@@ -4086,7 +4095,21 @@ function planGroups(plans) {          // i PAC sono raggruppati per conto: sotto
   if (!plans.length) return null; const ids = [...new Set(plans.map(p => p.accId))].sort((a, b) => S.accounts.findIndex(x => x.id === a) - S.accounts.findIndex(x => x.id === b));
   return h('div', null, ids.map(id => { const list = plans.filter(p => p.accId === id), pm = list.reduce((s, p) => s + p.amount / freqMonths(p.freq), 0);
     return h('div', { class: 'plan-grp' }, h('h3', { class: 'plan-h' }, accName(id), h('small', { class: 'muted' }, ' · ' + eur(pm) + ' al mese')), table([{ t: 'Voce' }, { t: 'Che cosa compra' }, { t: 'Importo', n: 1 }, { t: 'Quando' }, { t: 'Prossimo' }, { t: '' }], list.map(p => { const nx = planNext(p, 1)[0]; return [p.label, partsText(p), eur(p.amount), freqLabel(p.freq).toLowerCase() + (p.end ? ' fino al ' + fmtDate(p.end) : ''), nx ? fmtDate(nx) : 'finito', rowActs(btn('Modifica', () => editPlan(p), 'sm'), btn('Elimina', () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); done(); } }, 'sm danger'))]; }))); })); }
-function piAppuntamenti() {
+function pacManager() {          // "I miei PAC": vederli per conto e gestirli senza girare per le schede
+  if (document.querySelector('dialog.pacs')) return;
+  const dlg = h('dialog', { class: 'wide pacs' }), body = h('div'), shut = () => { PAC_UI = null; if (dlg.open) dlg.close(); dlg.remove(); };
+  PAC_UI = () => { if (!dlg.isConnected) { PAC_UI = null; return; } draw(); };
+  function draw() {
+    const plans = PL(), pm = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0), due = planDueAll();
+    body.replaceChildren(...[
+      h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'I miei PAC'), btn('Chiudi', shut, 'sm')),
+      plans.length ? h('p', { class: 'muted' }, pl(plans.length, 'PAC', 'PAC') + ' · circa ' + eur(pm) + ' al mese, ' + eur(pm * 12) + ' in un anno.') : null,
+      due.length ? h('div', { class: 'banner' }, h('span', null, pl(due.length, 'acquisto da confermare', 'acquisti da confermare')), btn('Conferma…', () => { shut(); confirmDue(); }, 'sm pri')) : null,
+      planGroups(plans) || h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.'),
+      h('div', { class: 'dlgacts' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'))].filter(Boolean));
+  }
+  dlg.append(body); dlg.addEventListener('close', () => { PAC_UI = null; dlg.remove(); }); draw(); document.body.append(dlg); dlg.showModal();
+}function piAppuntamenti() {
   const el = h('div'), due = planDueAll(), plans = PL(), perMonth = plans.reduce((t, p) => t + p.amount / freqMonths(p.freq), 0);
   if (due.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Da confermare'), btn('Conferma…', () => confirmDue(), 'pri')),
     h('p', { class: 'muted' }, 'Scaduti o di oggi. L\'app ha già preparato la modifica al prezzo di quel giorno: tu dici solo se l\'acquisto è stato preso davvero (Sì la registra, No la salta).'),
