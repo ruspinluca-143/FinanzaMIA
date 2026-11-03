@@ -2126,3 +2126,66 @@ timestamp;nome;id;prezzo;valuta;data;fonte
 2026-11-03T06:41:33+00:00;Apple 2045 (riferimento);US037833BH21;81.39;USD;2026-11-03;onvista
 2026-11-03T06:41:33+00:00;McDonald's 2052 (riferimento);US58013MFT62;85.55;USD;2026-11-03;onvista
 2026-11-03T06:41:33+00:00;Goldman Sachs 4,75% 2045 (riferimento);US38148LAF31;85.071;USD;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;iShares Core MSCI World UCITS ETF USD (Acc);IE00B4L5Y983;129.95;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi Core Nasdaq-100 Swap UCITS ETF Acc;LU1829221024;103.86;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Xtrackers II Global Government Bond UCITS ETF 1C EUR Hedged;LU0378818131;206.8;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Xtrackers II EUR Overnight Rate Swap UCITS ETF 1C;LU0290358497;150.6632;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi Euro Government Bond 0-6 M UCITS ETF;FR0010754200;127.65;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi S&P Eurozone Climate Paris Aligned UCITS ETF Acc;LU2195226068;41.74;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;iShares Core MSCI EM IMI UCITS ETF USD (Acc);IE00BKM4GZ66;45.415;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi MSCI Emerging Markets Swap II UCITS ETF;FR0010429068;18.062;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Invesco Physical Gold ETC;IE00B579F325;340.64;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;WisdomTree Core Physical Gold;JE00BN2CJ301;351.82;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi Euro Stoxx 50 II UCITS ETF-A;FR0007054358;70.49;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi Bl. Equal-weight Comm. ex-Agr. UCITS ETF;LU1829218749;37.545;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Vanguard FTSE Developed Europe UCITS ETF (EUR) Acc;IE00BK5BQX27;60.61;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;21Shares Bitcoin Core ETP;CH1199067674;16.424;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;WisdomTree World;XS3151433813;25.695;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Bitwise MSCI Digital Assets Select 20 ETP;DE000A3G3ZL3;80.9;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;L&G Global Brands UCITS ETF;IE0007HKA9K1;16.246;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;NVIDIA;nvda;202.06;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;SpaceX;spcx;136.37;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Bending Spoons S.p.A.;bsp;45.38;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Broadcom;avgo;322.23;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Apple;aapl;338.32;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Alumis Inc;alms;6.38;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Accenture;acn;260.94;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Bitcoin;bitcoin;68361;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;XRP;ripple;1.12;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;Ether;ethereum;2004.79;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;Solana;solana;81.7;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;Cardano;cardano;0.166761;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;Cosmos;cosmos;1.27;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;iShares Core MSCI Europe UCITS ETF EUR (Acc);IE00B4K48X80;105.74;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;WisdomTree Physical Gold EUR Daily Hedged;JE00B8DFY052;20.645;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;WisdomTree Physical Solana;GB00BNGJ9G01;11.768;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;WisdomTree NASDAQ-100;XS3003325795;37.34;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi MSCI World SRI Climate Paris Aligned;IE000Y77LGG9;123.33;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Xtrackers S&P 500 Swap UCITS ETF 1C;LU0490618542;137.89;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Bitwise Physical Ethereum ETP;DE000A3GMKD7;18.556;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Summit Midstream Corp;smc;29.54;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;nLIGHT;lasr;35.77;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Lumentum Holdings;lite;684.4;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Alphabet (Class A);googl;278.99;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Build-A-Bear Workshop;bbw;29.54;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Super Micro Computer Inc;smci;30.44;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;CoreWeave Inc.;crwv;50.15;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Sionna Therapeutics Inc;sion;3.73;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Innventure Inc;inv;0.29;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;Amundi Core MSCI World UCITS ETF Acc;IE000BI8OT95;163.21;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Xtrackers MSCI Brazil UCITS ETF 1C;LU0292109344;54.71;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;iShares MSCI Global Semiconductors UCITS ETF Acc;IE000I8KRLL9;15.942;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Innodata Inc.;inod;41.32;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;USD Coin (USDC);usd-coin;0.893107;EUR;2026-11-03;coingecko
+2026-11-03T06:56:34+00:00;Xtrackers MSCI Korea UCITS ETF (riferimento);LU0292100046;178.86;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Xtrackers MSCI World Value UCITS ETF (riferimento);IE00BL25JM42;72.68;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento);LU0908500753;320.8;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Amundi EUR Corporate Bond ESG UCITS ETF (riferimento);LU1437018168;53.82;EUR;2026-11-02;borsa_italiana
+2026-11-03T06:56:34+00:00;Centrus Energy;leu;94.9;USD;2026-11-02;stockanalysis
+2026-11-03T06:56:34+00:00;iShares MSCI USA Value Factor UCITS ETF (Acc);IE00BD1F4M44;16.444;EUR;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;iShares MSCI Korea UCITS ETF (Dist);IE00B0M63391;97.97;EUR;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;Paramount Skydance 2036 (riferimento);US925524AX89;74.95;EUR;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;Whirlpool 2033 (riferimento);US963320BE54;67.89;USD;2026-11-02;onvista
+2026-11-03T06:56:34+00:00;Apple 2045 (riferimento);US037833BH21;81.41;EUR;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;McDonald's 2052 (riferimento);US58013MFT62;85.57;EUR;2026-11-03;onvista
+2026-11-03T06:56:34+00:00;Goldman Sachs 4,75% 2045 (riferimento);US38148LAF31;85.093;EUR;2026-11-03;onvista
