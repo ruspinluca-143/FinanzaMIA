@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-X2Nm+qMljRCm0XoVz//ScPH5rGBjaH/1lMUAkZYLoDI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-g+eNNIfca0bJOdKDjAerGTUoIzGekBPlA5EIuaA5DiM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1216,11 +1216,11 @@ function wzRun(cfg) {          // cfg = { steps: () => [api => ({ q, body, valid
     const d = L[i](api), n = L.length, canBack = i > 0 && !d.noBack;
     const nxt = d.next === false ? null : h('button', { type: 'button', class: 'btn pri big', disabled: d.valid === false ? '' : null, onclick: async () => { if (d.onNext) { const r = await d.onNext(api); if (r === false) return; } else api.next(); } }, d.nextLabel || (i === n - 1 ? 'Fine' : 'Avanti'));
     api.nextBtn = nxt;
-    view.replaceChildren(
+    view.replaceChildren(...[
       h('div', { class: 'wz-top' }, canBack ? btn('← Indietro', api.back, 'sm') : h('span'), h('span', { class: 'wz-step muted' }, 'Passo ' + (i + 1) + ' di ' + n), btn('✕', shut, 'sm')),
       h('div', { class: 'wz-prog', 'aria-hidden': 'true' }, L.map((_, k) => h('i', { class: k <= i ? 'on' : '' }))),
       h('h3', { class: 'wz-q' }, d.q || ''), h('div', { class: 'wz-b' }, d.body || []), d.err ? h('p', { class: 'err' }, d.err) : null,
-      h('div', { class: 'wz-nav' }, canBack ? btn('← Indietro', api.back) : h('span'), nxt || h('span')));
+      h('div', { class: 'wz-nav' }, canBack ? btn('← Indietro', api.back) : h('span'), nxt || h('span'))].filter(Boolean));
     view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
     if (d.focus) setTimeout(() => { const f = view.querySelector(d.focus); if (f) f.focus(); }, 60);
   }
@@ -1460,7 +1460,8 @@ function openPrices(P, fname) {
   const px = n => fin(n) ? n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: n < 1 ? 6 : 4 }) : '—';
   const snap = h('input', { type: 'checkbox', checked: true }), ok = btn('', null, 'pri');
   const boxes = P.rows.map(r => r.skip ? null : h('input', { type: 'checkbox', checked: r.use, 'aria-label': 'Applica ' + r.i.name, onchange: upd }));
-  function upd() { const n = boxes.filter(b => b && b.checked).length; ok.textContent = n ? 'Applica ' + pl(n, 'prezzo', 'prezzi') : P.rows.some(r => !r.skip) ? 'Spunta i prezzi da applicare' : 'Nessun prezzo da applicare'; ok.disabled = !n; }
+  const real = boxes.filter(Boolean), allCb = h('input', { type: 'checkbox', 'aria-label': 'Seleziona tutti i prezzi', onchange: e => { real.forEach(b => { b.checked = e.target.checked; }); upd(); } });
+  function upd() { const n = boxes.filter(b => b && b.checked).length; allCb.checked = real.length > 0 && n === real.length; allCb.indeterminate = n > 0 && n < real.length; ok.textContent = n ? 'Applica ' + pl(n, 'prezzo', 'prezzi') : P.rows.some(r => !r.skip) ? 'Spunta i prezzi da applicare' : 'Nessun prezzo da applicare'; ok.disabled = !n; }
   ok.onclick = () => {
     let n = 0; P.rows.forEach((r, k) => { if (boxes[k] && boxes[k].checked) { setPriceAt(r.i, r.np, r.e.data); n++; } });
     for (const r of P.rows) {          // dati pubblici dell'ETF (costo annuo, benchmark, distribuzione): si completano solo se mancano
@@ -1476,6 +1477,7 @@ function openPrices(P, fname) {
     h('p', { class: 'muted' }, fname + ' · ' + (P.gen ? 'generato il ' + P.gen.toLocaleString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'senza data') + ' · ' + pl(P.n, 'prezzo', 'prezzi') + ' nel file, ' + pl(P.rows.length, 'trovato', 'trovati') + ' nell\'app'),
     P.rows.some(r => !r.skip && !r.use) ? h('div', { class: 'warn' }, 'Questi prezzi cambiano moltissimo rispetto a quello che hai: possono essere giusti (titolo che ha fatto un balzo) o un errore della fonte. Controlla il titolo, METTI LA SPUNTA a quelli che vuoi applicare e premi Applica. Quelli senza spunta restano al prezzo di prima.') : null,
     P.warns.length ? h('div', { class: 'warn' }, h('ul', null, P.warns.map(w => h('li', null, w)))) : null,
+    real.length ? h('label', { class: 'chk', style: 'font-weight:600' }, allCb, h('span', null, 'Seleziona tutti (' + real.length + ')')) : null,
     table([{ t: '' }, { t: 'Strumento' }, { t: 'Prezzo attuale', n: 1 }, { t: 'Nuovo prezzo', n: 1 }, { t: 'Variazione', n: 1 }, { t: 'Quotazione del' }, { t: 'Nota' }], rows, 'Nessuno strumento del file corrisponde a uno strumento dell\'app.'),
     P.unseen.length ? h('details', null, h('summary', { class: 'muted' }, pl(P.unseen.length, 'strumento con posizioni non è nel file', 'strumenti con posizioni non sono nel file') + ': restano al prezzo di prima'), h('p', { class: 'muted' }, P.unseen.map(i => i.name).join(' · '))) : null,
     h('label', { class: 'chk' }, snap, h('span', null, 'Registra anche lo snapshot del patrimonio di oggi', h('small', null, ' — con i prezzi appena applicati'))),
@@ -3178,7 +3180,7 @@ function topbar() {
     h('div', { class: 'acts' }, DEMO ? [CANSAVE ? btn('Salva come archivio cifrato', saveViewAsArchive, 'pri') : null, btn(CANSAVE ? 'Chiudi senza salvare' : 'Esci dalla demo', exitDemo)] : null));
 }
 /* ---- menu a sinistra: le funzioni di sistema (dati, salvataggi, sicurezza) e le viste meno usate ---- */
-const MICO = { op: ['M12 5v14', 'M5 12h14'], imp: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'], saldi: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], save: ['M5 4h11l3 3v13H5z', 'M8 4v5h7V4', 'M8 20v-6h8v6'], eye: ['M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z', 'M12 9a3 3 0 110 6 3 3 0 010-6z'], copy: ['M8 8h11v12H8z', 'M5 16V4h11'], lock: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], hist: ['M12 7v5l3 2', 'M4 12a8 8 0 108-8 8 8 0 00-7 4', 'M4 4v4h4'], out: ['M10 4H5v16h5', 'M15 8l4 4-4 4', 'M19 12H9'] };
+const MICO = { op: ['M12 5v14', 'M5 12h14'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], goal: ['M12 21a9 9 0 100-18 9 9 0 000 18z', 'M12 16.5a4.5 4.5 0 100-9 4.5 4.5 0 000 9z', 'M12 12h.01'], imp: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'], saldi: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], save: ['M5 4h11l3 3v13H5z', 'M8 4v5h7V4', 'M8 20v-6h8v6'], eye: ['M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z', 'M12 9a3 3 0 110 6 3 3 0 010-6z'], copy: ['M8 8h11v12H8z', 'M5 16V4h11'], lock: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], hist: ['M12 7v5l3 2', 'M4 12a8 8 0 108-8 8 8 0 00-7 4', 'M4 4v4h4'], out: ['M10 4H5v16h5', 'M15 8l4 4-4 4', 'M19 12H9'] };
 function openMenu() {
   if (document.querySelector('.drawer')) return;
   const bg = h('div', { class: 'drawer-bg' }), close = () => { bg.classList.add('out'); pan.classList.add('out'); setTimeout(() => { bg.remove(); pan.remove(); }, 260); document.removeEventListener('keydown', esc); };
@@ -3192,9 +3194,9 @@ function openMenu() {
     h('div', { class: 'dr-sec' }, 'Azioni rapide'),
     DEMO ? null : item('Registra un\'operazione', MICO.op, () => editOperation({}), 'acquisto, vendita, versamento…'),
     DEMO ? null : item('Scrivi cosa è successo', MICO.op, () => askBox(), 'una frase e ci penso io'),
-    DEMO ? null : item('I miei PAC', MICO.op, () => pacManager(), PL().length ? pl(PL().length, 'PAC attivo', 'PAC attivi') + ' · vedi e gestisci' : 'vedi e gestisci i PAC'),
+    DEMO ? null : item('I miei PAC', MICO.pac, () => pacManager(), PL().length ? pl(PL().length, 'PAC attivo', 'PAC attivi') + ' · vedi e gestisci' : 'vedi e gestisci i PAC'),
     DEMO ? null : item('Nuovo PAC', MICO.op, () => pacWizard(), 'un acquisto che si ripete'),
-    DEMO ? null : item('Nuovo obiettivo', MICO.save, () => goalWizard(), 'casa, pensione, viaggio…'),
+    DEMO ? null : item('Nuovo obiettivo', MICO.goal, () => goalWizard(), 'casa, pensione, viaggio…'),
     DEMO ? null : item('Importa i file dei conti', MICO.imp, () => pickBatch()),
     DEMO ? null : item('Aggiorna i saldi', MICO.saldi, openBalances, 'conti correnti, contanti, carte'),
     DEMO ? null : item('Salva adesso', MICO.save, saveNow, cloudSub ? 'online ' + cloudSub : ''),
@@ -3637,19 +3639,20 @@ function goalsCard() {
 /* ============ nuovo PAC guidato ============ */
 function candOf(i) { const held = []; for (const a of S.accounts) { const p = a.positions.find(z => z.instId === i.id); if (p) held.push({ a, p }); } return { id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', held }; }
 function pacWizard(pre) {
-  pre = pre || {}; const p = { parts: pre.c ? [{ c: pre.c, amount: null }] : [], c: pre.c || null, amount: null, fi: 0, day: 5, accId: '', fromId: '__same', whole: false, q: '' };
-  const nextDate = day => { const t = new Date(), d = new Date(t.getFullYear(), t.getMonth() + (day >= t.getDate() ? 0 : 1), 1); return ymd(new Date(d.getFullYear(), d.getMonth(), Math.min(day, 28))); };
+  pre = pre || {}; const p = { parts: pre.c ? [{ c: pre.c, amount: null }] : [], c: pre.c || null, amount: null, fi: 1, day: 5, accId: '', fromId: '__same', whole: false, q: '' };
+  const WD = ['', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], weekly = () => FREQ[p.fi][0] === 'settimanale';
+  const nextDate = day => { const t = new Date(); if (weekly()) { const add = (day - (t.getDay() || 7) + 7) % 7; return ymd(new Date(t.getFullYear(), t.getMonth(), t.getDate() + (add || 7))); } const d = new Date(t.getFullYear(), t.getMonth() + (day >= t.getDate() ? 0 : 1), 1); return ymd(new Date(d.getFullYear(), d.getMonth(), Math.min(day, 28))); };
   const sTit = api => { const res = h('div', { class: 'wz-res' }), inp = h('input', { type: 'search', class: 'wz-search', placeholder: 'Scrivi nome, ISIN o crypto', autocomplete: 'off', value: p.q, 'aria-label': 'Cerca il titolo' });
     const fill = () => { p.q = inp.value; res.replaceChildren(...opCands(inp.value, '', 'acquisto').slice(0, 7).map(c => h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { if (!p.parts.some(x => (x.c.id && x.c.id === c.id) || (!x.c.id && x.c.code === c.code && x.c.name === c.name))) p.parts.push({ c, amount: null }); if (!p.accId && c.held[0]) p.accId = c.held[0].a.id; api.next(); } }, h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null), h('span', { class: 'wz-s' }, (c.st === 'auto' ? '⟳ prezzo automatico' : c.st === 'stima' ? '≈ prezzo stimato' : '✎ prezzo a mano') + ' · oggi ' + nf2.format(c.price) + ' ' + c.ccy + (c.held.length ? ' · ce l\'hai in ' + c.held.map(x => x.a.name).join(', ') : ''))))); };
     inp.addEventListener('input', fill); fill(); return { q: p.parts.length ? 'Aggiungi un altro strumento (o premi Avanti)' : 'Che cosa compri ogni volta?', focus: '.wz-search', valid: p.parts.length > 0, body: [p.parts.length ? h('div', { class: 'wz-chip' }, h('b', null, 'Scelti: ' + p.parts.map(x => x.c.name).join(' + ')), h('span', { class: 'wz-s' }, 'un PAC può avere più strumenti: cercane un altro, oppure premi Avanti')) : null, inp, res].filter(Boolean) }; };
   const sImp = api => { const ok = () => p.parts.length > 0 && p.parts.every(x => x.amount > 0), one = p.parts.length === 1;
     return { q: one ? 'Quanto compri per volta?' : 'Quanto per ciascuno strumento, ogni volta?', focus: '.wz-num', valid: ok(), body: [...p.parts.map((x, k) => h('div', { class: 'wz-part' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, x.c.name), p.parts.length > 1 ? btn('Togli', () => { p.parts.splice(k, 1); api.redraw(); }, 'sm') : null), wzNum(x.amount, 'Euro per volta', v => { x.amount = v; if (api.nextBtn) api.nextBtn.disabled = !ok(); }), one ? wzChips([25, 50, 100, 200, 500], v => eur(v), v => { x.amount = v; api.next(); }) : null)), btn('+ Aggiungi un altro strumento', () => api.jump(0), 'sm')] }; };
   const sFreq = api => ({ q: 'Ogni quanto?', next: false, body: FREQ.map((f, k) => wzOpt(f[1], null, () => { p.fi = k; api.next(); }, p.fi === k ? 'sel' : '')) });
-  const sDay = api => ({ q: 'In che giorno del mese?', focus: '.wz-num', valid: p.day >= 1 && p.day <= 28, body: [wzNum(p.day, 'Giorno (1-28)', v => { p.day = v; if (api.nextBtn) api.nextBtn.disabled = !(v >= 1 && v <= 28); }), wzChips([1, 2, 5, 8, 10, 15, 20, 23, 28], v => 'il ' + v, v => { p.day = v; api.next(); })] });
+  const sDay = api => weekly() ? ({ q: 'In che giorno della settimana?', next: false, body: [1, 2, 3, 4, 5, 6, 7].map(k => wzOpt(WD[k], null, () => { p.day = k; api.next(); }, p.day === k ? 'sel' : '')) }) : ({ q: 'In che giorno del mese?', focus: '.wz-num', valid: p.day >= 1 && p.day <= 28, body: [wzNum(p.day, 'Giorno (1-28)', v => { p.day = v; if (api.nextBtn) api.nextBtn.disabled = !(v >= 1 && v <= 28); }), wzChips([1, 2, 5, 8, 10, 15, 20, 23, 28], v => 'il ' + v, v => { p.day = v; api.next(); })] });
   const sConto = api => ({ q: 'In quale conto lo compri?', next: false, body: S.accounts.filter(a => !a.dep && accGroup(a) !== 'fermi').concat(S.accounts.filter(a => !a.dep && accGroup(a) === 'fermi')).map(a => wzOpt(a.name, (TYPES[a.type] || {}).label + ' · liquidità ' + eur(Math.max(0, accCash(a)), true), () => { p.accId = a.id; api.next(); }, p.accId === a.id ? 'sel' : '')) });
   const sDa = api => ({ q: 'Da dove partono i soldi?', next: false, body: [wzOpt('Sono già nel conto', 'si usa la sua liquidità', () => { p.fromId = '__same'; api.next(); }), ...S.accounts.filter(a => a.id !== p.accId && !a.dep && accGroup(a) === 'fermi' && !a.box).map(a => wzOpt('Dal conto ' + a.name, 'liquidità ' + eur(Math.max(0, accCash(a)), true) + ' · prima registro il trasferimento', () => { p.fromId = a.id; api.next(); })), wzOpt('Arrivano da fuori', 'per esempio il TFR o lo stipendio versato direttamente', () => { p.fromId = '__ext'; api.next(); }, 'soft')] });
   const sSum = api => { p.amount = p.parts.reduce((t, x) => t + (x.amount || 0), 0); const f = FREQ[p.fi], perM = p.amount / f[2], year = perM * 12, name = p.parts.length > 1 ? p.parts.length + ' strumenti' : p.parts[0].c.name, acc = S.accounts.find(a => a.id === p.accId);
-    return { q: 'Controlla e conferma', nextLabel: 'Crea il PAC', valid: !!acc, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, eur(p.amount) + ' di ' + name + ' ' + f[1].toLowerCase() + ', il ' + p.day), p.parts.length > 1 ? h('ul', null, p.parts.map(x => h('li', null, eur(x.amount) + ' · ' + x.c.name))) : null, h('div', { class: 'wz-sum-s' }, (acc ? acc.name : '') + ' · ' + (p.fromId === '__same' ? 'con la sua liquidità' : p.fromId === '__ext' ? 'soldi da fuori' : 'dal conto ' + accName(p.fromId)))),
+    return { q: 'Controlla e conferma', nextLabel: 'Crea il PAC', valid: !!acc, body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, eur(p.amount) + ' di ' + name + ' ' + f[1].toLowerCase() + (f[0] === 'settimanale' ? ', di ' + WD[p.day].toLowerCase() : ', il ' + p.day)), p.parts.length > 1 ? h('ul', null, p.parts.map(x => h('li', null, eur(x.amount) + ' · ' + x.c.name))) : null, h('div', { class: 'wz-sum-s' }, (acc ? acc.name : '') + ' · ' + (p.fromId === '__same' ? 'con la sua liquidità' : p.fromId === '__ext' ? 'soldi da fuori' : 'dal conto ' + accName(p.fromId)))),
       talkBars([['In un anno versi', year, '', null, eur(year)], ['In 10 anni versi', year * 10, '', null, eur(year * 10)], ['In 10 anni, ipotesi 5% all\'anno', goalFuture(0, perM, 10, 0.05), 'non è una promessa', null, eur(goalFuture(0, perM, 10, 0.05))]], false),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.whole, onchange: e => { p.whole = e.target.checked; } }), h('span', null, 'Solo quote intere', h('small', null, ' — come il PAC di Directa: compra solo quote complete'))), h('p', { class: 'muted' }, 'Il giorno del PAC ti chiedo se è stato preso davvero: solo con il tuo sì lo registro.')],
       onNext: a2 => { const cl = x => ({ instId: x.c.id || '', instName: x.c.id ? '' : x.c.name, instCode: x.c.id ? '' : x.c.code, instCcy: x.c.ccy, instCls: x.c.cls || 'Azioni', amount: x.amount }), multi = p.parts.length > 1, c = p.parts[0].c, short = n => String(n).replace(/ucits|etf|acc\b|\(.*?\)/gi, '').replace(/\s+/g, ' ').trim().slice(0, 28);
@@ -4057,7 +4060,7 @@ function editOperationAdv(pre, after) {
 }
 /* ============ acquisti programmati (PAC) e scadenze ============ */
 const PL = () => S.plans || (S.plans = []);
-const FREQ = [['mensile', 'Ogni mese', 1], ['bimestrale', 'Ogni 2 mesi', 2], ['trimestrale', 'Ogni 3 mesi', 3], ['semestrale', 'Ogni 6 mesi', 6], ['annuale', 'Ogni anno', 12]];
+const FREQ = [['settimanale', 'Ogni settimana', 12 / 52], ['mensile', 'Ogni mese', 1], ['bimestrale', 'Ogni 2 mesi', 2], ['trimestrale', 'Ogni 3 mesi', 3], ['semestrale', 'Ogni 6 mesi', 6], ['annuale', 'Ogni anno', 12]];
 const freqMonths = f => (FREQ.find(x => x[0] === f) || [0, 0, 1])[2];
 const freqLabel = f => (FREQ.find(x => x[0] === f) || [0, f])[1];
 const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -4065,6 +4068,7 @@ const ymOf = ds => { const y = +ds.slice(0, 4), m = +ds.slice(5, 7); return y * 
 const addMonthsStr = (ds, n) => { const d = new Date(ds + 'T00:00:00'); return ymd(new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), 28))); };
 function occurrences(start, step, day, from, to, end) {          // le date (AAAA-MM-GG) di un acquisto periodico tra "from" e "to"
   const out = [], s = new Date(start + 'T00:00:00'); if (isNaN(s) || !(step > 0)) return out;
+  if (step < 1) { for (let k = 0; k < 6000; k++) { const d = ymd(new Date(s.getFullYear(), s.getMonth(), s.getDate() + 7 * k)); if (d > to || (end && d > end)) break; if (d >= from) out.push(d); } return out; }          // settimanale: ogni 7 giorni dalla data di partenza
   for (let k = 0; k < 2400; k++) {
     const y = s.getFullYear(), m = s.getMonth() + k * step, dim = new Date(y, m + 1, 0).getDate(), d = ymd(new Date(y, m, Math.min(day || s.getDate(), dim)));
     if (d > to || (end && d > end)) break;
