@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lAqlrsMDmW0Vw15MmEA5ARFXeZYJGc3fkGJlL5qOXqU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-E8Zb2tHPTNF+H0NM3M0989c9HdpzUW3q5JzH4sHk6YY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -433,7 +433,7 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(7,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
 .tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
@@ -464,6 +464,9 @@ dialog[open]{animation:sheet .45s var(--ease)}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;text-decoration:underline dotted;cursor:pointer}
 .goal{padding:10px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.spark2{width:100%;height:64px;display:block}.talk-acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .cls{padding:12px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.cls-s{font-size:14px;margin-top:4px}.ad-pos{color:var(--gain)}.ad-neg{color:var(--loss)}.dv{position:relative;height:10px;border-radius:6px;background:rgba(127,127,127,.18);margin:8px 0}.dv:after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:rgba(127,127,127,.55)}.dv-b{position:absolute;top:0;bottom:0;border-radius:6px}.jud{font-weight:600;font-size:14px}.mood{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:6px 0}.mood-t{font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.04em}.tema{padding:10px 0;border-top:1px solid var(--line,#ddd)}.srcs{font-size:13px}.att{padding-left:18px}.att li{margin:8px 0}.fonti{padding-left:18px}.fonti li{margin:6px 0}.mn{padding:10px 0;border-top:1px solid var(--line,#ddd)}.ideas{margin-top:6px}.idea{padding:6px 10px;margin:6px 0;border-radius:12px;background:rgba(127,127,127,.09)}.wz-part{padding:8px 0;border-top:1px solid var(--line,#ddd)}.plan-h{margin:14px 0 4px}.qa-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.qa{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid color-mix(in srgb,var(--s1) 30%,transparent);background:color-mix(in srgb,var(--card) 72%,transparent);color:var(--s1);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .15s,background .15s,box-shadow .15s}.qa:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--s1) 12%,var(--card));box-shadow:0 4px 14px color-mix(in srgb,var(--s1) 18%,transparent)}.qa:active{transform:scale(.97)}.qa svg{width:17px;height:17px;flex:none}
+.gchart{position:relative}.gtip{position:absolute;z-index:5;pointer-events:none;background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:8px 11px;font-size:13px;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:260px}.glegend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-top:6px}.gtip .sw,.glegend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:baseline}.gbar{transform-origin:50% 100%;animation:gb .6s var(--ease,ease) both;animation-delay:calc(var(--i,0)*35ms)}.gbar.h{transform-origin:0 50%;animation-name:gbh}@keyframes gb{from{transform:scaleY(0)}}@keyframes gbh{from{transform:scaleX(0)}}.gln{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.g-val{font-size:11px;fill:var(--ink2)}@media (prefers-reduced-motion:reduce){.gbar{animation:none}}
+.gs{margin-top:-4px}
+@media (max-width:600px){.gchart .g-txt,.gchart .g-val{font-size:14.5px}}
 </style>
 </head>
 <body>
@@ -2332,7 +2335,7 @@ async function loadOnlineData() {          // dal sito: storico prezzi e dati di
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
   const [hh, mm, az, ct, an] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json')]);
-  if (an) { try { const j = normAnalisi(JSON.parse(an)); if (j) DATA.analisi = j; } catch { /* file non valido: ignorato */ } }
+  if (an) { try { const j = normAnalisi(JSON.parse(an)); if (j) { DATA.analisi = j; logAnalisi(); } } catch { /* file non valido: ignorato */ } }
   if (ct) { try { setCatalog(JSON.parse(ct)); } catch { /* file non valido: ignorato */ } }
   if (hh) DATA.hist = parseHistory(hh);
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
@@ -2479,12 +2482,12 @@ function alerts() {
 }
 
 /* ============ scheda Analisi ============ */
-const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi'], ['tasse', 'Tasse e dichiarazione'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
+const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi'], ['tasse', 'Tasse e dichiarazione'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['sovrapposizioni', 'Sovrapposizioni'], ['affidabilita', 'Affidabilità'], ['rendimento', 'Rendimento vero'], ['cedole', 'Cedole'], ['vendi', 'Se vendo'], ['pagella', 'Pagella AI'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
 function tabAnalisi() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le analisi.'));
   const sub = UI.sub || 'andamento';
   const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Analisi' }, AN_SUBS.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.sub = k; render(); } }, l)));
-  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, tasse: anTasse, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
+  const body = ({ andamento: anAndamento, confronto: anConfronto, costi: anCosti, tasse: anTasse, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, sovrapposizioni: anSovrapposizioni, affidabilita: anAffidabilita, rendimento: anRendimento, cedole: anCedole, vendi: anVendi, pagella: anPagella, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari }[sub] || anAndamento)();
   return h('div', null, h('section', { class: 'card' }, h('h2', null, 'Analisi'), chips), body);
 }
 const histButtons = () => h('div', { class: 'row' }, ONLINE ? btn('Riscarica lo storico', () => loadOnlineData(), 'sm') : btn('Carica storico da file…', () => pickText('.csv,.txt,text/csv', t => { DATA.hist = parseHistory(t); render(); }), 'sm'));
@@ -2895,6 +2898,322 @@ function consigliSoldi() {
   }
   return sec;
 }
+/* ============ libreria dei grafici (SVG): tutti si toccano o si sfiorano per leggere i valori ============ */
+function gwrap(svg) {
+  const tip = h('div', { class: 'gtip', style: 'display:none' }), wrap = h('div', { class: 'gchart' }, svg, tip);
+  const show = (e, html) => { tip.replaceChildren(...[].concat(html).filter(x => x != null).map(x => x.nodeType ? x : h('div', null, x))); tip.style.display = ''; const r = wrap.getBoundingClientRect(); let l = e.clientX - r.left + 14; if (l + tip.offsetWidth > r.width - 4) l = e.clientX - r.left - tip.offsetWidth - 14; tip.style.left = Math.max(2, l) + 'px'; tip.style.top = Math.max(2, Math.min(e.clientY - r.top - 12, r.height - tip.offsetHeight - 2)) + 'px'; };
+  return { wrap, show, hide: () => { tip.style.display = 'none'; } };
+}
+function hoverOn(g, el, html) { for (const ev of ['pointerenter', 'pointermove', 'pointerdown']) el.addEventListener(ev, e => g.show(e, html)); el.addEventListener('pointerleave', g.hide); }
+const gTxt = (cls, x, y, anchor, t) => s('text', { class: cls, x, y, 'text-anchor': anchor || 'start' }, t);
+function vbars(items, o) {
+  o = o || {}; const nar = innerWidth < 600, W = nar ? 420 : 720, H = o.h || (nar ? 200 : 220), m = { l: nar ? 42 : 54, r: 10, t: 16, b: 34 }, n = items.length, vs = items.map(i => i.v), lo = Math.min(0, ...vs), hi = Math.max(0, ...vs, 1e-9);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': o.label || 'Grafico a barre' }), g = gwrap(svg), Y = v => H - m.b - (v - lo) / ((hi - lo) || 1) * (H - m.t - m.b), cw = (W - m.l - m.r) / Math.max(1, n), bw = Math.min(46, cw * 0.62);
+  for (const v of niceTicks(lo, hi)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(gTxt('g-txt', m.l - 8, Y(v) + 4, 'end', compact(v))); }
+  svg.append(s('line', { class: 'g-axis', x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }));
+  items.forEach((it, k) => { const x = m.l + cw * k + (cw - bw) / 2, y0 = Y(0), y1 = Y(it.v), col = it.c || (it.v < 0 ? 'var(--loss)' : 'var(--s1)');
+    if (Math.abs(y1 - y0) > 0.3) svg.append(s('rect', { class: 'gbar', x, y: Math.min(y0, y1), width: bw, height: Math.abs(y1 - y0), rx: 4, fill: col, style: '--i:' + k }));
+    if (n <= (nar ? 8 : 14) && !HIDE && it.v) svg.append(gTxt('g-val', x + bw / 2, it.v >= 0 ? y1 - 5 : y1 + 13, 'middle', compact(it.v)));
+    if (n <= (nar ? 8 : 14) || k % 2 === 0) svg.append(gTxt('g-txt', x + bw / 2, H - 12, 'middle', it.l));
+    const hit = s('rect', { x: m.l + cw * k, y: m.t, width: cw, height: H - m.t - m.b, fill: 'transparent' }); hoverOn(g, hit, [h('b', null, it.tip || it.l + ': ' + (o.fmt || eur)(it.v))]); svg.append(hit); });
+  return g.wrap;
+}
+function sbars(cols, keys, o) {          // barre impilate: cols = [{l, parts:{chiave: valore}}], keys = [[chiave, colore]]
+  o = o || {}; const nar = innerWidth < 600, W = nar ? 420 : 720, H = o.h || (nar ? 210 : 240), m = { l: nar ? 42 : 54, r: 10, t: 16, b: 34 }, n = cols.length, tots = cols.map(c => keys.reduce((t, [k]) => t + (c.parts[k] || 0), 0)), hi = Math.max(...tots, 1e-9);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': o.label || 'Barre impilate' }), g = gwrap(svg), Y = v => H - m.b - v / hi * (H - m.t - m.b), cw = (W - m.l - m.r) / Math.max(1, n), bw = Math.min(46, cw * 0.62);
+  for (const v of niceTicks(0, hi)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(gTxt('g-txt', m.l - 8, Y(v) + 4, 'end', compact(v))); }
+  cols.forEach((c, k) => { const x = m.l + cw * k + (cw - bw) / 2; let acc = 0;
+    for (const [key, col] of keys) { const v = c.parts[key] || 0; if (!v) continue; svg.append(s('rect', { class: 'gbar', x, y: Y(acc + v), width: bw, height: Y(acc) - Y(acc + v), fill: col, style: '--i:' + k })); acc += v; }
+    if (n <= (nar ? 8 : 14) || k % 2 === 0) svg.append(gTxt('g-txt', x + bw / 2, H - 12, 'middle', c.l));
+    const hit = s('rect', { x: m.l + cw * k, y: m.t, width: cw, height: H - m.t - m.b, fill: 'transparent' }); hoverOn(g, hit, [h('b', null, c.l + ': ' + eur(tots[k]))].concat(keys.filter(([key]) => c.parts[key]).map(([key, col]) => h('div', null, h('span', { class: 'sw', style: 'background:' + col }), ' ' + key + ': ' + eur(c.parts[key]))))); svg.append(hit); });
+  return h('div', null, g.wrap, h('div', { class: 'glegend' }, keys.map(([k, c]) => h('span', null, h('span', { class: 'sw', style: 'background:' + c }), ' ' + k))));
+}
+function hbars(items, o) {          // barre orizzontali con etichetta; valori negativi a sinistra dello zero. Su telefono l'etichetta sta sopra la barra
+  o = o || {}; const nar = innerWidth < 600, fmt = o.fmt || eur, W = nar ? 420 : 720, rh = nar ? 46 : 30, H = items.length * rh + 12, lab = nar ? 0 : 190, vs = items.map(i => i.v), lo = Math.min(0, ...vs), hi = Math.max(0, ...vs, 1e-9);
+  const pad = Math.max(nar ? 60 : 70, Math.max(...items.map(i => String(i.vt || fmt(i.v)).length)) * (nar ? 6.2 : 6.6) + 14), X = v => lab + (v - lo) / ((hi - lo) || 1) * (W - lab - pad), svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': o.label || 'Barre orizzontali' }), g = gwrap(svg);
+  svg.append(s('line', { class: 'g-axis', x1: X(0), x2: X(0), y1: 4, y2: H - 4 }));
+  items.forEach((it, k) => { const y = 6 + k * rh, x0 = X(0), x1 = X(it.v), col = it.c || (it.v < 0 ? 'var(--loss)' : 'var(--s1)'), by = nar ? y + 20 : y + 4, bh = nar ? 16 : rh - 12, mx = nar ? 42 : 30;
+    svg.append(gTxt('g-txt', 0, nar ? y + 13 : y + 18, 'start', String(it.l).length > mx ? String(it.l).slice(0, mx - 1) + '…' : it.l));
+    svg.append(s('rect', { class: 'gbar h', x: Math.min(x0, x1), y: by, width: Math.max(1.5, Math.abs(x1 - x0)), height: bh, rx: 4, fill: col, style: '--i:' + k }));
+    if (!HIDE) svg.append(gTxt('g-val', it.v >= 0 ? x1 + 6 : x0 + 6, by + bh - 4, 'start', it.vt || fmt(it.v)));
+    const hit = s('rect', { x: 0, y, width: W, height: rh, fill: 'transparent' }); hoverOn(g, hit, [h('b', null, it.l), it.tip || fmt(it.v), it.sub].filter(Boolean)); svg.append(hit); });
+  return g.wrap;
+}
+function dbars(items, names) {          // due barre per riga (es. tu e obiettivo)
+  const nar = innerWidth < 600, W = nar ? 420 : 720, rh = nar ? 62 : 44, H = items.length * rh + 12, lab = nar ? 0 : 150, pad = 64, hi = Math.max(...items.flatMap(i => [i.a, i.b]), 1e-9), X = v => lab + v / hi * (W - lab - pad);
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': 'Confronto tra due valori' }), g = gwrap(svg);
+  items.forEach((it, k) => { const y = 6 + k * rh, o1 = nar ? 20 : 4, o2 = nar ? 38 : 21;
+    svg.append(gTxt('g-txt', 0, nar ? y + 13 : y + 22, 'start', it.l), s('rect', { class: 'gbar h', x: lab, y: y + o1, width: Math.max(1.5, X(it.a) - lab), height: 14, rx: 4, fill: 'var(--s1)', style: '--i:' + k }), s('rect', { class: 'gbar h', x: lab, y: y + o2, width: Math.max(1.5, X(it.b) - lab), height: 14, rx: 4, fill: '#8e8e93', style: '--i:' + (k + 1) }));
+    if (!HIDE) svg.append(gTxt('g-val', X(it.a) + 6, y + o1 + 12, 'start', it.at || pct(it.a)), gTxt('g-val', X(it.b) + 6, y + o2 + 12, 'start', it.bt || pct(it.b)));
+    const hit = s('rect', { x: 0, y, width: W, height: rh, fill: 'transparent' }); hoverOn(g, hit, [h('b', null, it.l), names[0] + ': ' + (it.at || pct(it.a)) + (it.ae ? ' (' + it.ae + ')' : ''), names[1] + ': ' + (it.bt || pct(it.b)) + (it.be ? ' (' + it.be + ')' : '')]); svg.append(hit); });
+  return h('div', null, g.wrap, h('div', { class: 'glegend' }, h('span', null, h('span', { class: 'sw', style: 'background:var(--s1)' }), ' ' + names[0]), h('span', null, h('span', { class: 'sw', style: 'background:#8e8e93' }), ' ' + names[1])));
+}function gline(series, o) {          // series = [{name, color, pts:[{t, v}]}]; la prima serie ha l'area colorata
+  o = o || {}; const nar = innerWidth < 600, all = series.flatMap(x => x.pts); if (all.length < 2) return h('p', { class: 'muted' }, 'Servono almeno due giorni di dati: il grafico si riempie man mano che l\'app li raccoglie.');
+  const W = nar ? 420 : 720, H = o.h || (nar ? 230 : 250), m = { l: nar ? 44 : 56, r: 14, t: 14, b: 30 }, x0 = Math.min(...all.map(p => p.t)), x1 = Math.max(...all.map(p => p.t)), vs = all.map(p => p.v);
+  let lo = Math.min(...vs), hi = Math.max(...vs); if (o.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); } const sp = (hi - lo) || Math.max(1, Math.abs(hi) * 0.01); lo -= o.zero ? 0 : sp * 0.12; hi += sp * 0.08;
+  const X = t => m.l + (t - x0) / ((x1 - x0) || 1) * (W - m.l - m.r), Y = v => H - m.b - (v - lo) / ((hi - lo) || 1) * (H - m.t - m.b), svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'svgc', role: 'img', 'aria-label': o.label || 'Andamento nel tempo' }), g = gwrap(svg), fmt = o.fmt || eur;
+  for (const v of niceTicks(lo, hi)) { svg.append(s('line', { class: 'g-grid', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) })); if (!HIDE) svg.append(gTxt('g-txt', m.l - 8, Y(v) + 4, 'end', compact(v))); }
+  if (o.zero) svg.append(s('line', { class: 'g-axis', x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0), 'stroke-dasharray': '4 4' }));
+  for (let k = 0; k < 4; k++) { const t = x0 + (x1 - x0) * k / 3; svg.append(gTxt('g-txt', X(t), H - 8, k === 0 ? 'start' : k === 3 ? 'end' : 'middle', new Date(t).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }))); }
+  const id = 'ga' + Math.random().toString(36).slice(2, 7), d0 = series[0], path = pts => 'M' + pts.map(p => X(p.t).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' L');
+  svg.append(s('defs', null, s('linearGradient', { id, x1: 0, y1: 0, x2: 0, y2: 1 }, s('stop', { offset: '0%', style: 'stop-color:' + d0.color + ';stop-opacity:.28' }), s('stop', { offset: '100%', style: 'stop-color:' + d0.color + ';stop-opacity:0' }))));
+  if (d0.pts.length > 1) svg.append(s('path', { d: path(d0.pts) + ' L' + X(d0.pts[d0.pts.length - 1].t).toFixed(1) + ' ' + (H - m.b) + ' L' + X(d0.pts[0].t).toFixed(1) + ' ' + (H - m.b) + ' Z', fill: 'url(#' + id + ')' }));
+  series.forEach((x, k) => { if (x.pts.length > 1) svg.append(s('path', { class: 'gln draw', d: path(x.pts), stroke: x.color, pathLength: 1, style: k ? 'stroke-dasharray:6 5' : '' })); const l = x.pts[x.pts.length - 1]; svg.append(s('circle', { cx: X(l.t), cy: Y(l.v), r: 4, fill: x.color })); });
+  const cross = s('line', { class: 'cross', y1: m.t, y2: H - m.b, style: 'display:none' }), dots = series.map(x => s('circle', { r: 5, fill: x.color, style: 'display:none' })), hit = s('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: 'transparent' }); svg.append(cross, ...dots, hit);
+  const ts = [...new Set(all.map(p => p.t))].sort((a, b) => a - b), near = (pts, t) => pts.reduce((b, p) => Math.abs(p.t - t) < Math.abs(b.t - t) ? p : b, pts[0]);
+  const move = e => { const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W; let best = ts[0]; for (const t of ts) if (Math.abs(X(t) - px) < Math.abs(X(best) - px)) best = t;
+    cross.style.display = ''; cross.setAttribute('x1', X(best)); cross.setAttribute('x2', X(best)); const lines = [h('b', null, new Date(best).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }))];
+    series.forEach((x, k) => { const p = near(x.pts, best); dots[k].style.display = ''; dots[k].setAttribute('cx', X(p.t)); dots[k].setAttribute('cy', Y(p.v)); lines.push(h('div', null, h('span', { class: 'sw', style: 'background:' + x.color }), ' ' + x.name + ': ' + fmt(p.v))); }); g.show(e, lines); };
+  hit.addEventListener('pointermove', move); hit.addEventListener('pointerdown', move); hit.addEventListener('pointerleave', () => { cross.style.display = 'none'; dots.forEach(d => { d.style.display = 'none'; }); g.hide(); });
+  return h('div', null, g.wrap, series.length > 1 ? h('div', { class: 'glegend' }, series.map(x => h('span', null, h('span', { class: 'sw', style: 'background:' + x.color }), ' ' + x.name))) : null);
+}
+
+/* ============ Affidabilità, rendimento vero, cedole, vendita, sovrapposizioni, pagella dell'AI ============ */
+const INC_KINDS = [['dividendo', 'Dividendo', 1], ['cedola', 'Cedola di un\'obbligazione', 1], ['interessi', 'Interessi', 1], ['commissione', 'Commissione pagata', -1], ['imposta', 'Imposta pagata', -1]];
+const INC = () => S.incomes || (S.incomes = []);
+function incomeWizard(pre) {
+  pre = pre || {}; const st = { kind: pre.kind || '', accId: pre.accId || '', instId: pre.instId || '', amount: null, date: today() };
+  const cand = S.accounts.filter(a => !a.dep);
+  const sKind = api => ({ q: 'Che cosa hai ricevuto (o pagato)?', next: false, noBack: true, body: INC_KINDS.map(([k, l, sg]) => wzOpt(l, sg > 0 ? 'soldi che entrano nel conto' : 'soldi che escono dal conto', () => { st.kind = k; api.next(); }, st.kind === k ? 'sel' : '')) });
+  const sAcc = api => ({ q: 'In quale conto?', next: false, body: cand.map(a => wzOpt(a.name, (TYPES[a.type] || {}).label || '', () => { st.accId = a.id; api.next(); }, st.accId === a.id ? 'sel' : '')) });
+  const sInst = api => { const a = S.accounts.find(x => x.id === st.accId), held = a ? a.positions.map(p => inst(p.instId)).filter(Boolean) : [];
+    return { q: 'Di quale titolo?', next: false, body: [...held.map(i => wzOpt(i.name, i.code || '', () => { st.instId = i.id; api.next(); }, st.instId === i.id ? 'sel' : '')), wzOpt('Nessuno in particolare', 'vale per tutto il conto', () => { st.instId = ''; api.next(); }, 'soft')] }; };
+  const sAmt = api => { const dt = h('input', { type: 'date', value: st.date, 'aria-label': 'Data' }); dt.addEventListener('input', () => { st.date = dt.value || today(); });
+    return { q: 'Quanto, e quando?', focus: '.wz-num', valid: st.amount > 0, body: [wzNum(st.amount, 'Importo in €', v => { st.amount = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), h('label', { class: 'fld' }, h('span', null, 'Data'), dt)] }; };
+  const sSum = api => { const k = INC_KINDS.find(x => x[0] === st.kind), a = S.accounts.find(x => x.id === st.accId), i = st.instId ? inst(st.instId) : null;
+    return { q: 'Controlla e conferma', nextLabel: 'Registra', body: [h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, k[1] + ': ' + eur(st.amount, true)), h('div', { class: 'wz-sum-s' }, (a ? a.name : '') + (i ? ' · ' + i.name : '') + ' · ' + fmtDate(st.date))), h('p', { class: 'muted' }, 'La liquidità del conto ' + (k[2] > 0 ? 'aumenta' : 'diminuisce') + ' di questa cifra.')],
+      onNext: a2 => { const ac = S.accounts.find(x => x.id === st.accId); if (!ac) return false; const cfx = fxRate(ac.cashCcy) ?? 1, d = k[2] * st.amount / cfx; ac.cash = (ac.cash || 0) + d; ac.upd = today();
+        INC().push({ id: uid(), date: st.date, accId: ac.id, instId: st.instId, kind: st.kind, amount: st.amount, dCash: d }); done(); wzDone(a2, 'Registrato', k[1] + ' di ' + eur(st.amount, true) + ' in ' + ac.name + '.'); return false; } }; };
+  return wzRun({ steps: () => [...(pre.kind ? [] : [sKind]), ...(pre.accId ? [] : [sAcc]), ...(['dividendo', 'cedola'].includes(st.kind) && !pre.instId ? [sInst] : []), sAmt, sSum] });
+}
+function delIncome(x) { if (!confirm('Elimino questa registrazione e correggo la liquidità del conto?')) return; const a = S.accounts.find(z => z.id === x.accId); if (a) a.cash = (a.cash || 0) - (x.dCash || 0); S.incomes = INC().filter(z => z !== x); done(); }
+
+function costKnown(p) { const i = inst(p.instId), v = posValue(p); if (!(p.cost > 0)) return false; if (i && /valore totale/i.test(i.name) && Math.abs(p.cost - v) <= 0.005 * Math.max(1, v)) return false; return true; }          // "(valore totale)" con costo = valore: il costo vero non lo conosco
+function anAffidabilita() {
+  const el = h('div'), tot = totalValue(); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  let vK = 0, vU = 0; const unk = [];
+  for (const a of S.accounts) if (a.perf) for (const p of a.positions) { const v = posValue(p); if (costKnown(p)) vK += v; else { vU += v; unk.push([a.name, (inst(p.instId) || {}).name || '?', v]); } }
+  const cov = vK + vU > 0 ? vK / (vK + vU) : 1, issues = [];
+  const stale = S.instruments.filter(i => S.accounts.some(a => a.positions.some(p => p.instId === i.id)) && (isAuto(i) ? daysSince(i.autoAt || i.priceDate) > 3 : daysSince(i.priceDate) > 7));
+  if (stale.length) issues.push(['Prezzi vecchi', stale.length + ' titoli con prezzo non aggiornato: ' + stale.slice(0, 5).map(i => i.name).join(', ') + (stale.length > 5 ? '…' : ''), 'warn']);
+  const lim = a => accGroup(a) === 'investiti' ? 20 : accGroup(a) === 'pensione' ? 100 : 45, old = S.accounts.filter(a => a.upd && daysSince(a.upd) > lim(a));
+  if (old.length) issues.push(['Conti non aggiornati', old.map(a => a.name + ' (' + daysSince(a.upd) + ' giorni)').join(', '), 'warn']);
+  const seen = new Map(), dup = []; for (const o of OPS()) { const k = [o.accId, o.date, o.kind, o.instId || '', Math.round((o.qty || o.amount || 0) * 1e6)].join('|'); if (seen.has(k)) dup.push(o); else seen.set(k, o); }
+  if (dup.length) issues.push(['Operazioni doppie?', dup.length + ' operazioni identiche (stesso conto, giorno, titolo e quantità): ' + dup.slice(0, 3).map(o => (o.instName || OP_LABEL[o.kind]) + ' del ' + fmtDate(o.date)).join(', ') + '. Eliminane una dalla scheda del conto.', 'bad']);
+  const neg = S.accounts.filter(a => (a.cash || 0) < -1); if (neg.length) issues.push(['Liquidità negativa', neg.map(a => a.name + ' (' + eur(a.cash, true) + ')').join(', ') + ': manca un versamento o un trasferimento.', 'bad']);
+  const nofx = [...new Set(S.instruments.map(i => i.ccy))].filter(c => c !== 'EUR' && fxRate(c) == null); if (nofx.length) issues.push(['Cambio mancante', nofx.join(', ') + ': i valori in questa valuta non sono sommati bene.', 'bad']);
+  const noflow = S.accounts.filter(a => a.perf && !a.flows.length && a.positions.length); if (noflow.length) issues.push(['Conti senza storia dei versamenti', noflow.map(a => a.name).join(', ') + ': il guadagno non si può calcolare.', 'warn']);
+  el.append(tiles([{ l: 'Guadagno calcolato su', v: pct(cov), s: 'del valore dei titoli (il resto non ha un costo di carico noto)', x: () => ({ say: 'Per calcolare il guadagno di un titolo servono il prezzo medio a cui l\'hai pagato e quello di oggi. Per ' + eur(vU) + ' di titoli (' + pct(1 - cov) + ') il costo non c\'è, e il loro guadagno vale zero: il guadagno totale è quindi più prudente della realtà.', rows: unk.sort((a, b) => b[2] - a[2]).slice(0, 8).map(([a, n, v]) => [n, v, a, null, eur(v)]), rowsTitle: 'Titoli senza costo noto' }) },
+    { l: 'Cose da controllare', v: String(issues.length), s: issues.length ? 'vedi sotto' : 'tutto a posto' }, { l: 'Prezzi automatici', v: pct(S.instruments.filter(i => isAuto(i)).length / Math.max(1, S.instruments.length)), s: 'degli strumenti si aggiorna da solo' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto posso fidarmi?'), h('div', { class: 'dv', 'aria-hidden': 'true', style: 'margin:10px 0' }, h('i', { class: 'dv-b', style: 'left:0;width:' + Math.round(cov * 100) + '%;background:' + (cov > .9 ? 'var(--gain)' : cov > .75 ? '#ff9f0a' : 'var(--loss)') })),
+    h('p', { class: 'muted' }, 'Costo di carico noto per ' + pct(cov) + ' dei titoli dei conti d\'investimento.'),
+    issues.length ? h('ul', { class: 'list' }, issues.map(([t, d, k]) => h('li', null, h('span', null, h('b', { class: k === 'bad' ? 'ad-neg' : '' }, (k === 'bad' ? '✖ ' : '⚠ ') + t + ': '), d)))) : h('p', null, '✓ Nessun problema trovato: prezzi freschi, conti aggiornati, niente doppioni.'),
+    unk.length ? h('details', null, h('summary', { class: 'muted' }, 'Titoli di cui non conosco il costo (' + unk.length + ')'), h('ul', { class: 'list' }, unk.sort((a, b) => b[2] - a[2]).map(([a, n, v]) => h('li', null, h('span', null, n + ' · ' + a + ' · ' + eur(v)))))) : null));
+  el.append(riconciliazioneCard());
+  return el;
+}
+function riconciliazioneCard() {
+  S.recon = S.recon || {}; const sec = h('section', { class: 'card' }, h('h2', null, 'Confronto con il tuo broker'), h('p', { class: 'muted' }, 'Scrivi il totale che vedi nell\'app del broker o della banca: ti dico di quanto differisce dal mio calcolo e dove guardare.'));
+  const rows = S.accounts.filter(a => !a.dep && (a.positions.length || accGroup(a) === 'investiti')).map(a => {
+    const mine = accValue(a), r = S.recon[a.id], diff = r ? r.v - mine : null;
+    const inp = h('input', { type: 'number', step: 'any', class: 'pin', value: r ? r.v : '', placeholder: '€', 'aria-label': 'Totale visto nel broker per ' + a.name, onchange: e => { const v = pnum(e.target.value); if (v == null) delete S.recon[a.id]; else S.recon[a.id] = { v, d: today() }; done(); } });
+    const hints = []; if (r && Math.abs(diff) > Math.max(5, mine * 0.003)) {
+      const st = a.positions.map(p => inst(p.instId)).filter(i => i && (isAuto(i) ? daysSince(i.autoAt || i.priceDate) > 1 : daysSince(i.priceDate) > 3)); if (st.length) hints.push('prezzi non di oggi: ' + st.slice(0, 3).map(i => i.name).join(', '));
+      if (Math.abs(diff - 0) > 0 && a.cash && Math.abs(Math.abs(diff) - Math.abs(a.cash)) < Math.max(5, mine * 0.003)) hints.push('la differenza è quasi uguale alla liquidità (' + eur(a.cash, true) + '): forse nel broker è già contata, o no');
+      if (daysSince(a.upd || '2000-01-01') > 7) hints.push('conto aggiornato ' + daysSince(a.upd) + ' giorni fa: forse mancano operazioni recenti');
+      if (!hints.length) hints.push('controlla quote, cambio e operazioni dell\'ultimo periodo');
+    }
+    return [a.name, eur(mine), inp, diff == null ? '—' : gl(diff, seur(diff) + (mine ? ' (' + spct(diff / mine) + ')' : '')), hints.join(' · ') || (r ? '✓ allineato' : '')];
+  });
+  sec.append(table([{ t: 'Conto' }, { t: 'Il mio calcolo', n: 1 }, { t: 'Il tuo broker', n: 1 }, { t: 'Differenza', n: 1 }, { t: 'Dove guardare' }], rows, 'Nessun conto d\'investimento.'));
+  return sec;
+}
+
+function anRendimento() {
+  const el = h('div'), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa);
+  if (!pa.length || !tp.has) return h('section', { class: 'card' }, h('h2', null, 'Rendimento vero'), h('p', { class: 'muted' }, 'Servono conti d\'investimento con i versamenti: importali o registra il "valore di partenza".'));
+  let latent = 0; for (const a of pa) for (const p of a.positions) if (costKnown(p)) latent += posValue(p) - p.cost;
+  const realized = OPS().reduce((t, o) => t + (o.realized || 0), 0), incs = INC().filter(x => ['dividendo', 'cedola', 'interessi'].includes(x.kind)).reduce((t, x) => t + x.amount, 0),
+    costs = OPS().reduce((t, o) => t + (o.fee || 0), 0) + INC().filter(x => ['commissione', 'imposta'].includes(x.kind)).reduce((t, x) => t + x.amount, 0), other = tp.pnl - (latent + realized + incs - costs);
+  const rows = [['Guadagno dei titoli che hai ancora', latent, 'valore di oggi meno costo di carico'], ['Guadagno già incassato con le vendite', realized, 'dalle vendite registrate'], ['Dividendi, cedole e interessi', incs, 'registrati come incassi'], ['Commissioni e imposte pagate', -costs, 'operazioni e incassi registrati'], ['Altro e non misurabile', other, 'titoli senza costo noto, cambi, prima dei dati']];
+  el.append(tiles([{ l: 'Guadagno totale', v: gl(tp.pnl, seur(tp.pnl)), s: fin(tp.pnlPct) ? spct(tp.pnlPct) + ' sul versato' : '' }, { l: 'Già incassato', v: gl(realized + incs, seur(realized + incs)), s: 'vendite, dividendi e cedole' }, { l: 'Costi pagati', v: eur(costs), s: 'commissioni e imposte registrate' }]));
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Da dove viene il tuo guadagno'), btn('+ Registra un incasso', () => incomeWizard(), 'pri sm')),
+    talkBars(rows.map(([l, v, n]) => [l, v, n, null, seur(v)]), true),
+    h('p', { class: 'muted' }, 'Conta solo ciò che è successo dopo la data di partenza di ogni conto: i guadagni precedenti non si conoscono. Dividendi e cedole non registrati qui non compaiono. Un incasso registrato aggiorna anche la liquidità del conto, quindi non si conta due volte.')));
+  const list = INC().slice().sort((a, b) => a.date < b.date ? 1 : -1).slice(0, 25);
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Incassi e costi registrati'), list.length ? table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Titolo' }, { t: 'Importo', n: 1 }, { t: '' }], list.map(x => [fmtDate(x.date), (INC_KINDS.find(k => k[0] === x.kind) || [0, x.kind])[1], accName(x.accId), x.instId && inst(x.instId) ? inst(x.instId).name : '—', eur(x.amount, true), rowActs(btn('Elimina', () => delIncome(x), 'sm danger'))])) : h('p', { class: 'muted' }, 'Ancora nessun incasso. Quando ricevi un dividendo o una cedola premi "+ Registra un incasso".')));
+  return el;
+}
+
+/* ---- cedole e scadenze delle obbligazioni (stimate dal nome del titolo) ---- */
+const MESI3 = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+function parseBond(i) {
+  const n = String(i.name || ''); if (!/\b(btp|bot|cct|t-?bond|treasury|bund|oat|obbligazione|bond)\b/i.test(n) || /ucits|\betf\b|\betc\b/i.test(n)) return null;
+  const cm = n.match(/(\d+(?:[.,]\d+)?)\s*%/), coupon = cm ? parseFloat(cm[1].replace(',', '.')) : null; let mat = null;
+  const m1 = n.match(/(\d{2})\/(\d{2})\/(\d{4})/); if (m1) mat = { d: +m1[1], m: +m1[2] - 1, y: +m1[3] };
+  else { const m2 = n.match(/\b(gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)[a-z]*\.?\s+(\d{4})\b/i); if (m2) mat = { d: 15, m: MESI3.indexOf(m2[1].toLowerCase()), y: +m2[2] }; }
+  return { coupon, mat, gov: GOV_RE.test(n) };
+}
+function bondList() {
+  const out = []; for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId), b = i && parseBond(i); if (!b) continue; const v = posValue(p), valueBased = /^obbligazione\b/i.test(i.name) && p.qty <= 3, nominal = valueBased ? null : p.qty * 100;
+    out.push({ a, p, i, b, v, nominal, ccyFx: fxRate(i.ccy) ?? 1 }); }
+  return out;
+}
+function couponEvents(list, months) {
+  const ev = [], t0 = new Date(today() + 'T00:00:00'), t1 = new Date(t0.getFullYear(), t0.getMonth() + months, t0.getDate());
+  for (const x of list) { if (!x.b.mat || x.b.coupon == null || x.nominal == null) continue; const per = x.nominal * x.b.coupon / 100 / 2 * x.ccyFx; if (!(per > 0)) continue;
+    const ms = [x.b.mat.m, (x.b.mat.m + 6) % 12]; for (let y = t0.getFullYear(); y <= t1.getFullYear(); y++) for (const m of ms) { const d = new Date(y, m, Math.min(x.b.mat.d, 28)); if (d >= t0 && d <= t1 && d <= new Date(x.b.mat.y, x.b.mat.m, 28)) ev.push({ d, x, gross: per, net: per * (x.b.gov ? 0.875 : 0.74) }); } }
+  return ev.sort((a, b) => a.d - b.d);
+}
+function anCedole() {
+  const el = h('div'), list = bondList(); if (!list.length) return h('section', { class: 'card' }, h('h2', null, 'Cedole e scadenze'), h('p', { class: 'muted' }, 'Non trovo obbligazioni singole (BTP, T-Bond, obbligazioni societarie) tra i tuoi titoli.'));
+  const ev = couponEvents(list, 12), est = list.filter(x => x.nominal == null || !x.b.mat || x.b.coupon == null), byM = new Map();
+  for (const e of ev) { const k = e.d.getFullYear() + '-' + String(e.d.getMonth() + 1).padStart(2, '0'); byM.set(k, (byM.get(k) || 0) + e.net); }
+  const gross = ev.reduce((t, e) => t + e.gross, 0), net = ev.reduce((t, e) => t + e.net, 0);
+  el.append(tiles([{ l: 'Cedole nei prossimi 12 mesi', v: eur(net), s: 'nette stimate (lorde ' + eur(gross) + ')' }, { l: 'Al mese in media', v: eur(net / 12), s: 'netto' }, { l: 'Obbligazioni seguite', v: String(list.length), s: est.length ? est.length + ' senza dati completi' : 'tutte con scadenza e cedola' }]));
+  const rows = []; for (let k = 0; k < 12; k++) { const d = new Date(new Date().getFullYear(), new Date().getMonth() + k, 1), key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); rows.push([d.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }), byM.get(key) || 0]); }
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Cedole mese per mese'), vbars(rows.map(([l, v]) => ({ l, v, tip: l + ': ' + (v ? eur(v) + ' nette' : 'nessuna cedola') })), { unit: '€' }),
+    ev.length ? table([{ t: 'Data' }, { t: 'Obbligazione' }, { t: 'Conto' }, { t: 'Lorda', n: 1 }, { t: 'Netta stimata', n: 1 }], ev.map(e => [e.d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }), e.x.i.name, e.x.a.name, eur(e.gross), eur(e.net)])) : null,
+    h('p', { class: 'muted' }, 'Stima: valore nominale = quote × 100, cedola e scadenza lette dal nome del titolo, pagamento ogni 6 mesi, tasse 12,5% sui titoli di Stato e 26% sulle altre. Le obbligazioni tenute come "piccola posizione in euro" (Trade Republic) non hanno un nominale noto e non sono incluse.')));
+  const mats = list.filter(x => x.b.mat).sort((a, b) => new Date(a.b.mat.y, a.b.mat.m, a.b.mat.d) - new Date(b.b.mat.y, b.b.mat.m, b.b.mat.d));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Scadenze'), table([{ t: 'Obbligazione' }, { t: 'Conto' }, { t: 'Scade' }, { t: 'Anni', n: 1 }, { t: 'Cedola', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Valore', n: 1 }], mats.map(x => { const dt = new Date(x.b.mat.y, x.b.mat.m, x.b.mat.d), yrs = (dt - new Date()) / 31557600000;
+    return [x.i.name, x.a.name, dt.toLocaleDateString('it-IT', { month: 'short', year: 'numeric' }), nfp.format(yrs), x.b.coupon != null ? nfp.format(x.b.coupon) + '%' : '—', x.nominal != null ? nf2.format(x.i.price) + (x.i.price < 100 ? ' (rimborso a 100: ' + spct(100 / x.i.price - 1) + ')' : '') : '—', eur(x.v)]; })),
+    h('p', { class: 'muted' }, 'Il rimborso a 100 è il guadagno teorico di chi tiene il titolo fino alla scadenza, se l\'emittente paga: è un\'indicazione, non una promessa.')));
+  return el;
+}
+
+/* ---- se vendo: tasse e netto ---- */
+function sellRows() {
+  const rows = []; for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (!i) continue; const v = posValue(p), known = costKnown(p), gain = known ? v - p.cost : null, rate = taxRateOf(i), tax = gain > 0 ? gain * rate / 100 : 0;
+    rows.push({ a, p, i, v, known, gain, rate, tax, net: v - tax, eff: v > 0 && known ? tax / v : null }); }
+  return rows;
+}
+function anVendi() {
+  const el = h('div'), rows = sellRows().filter(r => r.v > 0); if (!rows.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessuna posizione.'));
+  const amt = pnum(UI.sellAmt) ?? 1000, inp = h('input', { type: 'number', step: 'any', class: 'pin', value: amt, 'aria-label': 'Quanto vuoi incassare', onchange: e => { const v = pnum(e.target.value); UI.sellAmt = v != null && v >= 0 ? v : amt; render(); } });
+  const totTax = rows.reduce((t, r) => t + r.tax, 0), totV = rows.reduce((t, r) => t + r.v, 0);
+  el.append(tiles([{ l: 'Se vendessi tutto', v: eur(totV - totTax), s: 'netto, con ' + eur(totTax) + ' di tasse stimate' }, { l: 'Posizioni in perdita', v: String(rows.filter(r => r.gain != null && r.gain < 0).length), s: 'vendendole non paghi tasse e crei minusvalenze' }, { l: 'Senza costo noto', v: String(rows.filter(r => !r.known).length), s: 'tasse non stimabili' }]));
+  const pick = []; let left = amt; for (const r of rows.filter(r => r.known && !/pension/i.test(r.a.type)).sort((x, y) => (x.eff ?? 1) - (y.eff ?? 1) || y.v - x.v)) { if (left <= 0.5) break; const take = Math.min(r.v, left), share = take / r.v, tax = Math.max(0, r.gain) * share * r.rate / 100; pick.push({ r, take, tax }); left -= take; }
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto vuoi incassare?'), h('label', { class: 'fld' }, h('span', null, 'Importo (€)'), inp),
+    pick.length ? [table([{ t: 'Che cosa vendere' }, { t: 'Conto' }, { t: 'Importo', n: 1 }, { t: 'Tasse stimate', n: 1 }], pick.map(x => [x.r.i.name, x.r.a.name, eur(x.take), x.tax ? eur(x.tax) : '—'])), h('p', null, h('b', null, 'Totale: ' + eur(pick.reduce((t, x) => t + x.take, 0)) + ' · tasse circa ' + eur(pick.reduce((t, x) => t + x.tax, 0)) + ' · netto circa ' + eur(pick.reduce((t, x) => t + x.take - x.tax, 0))))] : h('p', { class: 'muted' }, 'Scrivi un importo.'),
+    left > 0.5 ? h('div', { class: 'warn' }, 'Con le posizioni di cui conosco il costo arrivo a ' + eur(amt - left) + ': per il resto mancano dati.') : null,
+    h('p', { class: 'muted' }, 'Ordine scelto per pagare meno tasse: prima le posizioni in perdita o con poco guadagno, poi le altre. Non è un consiglio di vendere: serve a vedere quanto costerebbe. Il fondo pensione è escluso.')));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Tutte le posizioni'), table([{ t: 'Titolo' }, { t: 'Conto' }, { t: 'Valore', n: 1 }, { t: 'Guadagno', n: 1 }, { t: 'Aliquota', n: 1 }, { t: 'Tasse', n: 1 }, { t: 'Netto', n: 1 }], rows.sort((a, b) => b.v - a.v).map(r => [r.i.name, r.a.name, eur(r.v), r.gain == null ? 'n.d.' : gl(r.gain, seur(r.gain)), r.rate + '%', r.gain == null ? '—' : r.tax ? eur(r.tax) : '—', eur(r.net)]))));
+  return el;
+}
+/* ============ sovrapposizioni, PAC che riequilibrano, pagella dell'AI ============ */
+const FAMS = [['MSCI World / Mondo', /msci\s*world|all-?world|acwi|global brands|\bworld\b/i, 0.70, 'NVIDIA 5; Microsoft 4,3; Apple 4,5; Amazon 2,7; Alphabet 3,3; Meta 1,9; Broadcom 1,8; Tesla 1,4'], ['S&P 500', /s&p\s*500|sp500/i, 1, 'NVIDIA 7,5; Microsoft 6,5; Apple 6,5; Amazon 3,8; Alphabet 5; Meta 2,8; Broadcom 2,7; Tesla 2'], ['Nasdaq-100', /nasdaq/i, 1, 'NVIDIA 9; Microsoft 8; Apple 8; Amazon 5,5; Alphabet 5; Broadcom 5; Meta 3,5; Tesla 3'], ['Europa', /europe|stoxx|euro\s*stoxx/i, 0, ''], ['Mercati emergenti', /emerging|\bem\b|brazil|korea|india|china|asia/i, 0, ''], ['Oro e materie prime', /\bgold\b|\boro\b|commod|materie|silver/i, 0, ''], ['Crypto', /bitcoin|ethereum|solana|crypto|digital assets/i, 0, '']];
+function famOf(i) { const n = String(i.name || ''); if (kindOf(i) === 'azione') return null; return FAMS.find(f => f[1].test(n)) || null; }
+function anSovrapposizioni() {
+  const el = h('div'), tot = totalValue(); if (!(tot > 0)) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun dato.'));
+  const agg = new Map(); for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i) agg.set(i.id, (agg.get(i.id) || 0) + posValue(p)); }
+  const fam = new Map(); let usaDir = 0; const usaVia = [];
+  for (const [id, v] of agg) { const i = inst(id), f = famOf(i); if (f) { const e = fam.get(f[0]) || { f, v: 0, list: [] }; e.v += v; e.list.push([i, v]); fam.set(f[0], e); } else if (kindOf(i) === 'azione' && /usa|stati uniti|america/i.test(i.area || '')) usaDir += v; }
+  for (const e of fam.values()) if (e.f[2] > 0) usaVia.push([e.f[0], e.v * e.f[2]]);
+  const usaTot = usaDir + usaVia.reduce((t, x) => t + x[1], 0), over = [...fam.values()].filter(e => e.list.length >= 2 || ['MSCI World / Mondo', 'S&P 500', 'Nasdaq-100'].includes(e.f[0]));
+  const usaFams = [...fam.values()].filter(e => e.f[2] > 0).length;
+  el.append(tiles([{ l: 'USA, stima totale', v: pct(usaTot / tot), s: eur(usaTot) + ' tra titoli diretti e fondi', x: () => ({ say: 'Somma dei titoli americani che hai in diretta più la parte USA dei fondi: circa il 70% di un ETF "MSCI World", il 100% di S&P 500 e Nasdaq-100. È una stima: i pesi veri cambiano ogni mese.' }) }, { l: 'Fondi sulla stessa famiglia', v: String(over.filter(e => e.list.length >= 2).length), s: 'strumenti che comprano le stesse aziende' }, { l: 'Famiglie "americane"', v: String(usaFams), s: usaFams >= 2 ? 'World, S&P 500 e Nasdaq si sovrappongono molto' : 'poca sovrapposizione' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Quanta America ho davvero?'), hbars([['Azioni USA in diretta', usaDir, 'var(--s1)'], ...usaVia.map(([n, v]) => ['Dentro i fondi ' + n, v, '#bf5af2'])].filter(x => x[1] > 0).map(([l, v, c]) => ({ l, v, c, vt: eur(v) + ' · ' + pct(v / tot), tip: pct(v / tot) + ' del patrimonio' })), { fmt: eur }),
+    usaFams >= 2 ? h('div', { class: 'warn' }, 'Hai più fondi che comprano in gran parte le stesse aziende americane (' + [...fam.values()].filter(e => e.f[2] > 0).map(e => e.f[0]).join(', ') + '): sembra diversificazione, ma una parte è la stessa cosa due volte. Non è un errore, ma tienilo presente prima di aggiungere altri ETF simili.') : null));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Famiglie di strumenti'), table([{ t: 'Famiglia' }, { t: 'Strumenti' }, { t: 'Valore', n: 1 }, { t: 'Peso', n: 1 }], [...fam.values()].sort((a, b) => b.v - a.v).map(e => [e.f[0], e.list.map(x => x[0].name).join(' · '), eur(e.v), pct(e.v / tot)])),
+    h('div', { class: 'row' }, btn('Compila con stime le prime posizioni dei fondi', () => { let n = 0; for (const e of fam.values()) if (e.f[3]) for (const [i] of e.list) if (!String(i.holdings || '').trim()) { i.holdings = e.f[3]; i.holdingsEst = true; n++; } if (!n) { alert('I fondi di queste famiglie hanno già le loro prime posizioni.'); return; } done(); alert('Ho compilato ' + n + ' fondi con pesi indicativi. Li vedi in Esposizione; per i numeri esatti usa il file dell\'emittente.'); }, 'sm'), btn('Vai a Esposizione', () => { UI.sub = 'esposizione'; render(); }, 'sm')),
+    h('p', { class: 'muted' }, 'I pesi compilati sono stime arrotondate delle prime 8 aziende e cambiano ogni mese: servono a vedere l\'ordine di grandezza (per esempio quanta NVIDIA hai in tutto), non per decidere al centesimo.')));
+  return el;
+}
+
+function pacClassOf(part) { const i = part.instId ? inst(part.instId) : null; if (i) return parseMix(i.cls || '', 'Azioni')[0][0]; const c = part.instCls || 'Azioni'; return /bitcoin|crypto/i.test(part.instName || '') ? 'Crypto' : /obblig/i.test(part.instName || '') ? 'Obbligazioni' : c; }
+function pacParts(p) { return p.parts && p.parts.length ? p.parts : [{ instId: p.instId, instName: p.instName, instCode: p.instCode, instCls: p.instCls, amount: p.amount }]; }
+function pacRibilancia() {
+  const plans = PL().filter(p => p.kind === 'acquisto'); if (!plans.length || !(S.policy.target && S.policy.target.trim())) return null;
+  const cur = new Map(); let tot = 0; for (const p of plans) { const mult = 1 / freqMonths(p.freq); for (const x of pacParts(p)) { const c = pacClassOf(x), m = x.amount * mult; cur.set(c, (cur.get(c) || 0) + m); tot += m; } }
+  const rb = rebalance(tot * 12); if (!rb) return null;           // dove andrebbe un anno di PAC per avvicinarsi all'obiettivo
+  const want = new Map(); let sum = 0; for (const r of rb) { const w = Math.max(0, r.put); want.set(r.label, w); sum += w; } for (const [k, w] of want) want.set(k, sum > 0 ? w / sum * tot : 0);
+  const keys = [...new Set([...cur.keys(), ...want.keys()])], rows = keys.map(k => ({ k, now: cur.get(k) || 0, to: want.get(k) || 0 })).filter(r => r.now > 0.5 || r.to > 0.5).sort((a, b) => b.to - a.to);
+  const move = rows.some(r => Math.abs(r.to - r.now) >= Math.max(5, tot * 0.03));
+  const apply = () => { if (!confirm('Cambio gli importi dei PAC per avvicinarti all\'obiettivo? Il totale al mese resta ' + eur(tot) + '. I PAC senza strumenti di una classe richiesta non cambiano: te lo segnalo.')) return;
+    const f = new Map(rows.map(r => [r.k, r.now > 0 ? r.to / r.now : 1]));
+    for (const p of plans) { const ps = pacParts(p); for (const x of ps) { const k = f.get(pacClassOf(x)); if (k != null && isFinite(k)) x.amount = Math.max(1, Math.round(x.amount * k)); } if (p.parts && p.parts.length) p.amount = p.parts.reduce((t, x) => t + x.amount, 0); else p.amount = ps[0].amount; }
+    done(); };
+  return h('section', { class: 'card' }, h('h2', null, 'I PAC riportano il portafoglio all\'obiettivo?'), h('p', { class: 'muted' }, 'Ogni mese metti circa ' + eur(tot) + ' nei PAC. Ecco come sono divisi oggi e come andrebbero divisi per avvicinarti alla tua allocazione obiettivo, senza vendere nulla.'),
+    table([{ t: 'Classe' }, { t: 'Oggi al mese', n: 1 }, { t: 'Proposto', n: 1 }, { t: 'Cambio', n: 1 }], rows.map(r => [r.k, eur(r.now), eur(r.to), r.to - r.now >= 0.5 ? h('b', { class: 'ad-pos' }, '+' + eur(r.to - r.now)) : r.to - r.now <= -0.5 ? h('b', { class: 'ad-neg' }, '−' + eur(r.now - r.to)) : '—'])),
+    move ? h('div', { class: 'row' }, btn('Applica la proposta', apply, 'pri sm'), h('span', { class: 'muted' }, 'Riscala gli importi dentro ogni classe.')) : h('p', null, '✓ I tuoi PAC sono già divisi in modo coerente con l\'obiettivo.'),
+    rows.some(r => r.to > 0.5 && r.now < 0.5) ? h('div', { class: 'warn' }, 'Nessun PAC compra ' + rows.filter(r => r.to > 0.5 && r.now < 0.5).map(r => r.k).join(', ') + ': per aumentare quella classe crea un PAC nuovo (premi "+ Nuovo PAC").') : null);
+}
+
+function logAnalisi() {          // ogni analisi vista si ricorda: dopo qualche giorno si vede se aveva ragione
+  const an = DATA.analisi; if (!an || !an.data || !S || DEMO) return; S.aiLog = S.aiLog || [];
+  if (S.aiLog.some(x => x.d === an.data)) return; S.aiLog.push({ d: an.data, u: an.umore ? an.umore.valore : 0, j: Object.fromEntries(an.classi.map(c => [c.classe, c.giudizio])) }); S.aiLog = S.aiLog.slice(-120); touch();
+}
+function classValues() { const m = new Map(); for (const ac of S.accounts) for (const p of ac.positions) { const i = inst(p.instId); if (i) m.set(i.id, (m.get(i.id) || 0) + posValue(p)); } return m; }
+function classReturnSince(cls, d) {          // variazione di prezzo media (pesata sul valore di oggi) dei titoli di una classe da una certa data
+  let w = 0, a = 0; for (const [id, v] of classValues()) { const i = inst(id); if (!i || parseMix(i.cls || '', 'Azioni')[0][0].toLowerCase() !== cls.toLowerCase()) continue; const ser = seriesOf(i); if (ser.length < 2 || ser[0].d > d) continue; const p0 = priceAtS(ser, i.price, d); if (!(p0 > 0)) continue; w += v; a += v * (i.price / p0 - 1); }
+  return w > 0 ? a / w : null;
+}function anPagella() {
+  const el = h('div'), log = (S.aiLog || []).slice().sort((x, y) => x.d < y.d ? 1 : -1);
+  if (!log.length) return h('section', { class: 'card' }, h('h2', null, 'Pagella dell\'analisi AI'), h('p', { class: 'muted' }, 'Ogni giorno che apri l\'app, l\'analisi del giorno si registra qui. Dopo qualche giorno confronto che cosa aveva detto con come si sono mossi davvero i prezzi dei tuoi titoli. Per ora non c\'è ancora nulla da valutare.'));
+  let ok = 0, tot = 0; const rows = [];
+  for (const e of log) { const age = daysSince(e.d); for (const [cls, g] of Object.entries(e.j || {})) { const r = age >= 3 ? classReturnSince(cls, e.d) : null; let verdict = '…'; if (r != null) { const good = g > 0 ? r > 0 : g < 0 ? r < 0 : Math.abs(r) < 0.02; verdict = good ? '✓' : '✗'; tot++; if (good) ok++; } rows.push([fmtDate(e.d), cls, judLabel(g), r == null ? 'troppo presto' : spct(r), verdict]); } }
+  el.append(tiles([{ l: 'Giorni registrati', v: String(log.length), s: 'dal ' + fmtDate(log[log.length - 1].d) }, { l: 'Giudizi verificati', v: String(tot), s: tot ? 'dopo almeno 3 giorni' : 'servono almeno 3 giorni' }, { l: 'Coerenti con i prezzi', v: tot ? pct(ok / tot) : '—', s: tot ? ok + ' su ' + tot : 'ancora nessun dato' }]));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Pagella dell\'analisi AI'), table([{ t: 'Giorno' }, { t: 'Classe' }, { t: 'Giudizio dell\'AI' }, { t: 'Da allora i tuoi titoli', n: 1 }, { t: '' }], rows.slice(0, 60)),
+    h('p', { class: 'muted' }, '✓ = un giudizio favorevole è stato seguito da prezzi in salita, una prudenza da prezzi in calo, un neutrale da prezzi quasi fermi (entro ±2%). Pochi giorni dicono poco: è una verifica onesta nel tempo, non una prova. Si basa sulla variazione dei prezzi dei titoli che possiedi in quella classe.')));
+  return el;
+}
+/* ============ scheda Grafici: tutti i grafici, dinamici e dettagliati ============ */
+const G_PERS = [['1M', 'Un mese', 30], ['3M', '3 mesi', 91], ['6M', '6 mesi', 182], ['1A', 'Un anno', 365], ['MAX', 'Tutto', 99999]];
+const cutPts = (pts, days) => { const lim = Date.now() - days * 864e5; const r = pts.filter(p => p.t >= lim); return r.length >= 2 ? r : pts.slice(-Math.max(2, Math.min(pts.length, 2))); };
+function gChips(opts, cur, set, label) { return h('div', { class: 'chips', role: 'group', 'aria-label': label }, opts.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': cur === k ? 'true' : 'false', onclick: () => { set(k); render(); } }, l))); }
+function gCard(title, how, ...body) { return h('section', { class: 'card' }, h('h2', null, title), h('p', { class: 'muted gs' }, how), ...body.filter(Boolean)); }
+function tabGrafici() {
+  const el = h('div'); if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere i grafici.'));
+  const per = UI.gper || '3M', days = (G_PERS.find(x => x[0] === per) || G_PERS[1])[2], mode = UI.gmode || 'valore', tot = totalValue(), pa = S.accounts.filter(a => a.perf);
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Grafici'), h('p', { class: 'muted' }, 'Sfiora (o tocca) un punto, una barra o una fetta per leggere i numeri esatti. Scegli il periodo qui sotto: vale per i grafici nel tempo.'), gChips(G_PERS.map(x => [x[0], x[1]]), per, v => { UI.gper = v; }, 'Periodo')));
+  /* 1. andamento */
+  const pts = chartPoints(), tpts = S.snapshots.map(n => ({ t: dayMs(n.date), v: n.total })).concat([{ t: dayMs(today()), v: tot }]).filter((p, k, a) => a.findIndex(x => x.t === p.t) === k).sort((a, b) => a.t - b.t);
+  const px = pa.length ? valueSeries(pa) : [];
+  let ser, o = { fmt: eur };
+  if (mode === 'totale') ser = [{ name: 'Patrimonio totale', color: '#0a84ff', pts: cutPts(tpts, days) }];
+  else if (mode === 'guadagno') { ser = [{ name: 'Guadagno', color: '#30d158', pts: cutPts(pts.map(p => ({ t: p.t, v: p.v - p.c })), days) }]; o.zero = true; }
+  else if (mode === 'prezzi') ser = [{ name: 'Valore dai prezzi storici', color: '#bf5af2', pts: cutPts(px.map(p => ({ t: p.t, v: p.v })), days) }];
+  else ser = [{ name: 'Valore degli investimenti', color: '#0a84ff', pts: cutPts(pts.map(p => ({ t: p.t, v: p.v })), days) }, { name: 'Versato netto', color: '#8e8e93', pts: cutPts(pts.map(p => ({ t: p.t, v: p.c })), days) }];
+  const first = ser[0].pts[0], last = ser[0].pts[ser[0].pts.length - 1], dlt = first && last ? last.v - first.v : null;
+  el.append(gCard('Andamento nel tempo', 'Scegli che cosa vedere. "Guadagno" toglie i soldi che hai messo tu e mostra solo quanto hanno reso.', gChips([['valore', 'Investimenti e versato'], ['guadagno', 'Guadagno'], ['totale', 'Patrimonio totale'], ['prezzi', 'Dai prezzi storici']], mode, v => { UI.gmode = v; }, 'Che cosa vedere'),
+    dlt != null && ser[0].pts.length > 1 ? h('p', null, h('b', null, 'Nel periodo: ' + seur(dlt)), h('span', { class: 'muted' }, ' (dal ' + new Date(first.t).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) + ')')) : null, gline(ser, o),
+    mode === 'prezzi' ? h('p', { class: 'muted' }, 'Ricostruito con le quantità di oggi sui prezzi storici: non conosce acquisti e vendite fatti prima.') : null));
+  /* 2. composizione */
+  const dims = [['class', 'Classe'], ['area', 'Area'], ['ccy', 'Valuta'], ['acc', 'Conto'], ['inst', 'Strumento']], dim = UI.gdim || 'class', rows = exposure(dim, true);
+  el.append(gCard('Di che cosa è fatto il patrimonio', 'Tocca una fetta o una voce della legenda per vedere i dettagli.', gChips(dims, dim, v => { UI.gdim = v; }, 'Raggruppa per'), rows.length ? donut(rows, dims.find(d => d[0] === dim)[1], false, ['class', 'area', 'acc', 'inst', 'ccy'].includes(dim) ? lab => talkMix(dim, lab) : null) : h('p', { class: 'muted' }, 'Nessun dato.')));
+  /* 3. tu contro obiettivo */
+  if (S.policy.target && S.policy.target.trim() && tot > 0) { const ex = exposure('class', true), t2 = totalValue() - boxTotal(), curM = new Map(ex.map(([l, v]) => [l.toLowerCase(), v])), items = parseMix(S.policy.target, '').map(([k, w]) => { const c = (curM.get(k.toLowerCase()) || 0) / t2; return { l: k, a: c, b: w, ae: eur(c * t2), be: eur(w * t2) }; });
+    el.append(gCard('Tu contro il tuo obiettivo', 'Barra blu: quanto hai oggi. Barra grigia: quanto vorresti avere. Se la blu è molto più corta o lunga, quella classe è lontana dall\'obiettivo.', dbars(items, ['Oggi', 'Obiettivo']))); }
+  /* 4. per conto */
+  const accRows = S.accounts.filter(a => accValue(a) > 0).sort((a, b) => accValue(b) - accValue(a)), colG = { fermi: '#8e8e93', investiti: '#0a84ff', pensione: '#bf5af2' };
+  el.append(gCard('Dove sono i soldi, conto per conto', 'Grigio: soldi fermi. Blu: investiti. Viola: fondo pensione.', hbars(accRows.map(a => ({ l: a.name, v: accValue(a), c: colG[accGroup(a)], vt: eur(accValue(a)) + ' · ' + pct(accValue(a) / tot), tip: pct(accValue(a) / tot) + ' del patrimonio', sub: (TYPES[a.type] || {}).label }))), h('div', { class: 'glegend' }, h('span', null, h('span', { class: 'sw', style: 'background:#8e8e93' }), ' fermi'), h('span', null, h('span', { class: 'sw', style: 'background:#0a84ff' }), ' investiti'), h('span', null, h('span', { class: 'sw', style: 'background:#bf5af2' }), ' pensione'))));
+  /* 5. guadagno per posizione e rendimento per conto */
+  const pr = sellRows().filter(r => r.known && r.gain != null).sort((a, b) => b.gain - a.gain), sel = pr.length > 16 ? [...pr.slice(0, 8), ...pr.slice(-8)] : pr;
+  if (sel.length) el.append(gCard('Chi guadagna e chi perde', 'Verde: titoli in guadagno. Rosso: in perdita. Considera solo i titoli di cui conosco il costo di carico.', hbars(sel.map(r => ({ l: r.i.name, v: r.gain, vt: seur(r.gain) + ' · ' + spct(r.gain / (r.v - r.gain)), c: r.gain >= 0 ? 'var(--gain)' : 'var(--loss)', tip: 'Valore ' + eur(r.v) + ' · costo ' + eur(r.v - r.gain), sub: r.a.name })))));
+  const perfRows = pa.map(a => [a, perfOf([a])]).filter(([, p]) => fin(p.pnlPct) && p.has).sort((x, y) => y[1].pnlPct - x[1].pnlPct);
+  if (perfRows.length) el.append(gCard('Rendimento di ogni conto', 'Guadagno diviso i soldi versati in quel conto.', hbars(perfRows.map(([a, p]) => ({ l: a.name, v: p.pnlPct, vt: spct(p.pnlPct), c: p.pnlPct >= 0 ? 'var(--gain)' : 'var(--loss)', tip: 'Guadagno ' + seur(p.pnl) + ' su ' + eur(p.contrib) + ' versati' })), { fmt: v => spct(v) })));
+  /* 6. posizioni più grandi */
+  const big = [...classValues()].map(([id, v]) => [inst(id), v]).filter(x => x[0]).sort((a, b) => b[1] - a[1]), top5 = big.slice(0, 5).reduce((t, x) => t + x[1], 0);
+  if (big.length) el.append(gCard('Le posizioni più grandi', 'Le prime 5 pesano ' + pct(top5 / tot) + ' del patrimonio. Se una sola pesa troppo, un suo calo si sente molto.', hbars(big.slice(0, 12).map(([i, v]) => ({ l: i.name, v, vt: eur(v) + ' · ' + pct(v / tot), tip: pct(v / tot) + ' del patrimonio' })))));
+  /* 7. versamenti e PAC */
+  const mm = []; for (let k = 11; k >= 0; k--) { const d = new Date(new Date().getFullYear(), new Date().getMonth() - k, 1), key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); mm.push({ key, l: d.toLocaleDateString('it-IT', { month: 'short' }), v: 0 }); }
+  for (const a of pa) for (const f of a.flows) { if (f.type === 'partenza') continue; const r = mm.find(x => x.key === f.date.slice(0, 7)); if (r) r.v += flowSign(f.type) * f.amount; }
+  if (mm.some(x => x.v)) el.append(gCard('Soldi messi (o tolti) mese per mese', 'Versamenti meno prelievi negli ultimi 12 mesi, escluso il valore di partenza.', vbars(mm.map(x => ({ l: x.l, v: x.v, tip: x.l + ': ' + seur(x.v) })))));
+  const plans = PL(); if (plans.length) { const cols = [], accKeys = new Map(); for (let k = 0; k < 12; k++) { const d = new Date(new Date().getFullYear(), new Date().getMonth() + k, 1); cols.push({ key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), l: d.toLocaleDateString('it-IT', { month: 'short' }), parts: {} }); }
+    for (const p of plans) for (const dd of occurrences(p.start, freqMonths(p.freq), p.day, today(), addMonthsStr(today(), 12), p.end)) { const c = cols.find(x => x.key === dd.slice(0, 7)); if (c) { const n = accName(p.accId); if (!accKeys.has(n)) accKeys.set(n, PALETTE[accKeys.size % PALETTE.length]); c.parts[n] = (c.parts[n] || 0) + p.amount; } }
+    el.append(gCard('I PAC dei prossimi 12 mesi', 'Quanto si compra ogni mese con i PAC, diviso per conto.', sbars(cols, [...accKeys]))); }
+  /* 8. cedole */
+  const bl = bondList(), ev = couponEvents(bl, 12); if (ev.length) { const byM = new Map(); for (const e of ev) { const k = e.d.getFullYear() + '-' + String(e.d.getMonth() + 1).padStart(2, '0'); byM.set(k, (byM.get(k) || 0) + e.net); }
+    const rr = []; for (let k = 0; k < 12; k++) { const d = new Date(new Date().getFullYear(), new Date().getMonth() + k, 1), key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); rr.push({ l: d.toLocaleDateString('it-IT', { month: 'short' }), v: byM.get(key) || 0 }); }
+    el.append(gCard('Cedole in arrivo', 'Cedole nette stimate delle tue obbligazioni nei prossimi 12 mesi (dettagli in Analisi → Cedole).', vbars(rr.map(x => ({ l: x.l, v: x.v, c: '#30d158', tip: x.l + ': ' + (x.v ? eur(x.v) : 'nessuna cedola') }))))); }
+  /* 9. prezzo di un titolo */
+  const cands = S.instruments.filter(i => seriesOf(i).length >= 2); if (cands.length) { const cur = cands.find(i => i.id === UI.ginst) || cands[0], sp = seriesOf(cur).map(x => ({ t: dayMs(x.d), v: x.p })), cp = cutPts(sp, days), ch = cp.length > 1 ? cp[cp.length - 1].v / cp[0].v - 1 : null;
+    const selb = h('select', { 'aria-label': 'Scegli un titolo', onchange: e => { UI.ginst = e.target.value; render(); } }, cands.map(i => h('option', { value: i.id, selected: i.id === cur.id }, i.name)));
+    el.append(gCard('Il prezzo di un titolo', 'Scegli un titolo: vedi come si è mosso il suo prezzo nel periodo scelto.', h('label', { class: 'fld' }, h('span', null, 'Titolo'), selb), ch != null ? h('p', null, h('b', null, spct(ch)), h('span', { class: 'muted' }, ' nel periodo · ora ' + nf2.format(cur.price) + ' ' + cur.ccy)) : null, gline([{ name: cur.name, color: ch != null && ch < 0 ? '#ff453a' : '#30d158', pts: cp }], { fmt: v => nf2.format(v) + ' ' + cur.ccy }))); }
+  el.append(h('p', { class: 'muted' }, 'I grafici nel tempo si riempiono man mano: l\'app registra i prezzi e fa una fotografia del patrimonio ogni giorno che la apri.'));
+  return el;
+}
 /* ============ scheda Mercati ============ */
 const upcoming = (m, n) => asArr(m.indicatori && m.indicatori.calendario).filter(e => e.data >= today()).slice(0, n);
 const whenIn = d => { const n = Math.round((dayMs(d) - dayMs(today())) / 864e5); return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; };
@@ -3041,7 +3360,8 @@ function render() {
     window.scrollTo(0, y); afterRender();
   }
 }
-function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); UI.tab = 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
+window.addEventListener('hashchange', () => { const k = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi' })[location.hash]; if (k && S && !LOCKED) { UI.tab = k; UI.acc = null; render(); window.scrollTo(0, 0); } });          // i collegamenti delle notifiche (sito/#pac) aprono la scheda giusta
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); UI.tab = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi' })[location.hash] || 'panoramica'; UI.acc = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -3211,6 +3531,7 @@ function openMenu() {
     DEMO ? null : item('Scrivi cosa è successo', MICO.op, () => askBox(), 'una frase e ci penso io'),
     DEMO ? null : item('I miei PAC', MICO.pac, () => pacManager(), PL().length ? pl(PL().length, 'PAC attivo', 'PAC attivi') + ' · vedi e gestisci' : 'vedi e gestisci i PAC'),
     DEMO ? null : item('Nuovo PAC', MICO.op, () => pacWizard(), 'un acquisto che si ripete'),
+    DEMO ? null : item('Registra un incasso', MICO.saldi, () => incomeWizard(), 'dividendo, cedola, commissione…'),
     DEMO ? null : item('Nuovo obiettivo', MICO.goal, () => goalWizard(), 'casa, pensione, viaggio…'),
     DEMO ? null : item('Importa i file dei conti', MICO.imp, () => pickBatch()),
     DEMO ? null : item('Aggiorna i saldi', MICO.saldi, openBalances, 'conti correnti, contanti, carte'),
@@ -3233,13 +3554,13 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'pac', 'consigli', 'analisi', 'piano'];          // le altre viste sono nel menu a sinistra
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'conti', 'pac', 'grafici', 'consigli', 'analisi', 'piano'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const ICONS = { grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, consigli: tabConsigli, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
 function tabPanoramica() {
@@ -4254,7 +4575,7 @@ function pacBlock(inDialog) {          // il contenuto di "I miei PAC": riepilog
 }
 function tabPac() {
   return h('div', null, h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'I miei PAC'), btn('+ Nuovo PAC', () => pacWizard(), 'pri sm')), ...pacBlock(null),
-    PL().length ? h('p', { class: 'muted' }, 'Il calendario dei prossimi 12 mesi è in ', h('a', { href: '#', onclick: e => { e.preventDefault(); UI.tab = 'piano'; render(); } }, 'Piano'), '.') : null));
+    PL().length ? h('p', { class: 'muted' }, 'Il calendario dei prossimi 12 mesi è in ', h('a', { href: '#', onclick: e => { e.preventDefault(); UI.tab = 'piano'; render(); } }, 'Piano'), '.') : null), pacRibilancia());
 }
 function pacManager() {          // la stessa cosa in una finestra, dal menu
   if (document.querySelector('dialog.pacs')) return;
