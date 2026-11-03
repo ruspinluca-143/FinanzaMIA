@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-oAOnBtL+0NJrlOxKe8gYhsqBi+bCyrj2bRiyfJNgNNA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lAqlrsMDmW0Vw15MmEA5ARFXeZYJGc3fkGJlL5qOXqU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -497,6 +497,8 @@ function s(tag, attrs, ...kids) {
   for (const kid of kids.flat()) if (kid != null) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
   return el;
 }
+/* un elemento vuoto (null, undefined, false) passato a append/prepend/replaceChildren non deve mai diventare la scritta "null" sullo schermo */
+for (const P of [Element.prototype, DocumentFragment.prototype]) for (const m of ['append', 'prepend', 'replaceChildren']) { const orig = P[m]; P[m] = function (...a) { return orig.apply(this, a.filter(x => x != null && x !== false)); }; }
 const btn = (label, fn, cls) => h('button', { type: 'button', class: 'btn ' + (cls || ''), onclick: fn }, label);
 
 /* ============ formati ============ */
@@ -2240,7 +2242,7 @@ const G = () => S.goal || (S.goal = { cagr: 20, years: 5, monthly: 0, assume: {}
 const JR = () => S.journal || (S.journal = []);
 const DEFAULTS = { maxPos: 5, maxCrypto: 10, maxAny: 35, maxCash: 20, tol: 5 };
 const th = k => { const v = pnum(S.policy[k]); return v > 0 ? v : DEFAULTS[k]; };
-const LEV_RE = /leverage|\b[2-5]x\b|\bshort\b|inverse|ultra|daily/i;
+const LEV_RE = /leverage|\b[2-5]x\b|-1x\b|\bshort\b(?!\s*[- ]?(dur|term|matur))|inverse|ultra\s?(short|pro)|\bdaily\s+(leverag|short|inverse|[2-5]x)/i;          // 'Daily Hedged' (copertura del cambio) e 'Short Duration' (obbligazioni a breve scadenza) NON sono leva
 const CLASS_DEFAULT = { 'Azioni': [7, 16], 'Obbligazioni': [3, 5], 'Materie prime': [4, 15], 'Crypto': [10, 70], 'Monetario': [2, 1], 'Liquidità': [1.5, 0.5], 'Non classificato': [5, 15] };   // [rendimento atteso %, volatilità %]: IPOTESI modificabili, non previsioni
 const kindOf = i => {
   if (i.kind) return i.kind;
@@ -2470,7 +2472,7 @@ function alerts() {
   if (cr * 100 > th('maxCrypto')) out.push('Le crypto valgono ' + ilPct(cr) + ': oltre la soglia del ' + th('maxCrypto') + '%.');
   const cash = S.accounts.filter(a => ['broker', 'crypto', 'trading'].includes(a.type)).reduce((t, a) => t + accCash(a), 0) / tot;
   if (cash * 100 > th('maxCash')) out.push('Liquidità ferma nei conti d\'investimento: ' + pct(cash) + ' del patrimonio (soglia ' + th('maxCash') + '%).');
-  if (S.policy.target && S.policy.target.trim()) { const cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v / tot])); for (const [k, w] of parseMix(S.policy.target, 'Non classificato')) { const d = ((cur.get(k.toLowerCase()) || 0) - w) * 100; if (Math.abs(d) > th('tol')) out.push('«' + k + '»: ' + (d > 0 ? '+' : '') + nfp.format(d) + ' punti rispetto all\'obiettivo (soglia ±' + th('tol') + ').'); } }
+  if (S.policy.target && S.policy.target.trim()) { const cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v / tot])); for (const [k, w] of parseMix(S.policy.target, 'Non classificato')) { const d = ((cur.get(k.toLowerCase()) || 0) - w) * 100; if (Math.abs(d) > th('tol')) out.push('«' + k + '»: hai ' + pct(cur.get(k.toLowerCase()) || 0) + ' (' + eur((cur.get(k.toLowerCase()) || 0) * tot) + ') contro un obiettivo del ' + pct(w) + ' (' + eur(w * tot) + '): ' + (d > 0 ? '+' : '') + nfp.format(d) + ' punti (soglia ±' + th('tol') + ').'); } }
   const unc = ex.filter(([l]) => /non classificat/i.test(l)).reduce((t, x) => t + x[1], 0) / tot; if (unc > 0.1) out.push('Il ' + pct(unc) + ' del patrimonio è "Non classificato": completa le classi in Strumenti.');
   const lev = [...agg.keys()].map(inst).filter(i => LEV_RE.test(i.name) || i.lev); if (lev.length) out.push('Possibili prodotti con leva o inversi: ' + lev.map(i => i.name).join(', ') + '. Controlla la struttura.');
   return out;
