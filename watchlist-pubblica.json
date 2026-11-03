@@ -67,6 +67,7 @@
     {"nome":"Whirlpool 2033 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US963320BE54","tipo":"BOND","onvista":"300468093"},
     {"nome":"Apple 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US037833BH21","tipo":"BOND","onvista":"91807308"},
     {"nome":"McDonald's 2052 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US58013MFT62","tipo":"BOND","onvista":"231292184"},
-    {"nome":"Goldman Sachs 4,75% 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US38148LAF31","tipo":"BOND","onvista":"92394102"}
+    {"nome":"Goldman Sachs 4,75% 2045 (riferimento)","classe":"Obbligazioni","fonte":"onvista","id":"US38148LAF31","tipo":"BOND","onvista":"92394102"},
+    {"nome":"Sunrise Energy Metals Ltd.","classe":"Azioni","fonte":"onvista","id":"AU0000143729","tipo":"STOCK","onvista":"18465709"}
   ]
 }
