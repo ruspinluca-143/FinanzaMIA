@@ -467,7 +467,41 @@ dialog[open]{animation:sheet .45s var(--ease)}
 .gchart{position:relative}.gtip{position:absolute;z-index:5;pointer-events:none;background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:8px 11px;font-size:13px;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:260px}.glegend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-top:6px}.gtip .sw,.glegend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:baseline}.gbar{transform-origin:50% 100%;animation:gb .6s var(--ease,ease) both;animation-delay:calc(var(--i,0)*35ms)}.gbar.h{transform-origin:0 50%;animation-name:gbh}@keyframes gb{from{transform:scaleY(0)}}@keyframes gbh{from{transform:scaleX(0)}}.gln{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.g-val{font-size:11px;fill:var(--ink2)}@media (prefers-reduced-motion:reduce){.gbar{animation:none}}
 .gs{margin-top:-4px}
 @media (max-width:600px){.gchart .g-txt,.gchart .g-val{font-size:14.5px}}
-.tabs .tab .ls{letter-spacing:-.01em}.g-c0{--gc:#0a84ff}.g-c1{--gc:#ff9f0a}.g-c2{--gc:#30b0c7}.g-c3{--gc:#bf5af2}.g-c4{--gc:#30d158}.g-c5{--gc:#ff375f}
+.tabs .tab .ls{letter-spacing:-.01em}/* ---- impaginazione piu' compatta (04/11): bottoni, selettori, schede e numeri piu' piccoli, piu' cose in una schermata ---- */
+body{font-size:14px;line-height:1.4}
+h2{font-size:17px;margin-bottom:8px}h3{font-size:15.5px;margin:10px 0 6px}h4{font-size:14px}
+.lead{font-size:16px}
+.card{padding:14px 16px;margin:10px 0;border-radius:18px}
+.card p{margin:6px 0}
+.btn{font-size:13px;padding:5px 12px}.btn.sm{font-size:12px;padding:3px 9px}.btn.big{font-size:14px;padding:8px 15px}
+.chips{gap:5px;margin:4px 0 10px}.chip{font-size:12.5px;padding:4px 11px}
+.pill{font-size:12.5px;padding:3px 10px}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.tile{padding:10px 12px;border-radius:15px}.tile .val{font-size:21px;margin:2px 0}.tile .sub,.hero .sub{font-size:12px}
+.tile.tap::after{top:9px;right:9px;width:16px;height:16px;font-size:10px;line-height:14px}
+.warn{padding:9px 12px;margin:8px 0;font-size:13px;border-radius:12px}
+.banner{padding:9px 12px;margin:10px 0;font-size:13.5px}
+.row{gap:8px}.actbar{margin-top:10px;gap:6px}
+.fld{margin:8px 0;gap:3px}input,select,textarea{padding:6px 10px}
+.grp{margin:14px 0 6px}.grp-head{padding:2px 4px 8px}.grp-n{font-size:17px}.grp-p{font-size:13px}
+.conti-head .ch-n{font-size:clamp(26px,5vw,36px)}
+.acards{gap:8px}
+.tbl th,.tbl td{padding-top:6px;padding-bottom:6px}
+dialog{padding:18px}
+@media (max-width:700px){
+  .wrap{padding-left:12px;padding-right:12px}
+  .card{padding:12px 13px;border-radius:16px}
+  h2{font-size:16px}
+  .tiles{grid-template-columns:1fr 1fr;gap:8px}.tile{padding:9px 11px}.tile .val{font-size:18px}
+  .acards{gap:8px}.acard{padding:9px 9px 8px}.acard .ac-val{font-size:17px}.acard .ac-name{font-size:13px;margin:6px 0 1px}
+  .tbl tr{padding:8px 2px}.tbl td{padding:3px 0}.tbl td:first-child{font-size:15px}.tbl td::before{font-size:11.5px}
+  dialog,dialog.wide{padding:16px 14px calc(16px + env(safe-area-inset-bottom))}
+  .conti-head .actbar .btn{font-size:12.5px;padding:7px 5px}
+  .grp{margin:12px 0 5px}
+  .chips{margin:2px 0 8px}
+}
+.donut{gap:16px;margin:6px 0 10px}.donut.v{gap:8px}.donut.v .dsvg{width:min(180px,100%)}
+.g-c0{--gc:#0a84ff}.g-c1{--gc:#ff9f0a}.g-c2{--gc:#30b0c7}.g-c3{--gc:#bf5af2}.g-c4{--gc:#30d158}.g-c5{--gc:#ff375f}
 .ac-desc{font-size:11.5px;line-height:1.3;color:var(--muted);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .anv .acard{aspect-ratio:auto;min-height:112px}
 .anv .acard .ac-name{-webkit-line-clamp:2;font-size:14.5px}
