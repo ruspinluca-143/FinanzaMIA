@@ -7,7 +7,7 @@
 param([string]$Uscita = '.', [switch]$SoloFondi, [switch]$SoloInsider, [int]$GiorniInsider = 2)
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$ua = 'FinanzeApp personale luca.ruspini@icloud.com'
+$ua = 'FinanzeApp personale ruspiniluca143@gmail.com'
 $inv = [Globalization.CultureInfo]::InvariantCulture
 $out = Join-Path $Uscita 'grandi-soldi.json'
 $old = $null; if (Test-Path $out) { try { $old = Get-Content $out -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $old = $null } }
