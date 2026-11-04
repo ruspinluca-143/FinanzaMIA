@@ -7,7 +7,7 @@
 param([string]$Uscita = '.', [switch]$SoloFondi, [switch]$SoloInsider, [int]$GiorniInsider = 2)
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$ua = 'FinanzeApp personale ruspiniluca143@gmail.com'
+$ua = 'FinanzeApp/1.0 (ruspiniluca143@gmail.com)'          # formato prodotto/versione (contatto): PowerShell 7 rifiuta un User-Agent scritto a parole
 $inv = [Globalization.CultureInfo]::InvariantCulture
 $out = Join-Path $Uscita 'grandi-soldi.json'
 $old = $null; if (Test-Path $out) { try { $old = Get-Content $out -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $old = $null } }
@@ -161,5 +161,6 @@ if (-not $SoloFondi) {
 }
 $res = [ordered]@{ generato = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); fonte = 'SEC EDGAR (13F e Form 4)'; fondi = $fondi; escludiAgg = $NOAGG; aggregato = $aggr; insider = $ins }
 if (-not (Test-Path $Uscita)) { New-Item -ItemType Directory $Uscita -Force | Out-Null }
+if (@($fondi).Count -eq 0 -and -not $SoloInsider) { if ($old -and @($old.fondi).Count) { 'Nessun portafoglio letto ora: tengo i dati di prima.'; return }; throw 'Nessun portafoglio letto: non scrivo un file vuoto.' }
 [IO.File]::WriteAllText($out, ($res | ConvertTo-Json -Depth 8 -Compress), (New-Object Text.UTF8Encoding($false)))
 'Scritto ' + $out + ' (' + [math]::Round((Get-Item $out).Length / 1KB) + ' KB): ' + @($fondi).Count + ' gestori, ' + @($ins.operazioni).Count + ' operazioni insider'

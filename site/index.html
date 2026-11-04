@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CqOj9zFIRPCuD961U5uf3UaEOmYsij40vT/FOidlgkw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VI9zSdI/qLzYB5ZrEyOxR7SpawpKf3F599+JigAHVUE='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4689,7 +4689,7 @@ const GR_ICO = ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'];
 const GR_TIPI = ['Holding', 'Hedge fund', 'Family office', 'Investitore attivista', 'Value investor', 'Gestore di ETF', 'Fondazione', 'Fondo sovrano', 'Istituzione'];
 const GR_DELAY = 'I portafogli dei grandi (modulo 13F) arrivano con 1-2 mesi di ritardo: la SEC li pubblica fino a 45 giorni dopo la fine del trimestre. Mostrano dove i soldi sono stati messi alla fine del trimestre, non dove sono oggi. Le operazioni degli insider (Form 4) invece sono in ritardo di soli 2 giorni. Contano solo azioni quotate negli USA: niente obbligazioni, opzioni, posizioni corte o mercati esteri.';
 function normGrandi(j) {
-  if (!j || !Array.isArray(j.fondi)) return null;
+  if (!j || !Array.isArray(j.fondi) || !j.fondi.length) return null;          // file vuoto (raccolta fallita): come se non ci fosse
   const fx = x => Object.assign(x, { isins: asArr(x.isins) }), ch = c => c ? { nuove: asArr(c.nuove).map(fx), chiuse: asArr(c.chiuse).map(fx), aumentate: asArr(c.aumentate).map(fx), ridotte: asArr(c.ridotte).map(fx), n: Object.assign({ nuove: asArr(c.nuove).length, chiuse: asArr(c.chiuse).length, aumentate: asArr(c.aumentate).length, ridotte: asArr(c.ridotte).length }, c.n || {}) } : null;
   j.fondi = j.fondi.filter(f => f && f.nome && fin(f.valore)).map(f => Object.assign(f, { top: asArr(f.top).map(fx), trim: ch(f.trim), sem: ch(f.sem) }));
   const ag = j.aggregato || {}; for (const p of ['trim', 'sem']) ag[p] = ag[p] ? { comprati: asArr(ag[p].comprati).map(x => Object.assign(x, { isins: asArr(x.isins), compra: asArr(x.compra), vende: asArr(x.vende) })), venduti: asArr(ag[p].venduti).map(x => Object.assign(x, { isins: asArr(x.isins), compra: asArr(x.compra), vende: asArr(x.vende) })) } : { comprati: [], venduti: [] };
