@@ -71,6 +71,11 @@
     {"nome":"Sunrise Energy Metals Ltd.","classe":"Azioni","fonte":"onvista","id":"AU0000143729","tipo":"STOCK","onvista":"18465709"},
     {"nome":"Apollo Global Private Markets ELTIF","classe":"Azioni","fonte":"onvista","id":"LU3170240538","tipo":"FUND","onvista":"307695737"},
     {"nome":"Corning Inc.","classe":"Azioni","fonte":"onvista","id":"US2193501051","tipo":"STOCK","onvista":"85444"},
-    {"nome":"Marvell Technology Inc.","classe":"Azioni","fonte":"onvista","id":"US5738741041","tipo":"STOCK","onvista":"95703"}
+    {"nome":"Marvell Technology Inc.","classe":"Azioni","fonte":"onvista","id":"US5738741041","tipo":"STOCK","onvista":"95703"},
+    {"nome":"Xtrackers MSCI Japan UCITS ETF 1C","classe":"Azioni","fonte":"onvista","id":"LU0274209740","tipo":"FUND","onvista":"15533225"},
+    {"nome":"iShares Core EURO STOXX 50 UCITS ETF (Acc)","classe":"Azioni","fonte":"onvista","id":"IE00B53L3W79","tipo":"FUND","onvista":"26625456"},
+    {"nome":"Amundi Core STOXX Europe 600 UCITS ETF EUR Hedged (Dist)","classe":"Azioni","fonte":"onvista","id":"LU1574142243","tipo":"FUND","onvista":"121954481"},
+    {"nome":"Amundi S&P World Utilities Screened UCITS ETF (Dist)","classe":"Azioni","fonte":"onvista","id":"IE00052T92P8","tipo":"FUND","onvista":"229278470"},
+    {"nome":"Vanguard S&P 500 UCITS ETF (USD) Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFMXXD54","tipo":"FUND","onvista":"151023875"}
   ]
 }
