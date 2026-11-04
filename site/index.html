@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VI9zSdI/qLzYB5ZrEyOxR7SpawpKf3F599+JigAHVUE='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jkUTGK9/fx6WdMLfuEmrsSqCcWALUR2L8/tpoIIvfcw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -79,7 +79,7 @@ dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0
 .ac-top{display:flex;align-items:center;gap:10px}
 .ac-ico{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;color:var(--gc);background:color-mix(in srgb,var(--gc) 14%,transparent);flex:none}
 .ac-name{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ac-tag{font-size:11px;font-weight:600;color:var(--gc);background:color-mix(in srgb,var(--gc) 12%,transparent);border-radius:99px;padding:2px 8px}
+.ac-day{margin:0!important;font-size:12px!important;padding:2px 8px!important;white-space:nowrap}.ac-tag{font-size:11px;font-weight:600;color:var(--gc);background:color-mix(in srgb,var(--gc) 12%,transparent);border-radius:99px;padding:2px 8px}
 .ac-val{font-size:26px;font-weight:700;letter-spacing:-.03em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
 .ac-sub{color:var(--muted);font-size:12.5px;margin-bottom:6px}
 .acard .pill{font-size:12.5px;padding:3px 10px;margin:2px 0 4px}
@@ -3701,11 +3701,21 @@ function moveAcc(a, dir) {          // sposta un conto avanti (-1) o indietro (+
   const g = groupAccs().find(x => x.k === accGroup(a)), list = g.accs.slice(), i = list.indexOf(a), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return;
   [list[i], list[j]] = [list[j], list[i]]; list.forEach((x, n) => { x.ord = n; }); touch(); render();
 }
+function accDay(a) {          // come si e' mosso oggi il conto: prezzo di adesso contro l'ultimo prezzo di un giorno precedente, per le quantita' di oggi
+  if (!a.positions.length) return null; const t = today(); let d1 = 0, v0 = 0, n = 0;
+  for (const p of a.positions) { const i = inst(p.instId); if (!i || !(p.qty > 0)) continue; const s = seriesOf(i); let ref = null; for (let k = s.length - 1; k >= 0; k--) if (s[k].d < t) { ref = s[k]; break; }
+    if (!ref || !(ref.p > 0)) continue; const fx = fxRate(i.ccy) ?? 1; d1 += p.qty * (i.price - ref.p) * fx; v0 += p.qty * ref.p * fx; n++; }
+  return n && v0 > 0 ? { abs: d1, pct: d1 / v0 } : null;
+}
+function dayTag(a) {          // in alto a destra del riquadro: la giornata del conto in % (verde se positiva, rosso se negativa)
+  const d = accDay(a); if (!d) return null; const z = Math.abs(d.pct) < 0.0005;
+  return h('span', { class: 'pill ac-day ' + (z ? '' : d.pct > 0 ? 'up' : 'dn'), title: 'Oggi ' + seur(d.abs) + ' rispetto all\'ultima chiusura' }, z ? '0,0%' : (d.pct > 0 ? '▲ +' : '▼ −') + nfp.format(Math.abs(d.pct) * 100) + '%');
+}
 function accCard(a, total, k) {          // riquadro quadrato e compatto: due per riga sul telefono
   const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); }, grp = accGroup(a), x = grp === 'fermi' || !a.positions.length ? null : autoInfo(a), nA = x ? x.auto.length : 0, nT = x ? x.auto.length + x.fermi.length : 0;
   const badge = !x ? h('div', { class: 'ac-auto man' }, '✎ saldo a mano') : h('button', { type: 'button', class: 'ac-auto ' + (x.fermi.length ? (nA ? 'mix' : 'man') : 'ok'), onclick: e => { e.stopPropagation(); tapFx(e.currentTarget); talkAuto(a); } }, nA === nT ? '⟳ tutto automatico' : nA ? '⟳ ' + nA + ' su ' + nT + ' automatici' : '✎ prezzi a mano');
   const card = h('div', { class: 'acard g-' + grp, role: 'button', tabindex: '0', style: '--i:' + k, 'data-s': normT([a.name, TYPES[a.type] ? TYPES[a.type].label : a.type, a.box, (ACC_GROUPS.find(g => g[0] === grp) || [])[1], a.note].filter(Boolean).join(' ')), onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); open(); }, onkeydown: e => { if (e.key === 'Enter') open(); } },
-    h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, accIco(a)), a.box ? h('span', { class: 'ac-tag' }, a.box) : null),
+    h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, accIco(a)), dayTag(a) || (a.box ? h('span', { class: 'ac-tag' }, a.box) : null)),
     UI.reorder ? h('div', { class: 'ac-mv' }, h('button', { type: 'button', class: 'mv', 'aria-label': 'Sposta prima', onclick: e => { e.stopPropagation(); moveAcc(a, -1); } }, '◀'), h('button', { type: 'button', class: 'mv', 'aria-label': 'Sposta dopo', onclick: e => { e.stopPropagation(); moveAcc(a, 1); } }, '▶')) : null,
     h('div', { class: 'ac-name', title: a.name }, a.name),
     h('div', { class: 'ac-val' }, eur(v)),
@@ -3723,7 +3733,7 @@ function tabConti() {
   if (UI.acc) return viewAccount(UI.acc);
   const total = totalValue(), el = h('div', { class: 'conti' });
   const sq = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca un conto (nome, tipo, cassa…)', 'aria-label': 'Cerca un conto', autocomplete: 'off', enterkeyhint: 'search', value: UI.contiQ || '', oninput: e => filterConti(e.target.value) });
-  el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'Tutti i tuoi conti'), h('div', { class: 'ch-n' }, eur(total)), h('div', { class: 'muted' }, pl(S.accounts.length, 'conto', 'conti') + ' · tocca un conto per aprirlo'))),
+  el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'Tutti i tuoi conti'), h('div', { class: 'ch-n' }, eur(total)), h('div', { class: 'muted' }, pl(S.accounts.length, 'conto', 'conti') + ' · tocca un conto per aprirlo'), heroDelta())),
     S.accounts.length > 3 ? h('div', { class: 'cq-row' }, sq, h('span', { class: 'cq-n muted' })) : null,
     h('div', { class: 'actbar' }, btn('Aggiorna saldi', openBalances, 'pri'), btn('Importa file…', () => pickBatch()), btn('+ Nuovo conto', () => editAccount()), S.accounts.length > 1 ? btn(UI.reorder ? 'Fatto' : 'Riordina', () => { UI.reorder = !UI.reorder; render(); }, UI.reorder ? 'pri' : '') : null),
     UI.reorder ? h('p', { class: 'muted' }, 'Tocca ◀ ▶ su un conto per spostarlo prima o dopo, dentro il suo gruppo. L\'ordine resta salvato. Premi Fatto quando hai finito.') : null));
