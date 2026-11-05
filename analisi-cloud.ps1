@@ -50,8 +50,9 @@ $ctx = 'Oggi e'' ' + $oggi + '. ' + $prev + "`n`nINDICATORI DI MERCATO (JSON):`n
 if ($RispostaProva) { $g = Get-Content $RispostaProva -Raw -Encoding UTF8 | ConvertFrom-Json }
 else {
   $body = @{ systemInstruction = @{ parts = @(@{ text = $sys }) }; contents = @(@{ role = 'user'; parts = @(@{ text = $ctx }) }); generationConfig = @{ temperature = 0.3; responseMimeType = 'application/json' } } | ConvertTo-Json -Depth 8 -Compress
-  # 503 = Gemini sovraccarico (capita): 6 tentativi con pause crescenti; dal 4o si prova il modello piu' leggero
-  $mods = @('gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash')
+  # 503 = Gemini sovraccarico (capita): 6 tentativi con pause crescenti, ogni volta con un modello diverso
+  # i modelli 2.5 non sono piu' disponibili per le chiavi nuove (404); gemini-flash-latest a volte e' sovraccarico (503): si provano i 3.x uno dopo l'altro
+  $mods = @('gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite')
   $res = $null; for ($k = 1; $k -le $mods.Count; $k++) {
     try { $res = Invoke-RestMethod ('https://generativelanguage.googleapis.com/v1beta/models/' + $mods[$k - 1] + ':generateContent') -Method Post -Headers @{ 'x-goog-api-key' = $key } -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 120; break }
     catch {
