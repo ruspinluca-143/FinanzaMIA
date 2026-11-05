@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WMLdDF9+eVCJIGMfzUVIjCzo/AP1sefnJZWXy8N1vAE='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gLNl7knfLlzEtj0g6gbUZkevgZQzzjgDPj7fZzgisiM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4832,14 +4832,16 @@ function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Co
     const acc = S.accounts.find(a => a.name.toLowerCase() === (an || '').toLowerCase());
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) { miss.push(label + ' (data non valida)'); continue; }
     if (!acc) { miss.push(label + ' (conto "' + an + '" non trovato)'); continue; }
-    if (!OP_FLOW[kind]) { miss.push(label + ' (tipo "' + kind + '" non valido)'); continue; }
+    const solo = /^movimento$/i.test(kind);          // tipo "movimento": soldi versati che sono GIA' nel valore del conto (nessuna liquidita' aggiunta, nessun trasferimento): serve per segnare un versamento dimenticato
+    if (!solo && !OP_FLOW[kind]) { miss.push(label + ' (tipo "' + kind + '" non valido)'); continue; }
     const ccy = normCcy(cc || 'EUR'), fx = fxRate(ccy), qty = parseNum(q, ','), price = parseNum(pr, ','), total = parseNum(tot, ',');
     if (fx == null) { miss.push(label + ' (manca il cambio ' + ccy + ')'); continue; }
-    const fromAcc = from ? S.accounts.find(a => a.name.toLowerCase() === from.toLowerCase()) : ((kind === 'acquisto' || kind === 'versamento') ? autoFromAcc(acc) : null); const ops = [];
-    if (kind === 'versamento' || kind === 'prelievo') {
+    const fromAcc = solo ? null : from ? S.accounts.find(a => a.name.toLowerCase() === from.toLowerCase()) : ((kind === 'acquisto' || kind === 'versamento') ? autoFromAcc(acc) : null); const ops = [];
+    if (kind === 'versamento' || kind === 'prelievo' || solo) {
       if (!(total > 0)) { miss.push(label + ' (importo mancante)'); continue; }
-      if (OPS().some(x => (x.accId === acc.id || x.toId === acc.id) && x.date === date && (x.kind === kind || x.kind === 'trasferimento') && Math.abs((x.amount || 0) - total * fx) < 0.01)) { dup++; continue; }
-      if (kind === 'versamento' && fromAcc && fromAcc.id !== acc.id) ops.push({ accId: fromAcc.id, toId: acc.id, kind: 'trasferimento', date, amount: r2(total * fx), note: 'Da file' });          // i soldi arrivano dal conto di partenza: si registra lo spostamento
+      if (OPS().some(x => (x.accId === acc.id || x.toId === acc.id) && x.date === date && (x.kind === (solo ? 'versamento' : kind) || x.kind === 'trasferimento') && Math.abs((x.amount || 0) - total * fx) < 0.01)) { dup++; continue; }
+      if (solo) ops.push({ accId: acc.id, kind: 'versamento', date, amount: r2(total * fx), fromCash: false, note: from || 'Versamento registrato dopo' });
+      else if (kind === 'versamento' && fromAcc && fromAcc.id !== acc.id) ops.push({ accId: fromAcc.id, toId: acc.id, kind: 'trasferimento', date, amount: r2(total * fx), note: 'Da file' });          // i soldi arrivano dal conto di partenza: si registra lo spostamento
       else ops.push({ accId: acc.id, kind, date, amount: r2(total * fx), fromCash: true, note: 'Da file' });
     } else if (kind === 'acquisto' || kind === 'vendita') {
       const i = findInst(name, code);
