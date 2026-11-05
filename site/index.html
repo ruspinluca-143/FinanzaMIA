@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aa7ZcAAyVLXlwNj/DBFDPdRsbrcK6BxpiTHS2J/hrsk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3BsrAkItFXrHjbD2pHbxAnhBYFM/grP/pune1MisiB0='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -895,9 +895,13 @@ async function clPush(final) {
   } catch (e) { CL.state = 'offline'; CL.err = String(e.message || e); clNote(); clRetry(); }
   finally { CL.busy = false; if (CL.again) { CL.again = false; clSoon(300); } }
 }
+const CL_VOLATILE = new Set(['price', 'priceDate', 'hist', 'autoSrc', 'snapshots', 'fold', 'nudge', 'taxNudge', 'aiLog']);          // cio' che l'app cambia da sola ogni giorno
+function clCanon(v) { return Array.isArray(v) ? v.map(clCanon) : v && typeof v === 'object' ? Object.keys(v).filter(k => !CL_VOLATILE.has(k)).sort().map(k => [k, clCanon(v[k])]) : v; }
+const clCore = D => { try { return JSON.stringify(clCanon(D)); } catch { return Math.random() + ''; } };
 function clChoose(D, r) {          // due versioni diverse dei dati: si sceglie quale tenere
   const nL = S ? S.accounts.length : 0, nR = D.accounts.length;
   if (!nR && nL) return 'local'; if (!nL) return CL.wiped ? 'local' : 'remote';          // archivio vuoto: vince quello online, tranne se l'hai appena svuotato tu
+  if (clCore(S) === clCore(D)) return 'remote';          // se cambiano solo prezzi, snapshot e simili (cose che l'app aggiorna da sola) non si disturba nessuno: vince quella online, i prezzi si riscaricano
   const keep = S; S = D; const tR = totalValue(); S = keep; const tL = totalValue();
   return confirm('Ci sono due versioni dei tuoi dati.\n\nOnline (salvata il ' + clHm(r.quando) + '): ' + pl(nR, 'conto', 'conti') + ', ' + eur(tR) + '.\nSu questo dispositivo: ' + pl(nL, 'conto', 'conti') + ', ' + eur(tL) + '.\n\nOK = tengo quella online.\nAnnulla = tengo quella di questo dispositivo e la metto online.') ? 'remote' : 'local';
 }
