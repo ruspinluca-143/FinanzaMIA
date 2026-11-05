@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9+iLEeTgWVBGyVmIhODV3TpSmKLXvkiJRvW7oTShRGg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-P3q1LjLW6f6xgGpOdISyQPu+6Nerufo4h6/0XDJMMwU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -154,9 +154,9 @@ dialog.opd{max-width:560px}
 .acard .ac-ico svg{width:17px;height:17px}
 .acard .ac-name{font-size:13.5px;font-weight:600;line-height:1.25;margin:8px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;flex:none}
 .acard .ac-val{font-size:20px;margin:0}
-.acard .ac-sub{font-size:11.5px;margin:2px 0}
-.acard .pill{font-size:11.5px;padding:2px 8px;margin:3px 0 0}
-.acard .ac-bar{margin-top:auto;height:5px}
+.acard .ac-sub{font-size:11.5px;margin:2px 0 7px}
+.acard .pill{font-size:11.5px;padding:2px 8px;margin:1px 0 7px}
+.acard .ac-bar{margin-top:auto;height:5px;flex:none}
 .acard .ac-auto{margin-top:7px;padding:5px 7px;font-size:11px;border-radius:9px;line-height:1.25}
 .acard[hidden],.grp[hidden]{display:none!important}
 @media (max-width:700px){.acards{grid-template-columns:1fr 1fr;gap:9px}.acard{padding:10px 10px 9px}.acard .ac-val{font-size:18px}}
@@ -3393,7 +3393,7 @@ function tabGrafici() {
     el.append(gCard('Tu contro il tuo obiettivo', 'Barra blu: quanto hai oggi. Barra grigia: quanto vorresti avere. Se la blu è molto più corta o lunga, quella classe è lontana dall\'obiettivo.', dbars(items, ['Oggi', 'Obiettivo']))); }
   /* 4. per conto */
   const accRows = S.accounts.filter(a => accValue(a) > 0).sort((a, b) => accValue(b) - accValue(a)), colG = { fermi: '#8e8e93', investiti: '#0a84ff', pensione: '#bf5af2' };
-  el.append(gCard('Dove sono i soldi, conto per conto', 'Grigio: soldi fermi. Blu: investiti. Viola: fondo pensione.', hbars(accRows.map(a => ({ l: a.name, v: accValue(a), c: colG[accGroup(a)], vt: eur(accValue(a)) + ' · ' + pct(accValue(a) / tot), tip: pct(accValue(a) / tot) + ' del patrimonio', sub: (TYPES[a.type] || {}).label }))), h('div', { class: 'glegend' }, h('span', null, h('span', { class: 'sw', style: 'background:#8e8e93' }), ' fermi'), h('span', null, h('span', { class: 'sw', style: 'background:#0a84ff' }), ' investiti'), h('span', null, h('span', { class: 'sw', style: 'background:#bf5af2' }), ' pensione'))));
+  el.append(gCard('Dove sono i soldi, conto per conto', 'Grigio: soldi fermi. Blu: investiti. Viola: fondo pensione.', hbars(accRows.map(a => ({ l: a.name, v: accValue(a), c: colG[accShow(a)], vt: eur(accValue(a)) + ' · ' + pct(accValue(a) / tot), tip: pct(accValue(a) / tot) + ' del patrimonio', sub: (TYPES[a.type] || {}).label }))), h('div', { class: 'glegend' }, h('span', null, h('span', { class: 'sw', style: 'background:#8e8e93' }), ' fermi'), h('span', null, h('span', { class: 'sw', style: 'background:#0a84ff' }), ' investiti'), h('span', null, h('span', { class: 'sw', style: 'background:#bf5af2' }), ' pensione'))));
   /* 5. guadagno per posizione e rendimento per conto */
   const pr = sellRows().filter(r => r.known && r.gain != null).sort((a, b) => b.gain - a.gain), sel = pr.length > 16 ? [...pr.slice(0, 8), ...pr.slice(-8)] : pr;
   if (sel.length) el.append(gCard('Chi guadagna e chi perde', 'Verde: titoli in guadagno. Rosso: in perdita. Considera solo i titoli di cui conosco il costo di carico.', hbars(sel.map(r => ({ l: r.i.name, v: r.gain, vt: seur(r.gain) + ' · ' + spct(r.gain / (r.v - r.gain)), c: r.gain >= 0 ? 'var(--gain)' : 'var(--loss)', tip: 'Valore ' + eur(r.v) + ' · costo ' + eur(r.v - r.gain), sub: r.a.name })))));
@@ -3839,9 +3839,10 @@ function tabPanoramica() {
 }
 
 /* ---- i conti divisi in tre gruppi: soldi fermi, soldi investiti, fondo pensione ---- */
-const ACC_GROUPS = [['fermi', 'Soldi fermi', 'Conti correnti, contanti, carte e conti deposito: soldi pronti da usare, che non salgono e non scendono con i mercati (le carte di credito contano come debito).'], ['investiti', 'Soldi investiti', 'Broker, crypto e trading: titoli, ETF e crypto che cambiano valore ogni giorno.'], ['pensione', 'Fondo pensione', 'TFR e versamenti per la pensione: crescono nel tempo e si possono ritirare solo in casi precisi (pensione, prima casa, spese mediche).']];
+const ACC_GROUPS = [['fermi', 'Soldi fermi', 'Conti correnti, contanti, carte, conti deposito e MetaTrader 5: soldi che non seguono i prezzi dei mercati titolo per titolo (le carte di credito contano come debito).'], ['investiti', 'Soldi investiti', 'Broker e crypto: titoli, ETF e crypto che cambiano valore ogni giorno.'], ['pensione', 'Fondo pensione', 'TFR e versamenti per la pensione: crescono nel tempo e si possono ritirare solo in casi precisi (pensione, prima casa, spese mediche).']];
 const accGroup = a => a.type === 'pensione' ? 'pensione' : ['broker', 'crypto', 'trading'].includes(a.type) ? 'investiti' : 'fermi';
-const groupAccs = () => ACC_GROUPS.map(([k, l, d]) => { const accs = S.accounts.filter(a => accGroup(a) === k).sort((x, y) => (x.ord ?? 1e9) - (y.ord ?? 1e9) || accValue(y) - accValue(x)); return { k, l, d, accs, tot: accs.reduce((t, a) => t + accValue(a), 0) }; });
+const accShow = a => a.type === 'trading' ? 'fermi' : accGroup(a);          // dove si VEDE il conto: MetaTrader 5 (trading) sta tra i soldi fermi; per il resto (da dove partono i soldi, controlli) resta un conto d'investimento
+const groupAccs = () => ACC_GROUPS.map(([k, l, d]) => { const accs = S.accounts.filter(a => accShow(a) === k).sort((x, y) => (x.ord ?? 1e9) - (y.ord ?? 1e9) || accValue(y) - accValue(x)); return { k, l, d, accs, tot: accs.reduce((t, a) => t + accValue(a), 0) }; });
 function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni gruppo e da quali conti
   const tot = totalValue();
   return tiles(groupAccs().filter(g => g.accs.length).map(g => ({ l: g.l, v: eur(g.tot), s: (tot > 0 ? pct(g.tot / tot) + ' del totale · ' : '') + pl(g.accs.length, 'conto', 'conti'),
@@ -3876,7 +3877,7 @@ function talkAuto(a) {
 const ACC_ICO = { banca: ['M3 10l9-6 9 6', 'M5 10v8', 'M9.5 10v8', 'M14.5 10v8', 'M19 10v8', 'M3 20h18'], contanti: ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z'], pagamenti: ['M3 6h18a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1z', 'M2 10h20', 'M6 14.5h4'], deposito: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'], broker: ['M4 19l5-6 4 3 7-9', 'M15 7h5v5'], crypto: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M9.5 8h3.5a2 2 0 010 4H9.5h4a2 2 0 010 4h-4z', 'M11 6.5v1.5M11 16v1.5'], trading: ['M7 4v16', 'M5 8h4v6H5z', 'M17 4v16', 'M15 7h4v8h-4z'], pensione: ['M3 12a9 9 0 0118 0z', 'M12 12v6a2 2 0 01-4 0'], altro: ['M12 4a8 8 0 100 16 8 8 0 000-16z'] };
 const accIco = a => s('svg', { viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ACC_ICO[a.type] || ACC_ICO.altro).map(d => s('path', { d })));
 function moveAcc(a, dir) {          // sposta un conto avanti (-1) o indietro (+1) nel suo gruppo; l'ordine resta salvato
-  const g = groupAccs().find(x => x.k === accGroup(a)), list = g.accs.slice(), i = list.indexOf(a), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return;
+  const g = groupAccs().find(x => x.k === accShow(a)), list = g.accs.slice(), i = list.indexOf(a), j = i + dir; if (i < 0 || j < 0 || j >= list.length) return;
   [list[i], list[j]] = [list[j], list[i]]; list.forEach((x, n) => { x.ord = n; }); touch(); render();
 }
 function accDay(a) {          // come si e' mosso oggi il conto: prezzo di adesso contro l'ultimo prezzo di un giorno precedente, per le quantita' di oggi
@@ -3890,7 +3891,7 @@ function dayTag(a) {          // in alto a destra del riquadro: la giornata del 
   return h('span', { class: 'pill ac-day ' + (z ? '' : d.pct > 0 ? 'up' : 'dn'), title: 'Oggi ' + seur(d.abs) + ' rispetto all\'ultima chiusura' }, z ? '0,0%' : (d.pct > 0 ? '▲ +' : '▼ −') + nfp.format(Math.abs(d.pct) * 100) + '%');
 }
 function accCard(a, total, k) {          // riquadro quadrato e compatto: due per riga sul telefono
-  const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); }, grp = accGroup(a), x = grp === 'fermi' || !a.positions.length ? null : autoInfo(a), nA = x ? x.auto.length : 0, nT = x ? x.auto.length + x.fermi.length : 0;
+  const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); }, grp = accShow(a), x = grp === 'fermi' || !a.positions.length ? null : autoInfo(a), nA = x ? x.auto.length : 0, nT = x ? x.auto.length + x.fermi.length : 0;
   const badge = !x ? h('div', { class: 'ac-auto man' }, '✎ saldo a mano') : h('button', { type: 'button', class: 'ac-auto ' + (x.fermi.length ? (nA ? 'mix' : 'man') : 'ok'), onclick: e => { e.stopPropagation(); tapFx(e.currentTarget); talkAuto(a); } }, nA === nT ? '⟳ tutto automatico' : nA ? '⟳ ' + nA + ' su ' + nT + ' automatici' : '✎ prezzi a mano');
   const card = h('div', { class: 'acard g-' + grp, role: 'button', tabindex: '0', style: '--i:' + k, 'data-s': normT([a.name, TYPES[a.type] ? TYPES[a.type].label : a.type, a.box, (ACC_GROUPS.find(g => g[0] === grp) || [])[1], a.note].filter(Boolean).join(' ')), onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); open(); }, onkeydown: e => { if (e.key === 'Enter') open(); } },
     h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, accIco(a)), dayTag(a) || (a.box ? h('span', { class: 'ac-tag' }, a.box) : null)),
@@ -3965,7 +3966,7 @@ function tabConti() {
   el.append(pianoCard());          // l'ex scheda Piano, ridotta all'essenziale
   el.append(opsCard());          // le ultime operazioni di tutti i conti
   el.append(h('p', { class: 'noconti muted', hidden: '' }, 'Nessun conto corrisponde alla ricerca.'));
-  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; il resto = fermi.'));
+  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker e crypto = investiti; il resto (compreso MetaTrader 5) = fermi.'));
   if (UI.contiQ) setTimeout(() => filterConti(UI.contiQ), 0);
   return el;
 }function accCharts(a) {

@@ -50,7 +50,9 @@ $ctx = 'Oggi e'' ' + $oggi + '. ' + $prev + "`n`nINDICATORI DI MERCATO (JSON):`n
 if ($RispostaProva) { $g = Get-Content $RispostaProva -Raw -Encoding UTF8 | ConvertFrom-Json }
 else {
   $body = @{ systemInstruction = @{ parts = @(@{ text = $sys }) }; contents = @(@{ role = 'user'; parts = @(@{ text = $ctx }) }); generationConfig = @{ temperature = 0.3; responseMimeType = 'application/json' } } | ConvertTo-Json -Depth 8 -Compress
-  $res = $null; for ($k = 1; $k -le 3; $k++) { try { $res = Invoke-RestMethod ('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent') -Method Post -Headers @{ 'x-goog-api-key' = $key } -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 120; break } catch { if ($k -eq 3) { throw ('Gemini non risponde: ' + ($_.Exception.Message -replace [regex]::Escape($key), '***')) }; Start-Sleep -Seconds (8 * $k) } }
+  # 503 = Gemini sovraccarico (capita): 6 tentativi con pause crescenti; dal 4o si prova il modello piu' leggero
+  $mods = @('gemini-flash-latest', 'gemini-flash-latest', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-flash-latest')
+  $res = $null; for ($k = 1; $k -le $mods.Count; $k++) { try { $res = Invoke-RestMethod ('https://generativelanguage.googleapis.com/v1beta/models/' + $mods[$k - 1] + ':generateContent') -Method Post -Headers @{ 'x-goog-api-key' = $key } -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 120; break } catch { if ($k -eq $mods.Count) { throw ('Gemini non risponde: ' + ($_.Exception.Message -replace [regex]::Escape($key), '***')) }; Write-Host ('Tentativo ' + $k + ' fallito (' + ($_.Exception.Message -replace [regex]::Escape($key), '***') + '): riprovo.'); Start-Sleep -Seconds (15 * $k) } }
   $txt = $res.candidates[0].content.parts[0].text; if (-not $txt) { throw 'Gemini non ha dato una risposta.' }; $g = $txt | ConvertFrom-Json
 }
 
