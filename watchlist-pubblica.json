@@ -76,6 +76,9 @@
     {"nome":"iShares Core EURO STOXX 50 UCITS ETF (Acc)","classe":"Azioni","fonte":"onvista","id":"IE00B53L3W79","tipo":"FUND","onvista":"26625456"},
     {"nome":"Amundi Core STOXX Europe 600 UCITS ETF EUR Hedged (Dist)","classe":"Azioni","fonte":"onvista","id":"LU1574142243","tipo":"FUND","onvista":"121954481"},
     {"nome":"Amundi S&P World Utilities Screened UCITS ETF (Dist)","classe":"Azioni","fonte":"onvista","id":"IE00052T92P8","tipo":"FUND","onvista":"229278470"},
-    {"nome":"Vanguard S&P 500 UCITS ETF (USD) Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFMXXD54","tipo":"FUND","onvista":"151023875"}
+    {"nome":"Vanguard S&P 500 UCITS ETF (USD) Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFMXXD54","tipo":"FUND","onvista":"151023875"},
+    {"nome":"Invesco EQQQ NASDAQ-100 UCITS ETF Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFZXGZ54","tipo":"FUND","onvista":"143547251"},
+    {"nome":"iShares NASDAQ 100 UCITS ETF EUR Hedged (Acc)","classe":"Azioni","fonte":"onvista","id":"IE00BYVQ9F29","tipo":"FUND","onvista":"141569521"},
+    {"nome":"Amundi Nasdaq-100 UCITS ETF Acc","classe":"Azioni","fonte":"onvista","id":"LU1681038243","tipo":"FUND","onvista":"129545851"}
   ]
 }
