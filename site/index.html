@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-38NFESE+v+C76AOZXq+Oammi6RMiPKJg0uP3/N3UCD4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9+iLEeTgWVBGyVmIhODV3TpSmKLXvkiJRvW7oTShRGg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -36,7 +36,9 @@ html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
 .seg.pick{cursor:pointer}
 ul.list li.tapme,.dleg li.tapme{border-radius:10px;transition:background .25s}
 ul.list li.tapme:hover,.dleg li.tapme:hover{background:color-mix(in srgb,var(--s1) 8%,transparent)}
-dialog.talk{max-width:540px}
+dialog.talk{max-width:540px;overflow-x:hidden}
+.talk-say,.talk-box,.talk-n,.talk-k,dialog.talk h3{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+dialog.talk .dlgacts{position:static;margin-top:14px}
 dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0)*55ms + 80ms)}
 .talk-k{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--s1);margin-bottom:2px}
 .talk-n{font-size:clamp(34px,7vw,46px);font-weight:700;letter-spacing:-.04em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
@@ -2460,7 +2462,7 @@ function deltaFrom(pts, days) {
 }
 function todayMovers() {          // chi ha mosso il patrimonio oggi: per ogni titolo, quantita' x (prezzo di adesso - ultimo prezzo di un giorno precedente)
   const t = today(), by = new Map();
-  for (const a of S.accounts) if (a.perf) for (const p of a.positions) { const i = inst(p.instId); if (!i || !(p.qty > 0)) continue; const s = seriesOf(i); let ref = null; for (let k = s.length - 1; k >= 0; k--) if (s[k].d < t) { ref = s[k]; break; } if (!ref || !(ref.p > 0)) continue;
+  for (const a of S.accounts) if (a.perf) for (const p of a.positions) { const i = inst(p.instId); if (!i || !(p.qty > 0)) continue; const s = seriesOf(i); let ref = null; for (let k = s.length - 1; k >= 0; k--) if (s[k].d < t) { ref = s[k]; break; } if (!ref || !(ref.p > 0) || daysSince(ref.d) > 5) continue;
     const d = p.qty * (i.price - ref.p) * (fxRate(i.ccy) ?? 1), r = by.get(i.id) || { i, d: 0, pct: i.price / ref.p - 1 }; r.d += d; by.set(i.id, r); }
   return [...by.values()].sort((x, y) => Math.abs(y.d) - Math.abs(x.d));
 }
@@ -3341,7 +3343,7 @@ function pacRibilancia() {
   return h('section', { class: 'card' }, h('h2', null, 'I PAC riportano il portafoglio all\'obiettivo?'), h('p', { class: 'muted' }, 'Ogni mese metti circa ' + eur(tot) + ' nei PAC. Ecco come sono divisi oggi e come andrebbero divisi per avvicinarti alla tua allocazione obiettivo, senza vendere nulla.'),
     table([{ t: 'Classe' }, { t: 'Oggi al mese', n: 1 }, { t: 'Proposto', n: 1 }, { t: 'Cambio', n: 1 }], rows.map(r => [r.k, eur(r.now), eur(r.to), r.to - r.now >= 0.5 ? h('b', { class: 'ad-pos' }, '+' + eur(r.to - r.now)) : r.to - r.now <= -0.5 ? h('b', { class: 'ad-neg' }, '−' + eur(r.now - r.to)) : '—'])),
     move ? h('div', { class: 'row' }, btn('Applica la proposta', apply, 'pri sm'), h('span', { class: 'muted' }, 'Riscala gli importi dentro ogni classe.')) : h('p', null, '✓ I tuoi PAC sono già divisi in modo coerente con l\'obiettivo.'),
-    rows.some(r => r.to > 0.5 && r.now < 0.5) ? h('div', { class: 'warn' }, 'Nessun PAC compra ' + rows.filter(r => r.to > 0.5 && r.now < 0.5).map(r => r.k).join(', ') + ': per aumentare quella classe crea un PAC nuovo (premi "+ Nuovo PAC").') : null);
+    null);
 }
 
 function logAnalisi() {          // ogni analisi vista si ricorda: dopo qualche giorno si vede se aveva ragione
@@ -3702,7 +3704,7 @@ function viewLock() {
 }
 /* ---- ogni finestra con pulsanti (OK, Annulla, Registra...) li ha anche in alto: copie che premono gli originali ---- */
 function dlgTopBar(dlg) {
-  if (dlg.classList.contains('frm') || dlg.querySelector(':scope .dlgtop')) return; const acts = dlg.querySelector('.dlgacts'); if (!acts) return;
+  if (dlg.classList.contains('frm') || dlg.classList.contains('talk') || dlg.querySelector(':scope .dlgtop')) return; const acts = dlg.querySelector('.dlgacts'); if (!acts) return;
   const bar = h('div', { class: 'dlgtop' });
   for (const b of acts.querySelectorAll('button')) {          // la copia in alto segue il pulsante originale (testo e "spento"): se cambia sotto, cambia anche qui
     const c = h('button', { type: 'button', class: b.className + ' sm', onclick: () => b.click() }, b.textContent); c.disabled = b.disabled; bar.append(c);
@@ -3880,7 +3882,7 @@ function moveAcc(a, dir) {          // sposta un conto avanti (-1) o indietro (+
 function accDay(a) {          // come si e' mosso oggi il conto: prezzo di adesso contro l'ultimo prezzo di un giorno precedente, per le quantita' di oggi
   if (!a.positions.length) return null; const t = today(); let d1 = 0, v0 = 0, n = 0;
   for (const p of a.positions) { const i = inst(p.instId); if (!i || !(p.qty > 0)) continue; const s = seriesOf(i); let ref = null; for (let k = s.length - 1; k >= 0; k--) if (s[k].d < t) { ref = s[k]; break; }
-    if (!ref || !(ref.p > 0)) continue; const fx = fxRate(i.ccy) ?? 1; d1 += p.qty * (i.price - ref.p) * fx; v0 += p.qty * ref.p * fx; n++; }
+    if (!ref || !(ref.p > 0) || daysSince(ref.d) > 5) continue; const fx = fxRate(i.ccy) ?? 1; d1 += p.qty * (i.price - ref.p) * fx; v0 += p.qty * ref.p * fx; n++; }
   return n && v0 > 0 ? { abs: d1, pct: d1 / v0 } : null;
 }
 function dayTag(a) {          // in alto a destra del riquadro: la giornata del conto in % (verde se positiva, rosso se negativa)
@@ -3999,6 +4001,11 @@ function accForecast(a, v0, cash) {          // stima: quanto potrebbe valere tr
 function fermoTiles(a) {          // conti fermi (banca, contanti, carte): niente rendimento, che non c'entra: solo il valore
   return [{ l: 'Valore', v: eur(accValue(a)), s: a.upd ? 'aggiornato il ' + fmtDate(a.upd) : '', x: () => ({ kind: a.name, num: accValue(a), say: 'Quanto c\x27è oggi su questo conto. Lo aggiorni con "Aggiorna saldi" o da "Modifica conto"; si muove da solo quando registri spostamenti e acquisti.' }) }];
 }
+function setAccountTotal(a) {          // il valore TOTALE di oggi (non quanto hai aggiunto): la differenza e' guadagno o perdita, non un versamento
+  const cfx = fxRate(a.cashCcy) ?? 1;
+  form('Valore di ' + a.name, [{ key: 'v', label: 'Quanto vale oggi, in totale (' + (a.cashCcy || 'EUR') + ')', type: 'number', req: true, hint: 'Scrivi il valore TOTALE di adesso, non quanto hai aggiunto. La differenza rispetto a prima conta come guadagno o perdita, non come versamento.' }], { v: Math.round(accValue(a) / cfx * 100) / 100 }, o => {
+    if (!(o.v >= 0)) return 'Scrivi un valore valido.'; const before = accValue(a); a.cash = o.v; a.upd = today(); takeSnapshot(); done(); setStatus(a.name + ': da ' + eur(before, true) + ' a ' + eur(accValue(a), true)); });
+}
 function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
@@ -4006,7 +4013,7 @@ function viewAccount(id) {
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
-  if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
+  if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   accCharts(a).forEach(c => c && el.append(c));          // grafici del conto: andamento, composizione, entrate e uscite, stima futura
@@ -4382,7 +4389,8 @@ function aiCard() {
     h('p', { class: 'muted' }, 'Senza AI l\'app capisce già le frasi semplici ("Scrivi cosa è successo"). Con una chiave gratuita di Google Gemini capisce anche frasi più libere e può leggere uno screenshot del conto.'),
     h('p', { class: 'muted' }, 'Privacy: all\'AI vanno solo la frase che scrivi (con i nomi dei tuoi conti) o l\'immagine che scegli tu. Non parte mai niente da solo. Nel piano gratuito Google può usare questi dati per migliorare i suoi servizi: non mandare screenshot con dati personali che non vuoi condividere. La lettura degli screenshot è sperimentale: controlla sempre il riepilogo.'),
     h('p', null, h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener' }, 'Prendi la chiave gratuita su aistudio.google.com/apikey')),
-    h('label', { class: 'fld' }, h('span', null, 'Chiave AI'), h('input', { type: 'password', value: key, placeholder: 'incolla qui la chiave', autocomplete: 'off', onchange: e => { S.settings.aiKey = e.target.value.trim(); done(); } })),
+    h('label', { class: 'fld' }, h('span', null, 'Chiave AI'), h('input', { type: 'password', id: 'aikey', value: key, placeholder: 'incolla qui la chiave', autocomplete: 'off', onchange: e => { S.settings.aiKey = e.target.value.trim(); done(); } })),
+    h('div', { class: 'row' }, btn('Salva chiave', () => { const v = ((document.getElementById('aikey') || {}).value || '').trim(); if (!v) { alert('Incolla prima la chiave nel campo.'); return; } S.settings.aiKey = v; done(); setStatus('Chiave AI salvata'); }, 'pri sm'), h('span', { class: 'muted' }, key ? '✓ Chiave salvata (resta nei tuoi dati cifrati)' : 'Nessuna chiave salvata')),
     h('div', { class: 'row' }, key ? btn('Leggi le operazioni da uno screenshot…', aiOpsStart, 'pri') : null, key ? btn('Leggi i saldi da uno screenshot…', aiScreenshot) : null, key ? btn('Togli la chiave', () => { delete S.settings.aiKey; done(); }) : null));
 }
 /* ============ operazioni da uno screenshot (AI): si controlla riga per riga prima di registrare ============ */

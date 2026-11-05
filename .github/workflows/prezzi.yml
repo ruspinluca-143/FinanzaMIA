@@ -1,7 +1,7 @@
 name: Prezzi e pubblicazione
 on:
   schedule:
-    - cron: '23 5,7 * * *'
+    - cron: '23 5,7,11 * * *'
     - cron: '53 16,18,20 * * *'
   workflow_dispatch:
   push:
