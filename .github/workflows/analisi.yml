@@ -43,5 +43,11 @@ jobs:
           git add site/analisi.json
           if git diff --cached --quiet; then echo "Niente di nuovo da salvare."; exit 0; fi
           git commit -m "Analisi del $(date -u '+%Y-%m-%d') (cloud)"
-          for i in 1 2 3 4; do git pull --rebase -X theirs origin main && git push && break; sleep $((i*20)); done
+          git checkout -- .          # i file letti da raccogli-mercati cambiano solo qui sul server: si buttano, altrimenti il pull --rebase si rifiuta
+          ok=0
+          for i in 1 2 3 4; do
+            if git pull --rebase -X theirs origin main && git push; then ok=1; break; fi
+            sleep $((i*20))
+          done
+          if [ "$ok" != 1 ]; then echo "Non sono riuscito a salvare l'analisi su GitHub."; exit 1; fi
           gh workflow run prezzi.yml --ref main
