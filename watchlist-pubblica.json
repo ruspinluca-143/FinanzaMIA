@@ -79,6 +79,7 @@
     {"nome":"Vanguard S&P 500 UCITS ETF (USD) Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFMXXD54","tipo":"FUND","onvista":"151023875"},
     {"nome":"Invesco EQQQ NASDAQ-100 UCITS ETF Acc","classe":"Azioni","fonte":"onvista","id":"IE00BFZXGZ54","tipo":"FUND","onvista":"143547251"},
     {"nome":"iShares NASDAQ 100 UCITS ETF EUR Hedged (Acc)","classe":"Azioni","fonte":"onvista","id":"IE00BYVQ9F29","tipo":"FUND","onvista":"141569521"},
-    {"nome":"Amundi Nasdaq-100 UCITS ETF Acc","classe":"Azioni","fonte":"onvista","id":"LU1681038243","tipo":"FUND","onvista":"129545851"}
+    {"nome":"Amundi Nasdaq-100 UCITS ETF Acc","classe":"Azioni","fonte":"onvista","id":"LU1681038243","tipo":"FUND","onvista":"129545851"},
+    {"nome":"Leonardo SpA","classe":"Azioni","fonte":"onvista","id":"IT0003856405","tipo":"STOCK","onvista":"12547456"}
   ]
 }
