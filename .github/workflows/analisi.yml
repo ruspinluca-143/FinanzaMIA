@@ -4,6 +4,11 @@ on:
     - cron: '40 6 * * *'
     - cron: '40 9 * * *'
   workflow_dispatch:
+    inputs:
+      forza:
+        description: "Riscrivi l'analisi anche se quella di oggi c'e' gia'"
+        type: boolean
+        default: false
 permissions:
   contents: write
   actions: write
@@ -25,7 +30,10 @@ jobs:
         shell: pwsh
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
-        run: ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json
+          FORZA: ${{ inputs.forza }}
+        run: |
+          if ($env:FORZA -eq 'true') { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json -Forza }
+          else { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json }
       - name: Salva l'analisi e pubblica il sito
         env:
           GH_TOKEN: ${{ github.token }}
