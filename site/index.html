@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-P3q1LjLW6f6xgGpOdISyQPu+6Nerufo4h6/0XDJMMwU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jfOkgCDESv9TovL/k+76oAB4cze3wLwR6RZ7Pa+hy3k='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1283,9 +1283,9 @@ let PAC_UI = null;
 let UNDO = null;
 function undoMark(msg) { if (S && /elimin|cancell|annull|togli|rimuov/i.test(String(msg))) { try { UNDO = { json: JSON.stringify(S), t: Date.now() }; } catch { UNDO = null; } } }          // appena confermi un'eliminazione si ricorda com'erano i dati un attimo prima
 window.confirm = (m => msg => { const ok = m(msg); if (ok) undoMark(msg); return ok; })(window.confirm.bind(window));
-function undoToast() {          // per 10 secondi dopo l'eliminazione compare "Annulla": riporta tutto com'era
+function undoToast() {          // per 5 secondi dopo l'eliminazione compare "Annulla": riporta tutto com'era
   if (!UNDO || Date.now() - UNDO.t > 4000) return; const u = UNDO; UNDO = null; document.querySelectorAll('.undo-toast').forEach(x => x.remove());
-  let n = 10; const b = h('button', { type: 'button', class: 'btn pri sm' }, 'Annulla (10)'), bar = h('div', { class: 'undo-toast', role: 'status' }, h('span', null, 'Eliminato.'), b);
+  let n = 5; const b = h('button', { type: 'button', class: 'btn pri sm' }, 'Annulla (5)'), bar = h('div', { class: 'undo-toast', role: 'status' }, h('span', null, 'Eliminato.'), b);
   const tick = setInterval(() => { n--; if (n <= 0) { clearInterval(tick); bar.remove(); } else b.textContent = 'Annulla (' + n + ')'; }, 1000);
   b.onclick = () => { clearInterval(tick); bar.remove(); S = JSON.parse(u.json); migrate(S); if (UI.acc && !S.accounts.some(x => x.id === UI.acc)) UI.acc = null; if (UI.planId && !(S.plans || []).some(x => x.id === UI.planId)) UI.planId = null; touch(); render(); if (PAC_UI) PAC_UI(); setStatus('Ripristinato'); };
   document.body.append(bar);
@@ -3562,7 +3562,7 @@ function render() {
   else {
     const vk = UI.tab + '|' + (UI.acc || '') + (UI.planId || '') + (UI.fondo || '') + '|' + (UI.tab === 'analisi' ? UI.sub || '' : UI.tab === 'piano' ? UI.psub || '' : ''), fresh = vk !== LASTVIEW; LASTVIEW = vk;      // l'ingresso animato parte solo quando cambia scheda, non a ogni modifica
     $app.replaceChildren(h('main', { class: 'wrap' + (fresh ? ' enter' : '') }, topbar(), unsavedBar(), newVerBar(), tabsBar(), h('div', { class: 'view' }, content())));
-    window.scrollTo(0, y); afterRender();
+    window.scrollTo(0, fresh ? 0 : y); afterRender();          // cambiando schermata (es. apri un conto) si parte dall'inizio, non da meta'
   }
 }
 window.addEventListener('hashchange', () => { const k = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash]; if (k && S && !LOCKED) { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } });          // i collegamenti delle notifiche (sito/#pac) aprono la scheda giusta
@@ -4342,14 +4342,22 @@ function runSentence(p, text) {
   shutAll(); opWizard(Object.assign({ _wz: 1 }, p), null); return '';
 }
 function shutAll() { document.querySelectorAll('dialog.wz').forEach(d => { try { d.close(); } catch (e) { } d.remove(); }); }
+const AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];          // se uno e' sovraccarico (503) o non risponde si passa al successivo
 async function aiAsk(parts, sys) {
   const key = (S.settings || {}).aiKey; if (!key) throw new Error('Manca la chiave AI (Dati e sicurezza).');
-  const r = await fetch(AI_HOST + '/v1beta/models/gemini-flash-latest:generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json' } }) });
-  if (!r.ok) throw new Error('L\'AI ha risposto con errore ' + r.status + (r.status === 429 ? ' (limite gratuito raggiunto: riprova tra poco)' : ''));
-  const j = await r.json(), t = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
-  if (!t) throw new Error('L\'AI non ha dato una risposta utile.'); return JSON.parse(t);
-}
-async function aiSentence(text) {          // all'AI vanno SOLO la frase e i nomi dei conti: nessun importo, nessuna posizione
+  const body = JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json' } });
+  let last = '', limit = false;
+  for (const m of AI_MODELS) {
+    let r; try { r = await fetch(AI_HOST + '/v1beta/models/' + m + ':generateContent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body }); } catch (e) { last = 'rete'; continue; }          // "Load failed": il server sovraccarico a volte chiude senza risposta
+    if (r.status === 400 || r.status === 401 || r.status === 403) throw new Error('L\'AI ha rifiutato la richiesta (errore ' + r.status + '): controlla la chiave in Dati e sicurezza.');
+    if (!r.ok) { last = r.status; if (r.status === 429) limit = true; continue; }
+    let j; try { j = await r.json(); } catch (e) { last = 'risposta'; continue; }
+    const t = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
+    if (!t) { last = 'vuota'; continue; }
+    try { return JSON.parse(t); } catch (e) { last = 'formato'; }
+  }
+  throw new Error('L\'AI è troppo affollata in questo momento (' + AI_MODELS.length + ' modelli provati, ultimo errore: ' + last + ')' + (limit ? ': limite gratuito raggiunto' : '') + '. Riprova tra qualche minuto.');
+}async function aiSentence(text) {          // all'AI vanno SOLO la frase e i nomi dei conti: nessun importo, nessuna posizione
   const j = await aiAsk([{ text }], 'Estrai da una frase in italiano una operazione finanziaria. Rispondi SOLO con JSON: {"kind":"acquisto|vendita|versamento|prelievo|trasferimento|null","account":"nome del conto o null","toAccount":"conto di destinazione o null","instrument":"nome o ISIN dello strumento o null","eur":numero o null,"qty":numero o null}. Conti possibili: ' + S.accounts.map(a => a.name).join(', '));
   const f = n => { if (!n) return null; const q = normT(n); return S.accounts.find(a => normT(a.name) === q) || S.accounts.find(a => normT(a.name).includes(q) || q.includes(normT(a.name))) || null; };
   const out = {}; if (OP_FLOW[j.kind]) out.kind = j.kind; const a = f(j.account), b = f(j.toAccount); if (a) out.accId = a.id; if (b) out.toId = b.id;
