@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gLNl7knfLlzEtj0g6gbUZkevgZQzzjgDPj7fZzgisiM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-da8F//fUoFvKy4xnbWv3I2s2201dGIy9dAtb4POctNw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -201,6 +201,22 @@ dialog.wz{max-width:520px;padding:18px 18px 16px}
 .wz-search,.wz-num{width:100%;font:inherit;font-size:18px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--ring);background:var(--card-s);color:var(--ink)}
 .wz-num{font-size:30px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
 .wz-search:focus,.wz-num:focus{border-color:var(--s1);outline:none}
+.ops-q{font-size:15px;padding:10px 14px;border-radius:14px;margin:4px 0 2px}
+.pl-card{padding:6px 14px 10px}
+.pl-grp{margin-top:10px}.pl-grp:first-child{margin-top:4px}
+.pl-head{display:flex;align-items:center;gap:8px;padding:4px 0 6px}
+.pl-head h3{margin:0;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--gc,var(--s1));box-shadow:0 0 0 4px color-mix(in srgb,var(--gc,var(--s1)) 22%,transparent)}
+.pl-pm{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.pl-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--ring);cursor:pointer}
+.pl-row .ac-ico{width:32px;height:32px;border-radius:10px;color:var(--gc,var(--s1));background:color-mix(in srgb,var(--gc,var(--s1)) 14%,transparent)}
+.pl-main{flex:1;min-width:0}
+.pl-t{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-r{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.pl-a{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.pl-r .pill{font-size:11.5px;padding:1px 8px}
+.pacfil{margin-top:10px}.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.pf-row .fld{margin:0}.pf-sel select{width:100%}
 .wz-res{display:grid;gap:8px}
 .wz-chip{padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 8%,transparent);display:grid;gap:2px}
 .wz-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -3925,14 +3941,22 @@ function opsCard() {          // in fondo ai conti: le ultime operazioni registr
   const all = OPS().slice().reverse(), accF = UI.opsAcc || '', lim = UI.opsAll ? 300 : 12;
   const sec = h('section', { class: 'card' }, h('h2', null, 'Operazioni'));
   if (!all.length) { sec.append(h('p', { class: 'muted' }, 'Nessuna operazione registrata: con "+ Operazione" registri acquisti, vendite, versamenti e trasferimenti, e qui li ritrovi.'), btn('+ Operazione', () => editOperation({}), 'pri sm')); return sec; }
-  const ids = [...new Set(all.flatMap(x => [x.accId, x.toId]).filter(Boolean))].filter(id => S.accounts.some(a => a.id === id)), list = all.filter(x => !accF || x.accId === accF || x.toId === accF);
-  sec.append(h('p', { class: 'muted' }, 'Le ultime operazioni fatte, dalla più recente. Tocca il nome per i dettagli o per annullarla.'),
-    h('div', { class: 'row' }, h('label', { class: 'fld', style: 'margin:0;flex:1;min-width:150px' }, h('span', null, 'Conto'), h('select', { onchange: e => { UI.opsAcc = e.target.value; render(); } }, [h('option', { value: '' }, 'Tutti i conti'), ...ids.map(id => h('option', { value: id, selected: accF === id }, accName(id)))])), btn('+ Operazione', () => editOperation({}), 'pri sm')),
-    table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim).map(x => [fmtDate(x.date), lnk(OP_LABEL[x.kind] || x.kind, () => talkOp(x)), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), 'Nessuna operazione per questo conto.'));
-  if (list.length > 12) sec.append(btn(UI.opsAll ? 'Mostra solo le ultime 12' : 'Mostra tutte (' + list.length + ')', () => { UI.opsAll = !UI.opsAll; render(); }, 'sm'));
+  const ids = [...new Set(all.flatMap(x => [x.accId, x.toId]).filter(Boolean))].filter(id => S.accounts.some(a => a.id === id)), byAcc = all.filter(x => !accF || x.accId === accF || x.toId === accF);
+  const hay = x => normT([x.date, fmtDate(x.date), OP_LABEL[x.kind] || x.kind, accName(x.accId), x.toId ? accName(x.toId) : '', x.instName || '', x.note || '', String(x.gross != null ? x.gross : x.amount).replace('.', ','), String(x.gross != null ? x.gross : x.amount)].join(' '));
+  const wrap = h('div'), cnt = h('p', { class: 'muted cq-n' });
+  const draw = () => {          // si ridisegna solo la tabella, cosi' la tastiera resta aperta mentre scrivi
+    const toks = normT(UI.opsQ || '').split(' ').filter(Boolean), list = toks.length ? byAcc.filter(x => { const s2 = hay(x); return toks.every(t => s2.includes(t)); }) : byAcc, lim2 = toks.length || UI.opsAll ? 300 : 12;
+    cnt.textContent = toks.length ? pl(list.length, 'operazione trovata', 'operazioni trovate') : '';
+    wrap.replaceChildren(table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim2).map(x => [fmtDate(x.date), lnk(OP_LABEL[x.kind] || x.kind, () => talkOp(x)), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), toks.length ? 'Nessuna operazione corrisponde: prova con meno parole.' : 'Nessuna operazione per questo conto.'));
+    if (!toks.length && list.length > 12) wrap.append(btn(UI.opsAll ? 'Mostra solo le ultime 12' : 'Mostra tutte (' + list.length + ')', () => { UI.opsAll = !UI.opsAll; render(); }, 'sm'));
+  };
+  const q = h('input', { type: 'search', class: 'wz-search ops-q', placeholder: 'Cerca: conto, titolo, tipo, data o importo (es. trade republic, 188, trasferimento)', value: UI.opsQ || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra le operazioni' });
+  q.addEventListener('input', () => { UI.opsQ = q.value; draw(); });
+  sec.append(h('p', { class: 'muted' }, 'Le ultime operazioni fatte, dalla più recente. Scrivi qui sotto per cercare, tocca il nome per i dettagli o per annullarla.'), q, cnt,
+    h('div', { class: 'row' }, h('label', { class: 'fld', style: 'margin:0;flex:1;min-width:150px' }, h('span', null, 'Conto'), h('select', { onchange: e => { UI.opsAcc = e.target.value; render(); } }, [h('option', { value: '' }, 'Tutti i conti'), ...ids.map(id => h('option', { value: id, selected: accF === id }, accName(id)))])), btn('+ Operazione', () => editOperation({}), 'pri sm')), wrap);
+  draw();
   return sec;
-}
-function pianoCard() {          // sotto i conti: quanto entra, quanto esce, quanto ti resta e dove potrebbe arrivare il patrimonio
+}function pianoCard() {          // sotto i conti: quanto entra, quanto esce, quanto ti resta e dove potrebbe arrivare il patrimonio
   const B = BG(), F = planFlows(12), s12 = a => { let t = 0; for (let m = 1; m <= 12; m++) t += a[m]; return t; }, inc = s12(F.inc) / 12, exp = s12(F.exp) / 12, pac = s12(F.pac) / 12, left = inc - exp - pac, has = B.items.length > 0 || PL().length > 0, open = !!UI.pvOpen;
   const sec = h('section', { class: 'card' }, h('h2', null, 'Piano e previsioni'));
   if (has) sec.append(tiles([{ l: 'Entrate al mese', v: eur(inc), s: 'media dei prossimi 12 mesi' }, { l: 'Spese al mese', v: eur(exp), s: 'annuali e trimestrali spalmate' }, { l: 'Acquisti programmati al mese', v: eur(pac), s: 'verso gli investimenti' }, { l: 'Ti resta al mese', v: h('span', { class: 'pill ' + (left < 0 ? 'dn' : 'up') }, eur(left)), s: left < 0 ? 'spendi più di quanto entra' : 'si accumula come liquidità' }]));
@@ -4905,26 +4929,22 @@ const planIco = () => s('svg', { viewBox: '0 0 24 24', width: 17, height: 17, fi
 const planMonthly = p => p.amount / freqMonths(p.freq);
 const planShort = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) : '';
 function openPlan(p, inDialog) { UI.planId = p.id; UI.tab = 'pac'; if (inDialog) inDialog(); render(); window.scrollTo(0, 0); }
-function planCard(p, accMonthly, isDue, k, inDialog) {
+function planRow(p, isDue, inDialog) {          // una riga compatta: nome e che cosa compra a sinistra, importo e stato a destra
   const nx = planNext(p, 1)[0], n = p.parts && p.parts.length ? p.parts.length : 0, i = p.instId ? inst(p.instId) : null;
   const what = n ? pl(n, 'strumento', 'strumenti') + ': ' + p.parts.slice(0, 3).map(x => (x.instId && inst(x.instId) ? inst(x.instId).name : x.instName || x.instCode || '?').replace(/\s*(UCITS|ETF|Inc\.?|S\.p\.A\.?).*$/i, '')).join(', ') + (n > 3 ? '…' : '') : (i ? i.name : p.instName || 'Versamento');
-  return h('div', { class: 'acard', role: 'button', tabindex: '0', style: '--i:' + k, onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); openPlan(p, inDialog); }, onkeydown: e => { if (e.key === 'Enter') openPlan(p, inDialog); } },
-    h('div', { class: 'ac-top' }, h('span', { class: 'ac-ico' }, planIco()), h('span', { class: 'ac-tag' }, freqLabel(p.freq).replace('Ogni ', 'ogni ').replace('ogni mese', 'mensile'))),
-    h('div', { class: 'ac-name', title: p.label }, p.label),
-    h('div', { class: 'ac-val' }, eur(p.amount)),
-    h('div', null, h('span', { class: 'pill ' + (isDue ? 'dn' : 'up') }, isDue ? 'da confermare' : nx ? 'prossimo ' + planShort(nx) : 'finito')),
-    h('div', { class: 'ac-sub', title: what }, what),
-    h('div', { class: 'ac-bar' }, h('i', { style: '--w:' + (accMonthly > 0 ? Math.max(3, planMonthly(p) / accMonthly * 100) : 0).toFixed(1) + '%' })));
+  return h('div', { class: 'pl-row', role: 'button', tabindex: '0', onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); openPlan(p, inDialog); }, onkeydown: e => { if (e.key === 'Enter') openPlan(p, inDialog); } },
+    h('span', { class: 'ac-ico' }, planIco()),
+    h('div', { class: 'pl-main' }, h('div', { class: 'pl-t', title: p.label }, p.label), h('div', { class: 'pl-s', title: what }, freqLabel(p.freq).replace('Ogni ', 'ogni ').replace('ogni mese', 'mensile') + ' · ' + what)),
+    h('div', { class: 'pl-r' }, h('div', { class: 'pl-a' }, eur(p.amount)), h('span', { class: 'pill ' + (isDue ? 'dn' : 'up') }, isDue ? 'da confermare' : nx ? planShort(nx) : 'finito')));
 }
-function planCards(plans, inDialog) {
+function planCards(plans, inDialog) {          // una sola scheda, un blocco per conto (nome, quanto al mese) e sotto le righe dei suoi PAC in ordine di data
   if (!plans.length) return null; const ids = [...new Set(plans.map(p => p.accId))].sort((a, b) => S.accounts.findIndex(x => x.id === a) - S.accounts.findIndex(x => x.id === b));
-  const tot = plans.reduce((t, p) => t + planMonthly(p), 0), due = new Set(planDueAll().map(x => x.p.id)); let k = 0;
-  return h('div', { class: 'conti pacv' }, ids.map((id, gi) => { const list = plans.filter(p => p.accId === id).sort((a, b) => (planNext(a, 1)[0] || '9') < (planNext(b, 1)[0] || '9') ? -1 : 1), pm = list.reduce((t, p) => t + planMonthly(p), 0), share = tot > 0 ? pm / tot : 0;
-    return h('section', { class: 'grp g-c' + (gi % 6) },
-      h('div', { class: 'grp-head' }, h('div', { class: 'grp-t' }, h('h2', null, accName(id)), h('span', { class: 'grp-n' }, eur(pm) + ' /mese'), h('span', { class: 'grp-p' }, pct(share))), h('div', { class: 'grp-bar' }, h('i', { style: '--w:' + (share * 100).toFixed(1) + '%' }))),
-      h('div', { class: 'acards' }, list.map(p => planCard(p, pm, due.has(p.id), k++, inDialog)))); }));
-}
-function viewPlan(id) {
+  const tot = plans.reduce((t, p) => t + planMonthly(p), 0), due = new Set(planDueAll().map(x => x.p.id));
+  return h('section', { class: 'card pacv pl-card' }, ids.map((id, gi) => { const list = plans.filter(p => p.accId === id).sort((a, b) => (planNext(a, 1)[0] || '9') < (planNext(b, 1)[0] || '9') ? -1 : 1), pm = list.reduce((t, p) => t + planMonthly(p), 0), share = tot > 0 ? pm / tot : 0;
+    return h('div', { class: 'pl-grp g-c' + (gi % 6) },
+      h('div', { class: 'pl-head' }, h('span', { class: 'pl-dot' }), h('h3', null, accName(id)), h('span', { class: 'pl-pm' }, eur(pm) + ' /mese · ' + pct(share))),
+      list.map(p => planRow(p, due.has(p.id), inDialog))); }));
+}function viewPlan(id) {
   const p = PL().find(x => x.id === id); if (!p) { UI.planId = null; return tabPac(); }
   const el = h('div'), nxt = planNext(p, 6), monthly = planMonthly(p), delPlan = () => { if (confirm('Eliminare "' + p.label + '"? Le operazioni già registrate restano.')) { S.plans = PL().filter(x => x !== p); UI.planId = null; done(); } };
   el.append(h('div', { class: 'row' }, btn('← Tutti i PAC', () => { UI.planId = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, p.label), btn('Modifica', () => editPlan(p), 'pri'), btn('Elimina', delPlan, 'danger')),
@@ -4935,22 +4955,25 @@ function viewPlan(id) {
   el.append(h('section', { class: 'card' }, h('h2', null, 'Prossime date'), nxt.length ? h('ul', { class: 'list' }, nxt.map(d => h('li', null, h('span', null, fmtDate(d)), h('span', null, eur(p.amount))))) : h('p', { class: 'muted' }, 'Nessuna data futura: il PAC è finito.')));
   return el;
 }
-function pacFilters(plans) {          // filtri della scheda PAC: per conto e per data della prossima scadenza
-  if (plans.length < 2) return null; const accs = [...new Set(plans.map(p => p.accId))];
-  const row = (arr, cur, set, lab) => h('div', { class: 'chips', role: 'group', 'aria-label': lab }, arr.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': cur === k ? 'true' : 'false', onclick: () => { set(k); render(); } }, l)));
-  return h('div', { class: 'pacfil' }, accs.length > 1 ? row([['', 'Tutti i conti'], ...accs.map(id => [id, accName(id)])], UI.pacAcc || '', k => { UI.pacAcc = k; }, 'Conto') : null,
-    row([['tutte', 'Tutte le date'], ['conferma', 'Da confermare'], ['7', 'Prossimi 7 giorni'], ['30', 'Prossimi 30 giorni'], ['mese', 'Questo mese']], UI.pacWhen || 'tutte', k => { UI.pacWhen = k; }, 'Quando'));
+function pacFilters(plans, redraw) {          // ricerca per parole + due menu (conto e scadenza), tutto su una riga: la tastiera resta aperta mentre scrivi
+  if (!plans.length) return null; const accs = [...new Set(plans.map(p => p.accId))];
+  const q = h('input', { type: 'search', class: 'wz-search ops-q', placeholder: 'Cerca un PAC: nome, conto, titolo, importo…', value: UI.pacQ || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra i PAC' });
+  q.addEventListener('input', () => { UI.pacQ = q.value; redraw(); });
+  const sel = (lab, arr, cur, set) => h('label', { class: 'fld pf-sel' }, h('span', null, lab), h('select', { onchange: e => { set(e.target.value); render(); } }, arr.map(([k, l]) => h('option', { value: k, selected: cur === k }, l))));
+  return h('div', { class: 'pacfil' }, q, plans.length < 2 ? null : h('div', { class: 'pf-row' }, accs.length > 1 ? sel('Conto', [['', 'Tutti i conti'], ...accs.map(id => [id, accName(id)])], UI.pacAcc || '', k => { UI.pacAcc = k; }) : null,
+    sel('Quando', [['tutte', 'Tutte le date'], ['conferma', 'Da confermare'], ['7', 'Prossimi 7 giorni'], ['30', 'Prossimi 30 giorni'], ['mese', 'Questo mese']], UI.pacWhen || 'tutte', k => { UI.pacWhen = k; })));
 }
 function pacFilter(plans) {
-  const acc = UI.pacAcc || '', w = UI.pacWhen || 'tutte', due = new Set(planDueAll().map(x => x.p.id)), end = w === '7' || w === '30' ? ymd(new Date(Date.now() + +w * 864e5)) : w === 'mese' ? today().slice(0, 7) + '-31' : '';
-  return plans.filter(p => (!acc || p.accId === acc) && (w === 'tutte' || (w === 'conferma' ? due.has(p.id) : (nx => !!nx && nx <= end)(planNext(p, 1)[0]))));
-}
-function tabPac() {
+  const acc = UI.pacAcc || '', w = UI.pacWhen || 'tutte', toks = normT(UI.pacQ || '').split(' ').filter(Boolean), due = new Set(planDueAll().map(x => x.p.id)), end = w === '7' || w === '30' ? ymd(new Date(Date.now() + +w * 864e5)) : w === 'mese' ? today().slice(0, 7) + '-31' : '';
+  const hay = p => normT([p.label, accName(p.accId), p.fromAccId ? accName(p.fromAccId) : '', partsText(p), p.note || '', freqLabel(p.freq), String(p.amount).replace('.', ','), String(p.amount)].join(' '));
+  return plans.filter(p => (!acc || p.accId === acc) && (w === 'tutte' || (w === 'conferma' ? due.has(p.id) : (nx => !!nx && nx <= end)(planNext(p, 1)[0]))) && (!toks.length || (s2 => toks.every(t => s2.includes(t)))(hay(p))));
+}function tabPac() {
   if (UI.planId) return viewPlan(UI.planId);
-  const plans = PL(), pm = plans.reduce((t, p) => t + planMonthly(p), 0), due = planDueAll(), el = h('div');
+  const plans = PL(), pm = plans.reduce((t, p) => t + planMonthly(p), 0), due = planDueAll(), el = h('div'), wrap = h('div');
+  const drawL = () => wrap.replaceChildren(planCards(pacFilter(plans), null) || (plans.length ? h('p', { class: 'muted' }, 'Nessun PAC corrisponde: prova con meno parole o con Tutte le date e Tutti i conti.') : h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.')));
   el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'I tuoi PAC'), h('div', { class: 'ch-n' }, eur(pm) + ' /mese'), h('div', { class: 'muted' }, plans.length ? pl(plans.length, 'PAC', 'PAC') + ' · ' + eur(pm * 12) + ' in un anno · tocca un PAC per aprirlo' : 'Ancora nessun PAC'))),
-    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null), pacFilters(plans)));
-  el.append(planCards(pacFilter(plans), null) || (plans.length ? h('p', { class: 'muted' }, 'Nessun PAC con questi filtri: prova con Tutte le date o Tutti i conti.') : h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.')));
+    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null), pacFilters(plans, drawL)));
+  el.append(wrap); drawL();
   { const fc = fromCard(plans); if (fc) el.append(fc); }
   el.append(pacRibilancia());
   return el;
