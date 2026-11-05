@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-da8F//fUoFvKy4xnbWv3I2s2201dGIy9dAtb4POctNw='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Cvj5L4/lLbQ480YcL4sE/Jcdd9xx7gIB6vH4u+DnwEU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -923,8 +923,9 @@ function clChoose(D, r) {          // due versioni diverse dei dati: si sceglie 
   const nL = S ? S.accounts.length : 0, nR = D.accounts.length;
   if (!nR && nL) return 'local'; if (!nL) return CL.wiped ? 'local' : 'remote';          // archivio vuoto: vince quello online, tranne se l'hai appena svuotato tu
   if (clCore(S) === clCore(D)) return 'remote';          // se cambiano solo prezzi, snapshot e simili (cose che l'app aggiorna da sola) non si disturba nessuno: vince quella online, i prezzi si riscaricano
-  const keep = S; S = D; const tR = totalValue(); S = keep; const tL = totalValue();
-  return confirm('Ci sono due versioni dei tuoi dati.\n\nOnline (salvata il ' + clHm(r.quando) + '): ' + pl(nR, 'conto', 'conti') + ', ' + eur(tR) + '.\nSu questo dispositivo: ' + pl(nL, 'conto', 'conti') + ', ' + eur(tL) + '.\n\nOK = tengo quella online.\nAnnulla = tengo quella di questo dispositivo e la metto online.') ? 'remote' : 'local';
+  const pick = CL.pending ? 'local' : nR >= nL ? 'remote' : 'local';          // nessuna domanda: se hai modifiche non ancora online vincono le tue, altrimenti i dati online (o quelli con piu' conti)
+  try { setStatus(pick === 'local' ? 'Dati diversi online e qui: tengo le modifiche di questo dispositivo' : 'Dati diversi online e qui: tengo quelli online'); } catch (e) { }
+  return pick;
 }
 async function clMerge(r) {          // r = risposta di finanze_leggi: si decide se scaricare i dati online o caricare quelli di qui
   if (!r || !r.ok) return clFail(r);
