@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lAea31k1V70VzPfSf3n1lTEW035SWqn7eBMl11XTlbY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MWXyDQ+hBNnF0s0c815XTl3evZ/ZRRhJIehpOJhez2k='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -551,6 +551,9 @@ dialog.frm form{padding:0 16px 14px}
 .cl-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--grid);cursor:pointer}.cl-row:last-child{border-bottom:0}
 .cl-i{flex:none;width:18px;font-size:12px;color:var(--muted);text-align:center}.cl-n{flex:1;min-width:0}.cl-n b{display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cl-n small,.cl-v small{color:var(--muted);font-size:11.5px}
 .cl-sp{flex:none;width:72px}.clspark{width:72px;height:28px;display:block}.clspark.big{width:100%;height:80px}.cl-v{flex:none;text-align:right;min-width:78px;display:grid;justify-items:end;gap:2px}
+.acc-h{margin:10px 0 8px}
+.acc-acts{display:flex;gap:8px;flex-wrap:nowrap;margin-bottom:8px}.acc-acts .btn{flex:1;white-space:nowrap;padding:8px 6px;font-size:13px;text-align:center}
+.undo-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:250;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 16px;border-radius:99px;background:var(--ink);color:var(--bg);box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:14px;font-weight:600;animation:rise .3s var(--ease) both}
 .g-c0{--gc:#0a84ff}.g-c1{--gc:#ff9f0a}.g-c2{--gc:#30b0c7}.g-c3{--gc:#bf5af2}.g-c4{--gc:#30d158}.g-c5{--gc:#ff375f}
 .ac-desc{font-size:11.5px;line-height:1.3;color:var(--muted);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .anv .acard{aspect-ratio:auto;min-height:112px}
@@ -1275,7 +1278,17 @@ function suggestPass() {          // 10 sillabe pronunciabili (consonante + voca
 const ccyList = () => h('datalist', { id: 'dl-ccy' }, ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD'].map(c => h('option', { value: c })));
 const normCcy = c => (String(c || 'EUR').trim().toUpperCase().slice(0, 3)) || 'EUR';
 let PAC_UI = null;
-const done = () => { touch(); render(); if (PAC_UI) PAC_UI(); };
+let UNDO = null;
+function undoMark(msg) { if (S && /elimin|cancell|annull|togli|rimuov/i.test(String(msg))) { try { UNDO = { json: JSON.stringify(S), t: Date.now() }; } catch { UNDO = null; } } }          // appena confermi un'eliminazione si ricorda com'erano i dati un attimo prima
+window.confirm = (m => msg => { const ok = m(msg); if (ok) undoMark(msg); return ok; })(window.confirm.bind(window));
+function undoToast() {          // per 10 secondi dopo l'eliminazione compare "Annulla": riporta tutto com'era
+  if (!UNDO || Date.now() - UNDO.t > 4000) return; const u = UNDO; UNDO = null; document.querySelectorAll('.undo-toast').forEach(x => x.remove());
+  let n = 10; const b = h('button', { type: 'button', class: 'btn pri sm' }, 'Annulla (10)'), bar = h('div', { class: 'undo-toast', role: 'status' }, h('span', null, 'Eliminato.'), b);
+  const tick = setInterval(() => { n--; if (n <= 0) { clearInterval(tick); bar.remove(); } else b.textContent = 'Annulla (' + n + ')'; }, 1000);
+  b.onclick = () => { clearInterval(tick); bar.remove(); S = JSON.parse(u.json); migrate(S); if (UI.acc && !S.accounts.some(x => x.id === UI.acc)) UI.acc = null; if (UI.planId && !(S.plans || []).some(x => x.id === UI.planId)) UI.planId = null; touch(); render(); if (PAC_UI) PAC_UI(); setStatus('Ripristinato'); };
+  document.body.append(bar);
+}
+const done = () => { touch(); render(); if (PAC_UI) PAC_UI(); undoToast(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
@@ -3944,7 +3957,7 @@ function fermoTiles(a) {          // conti fermi (banca, contanti, carte): nient
 function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
-  el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
+  el.append(h('div', null, btn('← Tutti i conti', () => { UI.acc = null; render(); })), h('h2', { class: 'acc-h' }, a.name), h('div', { class: 'acc-acts' }, btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
