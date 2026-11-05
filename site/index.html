@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CB5J5ThBZyimzikJK/ujsexxK4n9PumOdii2OG/tuJo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lAea31k1V70VzPfSf3n1lTEW035SWqn7eBMl11XTlbY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3920,7 +3920,7 @@ function tabConti() {
   const by = new Map(); for (const f of a.flows) { const k = f.date.slice(0, 7); by.set(k, (by.get(k) || 0) + f.amount * flowSign(f.type)); }
   if (by.size) { const items = []; for (let k = 11; k >= 0; k--) { const m = addMonthsStr(today().slice(0, 7) + '-01', -k).slice(0, 7), v = by.get(m) || 0; items.push({ l: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }), v, tip: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) + ': ' + seur(v) }); }
     out.push(gCard('Soldi che entrano ed escono', 'Versamenti (barre blu) e prelievi (barre rosse) di questo conto, mese per mese, negli ultimi 12 mesi.', vbars(items, { fmt: seur, label: 'Entrate e uscite per mese' })));
-  } else out.push(gCard('Soldi che entrano ed escono', 'Nessun movimento registrato in questo conto: aggiungi i versamenti da "+ Movimento" e qui compare il grafico mese per mese.'));
+  } else out.push(gCard('Soldi che entrano ed escono', 'Nessun movimento registrato in questo conto: con "+ Operazione" registri versamenti e spostamenti, e qui compare il grafico mese per mese.'));
   out.push(accForecast(a, v0, cash));
   return out;
 }
@@ -3938,22 +3938,26 @@ function accForecast(a, v0, cash) {          // stima: quanto potrebbe valere tr
     gline(ser, { fmt: eur }),
     h('p', { class: 'muted' }, 'Parto da ' + eur(v0) + ' di oggi' + (m > 0 ? ' e aggiungo circa ' + eur(m) + ' al mese (' + (pac > 0 ? 'dai tuoi PAC' : 'la media dei movimenti degli ultimi 6 mesi') + ')' : ', senza nuovi versamenti') + '. ' + (cash ? 'Un conto fermo rende poco: gli scenari sono tassi da conto deposito.' : 'Gli scenari sono rendimenti medi annui' + (xi != null ? '; "Come finora" usa il rendimento che questo conto ha avuto (' + spct(xi) + ' all\'anno)' : '') + '. Il passato non garantisce il futuro.')));
 }
+function fermoTiles(a) {          // conti fermi (banca, contanti, carte): niente rendimento, che non c'entra: solo il valore
+  return [{ l: 'Valore', v: eur(accValue(a)), s: a.upd ? 'aggiornato il ' + fmtDate(a.upd) : '', x: () => ({ kind: a.name, num: accValue(a), say: 'Quanto c\x27è oggi su questo conto. Lo aggiorni con "Aggiorna saldi" o da "Modifica conto"; si muove da solo quando registri spostamenti e acquisti.' }) }];
+}
 function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
   el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
-  el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
+  const fermo = accGroup(a) === 'fermi' && !a.positions.length;
+  if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   accCharts(a).forEach(c => c && el.append(c));          // grafici del conto: andamento, composizione, entrate e uscite, stima futura
   if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
   const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? (i.autoSrc === 'stima' ? ' ≈' : ' ⟳') : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
+  if (!fermo) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
     table([{ t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Valore', n: 1 }, { t: 'Costo di carico', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: '' }], prow, 'Nessuna posizione. La liquidità si imposta con "Modifica conto".')));
   const frow = a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).map(f => [fmtDate(f.date), (FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0], (f.type === 'prelievo' ? '−' : '') + eur(f.amount), f.note || '', rowActs(btn('Modifica', () => editFlow(a, f), 'sm'), btn('Elimina', () => delFlow(a, f), 'sm danger'))]);
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Movimenti (soldi tuoi in entrata e uscita)'), btn('+ Movimento', () => editFlow(a), 'pri')),
+  if (!fermo || a.flows.length) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Movimenti (soldi tuoi in entrata e uscita)'), btn('+ Movimento', () => editFlow(a), 'pri')),
     table([{ t: 'Data' }, { t: 'Tipo' }, { t: 'Importo', n: 1 }, { t: 'Nota' }, { t: '' }], frow, 'Nessun movimento. Se non hai lo storico, inserisci un "Valore di partenza" con la data di oggi: il rendimento conterà da qui.')));
   const mineOps = OPS().filter(x => x.accId === a.id || x.toId === a.id).slice().reverse();
   if (mineOps.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Operazioni registrate'),
@@ -3961,7 +3965,7 @@ function viewAccount(id) {
       mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), OP_LABEL[x.kind] || x.kind, x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
     h('p', { class: 'muted' }, 'Si può annullare soltanto l\'ultima operazione del conto: serve se hai sbagliato un numero.')));
   const last = a.imports && a.imports[a.imports.length - 1];
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
+  if (!fermo) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
     h('p', { class: 'muted' }, 'Estratti conto e portafoglio scaricati dal broker. Il file è letto solo in questa pagina e non viene inviato da nessuna parte. Se il tuo è in Excel (.xlsx), aprilo e salvalo come CSV.'),
     last ? h('p', { class: 'muted' }, 'Ultimo import: ' + last.file + ' (' + fmtDate(last.date) + ')') : null));
   return el;
