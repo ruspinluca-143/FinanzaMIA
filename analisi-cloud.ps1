@@ -51,8 +51,19 @@ if ($RispostaProva) { $g = Get-Content $RispostaProva -Raw -Encoding UTF8 | Conv
 else {
   $body = @{ systemInstruction = @{ parts = @(@{ text = $sys }) }; contents = @(@{ role = 'user'; parts = @(@{ text = $ctx }) }); generationConfig = @{ temperature = 0.3; responseMimeType = 'application/json' } } | ConvertTo-Json -Depth 8 -Compress
   # 503 = Gemini sovraccarico (capita): 6 tentativi con pause crescenti; dal 4o si prova il modello piu' leggero
-  $mods = @('gemini-flash-latest', 'gemini-flash-latest', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-flash-lite-latest', 'gemini-flash-latest')
-  $res = $null; for ($k = 1; $k -le $mods.Count; $k++) { try { $res = Invoke-RestMethod ('https://generativelanguage.googleapis.com/v1beta/models/' + $mods[$k - 1] + ':generateContent') -Method Post -Headers @{ 'x-goog-api-key' = $key } -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 120; break } catch { if ($k -eq $mods.Count) { throw ('Gemini non risponde: ' + ($_.Exception.Message -replace [regex]::Escape($key), '***')) }; Write-Host ('Tentativo ' + $k + ' fallito (' + ($_.Exception.Message -replace [regex]::Escape($key), '***') + '): riprovo.'); Start-Sleep -Seconds (15 * $k) } }
+  $mods = @('gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash')
+  $res = $null; for ($k = 1; $k -le $mods.Count; $k++) {
+    try { $res = Invoke-RestMethod ('https://generativelanguage.googleapis.com/v1beta/models/' + $mods[$k - 1] + ':generateContent') -Method Post -Headers @{ 'x-goog-api-key' = $key } -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 120; break }
+    catch {
+      $det = (($_.ErrorDetails.Message + '') -replace [regex]::Escape($key), '***'); if ($det.Length -gt 400) { $det = $det.Substring(0, 400) }
+      Write-Host ('Tentativo ' + $k + ' (' + $mods[$k - 1] + ') fallito: ' + ($_.Exception.Message -replace [regex]::Escape($key), '***') + ' ' + ($det -replace '\s+', ' '))
+      if ($k -eq $mods.Count) {
+        try { $ml = Invoke-RestMethod 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=100' -Headers @{ 'x-goog-api-key' = $key } -TimeoutSec 30; Write-Host ('Modelli disponibili: ' + ((@($ml.models) | Where-Object { $_.supportedGenerationMethods -contains 'generateContent' } | ForEach-Object { $_.name -replace '^models/', '' }) -join ', ')) } catch { Write-Host ('Elenco modelli non letto: ' + ($_.Exception.Message -replace [regex]::Escape($key), '***')) }
+        throw 'Gemini non risponde dopo tutti i tentativi (vedi sopra).'
+      }
+      Start-Sleep -Seconds (12 * $k)
+    }
+  }
   $txt = $res.candidates[0].content.parts[0].text; if (-not $txt) { throw 'Gemini non ha dato una risposta.' }; $g = $txt | ConvertFrom-Json
 }
 
