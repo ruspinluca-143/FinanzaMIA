@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3BsrAkItFXrHjbD2pHbxAnhBYFM/grP/pune1MisiB0='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RTcgR9Fupk14f13vvHtcwcmzBMvnbSupooSqyskQ1HM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3706,7 +3706,7 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi soldi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 const MAIN_TABS = ['panoramica', 'conti', 'pac', 'grafici', 'consigli', 'analisi', 'grandi'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; UI.planId = null; if (k === 'analisi') UI.sub = null; UI.fondo = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
@@ -4910,7 +4910,7 @@ function tabClassifiche() {
   return el;
 }
 
-/* ============ Grandi soldi: portafogli dei grandi investitori (13F) e operazioni degli insider (Form 4), dati ufficiali della SEC ============ */
+/* ============ Grandi fondi: portafogli dei grandi investitori (13F) e operazioni degli insider (Form 4), dati ufficiali della SEC ============ */
 const NF1 = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 1 });
 const usdC = n => { if (!fin(n)) return '—'; const a = Math.abs(n), sg = n < 0 ? '−' : ''; return sg + (a >= 1e9 ? NF1.format(a / 1e9) + ' mld $' : a >= 1e6 ? NF1.format(a / 1e6) + ' mln $' : a >= 1e3 ? nf0.format(a / 1e3) + ' mila $' : nf0.format(a) + ' $'); };
 const susdC = n => (n > 0 ? '+' : '') + usdC(n);
@@ -4952,12 +4952,12 @@ function talkMove(f, x, per, kind) {
     how: 'Variazione del numero di azioni tra le due fotografie, per il prezzo di fine trimestre. È una stima: dentro il trimestre il gestore può aver comprato e venduto più volte.', tip: 'Le fotografie arrivano con 1-2 mesi di ritardo.' });
 }
 function talkGrandi(G, tot) {
-  talk({ kind: 'Grandi soldi', title: 'Quanto valgono i portafogli seguiti', value: usdC(tot), num: tot, fmt: usdC, say: 'È la somma delle azioni USA in mano ai ' + G.fondi.length + ' gestori che seguo, alla fine dell\'ultimo trimestre depositato. Non è tutto il loro patrimonio: mancano obbligazioni, opzioni, posizioni corte e mercati fuori dagli USA.',
+  talk({ kind: 'Grandi fondi', title: 'Quanto valgono i portafogli seguiti', value: usdC(tot), num: tot, fmt: usdC, say: 'È la somma delle azioni USA in mano ai ' + G.fondi.length + ' gestori che seguo, alla fine dell\'ultimo trimestre depositato. Non è tutto il loro patrimonio: mancano obbligazioni, opzioni, posizioni corte e mercati fuori dagli USA.',
     rows: G.fondi.slice().sort((a, b) => b.valore - a.valore).slice(0, 10).map(f => [f.nome, f.valore, f.chi, () => { closeTalks(); UI.fondo = f.cik; render(); window.scrollTo(0, 0); }, usdC(f.valore)]), rowsTitle: 'I dieci più grandi (tocca per aprirlo)', tip: 'Tocca un quadrato per vedere cosa ha in mano e cosa ha comprato o venduto.' });
 }
 function tabGrandi() {
   const G = DATA.grandi;
-  if (!G) return h('section', { class: 'card' }, h('h2', null, 'Grandi soldi'), h('p', { class: 'muted' }, ONLINE ? 'I dati dei grandi investitori non sono ancora disponibili: il sito li aggiorna ogni giorno. Riprova tra poco.' : 'Apri l\'app dal sito per vedere i portafogli dei grandi investitori.'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null, grInfo(GR_DELAY));
+  if (!G) return h('section', { class: 'card' }, h('h2', null, 'Grandi fondi'), h('p', { class: 'muted' }, ONLINE ? 'I dati dei grandi investitori non sono ancora disponibili: il sito li aggiorna ogni giorno. Riprova tra poco.' : 'Apri l\'app dal sito per vedere i portafogli dei grandi investitori.'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null, grInfo(GR_DELAY));
   if (UI.fondo) { const f = G.fondi.find(x => x.cik === UI.fondo); if (f) return viewFondo(f, G); UI.fondo = null; }
   const sub = UI.gsub || 'fondi', tot = G.fondi.reduce((t, f) => t + f.valore, 0), el = h('div');
   const nOps = G.insider.operazioni.length;
