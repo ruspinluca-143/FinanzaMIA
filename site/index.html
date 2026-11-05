@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-HtZ2YcvubdvkFavPN2+Q1uv44uEhQDPUNSfuuYa2msM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CB5J5ThBZyimzikJK/ujsexxK4n9PumOdii2OG/tuJo='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4199,6 +4199,11 @@ function goalsCard() {
 
 /* ============ nuovo PAC guidato ============ */
 function candOf(i) { const held = []; for (const a of S.accounts) { const p = a.positions.find(z => z.instId === i.id); if (p) held.push({ a, p }); } return { id: i.id, name: i.name, code: i.code || '', ccy: i.ccy, price: i.price, st: isAuto(i) ? (i.autoSrc === 'stima' ? 'stima' : 'auto') : 'man', held }; }
+function autoFromAcc(acc) {          // da dove partono di solito i soldi che finiscono in questo conto d'investimento: il conto scelto (di norma "Revolut (conto)"); mai per fondo pensione, depositi o se e' lo stesso conto
+  if (!acc || acc.dep || acc.type === 'pensione' || !acc.perf) return null;
+  const id = defFromId(), a = id ? S.accounts.find(x => x.id === id) : S.accounts.find(x => /revolut/i.test(x.name) && /\bconto\b/i.test(x.name) && !x.dep && !x.perf && !x.box);
+  return a && a.id !== acc.id ? a : null;
+}
 function defFromId() { const d = (S.settings || {}).defFrom; return d && S.accounts.some(a => a.id === d) ? d : ''; }          // il conto da cui partono di solito i soldi dei PAC
 function fromCard(plans) {          // se alcuni PAC non dicono da quale conto partono i soldi, si sistema in un tocco
   const miss = plans.filter(p => !p.fromAccId && !p.ext && (S.accounts.find(a => a.id === p.accId) || {}).type !== 'pensione'), cands = S.accounts.filter(a => !a.dep && accGroup(a) === 'fermi' && !a.box);
@@ -4666,7 +4671,7 @@ function planProposal(p, d, amt) {          // un PAC puo' avere piu' strumenti 
 }
 function planProposalOne(p, d, amt) {          // le operazioni che il PAC avrebbe fatto quel giorno, al prezzo di quel giorno, per uno strumento
   const amount = amt > 0 ? amt : p.amount, acc = S.accounts.find(a => a.id === p.accId); if (!acc) return { err: 'il conto di questo acquisto non c\'è più' };
-  const ops = [], from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '', note = p.label + ' del ' + fmtDate(d), r2 = v => Math.round(v * 100) / 100;
+  const ops = [], from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : (p.ext ? '' : ((autoFromAcc(acc) || {}).id || '')), note = p.label + ' del ' + fmtDate(d), r2 = v => Math.round(v * 100) / 100;
   if (p.kind !== 'acquisto') { ops.push(from ? { accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount, note } : { accId: p.accId, kind: 'versamento', date: d, amount, fromCash: true, note }); return { ops, text: (from ? 'Sposti ' + eur(amount, true) + ' da ' + accName(from) + ' a ' : 'Entrano ' + eur(amount, true) + ' in ') + acc.name }; }
   let i = p.instId ? inst(p.instId) : null; if (!i && (p.instName || p.instCode)) i = findInst(p.instName || '', p.instCode || '');
   const ce = !i && p.instCode && DATA.cat ? DATA.cat.byIsin.get(String(p.instCode).toLowerCase()) : null, r = !i && p.instCode ? ((S.refPrices || {})[p.instCode.toLowerCase()] || (ce ? { p: ce.p, c: ce.c } : null)) : null, ccy = i ? i.ccy : normCcy((r && r.c) || p.instCcy || 'EUR'), px = i ? priceOn(i, d) : r ? r.p : 0, fx = fxRate(ccy);
@@ -4724,7 +4729,7 @@ function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Co
     if (parts.some(x => !(x.amount > 0))) { miss.push(c[0] + ' (importo non valido)'); continue; }
     const fq = FREQ.find(f => f[0] === (c[5] || 'mensile').toLowerCase()) ? (c[5] || 'mensile').toLowerCase() : 'mensile', start = /^\d{4}-\d{2}-\d{2}$/.test(c[7] || '') ? c[7] : today(), multi = rows.length > 1, buy = !!(c[2] || c[3]);
     const pr = x => ({ instId: x.i ? x.i.id : '', instName: x.i ? '' : x.r[2], instCode: x.r[3] || '', instCls: 'Azioni', amount: x.amount });
-    const d = Object.assign({ label: c[0], kind: buy ? 'acquisto' : 'versamento', accId: acc.id, fromAccId: from && from.id !== acc.id ? from.id : '', amount: parts.reduce((s, x) => s + x.amount, 0), freq: fq, day: Math.min(28, Math.max(1, parseInt(c[6], 10) || +start.slice(8, 10))), start, end: '', note: '', whole: /intere/i.test(c[9] || ''), ext: /fuori/i.test(c[9] || '') }, multi ? { parts: parts.map(pr), instId: '', instName: '', instCode: '', instCls: 'Azioni' } : pr(parts[0]));
+    const d = Object.assign({ label: c[0], kind: buy ? 'acquisto' : 'versamento', accId: acc.id, fromAccId: from && from.id !== acc.id ? from.id : (/da fuori/i.test(c[9] || '') ? '' : ((autoFromAcc(acc) || {}).id || '')), amount: parts.reduce((s, x) => s + x.amount, 0), freq: fq, day: Math.min(28, Math.max(1, parseInt(c[6], 10) || +start.slice(8, 10))), start, end: '', note: '', whole: /intere/i.test(c[9] || ''), ext: /fuori/i.test(c[9] || '') }, multi ? { parts: parts.map(pr), instId: '', instName: '', instCode: '', instCls: 'Azioni' } : pr(parts[0]));
     if (multi) for (const q of PL().filter(z => z.accId === acc.id && !z.parts && z.kind === 'acquisto' && z.label.toLowerCase() !== d.label.toLowerCase())) {          // i PAC singoli degli stessi strumenti diventano parte di questo
       if (d.parts.some(x => (x.instId && x.instId === q.instId) || (x.instCode && q.instCode && x.instCode.toLowerCase() === q.instCode.toLowerCase()) || (x.instName && q.instName && normT(x.instName) === normT(q.instName)))) { S.plans = PL().filter(z => z !== q); replaced++; }
     }
@@ -4744,11 +4749,12 @@ function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Co
     if (!OP_FLOW[kind]) { miss.push(label + ' (tipo "' + kind + '" non valido)'); continue; }
     const ccy = normCcy(cc || 'EUR'), fx = fxRate(ccy), qty = parseNum(q, ','), price = parseNum(pr, ','), total = parseNum(tot, ',');
     if (fx == null) { miss.push(label + ' (manca il cambio ' + ccy + ')'); continue; }
-    const fromAcc = from ? S.accounts.find(a => a.name.toLowerCase() === from.toLowerCase()) : null; const ops = [];
+    const fromAcc = from ? S.accounts.find(a => a.name.toLowerCase() === from.toLowerCase()) : ((kind === 'acquisto' || kind === 'versamento') ? autoFromAcc(acc) : null); const ops = [];
     if (kind === 'versamento' || kind === 'prelievo') {
       if (!(total > 0)) { miss.push(label + ' (importo mancante)'); continue; }
-      if (OPS().some(x => x.accId === acc.id && x.date === date && x.kind === kind && Math.abs((x.amount || 0) - total * fx) < 0.01)) { dup++; continue; }
-      ops.push({ accId: acc.id, kind, date, amount: r2(total * fx), fromCash: true, note: 'Da file' });
+      if (OPS().some(x => (x.accId === acc.id || x.toId === acc.id) && x.date === date && (x.kind === kind || x.kind === 'trasferimento') && Math.abs((x.amount || 0) - total * fx) < 0.01)) { dup++; continue; }
+      if (kind === 'versamento' && fromAcc && fromAcc.id !== acc.id) ops.push({ accId: fromAcc.id, toId: acc.id, kind: 'trasferimento', date, amount: r2(total * fx), note: 'Da file' });          // i soldi arrivano dal conto di partenza: si registra lo spostamento
+      else ops.push({ accId: acc.id, kind, date, amount: r2(total * fx), fromCash: true, note: 'Da file' });
     } else if (kind === 'acquisto' || kind === 'vendita') {
       const i = findInst(name, code);
       if (!(qty > 0) || !(price > 0 || (i && i.price > 0))) { miss.push(label + ' (servono quote e prezzo)'); continue; }
@@ -4763,7 +4769,7 @@ function applyPlanFile(text) {          // file "piano": Voce;Conto;Strumento;Co
   if (n) setTimeout(() => checkOnlinePrices(true), 400);          // gli strumenti nuovi prendono subito il prezzo automatico
   return { n, dup, miss };
 }function registerDue(p, d) {
-  const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : '';
+  const i = p.instId ? inst(p.instId) : null, fx = i ? (fxRate(i.ccy) ?? 1) : 1, mark = () => { (p.done = p.done || []).push(d); done(); }, from = p.fromAccId && S.accounts.some(x => x.id === p.fromAccId) ? p.fromAccId : (p.ext ? '' : ((autoFromAcc(S.accounts.find(x => x.id === p.accId)) || {}).id || ''));
   const buy = after => { const q = Math.floor(p.amount / (i.price * fx)); editOperation({ accId: p.accId, kind: 'acquisto', date: d, instId: i.id, qty: q >= 1 ? q : null, note: p.label }, after); };
   if (p.kind === 'acquisto' && i) { if (from) editOperation({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: p.amount, note: p.label }, () => buy(mark)); else buy(mark); }          // con un conto di origine: prima il trasferimento, poi l'acquisto
   else if (from) editOperation({ accId: from, toId: p.accId, kind: 'trasferimento', date: d, amount: p.amount, note: p.label }, mark);
