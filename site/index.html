@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RTcgR9Fupk14f13vvHtcwcmzBMvnbSupooSqyskQ1HM='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Y2XDv7nwM58hj9a5Hl0qB9h9zX9V109hxcjpBsk7DtY='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3351,7 +3351,6 @@ function tabGrafici() {
   /* 7. versamenti e PAC */
   const mm = []; for (let k = 11; k >= 0; k--) { const d = new Date(new Date().getFullYear(), new Date().getMonth() - k, 1), key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); mm.push({ key, l: d.toLocaleDateString('it-IT', { month: 'short' }), v: 0 }); }
   for (const a of pa) for (const f of a.flows) { if (f.type === 'partenza') continue; const r = mm.find(x => x.key === f.date.slice(0, 7)); if (r) r.v += flowSign(f.type) * f.amount; }
-  if (mm.some(x => x.v)) el.append(gCard('Soldi messi (o tolti) mese per mese', 'Versamenti meno prelievi negli ultimi 12 mesi, escluso il valore di partenza.', vbars(mm.map(x => ({ l: x.l, v: x.v, tip: x.l + ': ' + seur(x.v) })))));
   const plans = PL(); if (plans.length) { const cols = [], accKeys = new Map(); for (let k = 0; k < 12; k++) { const d = new Date(new Date().getFullYear(), new Date().getMonth() + k, 1); cols.push({ key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), l: d.toLocaleDateString('it-IT', { month: 'short' }), parts: {} }); }
     for (const p of plans) for (const dd of occurrences(p.start, freqMonths(p.freq), p.day, today(), addMonthsStr(today(), 12), p.end)) { const c = cols.find(x => x.key === dd.slice(0, 7)); if (c) { const n = accName(p.accId); if (!accKeys.has(n)) accKeys.set(n, PALETTE[accKeys.size % PALETTE.length]); c.parts[n] = (c.parts[n] || 0) + p.amount; } }
     el.append(gCard('I PAC dei prossimi 12 mesi', 'Quanto si compra ogni mese con i PAC, diviso per conto.', sbars(cols, [...accKeys]))); }
@@ -3710,7 +3709,7 @@ const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'S
 const MAIN_TABS = ['panoramica', 'conti', 'pac', 'grafici', 'consigli', 'analisi', 'grandi'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; UI.planId = null; if (k === 'analisi') UI.sub = null; UI.fondo = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
-const SHORT = { grandi: 'Grandi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
+const SHORT = { grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
 function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
@@ -3854,6 +3853,23 @@ function panelDialog(title, build) {          // una finestra con un pezzo di sc
   PAC_UI = () => { if (!dlg.isConnected) { PAC_UI = null; return; } draw(); };
   dlg.append(body); dlg.addEventListener('close', () => { PAC_UI = null; dlg.remove(); }); draw(); document.body.append(dlg); dlg.showModal();
 }
+function talkOp(x) {
+  const k = OP_LABEL[x.kind] || x.kind, amt = x.gross != null ? x.gross : x.amount, rows = [];
+  talk({ kind: 'Operazione del ' + fmtDate(x.date), title: k + (x.instName ? ' · ' + x.instName : x.toId ? ' · ' + accName(x.accId) + ' → ' + accName(x.toId) : ''), value: eur(amt, true), num: amt,
+    say: (x.accId ? 'Registrata su ' + accName(x.accId) + (x.toId ? ', verso ' + accName(x.toId) : '') + '. ' : '') + (x.qty ? nfq.format(x.qty) + ' unità' + (x.price ? ' a ' + nf2.format(x.price) + ' ' + (x.ccy || '') : '') + '. ' : '') + (x.realized != null ? (x.realized >= 0 ? 'Guadagno realizzato ' : 'Perdita realizzata ') + eur(Math.abs(x.realized)) + '. ' : ''),
+    how: 'Il guadagno realizzato conta per le tasse: lo trovi in Analisi → Tasse.', tip: 'Se hai sbagliato un numero puoi annullare l\'operazione: i conti tornano com\'erano prima.', acts: [['Annulla questa operazione', () => undoOp(x), 'danger']] });
+}
+function opsCard() {          // in fondo ai conti: le ultime operazioni registrate, di tutti i conti, con filtro per conto
+  const all = OPS().slice().reverse(), accF = UI.opsAcc || '', lim = UI.opsAll ? 300 : 12;
+  const sec = h('section', { class: 'card' }, h('h2', null, 'Operazioni'));
+  if (!all.length) { sec.append(h('p', { class: 'muted' }, 'Nessuna operazione registrata: con "+ Operazione" registri acquisti, vendite, versamenti e trasferimenti, e qui li ritrovi.'), btn('+ Operazione', () => editOperation({}), 'pri sm')); return sec; }
+  const ids = [...new Set(all.flatMap(x => [x.accId, x.toId]).filter(Boolean))].filter(id => S.accounts.some(a => a.id === id)), list = all.filter(x => !accF || x.accId === accF || x.toId === accF);
+  sec.append(h('p', { class: 'muted' }, 'Le ultime operazioni fatte, dalla più recente. Tocca il nome per i dettagli o per annullarla.'),
+    h('div', { class: 'row' }, h('label', { class: 'fld', style: 'margin:0;flex:1;min-width:150px' }, h('span', null, 'Conto'), h('select', { onchange: e => { UI.opsAcc = e.target.value; render(); } }, [h('option', { value: '' }, 'Tutti i conti'), ...ids.map(id => h('option', { value: id, selected: accF === id }, accName(id)))])), btn('+ Operazione', () => editOperation({}), 'pri sm')),
+    table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim).map(x => [fmtDate(x.date), lnk(OP_LABEL[x.kind] || x.kind, () => talkOp(x)), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), 'Nessuna operazione per questo conto.'));
+  if (list.length > 12) sec.append(btn(UI.opsAll ? 'Mostra solo le ultime 12' : 'Mostra tutte (' + list.length + ')', () => { UI.opsAll = !UI.opsAll; render(); }, 'sm'));
+  return sec;
+}
 function pianoCard() {          // sotto i conti: quanto entra, quanto esce, quanto ti resta e dove potrebbe arrivare il patrimonio
   const B = BG(), F = planFlows(12), s12 = a => { let t = 0; for (let m = 1; m <= 12; m++) t += a[m]; return t; }, inc = s12(F.inc) / 12, exp = s12(F.exp) / 12, pac = s12(F.pac) / 12, left = inc - exp - pac, has = B.items.length > 0 || PL().length > 0, open = !!UI.pvOpen;
   const sec = h('section', { class: 'card' }, h('h2', null, 'Piano e previsioni'));
@@ -3887,6 +3903,7 @@ function tabConti() {
       h('div', { class: 'acards' }, g.accs.map(a => accCard(a, total, k++)))));
   }
   el.append(pianoCard());          // l'ex scheda Piano, ridotta all'essenziale
+  el.append(opsCard());          // le ultime operazioni di tutti i conti
   el.append(h('p', { class: 'noconti muted', hidden: '' }, 'Nessun conto corrisponde alla ricerca.'));
   el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; il resto = fermi.'));
   if (UI.contiQ) setTimeout(() => filterConti(UI.contiQ), 0);
@@ -4799,7 +4816,7 @@ function planCard(p, accMonthly, isDue, k, inDialog) {
 function planCards(plans, inDialog) {
   if (!plans.length) return null; const ids = [...new Set(plans.map(p => p.accId))].sort((a, b) => S.accounts.findIndex(x => x.id === a) - S.accounts.findIndex(x => x.id === b));
   const tot = plans.reduce((t, p) => t + planMonthly(p), 0), due = new Set(planDueAll().map(x => x.p.id)); let k = 0;
-  return h('div', { class: 'conti pacv' }, ids.map((id, gi) => { const list = plans.filter(p => p.accId === id), pm = list.reduce((t, p) => t + planMonthly(p), 0), share = tot > 0 ? pm / tot : 0;
+  return h('div', { class: 'conti pacv' }, ids.map((id, gi) => { const list = plans.filter(p => p.accId === id).sort((a, b) => (planNext(a, 1)[0] || '9') < (planNext(b, 1)[0] || '9') ? -1 : 1), pm = list.reduce((t, p) => t + planMonthly(p), 0), share = tot > 0 ? pm / tot : 0;
     return h('section', { class: 'grp g-c' + (gi % 6) },
       h('div', { class: 'grp-head' }, h('div', { class: 'grp-t' }, h('h2', null, accName(id)), h('span', { class: 'grp-n' }, eur(pm) + ' /mese'), h('span', { class: 'grp-p' }, pct(share))), h('div', { class: 'grp-bar' }, h('i', { style: '--w:' + (share * 100).toFixed(1) + '%' }))),
       h('div', { class: 'acards' }, list.map(p => planCard(p, pm, due.has(p.id), k++, inDialog)))); }));
@@ -4815,12 +4832,22 @@ function viewPlan(id) {
   el.append(h('section', { class: 'card' }, h('h2', null, 'Prossime date'), nxt.length ? h('ul', { class: 'list' }, nxt.map(d => h('li', null, h('span', null, fmtDate(d)), h('span', null, eur(p.amount))))) : h('p', { class: 'muted' }, 'Nessuna data futura: il PAC è finito.')));
   return el;
 }
+function pacFilters(plans) {          // filtri della scheda PAC: per conto e per data della prossima scadenza
+  if (plans.length < 2) return null; const accs = [...new Set(plans.map(p => p.accId))];
+  const row = (arr, cur, set, lab) => h('div', { class: 'chips', role: 'group', 'aria-label': lab }, arr.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': cur === k ? 'true' : 'false', onclick: () => { set(k); render(); } }, l)));
+  return h('div', { class: 'pacfil' }, accs.length > 1 ? row([['', 'Tutti i conti'], ...accs.map(id => [id, accName(id)])], UI.pacAcc || '', k => { UI.pacAcc = k; }, 'Conto') : null,
+    row([['tutte', 'Tutte le date'], ['conferma', 'Da confermare'], ['7', 'Prossimi 7 giorni'], ['30', 'Prossimi 30 giorni'], ['mese', 'Questo mese']], UI.pacWhen || 'tutte', k => { UI.pacWhen = k; }, 'Quando'));
+}
+function pacFilter(plans) {
+  const acc = UI.pacAcc || '', w = UI.pacWhen || 'tutte', due = new Set(planDueAll().map(x => x.p.id)), end = w === '7' || w === '30' ? ymd(new Date(Date.now() + +w * 864e5)) : w === 'mese' ? today().slice(0, 7) + '-31' : '';
+  return plans.filter(p => (!acc || p.accId === acc) && (w === 'tutte' || (w === 'conferma' ? due.has(p.id) : (nx => !!nx && nx <= end)(planNext(p, 1)[0]))));
+}
 function tabPac() {
   if (UI.planId) return viewPlan(UI.planId);
   const plans = PL(), pm = plans.reduce((t, p) => t + planMonthly(p), 0), due = planDueAll(), el = h('div');
   el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'I tuoi PAC'), h('div', { class: 'ch-n' }, eur(pm) + ' /mese'), h('div', { class: 'muted' }, plans.length ? pl(plans.length, 'PAC', 'PAC') + ' · ' + eur(pm * 12) + ' in un anno · tocca un PAC per aprirlo' : 'Ancora nessun PAC'))),
-    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null)));
-  el.append(planCards(plans, null) || h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.'));
+    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null), pacFilters(plans)));
+  el.append(planCards(pacFilter(plans), null) || (plans.length ? h('p', { class: 'muted' }, 'Nessun PAC con questi filtri: prova con Tutte le date o Tutti i conti.') : h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.')));
   el.append(pacRibilancia());
   return el;
 }
