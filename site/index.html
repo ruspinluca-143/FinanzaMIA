@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+KnxJBBw/+YY6F0UbeIIKm5y9bt+Eqb0r9Uln+c7B6Y='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aa7ZcAAyVLXlwNj/DBFDPdRsbrcK6BxpiTHS2J/hrsk='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -433,7 +433,7 @@ details.src summary{cursor:pointer;font-weight:500;padding:4px 0}
 .hero .spark{top:14px;bottom:auto;left:auto;right:0;width:50%;height:78px}
 .donut:not(.v) .dsvg{justify-self:center;width:min(240px,100%)}
 .acts .btn{padding:6px 12px;font-size:13px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(8,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(7,1fr);width:auto;max-width:none;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow:visible;border-radius:0;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--ring)}
 .thumb{display:none}
 .tab{flex-direction:column;justify-content:center;gap:2px;padding:6px 0 4px;font-size:10px;color:var(--muted)}
 .tab .ti{display:block;line-height:0}
@@ -501,6 +501,56 @@ dialog{padding:18px}
   .chips{margin:2px 0 8px}
 }
 .donut{gap:16px;margin:6px 0 10px}.donut.v{gap:8px}.donut.v .dsvg{width:min(180px,100%)}
+/* ---- moduli moderni (05/11): titolo fisso, campi in schede raccolte, interruttori, pulsanti sempre visibili ---- */
+dialog.frm{padding:0;max-width:520px;overflow:auto;border-radius:24px}
+dialog.frm form{padding:0 16px 14px}
+.frm-head{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 -16px 6px;padding:16px 16px 10px;background:color-mix(in srgb,var(--card-s) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.frm-head h3{margin:0;font-size:17px;line-height:1.25;flex:1;min-width:0}
+.frm-hb{display:flex;gap:6px;flex:none}
+.frm-grp{background:color-mix(in srgb,var(--ink) 4.5%,transparent);border-radius:16px;padding:0 14px;margin:8px 0}
+.frm-gt{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);margin:14px 6px -2px}
+.frm .fld,.frm .chk{margin:0;padding:10px 0;border-bottom:1px solid var(--grid)}
+.frm .frm-grp>:last-child{border-bottom:0}
+.frm .fld{display:grid;grid-template-columns:minmax(0,1fr) minmax(88px,42%);align-items:center;column-gap:12px;row-gap:2px}
+.frm .fld>span{font-size:14px;color:var(--ink);line-height:1.3}
+.frm .fld>small,.frm .chk small{grid-column:1/-1;display:block;font-size:12px;color:var(--muted);line-height:1.3;margin-top:2px}
+.frm .fld.sel{grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr)}
+.frm .fld.stack{grid-template-columns:1fr;row-gap:5px}
+.frm .fld.stack>span{font-size:12px;color:var(--muted)}
+.frm .fld input,.frm .fld select,.frm .fld textarea{width:100%;font-size:16px;font-weight:600;background:transparent;border:0;border-radius:10px;padding:6px 8px;text-align:right;box-shadow:none;min-width:0}
+.frm .fld.stack input,.frm .fld.stack textarea{text-align:left;font-weight:500;background:color-mix(in srgb,var(--card-s) 80%,transparent);border:1px solid var(--grid);padding:9px 11px}
+.frm .fld select{color:var(--s1);text-align-last:right;cursor:pointer}
+.frm .fld input:focus,.frm .fld select:focus,.frm .fld textarea:focus{background:color-mix(in srgb,var(--s1) 9%,transparent);box-shadow:0 0 0 2px color-mix(in srgb,var(--s1) 40%,transparent)}
+.frm .fld.stack input:focus{background:var(--card-s)}
+.frm .chk{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.frm .chk>span{font-size:14px;color:var(--ink);flex:1}
+.frm .chk input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;margin:0;width:46px;height:28px;border-radius:99px;background:color-mix(in srgb,var(--ink) 18%,transparent);position:relative;cursor:pointer;transition:background .25s}
+.frm .chk input[type=checkbox]::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .25s var(--ease)}
+.frm .chk input[type=checkbox]:checked{background:var(--gain,#30d158)}
+.frm .chk input[type=checkbox]:checked::after{transform:translateX(18px)}
+.frm .dlgacts{position:sticky;bottom:0;margin:12px -16px -14px;padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--card-s) 94%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--grid);justify-content:stretch}
+.frm .dlgacts .btn{flex:1;padding:11px;font-size:15px;font-weight:600}
+@media (max-width:700px){dialog.frm,dialog.frm.wide{padding:0}.frm-head{padding-top:20px}.frm-head::before{content:'';position:absolute;top:7px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:4px;background:color-mix(in srgb,var(--ink) 22%,transparent)}}
+/* ---- Home piu' pulita (05/11) ---- */
+.hero{padding:18px 18px 14px}
+.hero-n{font-size:clamp(38px,9vw,60px);margin:2px 0 8px}
+.hero-pills{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.hero-pills .sub{margin:0}
+.hchart{margin:10px 0 4px;padding:8px 10px 6px;border-radius:14px;background:color-mix(in srgb,var(--ink) 4.5%,transparent);cursor:pointer;transition:background .2s}
+.hchart:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.hc-top{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:2px}.hc-top b{font-size:13px}
+.hspark{width:100%;height:62px;display:block}
+.hspark .l{fill:none;stroke:var(--gain);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}.hspark.dn .l{stroke:var(--loss)}
+.qa-row{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.qa{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 4px!important;border-radius:14px!important;font-size:12px!important;line-height:1.2;text-align:center}
+.qa svg{width:20px!important;height:20px!important}
+.todochips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tchip{font:inherit;font-size:12.5px;font-weight:600;padding:5px 11px;border:0;border-radius:99px;background:var(--warn);color:var(--warnink);cursor:pointer}
+@media (max-width:700px){.tiles>.tile:last-child:nth-child(odd){grid-column:1/-1}}
+.acard{aspect-ratio:auto!important;min-height:108px}
+.cl-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--grid);cursor:pointer}.cl-row:last-child{border-bottom:0}
+.cl-i{flex:none;width:18px;font-size:12px;color:var(--muted);text-align:center}.cl-n{flex:1;min-width:0}.cl-n b{display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cl-n small,.cl-v small{color:var(--muted);font-size:11.5px}
+.cl-sp{flex:none;width:72px}.clspark{width:72px;height:28px;display:block}.clspark.big{width:100%;height:80px}.cl-v{flex:none;text-align:right;min-width:78px;display:grid;justify-items:end;gap:2px}
 .g-c0{--gc:#0a84ff}.g-c1{--gc:#ff9f0a}.g-c2{--gc:#30b0c7}.g-c3{--gc:#bf5af2}.g-c4{--gc:#30d158}.g-c5{--gc:#ff375f}
 .ac-desc{font-size:11.5px;line-height:1.3;color:var(--muted);margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .anv .acard{aspect-ratio:auto;min-height:112px}
@@ -1175,8 +1225,8 @@ function runScenario() {
 
 /* ============ form generico ============ */
 function form(title, fields, values, onOk, extra, okText) {
-  const dlg = h('dialog'), frm = h('form', { method: 'dialog' }), inputs = {}, err = h('p', { class: 'err' });
-  frm.append(h('h3', null, title));
+  const dlg = h('dialog', { class: 'frm' }), frm = h('form', { method: 'dialog' }), inputs = {}, err = h('p', { class: 'err' });
+  const head = h('div', { class: 'frm-head' }, h('h3', null, title)); frm.append(head); let grp = null, gk = '';          // modulo moderno: titolo fisso in alto, campi raggruppati in schede, pulsanti sempre a portata di pollice
   for (const f of fields) {
     let inp;
     if (f.type === 'select') inp = h('select', null, f.options.map(o => h('option', { value: o[0], selected: o[0] === values[f.key] }, o[1])));
@@ -1189,20 +1239,23 @@ function form(title, fields, values, onOk, extra, okText) {
       let ok = false; try { await navigator.clipboard.writeText(v); ok = true; } catch { /* senza permesso: la si copia a mano */ }
       err.textContent = ok ? 'Frase scritta e copiata: incollala subito nell\'app Password o scrivila su un foglio.' : 'Frase scritta qui sopra: copiala e salvala subito (app Password o un foglio).';
     } }, 'Suggeriscimi una frase') : null;
-    frm.append(f.type === 'check' ? h('label', { class: 'chk' }, inp, h('span', null, f.label, f.hint ? h('small', null, ' — ' + f.hint) : null))
-      : h('label', { class: 'fld' }, h('span', null, f.label), f.type === 'password' ? h('div', { class: 'pwrow' }, inp, pwToggle(inp)) : inp, gen, f.hint ? h('small', null, f.hint) : null));
+    const kind = f.type === 'check' ? 'chk' : /^part\d+$/.test(f.key) ? 'part' : 'main', stack = !f.type || f.type === 'text' || f.type === 'textarea' || f.type === 'password';
+    if (kind !== gk) { gk = kind; grp = h('div', { class: 'frm-grp ' + kind }); if (kind === 'part') frm.append(h('div', { class: 'frm-gt' }, 'Quanto compri ogni volta (€, 0 = toglilo)')); frm.append(grp); }
+    grp.append(f.type === 'check' ? h('label', { class: 'chk' }, h('span', null, f.label, f.hint ? h('small', null, f.hint) : null), inp)
+      : h('label', { class: 'fld' + (stack ? ' stack' : f.type === 'select' ? ' sel' : '') }, h('span', null, f.label), f.type === 'password' ? h('div', { class: 'pwrow' }, inp, pwToggle(inp)) : inp, gen, f.hint ? h('small', null, f.hint) : null));
   }
   for (const f of fields) if (f.sync) inputs[f.key].addEventListener('change', () => f.sync(inputs));
-  const okb = h('button', { type: 'submit', class: 'btn pri' }, okText || 'Salva');
+  const okb = h('button', { type: 'submit', class: 'btn pri' }, okText || 'Salva'), okb2 = h('button', { type: 'submit', class: 'btn pri sm' }, okText || 'Salva'), lock = v => { okb.disabled = v; okb2.disabled = v; };
   const shut = () => { if (dlg.open) dlg.close(); dlg.remove(); };
+  head.append(h('div', { class: 'frm-hb' }, h('button', { type: 'button', class: 'btn sm', onclick: shut }, 'Annulla'), okb2));
   frm.append(err, h('div', { class: 'dlgacts' }, h('button', { type: 'button', class: 'btn', onclick: shut }, 'Annulla'), okb), extra || null);
   frm.addEventListener('submit', async e => {
     e.preventDefault();
     const out = {};
     for (const f of fields) { const el = inputs[f.key]; out[f.key] = f.type === 'check' ? el.checked : f.type === 'number' ? (el.value === '' ? null : parseFloat(el.value)) : f.type === 'password' ? el.value : el.value.trim(); }
-    err.textContent = 'Un attimo…'; okb.disabled = true;
-    try { const msg = await onOk(out); if (msg) { err.textContent = msg; okb.disabled = false; return; } }
-    catch (x) { err.textContent = 'Errore: ' + (x.message || x); okb.disabled = false; return; }
+    err.textContent = 'Un attimo…'; lock(true);
+    try { const msg = await onOk(out); if (msg) { err.textContent = msg; lock(false); return; } }
+    catch (x) { err.textContent = 'Errore: ' + (x.message || x); lock(false); return; }
     shut();
   });
   dlg.addEventListener('close', () => dlg.remove());
@@ -1794,6 +1847,29 @@ function heroSpark() {
     s('path', { d: 'M0 ' + y0 + ' L' + W + ' ' + y0, stroke: 'currentColor', 'stroke-opacity': .25, 'stroke-dasharray': '4 5', fill: 'none', 'vector-effect': 'non-scaling-stroke' }),
     s('path', { d: d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z', fill: 'url(#spk)' }), s('path', { d, class: 'spk-line' }));
 }
+function heroChart() {          // il grafico sotto il totale: il guadagno (valore meno versato) nel tempo; toccandolo si spiega
+  const pts = heroPts(); if (pts.length < 2) return null;
+  const W = 600, H = 84, x0 = pts[0].t, x1 = pts[pts.length - 1].t, vs = pts.map(p => p.v), lo0 = Math.min(...vs), hi0 = Math.max(...vs), pad = Math.max(1, (hi0 - lo0) * 0.18), lo = lo0 - pad, hi = hi0 + pad;
+  const X = t => (t - x0) / ((x1 - x0) || 1) * W, Y = v => H - 6 - (v - lo) / ((hi - lo) || 1) * (H - 14), first = pts[0], last = pts[pts.length - 1], up = last.v >= first.v;
+  const d = 'M' + pts.map(p => X(p.t).toFixed(1) + ' ' + Y(p.v).toFixed(1)).join(' L');
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'none', class: 'hspark ' + (up ? 'up' : 'dn'), 'aria-hidden': 'true' },
+    s('defs', null, s('linearGradient', { id: 'hsg', x1: 0, y1: 0, x2: 0, y2: 1 }, s('stop', { offset: '0%', style: 'stop-color:' + (up ? 'var(--gain)' : 'var(--loss)') + ';stop-opacity:.28' }), s('stop', { offset: '100%', style: 'stop-color:' + (up ? 'var(--gain)' : 'var(--loss)') + ';stop-opacity:0' }))),
+    lo < 0 && hi > 0 ? s('path', { d: 'M0 ' + Y(0).toFixed(1) + ' L' + W + ' ' + Y(0).toFixed(1), stroke: 'currentColor', 'stroke-opacity': .3, 'stroke-dasharray': '4 5', fill: 'none', 'vector-effect': 'non-scaling-stroke' }) : null,
+    s('path', { d: d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z', fill: 'url(#hsg)' }), s('path', { d, class: 'l' }));
+  const say = () => { const mx = pts.reduce((m, p) => p.v > m.v ? p : m, pts[0]), mn = pts.reduce((m, p) => p.v < m.v ? p : m, pts[0]);
+    talk({ kind: 'Il grafico sotto il totale', title: 'Il tuo guadagno nel tempo', value: seur(last.v), num: last.v, fmt: seur,
+      say: 'Ogni punto è quanto guadagni (o perdi) in quel giorno: il valore dei tuoi conti d\'investimento meno i soldi che ci hai messo. Se la linea sale stai guadagnando di più; i versamenti nuovi non la fanno salire, perché sono soldi tuoi. Parte da ' + seur(first.v) + ' il ' + fmtDate(first.d) + ' e oggi è a ' + seur(last.v) + '.',
+      how: 'Massimo ' + seur(mx.v) + ' il ' + fmtDate(mx.d) + ' · minimo ' + seur(mn.v) + ' il ' + fmtDate(mn.d) + '. Lo storico è di ' + pl(pts.length, 'giorno', 'giorni') + ': più passa il tempo, più il grafico dice qualcosa.',
+      rows: pts.slice(-8).reverse().map(p => [fmtDate(p.d), p.v, '', null, seur(p.v)]), rowsTitle: 'Gli ultimi giorni', signed: true, tip: 'Per i grafici nel dettaglio apri la scheda Grafici.', acts: [['Apri i Grafici', () => { UI.tab = 'grafici'; render(); window.scrollTo(0, 0); }]] }); };
+  return h('div', { class: 'hchart', role: 'button', tabindex: '0', title: 'Tocca per capire il grafico', onclick: e => { tapFx(e.currentTarget); say(); }, onkeydown: e => { if (e.key === 'Enter') say(); } },
+    h('div', { class: 'hc-top' }, h('span', null, 'Il tuo guadagno dal ' + fmtDate(first.d)), h('b', { class: up ? 'gain' : 'loss' }, seur(last.v - first.v))), svg);
+}
+function todoChips() {          // al posto della lista grande: pochi pulsanti piccoli; toccandoli si spiega e si sceglie
+  const items = todoItems(); if (!items.length) return null;
+  const lab = { Scegli: 'Scegli la divisione', Crea: 'Metti un obiettivo', Attiva: 'Attiva il salvataggio online', Scarica: 'Fai una copia di sicurezza' };
+  const txt = x => { const n = (x.t.match(/^\d+/) || [''])[0], u = n === '1'; return x.b === 'Vedi' ? pl(alerts().length, 'avviso', 'avvisi') + ' sulle regole' : x.b === 'Aggiorna' ? n + (u ? ' conto' : ' conti') + ' da aggiornare' : x.b === 'Collega' ? n + (u ? ' titolo' : ' titoli') + ' senza prezzo' : x.b === 'Conferma' ? n + (u ? ' acquisto' : ' acquisti') + ' da confermare' : lab[x.b] || x.t; };
+  return h('div', { class: 'todochips', role: 'group', 'aria-label': 'Da fare' }, items.slice(0, 6).map(x => h('button', { type: 'button', class: 'tchip', onclick: () => talk({ kind: 'Da fare', title: x.t, say: x.s || '', acts: [[x.b, x.f, 'pri']] }) }, txt(x))));
+}
 const heroPill = tp => tp && fin(tp.pnl) ? h('div', null, h('span', { class: 'pill ' + (tp.pnl >= 0 ? 'up' : 'dn') }, (tp.pnl >= 0 ? '▲ ' : '▼ ') + seur(tp.pnl).replace('+', '') + (fin(tp.pnlPct) ? ' · ' + spct(tp.pnlPct) : '')), h('span', { class: 'pillnote' }, 'sul versato')) : null;
 
 /* ============ import da file CSV ============ */
@@ -2379,7 +2455,8 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm, az, ct, an, gs] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json')]);
+  const [hh, mm, az, ct, an, gs, cl] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json'), get('classifiche.json')]);
+  if (cl) { try { const j = normClass(JSON.parse(cl)); if (j) DATA.classif = j; } catch { /* file non valido: ignorato */ } }
   if (gs) { try { const j = normGrandi(JSON.parse(gs)); if (j) DATA.grandi = j; } catch { /* file non valido: ignorato */ } }
   if (an) { try { const j = normAnalisi(JSON.parse(an)); if (j) { DATA.analisi = j; logAnalisi(); } } catch { /* file non valido: ignorato */ } }
   if (ct) { try { setCatalog(JSON.parse(ct)); } catch { /* file non valido: ignorato */ } }
@@ -2387,7 +2464,7 @@ async function loadOnlineData() {          // dal sito: storico prezzi e dati di
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
   if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
   if (S && !DEMO && DATA.cat) { const n = applyCatalog(); if (n) { touch(); setStatus('Prezzi dal catalogo: ' + pl(n, 'strumento aggiornato', 'strumenti aggiornati')); } }
-  if (S && !LOCKED && (hh || mm || az || ct || an || gs)) render();
+  if (S && !LOCKED && (hh || mm || az || ct || an || gs || cl)) render();
 }
 /* ============ catalogo: i prezzi di TUTTI gli ETF, ETC/ETN, BTP e obbligazioni quotati in Italia e delle crypto principali (catalogo.json, scritto dal sito) ============ */
 const normT = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -2927,7 +3004,11 @@ function analisiBanner() {
   const an = DATA.analisi; if (!an) return null;
   return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
 }
-function tabConsigli() {
+function tabConsigli() {          // due viste: l'analisi di oggi (scritta dall'AI) e le classifiche dei titoli
+  const sub = UI.csub || 'analisi', seg = h('div', { class: 'chips', role: 'group', 'aria-label': 'Vista' }, [['analisi', 'Analisi di oggi'], ['titoli', 'Classifiche titoli']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
+  return h('div', null, seg, sub === 'titoli' ? tabClassifiche() : tabConsigliAnalisi());
+}
+function tabConsigliAnalisi() {
   const el = h('div'), an = DATA.analisi;
   if (!an) { el.append(h('section', { class: 'card' }, h('h2', null, 'Consigli'), h('p', { class: 'muted' }, ONLINE ? 'L\'analisi di oggi non è ancora disponibile: la scrive un\'AI ogni mattina leggendo le testate economiche. Riprova tra poco.' : 'L\'analisi giornaliera si vede dal sito online.'), btn('Riscarica', () => loadOnlineData(), 'sm')), consigliSoldi()); return el; }
   const age = analisiAge(an);
@@ -3566,7 +3647,7 @@ function viewLock() {
 }
 /* ---- ogni finestra con pulsanti (OK, Annulla, Registra...) li ha anche in alto: copie che premono gli originali ---- */
 function dlgTopBar(dlg) {
-  if (dlg.querySelector(':scope .dlgtop')) return; const acts = dlg.querySelector('.dlgacts'); if (!acts) return;
+  if (dlg.classList.contains('frm') || dlg.querySelector(':scope .dlgtop')) return; const acts = dlg.querySelector('.dlgacts'); if (!acts) return;
   const bar = h('div', { class: 'dlgtop' });
   for (const b of acts.querySelectorAll('button')) {          // la copia in alto segue il pulsante originale (testo e "spento"): se cambia sotto, cambia anche qui
     const c = h('button', { type: 'button', class: b.className + ' sm', onclick: () => b.click() }, b.textContent); c.disabled = b.disabled; bar.append(c);
@@ -3621,8 +3702,8 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi soldi'], ['piano', 'Piano'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'pac', 'grafici', 'consigli', 'analisi', 'grandi', 'piano'];          // le altre viste sono nel menu a sinistra
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi soldi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'conti', 'pac', 'grafici', 'consigli', 'analisi', 'grandi'];          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; UI.planId = null; if (k === 'analisi') UI.sub = null; UI.fondo = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { grandi: 'Grandi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
@@ -3637,13 +3718,13 @@ function tabPanoramica() {
     h('p', { class: 'muted' }, 'I file che ti preparo io (per esempio quelli di Fineco) contengono già tutto. Per i file scaricati dal broker l\'app ti fa vedere un\'anteprima.'));
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
-  el.append(h('section', { class: 'card hero' }, heroSpark(), h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), heroPill(tp), heroDelta(), boxTotal() ? h('div', { class: 'sub' }, 'Tuoi da investire, senza le casse separate: ' + eur(total - boxTotal())) : null, h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today()) + (heroPts().length >= 2 ? ' · il grafico è il tuo guadagno dal ' + fmtDate(heroPts()[0].d) : '')), h('div', { class: 'qa-row' }, qaBtn('Aggiorna prezzi', ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4'], () => { ONLINE ? pricesOnline() : pickPrices(); }), qaBtn('Importa file', MICO.imp, () => pickBatch()), qaBtn('Registra operazione', MICO.op, () => editOperation({})))));
+  el.append(h('section', { class: 'card hero' }, h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), h('div', { class: 'hero-pills' }, heroPill(tp), heroDelta()), heroChart(), boxTotal() ? h('div', { class: 'sub' }, 'Tuoi da investire, senza le casse separate: ' + eur(total - boxTotal())) : null, h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today())), h('div', { class: 'qa-row' }, qaBtn('Aggiorna prezzi', ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4'], () => { ONLINE ? pricesOnline() : pickPrices(); }), qaBtn('Importa file', MICO.imp, () => pickBatch()), qaBtn('Registra operazione', MICO.op, () => editOperation({})))));
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
   const ymN = today().slice(0, 7);          // a inizio mese (primi 10 giorni) un promemoria leggero, se non hai ancora registrato nulla
   if (!DEMO && S.accounts.length && +today().slice(8, 10) <= 10 && S.settings.nudge !== ymN && !OPS().some(o => o.date.slice(0, 7) === ymN)) el.append(h('div', { class: 'banner' }, h('span', null, 'Nuovo mese: hai fatto acquisti o versamenti? Registrali in un minuto.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.nudge = ymN; done(); }, 'sm'), btn('Registra', () => editOperation({}), 'pri sm'))));
-  if (!DEMO) el.append(todoCard());          // una lista sola di cose da fare oggi
+  { const tc = todoChips(); if (tc) el.append(tc); }          // pochi pulsanti piccoli con le cose da fare
   { const ab = analisiBanner(); if (ab) el.append(ab); }
   if (!DEMO) { const gc = goalsCard(); if (gc) el.append(gc); }
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
@@ -3657,7 +3738,7 @@ function tabPanoramica() {
       x: () => ({ how: tp.xirr == null ? 'Compare dopo un anno di storia. Per i conti importati con il prezzo pagato (Fineco, Directa, Fondo Cometa) non sappiamo quando hai comprato: dividere il guadagno di anni per un solo mese darebbe numeri assurdi (per esempio +55% in un mese diventerebbe più del 20.000% "all\'anno"). Per ora guarda il guadagno sul versato.' : 'Il tasso annuo che, applicato a ogni versamento dal suo giorno, porta esattamente al valore di oggi: ' + spct(tp.xirr) + ' all\'anno.', rows: perAcc(p => p.xirr).map(([a, , v]) => [a.name, v, '', openAcc(a), spct(v)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto', signed: true }) },
     { l: 'Guadagno sulle posizioni', v: pp.length ? gl(pg, seur(pg)) : '—', s: pp.length ? spct(pg / pcost) + ' sul costo di ' + eur(pcost) + ' · ' + pp.length + ' posizioni con costo, ' + pct(pv / total) + ' del patrimonio' : 'inserisci il costo di carico delle posizioni (non realizzato)',
       x: () => ({ how: pp.length ? eur(pv) + ' di valore − ' + eur(pcost) + ' di costo = ' + seur(pg) + ', su ' + pl(pp.length, 'posizione', 'posizioni') + ' di cui conosci il prezzo pagato.' : '', rows: pp.slice().sort((x, y) => Math.abs(y.pnl) - Math.abs(x.pnl)).slice(0, 10).map(x => [x.name, x.pnl, x.acc + ' · ' + spct(x.pct), () => talkPos(x.a, x.p)]), rowsTitle: 'Le 10 posizioni che pesano di più sul risultato', signed: true }) },
-    { l: 'Ultimo snapshot', v: lastSnap ? fmtDate(lastSnap) : 'nessuno', s: h('span', null, lastSnap ? daysSince(lastSnap) + ' giorni fa · ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); takeSnapshot(); render(); } }, 'registra oggi')) }
+
   ]));
   const bxc = boxesCard(); if (bxc) el.append(bxc);
   const nmc = nextMoneyCard(); if (nmc) el.append(nmc);
@@ -3754,7 +3835,7 @@ function accCard(a, total, k) {          // riquadro quadrato e compatto: due pe
     h('div', { class: 'ac-name', title: a.name }, a.name),
     h('div', { class: 'ac-val' }, eur(v)),
     a.perf && p.pnl != null ? h('div', null, h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + (fin(p.pnlPct) ? spct(p.pnlPct).replace('+', '') : seur(p.pnl).replace('+', '')))) : h('div', { class: 'ac-sub' }, total > 0 ? pct(v / total) + ' del totale' : ''),
-    h('div', { class: 'ac-bar' }, h('i', { style: '--w:' + (total > 0 ? Math.max(1, Math.abs(v) / total * 100) : 0).toFixed(1) + '%' })), badge);
+    h('div', { class: 'ac-bar' }, h('i', { style: '--w:' + (total > 0 ? Math.max(1, Math.abs(v) / total * 100) : 0).toFixed(1) + '%' })));
   return card;
 }
 function filterConti(q) {          // ricerca dei conti: nasconde i riquadri che non corrispondono (senza ridisegnare, cosi' la tastiera resta aperta)
@@ -3762,6 +3843,26 @@ function filterConti(q) {          // ricerca dei conti: nasconde i riquadri che
   document.querySelectorAll('.conti .grp').forEach(g => { let n = 0; g.querySelectorAll('.acard').forEach(c => { const ok = toks.every(t => c.dataset.s.includes(t)); c.hidden = !ok; if (ok) n++; }); g.hidden = !n; shown += n; });
   const none = document.querySelector('.conti .noconti'); if (none) none.hidden = shown > 0 || !toks.length;
   const cnt = document.querySelector('.conti .cq-n'); if (cnt) cnt.textContent = toks.length ? pl(shown, 'conto trovato', 'conti trovati') : '';
+}
+function panelDialog(title, build) {          // una finestra con un pezzo di scheda dentro, che si ridisegna quando cambi qualcosa
+  if (document.querySelector('dialog.panel')) return; const dlg = h('dialog', { class: 'wide panel' }), body = h('div'), shut = () => { PAC_UI = null; if (dlg.open) dlg.close(); dlg.remove(); };
+  const draw = () => body.replaceChildren(h('div', { class: 'row' }, h('h2', { class: 'grow' }, title), btn('Chiudi', shut, 'sm')), build());
+  PAC_UI = () => { if (!dlg.isConnected) { PAC_UI = null; return; } draw(); };
+  dlg.append(body); dlg.addEventListener('close', () => { PAC_UI = null; dlg.remove(); }); draw(); document.body.append(dlg); dlg.showModal();
+}
+function pianoCard() {          // sotto i conti: quanto entra, quanto esce, quanto ti resta e dove potrebbe arrivare il patrimonio
+  const B = BG(), F = planFlows(12), s12 = a => { let t = 0; for (let m = 1; m <= 12; m++) t += a[m]; return t; }, inc = s12(F.inc) / 12, exp = s12(F.exp) / 12, pac = s12(F.pac) / 12, left = inc - exp - pac, has = B.items.length > 0 || PL().length > 0, open = !!UI.pvOpen;
+  const sec = h('section', { class: 'card' }, h('h2', null, 'Piano e previsioni'));
+  if (has) sec.append(tiles([{ l: 'Entrate al mese', v: eur(inc), s: 'media dei prossimi 12 mesi' }, { l: 'Spese al mese', v: eur(exp), s: 'annuali e trimestrali spalmate' }, { l: 'Acquisti programmati al mese', v: eur(pac), s: 'verso gli investimenti' }, { l: 'Ti resta al mese', v: h('span', { class: 'pill ' + (left < 0 ? 'dn' : 'up') }, eur(left)), s: left < 0 ? 'spendi più di quanto entra' : 'si accumula come liquidità' }]));
+  else sec.append(h('p', { class: 'muted' }, 'Scrivi le tue entrate e spese (per esempio stipendio e affitto): ti dico quanto ti resta ogni mese e dove può arrivare il patrimonio.'));
+  sec.append(h('div', { class: 'actbar' }, btn('Entrate e spese…', () => panelDialog('Entrate e spese', piBudget), has ? '' : 'pri'), btn(open ? 'Nascondi la previsione' : 'Previsione del patrimonio', () => { UI.pvOpen = !open; render(); }, open ? '' : (has ? 'pri' : '')), PL().length ? btn('Calendario PAC', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null));
+  if (open) {
+    const hz = [12, 36, 60, 120], R = projectPlan(120);
+    sec.append(planChart(R), table([{ t: 'Tra' }, { t: 'Patrimonio (mediano)', n: 1 }, { t: 'Fascia 10°–90°', n: 1 }], hz.map(k => [horizonLabel(k) + ' · ' + addMonthsStr(today(), k).slice(0, 7), eur(R.p50[k]), eur(R.p10[k]) + ' … ' + eur(R.p90[k])])),
+      R.pDebt > 0.05 ? h('div', { class: 'warn' }, 'In ' + pct(R.pDebt) + ' dei casi simulati la liquidità finisce prima di coprire le spese. Controlla spese, eventi o acquisti programmati.') : null,
+      h('p', { class: 'muted' }, 'Simulazione con le tue entrate, spese e acquisti programmati e un rendimento di ' + nfp.format(R.mu * 100) + '% l\'anno: non è una promessa, la fascia mostra quanto può cambiare.'), btn('Impostazioni della previsione…', () => panelDialog('Previsione del patrimonio', piPrevisioni), 'sm'));
+  }
+  return sec;
 }
 function tabConti() {
   if (UI.acc) return viewAccount(UI.acc);
@@ -3781,11 +3882,42 @@ function tabConti() {
         h('div', { class: 'grp-bar' }, h('i', { style: '--w:' + (share * 100).toFixed(1) + '%' }))),
       h('div', { class: 'acards' }, g.accs.map(a => accCard(a, total, k++)))));
   }
+  el.append(pianoCard());          // l'ex scheda Piano, ridotta all'essenziale
   el.append(h('p', { class: 'noconti muted', hidden: '' }, 'Nessun conto corrisponde alla ricerca.'));
-  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; il resto = fermi. Tocca la riga ⟳ di un conto per vedere che cosa si aggiorna da solo.'));
+  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker, crypto e trading = investiti; il resto = fermi.'));
   if (UI.contiQ) setTimeout(() => filterConti(UI.contiQ), 0);
   return el;
-}function viewAccount(id) {
+}function accCharts(a) {
+  const per = UI.gper || '3M', days = (G_PERS.find(x => x[0] === per) || G_PERS[1])[2], out = [], v0 = accValue(a), cash = isCashAcc(a), tot = Math.abs(v0) || 1;
+  const snap = S.snapshots.filter(n => n.accs && n.accs[a.id] != null).map(n => ({ t: dayMs(n.date), v: n.accs[a.id] })).concat([{ t: dayMs(today()), v: v0 }]).filter((p, k, ar) => ar.findIndex(x => x.t === p.t) === k).sort((x, y) => x.t - y.t);
+  const vs = a.positions.length ? valueSeries([a]).map(p => ({ t: p.t, v: p.v })) : [], base = vs.length >= snap.length ? vs : snap, pts = cutPts(base, days), f1 = pts[0], l1 = pts[pts.length - 1];
+  out.push(gCard('Andamento del conto', 'Come è cambiato il valore di questo conto. Scegli il periodo; tocca o sfiora un punto per leggere i numeri.', gChips(G_PERS.map(x => [x[0], x[1]]), per, v => { UI.gper = v; }, 'Periodo'),
+    f1 && l1 && pts.length > 1 ? h('p', null, h('b', null, 'Nel periodo: ' + seur(l1.v - f1.v)), h('span', { class: 'muted' }, ' (dal ' + fmtDate(isoOf(f1.t)) + ')')) : null, gline([{ name: a.name, color: '#0a84ff', pts }], { fmt: eur }),
+    vs.length >= snap.length && a.positions.length ? h('p', { class: 'muted' }, 'Ricostruito con le quantità di oggi sui prezzi storici: non conosce acquisti e vendite fatti prima.') : null));
+  const rows = a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p)] : null; }).filter(Boolean).concat(accCash(a) > 0 ? [['Liquidità', accCash(a)]] : []).filter(r => r[1] > 0).sort((x, y) => y[1] - x[1]);
+  if (rows.length > 1) out.push(gCard('Di che cosa è fatto', 'Tocca una fetta o una voce per vedere quanto pesa.', donut(rows, 'Valore', false, lab => { const r = rows.find(x => x[0] === lab); if (r) talk({ kind: a.name, title: lab, value: eur(r[1]), num: r[1], say: 'Pesa ' + pct(r[1] / tot) + ' di questo conto.' }); })));
+  const by = new Map(); for (const f of a.flows) { const k = f.date.slice(0, 7); by.set(k, (by.get(k) || 0) + f.amount * flowSign(f.type)); }
+  if (by.size) { const items = []; for (let k = 11; k >= 0; k--) { const m = addMonthsStr(today().slice(0, 7) + '-01', -k).slice(0, 7), v = by.get(m) || 0; items.push({ l: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }), v, tip: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) + ': ' + seur(v) }); }
+    out.push(gCard('Soldi che entrano ed escono', 'Versamenti (barre blu) e prelievi (barre rosse) di questo conto, mese per mese, negli ultimi 12 mesi.', vbars(items, { fmt: seur, label: 'Entrate e uscite per mese' })));
+  } else out.push(gCard('Soldi che entrano ed escono', 'Nessun movimento registrato in questo conto: aggiungi i versamenti da "+ Movimento" e qui compare il grafico mese per mese.'));
+  out.push(accForecast(a, v0, cash));
+  return out;
+}
+function accForecast(a, v0, cash) {          // stima: quanto potrebbe valere tra qualche anno, in tre scenari (non e' una promessa)
+  const yrs = UI.gfy || 5, plans = PL().filter(p => p.accId === a.id), pac = plans.reduce((t, p) => t + planMonthly(p), 0), lim = addMonthsStr(today(), -6);
+  const past = a.flows.filter(f => f.date >= lim).reduce((t, f) => t + f.amount * flowSign(f.type), 0) / 6, m = pac > 0 ? pac : Math.max(0, past);
+  const pf = a.perf ? perfOf([a]) : null, xi = pf && fin(pf.xirr) ? Math.max(-0.2, Math.min(0.25, pf.xirr)) : null;
+  const sc = cash ? [['Prudente', 0, '#8e8e93'], ['Medio', 0.01, '#0a84ff'], ['Ottimista', 0.025, '#30d158']] : [['Prudente', 0.02, '#8e8e93'], ['Medio', 0.05, '#0a84ff'], ['Ottimista', 0.08, '#30d158']];
+  if (xi != null && !cash) sc.push(['Come finora', xi, '#bf5af2']);
+  const proj = (r, k) => { const i = r / 12; return i === 0 ? v0 + m * k : v0 * Math.pow(1 + i, k) + m * ((Math.pow(1 + i, k) - 1) / i); }, now = dayMs(today());
+  const ser = [sc[1], sc[0], sc[2]].concat(sc.slice(3)).map(([n, r, c]) => ({ name: n + ' (' + nfp.format(r * 100) + '%/anno)', color: c, pts: Array.from({ length: yrs * 12 + 1 }, (_, k) => ({ t: now + k * 30.4375 * 864e5, v: proj(r, k) })) }));
+  const end = r => proj(r, yrs * 12);
+  return gCard('Dove potrebbe arrivare', 'Stima di quanto potrebbe valere il conto nei prossimi anni, mantenendo i versamenti di oggi. Sono ipotesi, non previsioni.', gChips([[1, '1 anno'], [3, '3 anni'], [5, '5 anni'], [10, '10 anni']], yrs, v => { UI.gfy = v; }, 'Orizzonte'),
+    h('p', null, h('b', null, 'Tra ' + yrs + (yrs === 1 ? ' anno' : ' anni') + ': circa ' + eur(end(sc[1][1]))), h('span', { class: 'muted' }, ' (tra ' + eur(end(sc[0][1])) + ' e ' + eur(end(sc[2][1])) + ')')),
+    gline(ser, { fmt: eur }),
+    h('p', { class: 'muted' }, 'Parto da ' + eur(v0) + ' di oggi' + (m > 0 ? ' e aggiungo circa ' + eur(m) + ' al mese (' + (pac > 0 ? 'dai tuoi PAC' : 'la media dei movimenti degli ultimi 6 mesi') + ')' : ', senza nuovi versamenti') + '. ' + (cash ? 'Un conto fermo rende poco: gli scenari sono tassi da conto deposito.' : 'Gli scenari sono rendimenti medi annui' + (xi != null ? '; "Come finora" usa il rendimento che questo conto ha avuto (' + spct(xi) + ' all\'anno)' : '') + '. Il passato non garantisce il futuro.')));
+}
+function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
   el.append(h('div', { class: 'row' }, btn('← Tutti i conti', () => { UI.acc = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, a.name), btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
@@ -3794,13 +3926,7 @@ function tabConti() {
   el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)' }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
-  if (a.positions.length) {          // che cosa si aggiorna da solo in questo conto
-    const x = autoInfo(a), li = ([, , i, v], ok) => h('li', null, h('span', null, (ok ? '⟳ ' : '✎ ') + i.name, h('small', null, ok ? ' · ' + srcText(i) : ' · ' + fermoWhy(i))), h('span', null, eur(v)));
-    el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Cosa si aggiorna da solo'), h('span', { class: 'pill ' + (x.fermi.length ? 'dn' : 'up') }, pct(x.share) + ' del valore')),
-      h('p', { class: 'muted' }, 'Ogni giorno l\'app prende il prezzo di oggi dei titoli con ⟳ e lo moltiplica per le tue quantità. Quelli con ✎ restano al valore dell\'ultimo estratto.'),
-      h('div', { class: 'two' }, h('div', null, h('h4', null, 'Automatici (' + x.auto.length + ')'), x.auto.length ? h('ul', { class: 'list' }, x.auto.sort((p, q) => q[3] - p[3]).map(r => li(r, true))) : h('p', { class: 'muted' }, 'Nessuno.')),
-        h('div', null, h('h4', null, 'Fermi, li aggiorni tu (' + x.fermi.length + ')'), x.fermi.length ? h('ul', { class: 'list' }, x.fermi.sort((p, q) => q[3] - p[3]).map(r => li(r, false))) : h('p', { class: 'muted' }, 'Nessuno: tutto si aggiorna da solo.')))));
-  }
+  accCharts(a).forEach(c => c && el.append(c));          // grafici del conto: andamento, composizione, entrate e uscite, stima futura
   if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
   const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? (i.autoSrc === 'stima' ? ' ≈' : ' ⟳') : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Posizioni'), btn('+ Posizione', () => editPosition(a), 'pri')),
@@ -4621,7 +4747,7 @@ function editPlan(p) {
     { key: 'kind', label: 'Che cos\'è', type: 'select', options: [['acquisto', 'Acquisto di uno strumento'], ['versamento', 'Versamento sul conto']] },
     { key: 'accId', label: 'Conto di arrivo (dove finiscono i soldi o l\'acquisto)', type: 'select', options: S.accounts.map(a => [a.id, a.name]) },
     { key: 'fromAccId', label: 'Conto di partenza (facoltativo)', type: 'select', options: [['', '— i soldi sono già lì o arrivano da fuori —'], ...S.accounts.map(a => [a.id, a.name])], hint: 'per esempio il conto corrente da cui parte il bonifico verso il broker' },
-    ...(p && p.parts ? p.parts.map((x, k) => ({ key: 'part' + k, label: 'Ogni volta: ' + (x.instId && inst(x.instId) ? inst(x.instId).name : x.instName || x.instCode) + ' (€, 0 = toglilo)', type: 'number' })) : [{ key: 'instId', label: 'Strumento (per gli acquisti)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] }, { key: 'amount', label: 'Importo ogni volta (€)', type: 'number', req: true }]),
+    ...(p && p.parts ? p.parts.map((x, k) => ({ key: 'part' + k, label: (x.instId && inst(x.instId) ? inst(x.instId).name : x.instName || x.instCode), type: 'number' })) : [{ key: 'instId', label: 'Strumento (per gli acquisti)', type: 'select', options: [['', '— nessuno —'], ...S.instruments.map(i => [i.id, i.name])] }, { key: 'amount', label: 'Importo ogni volta (€)', type: 'number', req: true }]),
     { key: 'freq', label: 'Frequenza', type: 'select', options: FREQ.map(f => [f[0], f[1]]) },
     { key: 'day', label: 'Giorno del mese (1-28)', type: 'number' },
     { key: 'start', label: 'Dal', type: 'date', req: true },
@@ -4689,7 +4815,7 @@ function tabPac() {
   if (UI.planId) return viewPlan(UI.planId);
   const plans = PL(), pm = plans.reduce((t, p) => t + planMonthly(p), 0), due = planDueAll(), el = h('div');
   el.append(h('section', { class: 'card conti-head' }, h('div', { class: 'ch-top' }, h('div', null, h('div', { class: 'lbl' }, 'I tuoi PAC'), h('div', { class: 'ch-n' }, eur(pm) + ' /mese'), h('div', { class: 'muted' }, plans.length ? pl(plans.length, 'PAC', 'PAC') + ' · ' + eur(pm * 12) + ' in un anno · tocca un PAC per aprirlo' : 'Ancora nessun PAC'))),
-    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => { UI.tab = 'piano'; render(); }) : null)));
+    h('div', { class: 'actbar' }, btn('+ Nuovo PAC', () => pacWizard(), 'pri'), due.length ? btn('Conferma ' + pl(due.length, 'acquisto', 'acquisti') + '…', () => confirmDue()) : null, plans.length ? btn('Calendario', () => panelDialog('Calendario dei PAC', piAppuntamenti)) : null)));
   el.append(planCards(plans, null) || h('p', { class: 'muted' }, 'Ancora nessun PAC. Premi "+ Nuovo PAC": ti faccio poche domande.'));
   el.append(pacRibilancia());
   return el;
@@ -4723,6 +4849,63 @@ function pacManager() {          // la stessa cosa in una finestra, dal menu
   return el;
 }
 
+/* ============ classifiche dei titoli (Consigli): chi e' cresciuto, chi e' crollato, i piu' grandi, ieri/oggi; dati onvista, aggiornati ogni giorno ============ */
+function normClass(j) {
+  if (!j || !Array.isArray(j.voci) || j.voci.length < 10) return null;
+  j.voci = j.voci.filter(v => v && v.n && fin(v.p)).map(v => Object.assign(v, { sd: asArr(v.sd), sp: asArr(v.sp) })); return j;
+}
+const capC = n => !fin(n) ? '—' : n >= 1e12 ? NF1.format(n / 1e12) + ' tln €' : n >= 1e9 ? nf0.format(n / 1e9) + ' mld €' : nf0.format(n / 1e6) + ' mln €';
+const CL_PER = [['m1', '1 mese'], ['m3', '3 mesi'], ['m6', '6 mesi'], ['ytd', 'Da inizio anno'], ['y1', '1 anno'], ['y3', '3 anni'], ['y5', '5 anni']];
+const clPerLabel = k => (CL_PER.find(x => x[0] === k) || [0, k])[1];
+const clDD = v => v.hi > 0 ? v.p / v.hi - 1 : null;          // distanza dal massimo di 52 settimane
+function clSpark(v, maxDays, w, hgt, big) {          // mini-grafico dai prezzi di 5 anni, 3 anni, 1 anno, 6 mesi... fa oggi (punti a distanze vere nel tempo)
+  const pts = v.sd.map((d, i) => [d, v.sp[i]]).filter(x => x[0] <= maxDays && fin(x[1])).sort((a, b) => b[0] - a[0]); if (pts.length < 2) return null;
+  const lo = Math.min(...pts.map(x => x[1])), hi = Math.max(...pts.map(x => x[1])), X = d => (maxDays - d) / maxDays * w, Y = p => hgt - 3 - (p - lo) / ((hi - lo) || 1) * (hgt - 6), up = pts[pts.length - 1][1] >= pts[0][1], col = up ? 'var(--gain)' : 'var(--loss)';
+  const d = 'M' + pts.map(x => X(x[0]).toFixed(1) + ' ' + Y(x[1]).toFixed(1)).join(' L');
+  return s('svg', { viewBox: '0 0 ' + w + ' ' + hgt, class: big ? 'clspark big' : 'clspark', 'aria-hidden': 'true' }, s('path', { d: d + ' L' + w + ' ' + hgt + ' L0 ' + hgt + ' Z', fill: col, 'fill-opacity': .12 }), s('path', { d, fill: 'none', stroke: col, 'stroke-width': big ? 2.4 : 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    big ? pts.map(x => s('circle', { cx: X(x[0]), cy: Y(x[1]), r: 3.2, fill: col })) : null);
+}
+function talkTitolo(v, held) {
+  const mine = held.has(String(v.isin).toUpperCase()), dd = clDD(v), rows = [['Ieri/oggi (ultima seduta)', v.d1], ['1 settimana', v.w1], ['1 mese', v.m1], ['3 mesi', v.m3], ['6 mesi', v.m6], ['Da inizio anno', v.ytd], ['1 anno', v.y1], ['3 anni', v.y3], ['5 anni', v.y5]].filter(r => fin(r[1])), px = nf2.format(v.p) + (v.ty === 'bond' ? ' %' : ' ' + v.ccy);
+  talk({ kind: ({ azione: 'Azione', etf: 'ETF / fondo', bond: 'Obbligazione' }[v.ty] || 'Titolo') + (v.tk ? ' · ' + v.tk : '') + (v.set ? ' · ' + v.set : ''), title: nm(v.n), value: px,
+    say: nm(v.n) + ' quota ' + px + (fin(v.pd) ? ' (ultima chiusura precedente ' + nf2.format(v.pd) + ')' : '') + (fin(v.d1) ? ': oggi ' + spct(v.d1 / 100) : '') + '.' + (mine ? ' Ce l\'hai anche tu.' : ''),
+    box: clSpark(v, 1825, 300, 80, true) ? ['Andamento: 5 anni, 3 anni, 1 anno, 6 mesi, 3 mesi, 1 mese, 1 settimana, oggi', clSpark(v, 1825, 300, 80, true)] : null,
+    how: (fin(v.hi) && fin(v.lo) ? 'Nelle ultime 52 settimane è stato tra ' + nf2.format(v.lo) + ' e ' + nf2.format(v.hi) + (dd != null ? ': oggi è ' + spct(dd).replace('+', '') + ' dal massimo' : '') + '. ' : '') + (fin(v.cap) ? 'Capitalizzazione (valore di tutta l\'azienda in Borsa): ' + capC(v.cap) + '. ' : '') + 'Dati giornalieri, non in tempo reale.',
+    rows: rows.map(r => [r[0], r[1] / 100, '', null, spct(r[1] / 100)]), rowsTitle: 'Come è andato', signed: true,
+    tip: 'Un titolo salito molto non è per forza da comprare e uno crollato non è per forza un affare: guarda sempre il motivo. Non è un consiglio.' });
+}
+function tabClassifiche() {
+  const C = DATA.classif;
+  if (!C) return h('section', { class: 'card' }, h('h2', null, 'Classifiche dei titoli'), h('p', { class: 'muted' }, ONLINE ? 'Le classifiche non sono ancora disponibili: il sito le aggiorna una volta al giorno. Riprova più tardi.' : 'Apri l\'app dal sito per vedere le classifiche.'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null);
+  const ty = UI.ctipo || 'azione', all = C.voci.filter(v => v.ty === ty || (ty === 'etf' && v.ty === 'altro')), held = heldIsins(), el = h('div');
+  const mets = ty === 'azione' ? [['cresciuti', 'Più cresciuti'], ['grandi', 'Più grandi'], ['crolli', 'Maggiori crolli'], ['oggi', 'Ieri/oggi']] : [['cresciuti', 'Più cresciuti'], ['crolli', 'Maggiori crolli'], ['oggi', 'Ieri/oggi']];
+  let met = UI.cmet || 'cresciuti'; if (!mets.some(m => m[0] === met)) met = 'cresciuti'; let per = UI.cper || 'y1';
+  const chipRow = (arr, cur, set, lab) => h('div', { class: 'chips', role: 'group', 'aria-label': lab }, arr.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': cur === k ? 'true' : 'false', onclick: () => { set(k); render(); } }, l)));
+  const perOpts = met === 'crolli' ? [['hi', 'Dal massimo'], ...CL_PER] : CL_PER; if (!perOpts.some(x => x[0] === per)) per = met === 'crolli' ? 'hi' : 'y1';
+  const head = h('section', { class: 'card' }, h('h2', null, 'Classifiche dei titoli'), h('p', { class: 'muted' }, 'Azioni, ETF e obbligazioni: chi è salito di più, chi è crollato, i più grandi. Dati giornalieri (non in tempo reale), aggiornati il ' + fmtDate(String(C.generato).slice(0, 10)) + '. Tocca un titolo per il grafico e i numeri.'),
+    chipRow([['azione', 'Azioni'], ['etf', 'ETF'], ['bond', 'Obbligazioni']], ty, k => { UI.ctipo = k; }, 'Che cosa'), chipRow(mets, met, k => { UI.cmet = k; }, 'Classifica'), met === 'oggi' || met === 'grandi' ? null : chipRow(perOpts, per, k => { UI.cper = k; }, 'Periodo'));
+  el.append(head);
+  const val = (v, m) => m === 'hi' ? (clDD(v) != null ? clDD(v) * 100 : null) : v[m];
+  const row = (v, i, main, sub) => h('div', { class: 'cl-row', role: 'button', tabindex: '0', onclick: () => talkTitolo(v, held), onkeydown: e => { if (e.key === 'Enter') talkTitolo(v, held); } },
+    h('span', { class: 'cl-i' }, String(i + 1)), h('div', { class: 'cl-n' }, h('b', null, (held.has(String(v.isin).toUpperCase()) ? '★ ' : '') + nm(v.n)), h('small', null, [v.tk, v.set].filter(Boolean).join(' · ') || v.isin)), h('span', { class: 'cl-sp' }, clSpark(v, 365, 72, 28, false) || ''),
+    h('div', { class: 'cl-v' }, main, h('small', null, sub)));
+  const pctPill = x => fin(x) ? h('span', { class: 'pill ' + (x >= 0 ? 'up' : 'dn') }, (x >= 0 ? '▲ +' : '▼ −') + nfp.format(Math.abs(x)) + '%') : '—';
+  const px = v => nf2.format(v.p) + (v.ty === 'bond' ? ' %' : ' ' + v.ccy);
+  const list = (title, arr, mk, hint) => h('section', { class: 'card' }, h('h3', null, title), hint ? h('p', { class: 'muted' }, hint) : null, arr.length ? arr.map(mk) : h('p', { class: 'muted' }, 'Nessun dato.'));
+  if (met === 'oggi') {
+    const d = all.filter(v => fin(v.d1)).sort((a, b) => b.d1 - a.d1);
+    el.append(list('I più saliti nell\'ultima seduta', d.slice(0, 8), (v, i) => row(v, i, pctPill(v.d1), px(v))), list('I più scesi nell\'ultima seduta', d.slice(-8).reverse(), (v, i) => row(v, i, pctPill(v.d1), px(v))));
+  } else if (met === 'grandi') {
+    const d = all.filter(v => fin(v.cap)).sort((a, b) => b.cap - a.cap).slice(0, 15);
+    el.append(list('Le più capitalizzate', d, (v, i) => row(v, i, h('b', null, capC(v.cap)), 'oggi ' + (fin(v.d1) ? (v.d1 > 0 ? '+' : '') + nfp.format(v.d1) + '%' : '—')), 'Capitalizzazione = prezzo × numero di azioni: quanto vale tutta l\'azienda in Borsa.'));
+  } else {
+    const asc = met === 'crolli', d = all.filter(v => fin(val(v, per))).sort((a, b) => asc ? val(a, per) - val(b, per) : val(b, per) - val(a, per)).slice(0, 15);
+    el.append(list(asc ? 'Maggiori crolli (' + (per === 'hi' ? 'dal massimo di 52 settimane' : clPerLabel(per)) + ')' : 'Più cresciuti (' + clPerLabel(per) + ')', d, (v, i) => row(v, i, pctPill(val(v, per)), px(v)), asc ? 'Chi è sceso di più. Un crollo può essere un\'occasione o un campanello d\'allarme: guarda il motivo.' : 'Chi è salito di più nel periodo. Ciò che è salito molto può anche scendere.'));
+  }
+  el.append(h('p', { class: 'muted' }, 'Le azioni sono le circa 100 più grandi degli USA; gli ETF e le obbligazioni sono quelli della tua lista più alcuni molto diffusi. Il mini-grafico mostra l\'ultimo anno. ★ = ce l\'hai anche tu. Fonte: onvista.'));
+  return el;
+}
+
 /* ============ Grandi soldi: portafogli dei grandi investitori (13F) e operazioni degli insider (Form 4), dati ufficiali della SEC ============ */
 const NF1 = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 1 });
 const usdC = n => { if (!fin(n)) return '—'; const a = Math.abs(n), sg = n < 0 ? '−' : ''; return sg + (a >= 1e9 ? NF1.format(a / 1e9) + ' mld $' : a >= 1e6 ? NF1.format(a / 1e6) + ' mln $' : a >= 1e3 ? nf0.format(a / 1e3) + ' mila $' : nf0.format(a) + ' $'); };
@@ -4740,7 +4923,7 @@ function normGrandi(j) {
   j.aggregato = ag; j.escludiAgg = asArr(j.escludiAgg); j.insider = { giorniFatti: asArr(j.insider && j.insider.giorniFatti), operazioni: asArr(j.insider && j.insider.operazioni).filter(o => o && fin(o.valore)) };
   return j;
 }
-const nm = x => String(x == null ? '' : x).toLowerCase().replace(/(^|[\s(\-\/&.])([a-zà-ú])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Usa|Etf|Spdr|Adr|Llc|Lp|Nv|Sa|Ag|Plc|Ii|Iii|Iv|Ibm|Cf|Tjx|Cvs|Nrg)\b/g, w => w.toUpperCase());          // NVIDIA CORPORATION -> Nvidia Corporation
+const nm = x => String(x == null ? '' : x).toLowerCase().replace(/(^|[\s(\-\/&.])([a-zà-ú])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Usa|Etf|Spdr|Adr|Llc|Lp|Nv|Sa|Ag|Plc|Ii|Iii|Iv|Ibm|Cf|Tjx|Cvs|Nrg|Amd|Ups|Gm|Hp|Nxp|Asml|At&t|Pnc|Csx|Cme|Ice|Etc|Etn|Msci|Ucits|Usd|Eur|Acc|Etp|Reit)\b/g, w => w.toUpperCase()).replace(/bIsharesb/g, "iShares");          // NVIDIA CORPORATION -> Nvidia Corporation
 const hAny = (x, held) => (x.isins && x.isins.length ? x.isins : [x.isin]).some(i => i && held.has(i));
 function heldIsins() { const s = new Set(); for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (i && i.code && p.qty > 0) s.add(String(i.code).toUpperCase()); } return s; }
 const heldWord = (name, held) => { const w = normT(String(name || '')).split(' ')[0]; if (!w || w.length < 4) return false; return S.accounts.some(a => a.positions.some(p => { const i = inst(p.instId); return i && p.qty > 0 && normT(i.name).split(' ')[0] === w; })); };
@@ -4800,14 +4983,14 @@ function grFondi(G, tot) {
   return wrap;
 }
 function viewFondo(f, G) {
-  const per = UI.gper || 'trim', C = f[per] || f.trim, held = heldIsins(), el = h('div'), ritardo = daysAgo(f.trimestre);
+  const per = UI.grper || 'trim', C = f[per] || f.trim, held = heldIsins(), el = h('div'), ritardo = daysAgo(f.trimestre);
   const topPct = f.top.reduce((t, x) => t + (x.pct || 0), 0), top3 = f.top.slice(0, 3).reduce((t, x) => t + (x.pct || 0), 0);
   el.append(h('div', { class: 'row' }, btn('← Tutti i portafogli', () => { UI.fondo = null; render(); }), h('h2', { class: 'grow', style: 'margin:0' }, f.nome)),
     h('p', { class: 'muted' }, f.chi + ' · ' + f.tipo + ' · portafoglio al ' + fmtDate(f.trimestre) + ' (' + qLabel(f.trimestre) + '), depositato il ' + fmtDate(f.depositato) + ' · fotografia di ' + pl(ritardo, 'giorno', 'giorni') + ' fa'));
   if (ritardo > 150) el.append(grInfo('Questo gestore non ha ancora depositato il trimestre più recente: i dati sono vecchi di ' + ritardo + ' giorni.'));
   el.append(tiles([{ l: 'Valore in azioni USA', v: usdC(f.valore), s: pl(f.posizioni, 'titolo', 'titoli'), x: () => ({ kind: f.nome, say: 'Quanto valgono, alla data del ' + fmtDate(f.trimestre) + ', le azioni quotate negli USA che ' + f.nome + ' ha in portafoglio. Sono ' + pl(f.posizioni, 'titolo', 'titoli') + '. Non è tutto il suo patrimonio: mancano obbligazioni, opzioni e mercati esteri.', rows: f.top.slice(0, 6).map(y => [nm(y.n), y.v, pct(y.pct), () => { closeTalks(); talkPos13(f, y, held); }, usdC(y.v)]), rowsTitle: 'I titoli più grandi (tocca per i dettagli)' }) }, { l: 'Primi 3 titoli', v: pct(top3), s: top3 > 0.5 ? 'molto concentrato' : 'del portafoglio', x: () => ({ kind: f.nome, say: 'Quanta parte del portafoglio sta nei tre titoli più grandi. Più è alta, più il gestore ha puntato su poche società: guadagna molto se ha ragione e perde molto se sbaglia.', rows: f.top.slice(0, 3).map(y => [nm(y.n), y.v, pct(y.pct), null, usdC(y.v)]), tip: 'Sopra il 50% si parla di portafoglio concentrato; un fondo indicizzato ha di solito sotto il 20%.' }) }, { l: 'Primi 10 titoli', v: pct(topPct), s: 'del portafoglio', x: () => ({ kind: f.nome, say: 'Quanta parte del portafoglio sta nei dieci titoli più grandi. Il resto è distribuito su altri ' + Math.max(0, f.posizioni - 10) + ' titoli.', rows: f.top.map(y => [nm(y.n), y.v, pct(y.pct), null, usdC(y.v)]) }) },
     { l: 'Rispetto al trimestre prima', v: f.trim ? f.trim.n.nuove + ' nuove · ' + f.trim.n.chiuse + ' chiuse' : '—', s: 'posizioni aperte e chiuse', x: () => ({ kind: f.nome, say: 'Quante posizioni nuove ha aperto e quante ne ha chiuse del tutto rispetto al trimestre prima (' + fmtDate(f.precedente) + '). Più i cambi sono pochi, più il gestore tiene i titoli a lungo.', tip: 'Qui sotto, in Cosa ha fatto, trovi i dettagli titolo per titolo.' }) }]));
-  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, [['trim', 'Dall\'ultimo trimestre' + (f.precedente ? ' (' + fmtDate(f.precedente) + ')' : '')], ['sem', 'Dall\'ultimo semestre' + (f.semestre ? ' (' + fmtDate(f.semestre) + ')' : '')]].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': per === k ? 'true' : 'false', onclick: () => { UI.gper = k; render(); } }, l)));
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, [['trim', 'Dall\'ultimo trimestre' + (f.precedente ? ' (' + fmtDate(f.precedente) + ')' : '')], ['sem', 'Dall\'ultimo semestre' + (f.semestre ? ' (' + fmtDate(f.semestre) + ')' : '')]].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': per === k ? 'true' : 'false', onclick: () => { UI.grper = k; render(); } }, l)));
   const mx = Math.max(...f.top.map(x => x.pct || 0), 0.001);
   el.append(h('section', { class: 'card' }, h('h2', null, 'I titoli più grandi'), f.top.map(x => h('div', { class: 'row', role: 'button', tabindex: '0', onclick: () => talkPos13(f, x, held), style: 'gap:10px;align-items:center;margin:6px 0;flex-wrap:nowrap;cursor:pointer' }, h('span', { style: 'flex:1;min-width:0;font-size:14px' }, (hAny(x, held) ? '★ ' : '') + nm(x.n)), h('div', { class: 'bar-track', style: 'width:20%;flex:none' }, h('div', { class: 'bar', style: 'width:' + Math.max(2, (x.pct || 0) / mx * 100) + '%' })), h('span', { style: 'width:104px;flex:none;text-align:right;font-size:13px;white-space:nowrap' }, pct(x.pct) + ' · ' + usdC(x.v)))),
     h('p', { class: 'muted' }, '★ = ce l\'hai anche tu (stesso codice ISIN). Tocca una riga per i dettagli.')));
@@ -4831,10 +5014,10 @@ function ruleFondo(f, C, per, held) {
   return out;
 }
 function grDoveVanno(G) {
-  const per = UI.gper || 'trim', A = G.aggregato[per], held = heldIsins(), el = h('div');
+  const per = UI.grper || 'trim', A = G.aggregato[per], held = heldIsins(), el = h('div');
   const labP = per === 'sem' ? 'ultimi 6 mesi' : 'ultimo trimestre', n = G.fondi.filter(f => f[per]).length, f0 = G.fondi.find(f => f[per] && (per === 'sem' ? f.semestre : f.precedente)), dR = f0 ? ', dal ' + fmtDate(per === 'sem' ? f0.semestre : f0.precedente) + ' al ' + fmtDate(f0.trimestre) : '';
   el.append(h('section', { class: 'card' }, h('h2', null, 'Cosa comprano e vendono i grandi, tutti insieme'),
-    h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, [['trim', 'Ultimo trimestre'], ['sem', 'Ultimi 6 mesi']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': per === k ? 'true' : 'false', onclick: () => { UI.gper = k; render(); } }, l))),
+    h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, [['trim', 'Ultimo trimestre'], ['sem', 'Ultimi 6 mesi']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': per === k ? 'true' : 'false', onclick: () => { UI.grper = k; render(); } }, l))),
     h('p', { class: 'muted' }, 'Somma dei movimenti di ' + pl(n, 'portafoglio', 'portafogli') + ' nel periodo (' + labP + dR + '). Il valore è una stima: variazione delle azioni per il prezzo di fine trimestre. Non contano i fondi quantitativi, i market maker e quelli indicizzati (' + G.fondi.filter(f => G.escludiAgg.includes(+f.cik)).map(f => f.nome).join(', ') + '): i loro movimenti sono automatici, non scelte.')));
   const list = (title, rows, buy) => { const mx = Math.max(...rows.map(x => Math.abs(x.netto)), 1);
     return h('section', { class: 'card' }, h('h3', null, title), rows.length ? rows.map(x => { const who = buy ? x.compra : x.vende, isHeld = x.isins.some(i => held.has(i));

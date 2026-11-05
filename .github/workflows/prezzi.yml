@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'raccogli-grandi-soldi.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'promemoria-pac.json', 'catalogo.ps1', 'site/analisi.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'raccogli-grandi-soldi.ps1', 'classifiche.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'promemoria-pac.json', 'catalogo.ps1', 'site/analisi.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -53,6 +53,12 @@ jobs:
         timeout-minutes: 40
         shell: pwsh
         run: ./raccogli-grandi-soldi.ps1 -Uscita ./site -GiorniInsider 1
+      - name: Classifiche dei titoli (prezzi e rendimenti da onvista, una volta al giorno)
+        id: classifiche
+        continue-on-error: true
+        timeout-minutes: 25
+        shell: pwsh
+        run: ./classifiche.ps1 -Uscita ./site -Lista ./aziende-lista.json -Watch ./watchlist-pubblica.json
       - name: Catalogo dei prezzi di tutti gli ETF, ETC, BTP, obbligazioni e crypto principali
         id: catalogo
         continue-on-error: true
