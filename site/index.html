@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Cvj5L4/lLbQ480YcL4sE/Jcdd9xx7gIB6vH4u+DnwEU='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4jQI10HTpxVyoTUUUaA/IrFYXAXHOUPlaATjWHKfyRI='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -718,6 +718,28 @@ async function locPut(text, at) {
   if (LOC.persisted == null && navigator.storage && navigator.storage.persist) { try { LOC.persisted = await navigator.storage.persist(); } catch { LOC.persisted = false; } }          // chiede al browser di non cancellare questi dati da solo
 }
 async function locDel() { let bad = null; try { await idbDo('readwrite', st => st.delete('archivio')); } catch (e) { bad = e; } try { localStorage.removeItem(LS_KEY); } catch { /* niente */ } if (bad && LOC.where !== 'memoria locale') throw bad; LOC.rec = null; LOC.ok = false; }
+/* ---- salvataggi automatici: ogni minuto, mentre l'app e' aperta e qualcosa e' cambiato, una copia cifrata (le ultime 30) sul dispositivo; si puo' tornare indietro ---- */
+const AUTO_MAX = 30; let autoLast = '', autoBusy = false;
+async function autoList() { try { return (await idbDo('readonly', st => st.get('auto-idx'))) || []; } catch (e) { return []; } }
+async function autoPoint(force) {
+  if (!S || !KEY || DEMO || LOCKED || LOC.off || autoBusy || (!force && document.hidden)) return false;
+  const core = clCore(S); if (!force && core === autoLast) return false;          // niente di nuovo (i prezzi che si aggiornano da soli non contano)
+  autoBusy = true;
+  try {
+    const text = await seal(), id = new Date().toISOString(), idx = await autoList();
+    await idbDo('readwrite', st => st.put(text, 'auto:' + id)); idx.unshift({ id, n: S.accounts.length, tot: totalValue() });
+    const drop = idx.splice(AUTO_MAX); await idbDo('readwrite', st => st.put(idx, 'auto-idx'));
+    for (const d of drop) { try { await idbDo('readwrite', st => st.delete('auto:' + d.id)); } catch (e) { /* niente */ } }
+    autoLast = core; return true;
+  } catch (e) { return false; } finally { autoBusy = false; }
+}
+async function autoRestore(id) {
+  const text = await idbDo('readonly', st => st.get('auto:' + id)); if (!text) return 'Questo salvataggio non c\'è più.';
+  let D; try { const f = JSON.parse(text), header = { app: f.app, v: f.v, kdf: f.kdf, iter: f.iter, salt: f.salt }; D = JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv), additionalData: enc.encode(JSON.stringify(header)) }, KEY, unb64(f.ct)))); } catch (e) { return 'Non riesco ad aprire questo salvataggio (forse è stato fatto con un\'altra passphrase).'; }
+  migrate(D); await autoPoint(true);          // prima di tornare indietro si salva com'e' adesso: si puo' sempre tornare avanti
+  S = D; UI.acc = null; UI.planId = null; touch(); render(); setStatus('Ripristinato il salvataggio automatico'); return '';
+}
+setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
 async function seal() {
   S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
@@ -916,7 +938,7 @@ async function clPush(final) {
   } catch (e) { CL.state = 'offline'; CL.err = String(e.message || e); clNote(); clRetry(); }
   finally { CL.busy = false; if (CL.again) { CL.again = false; clSoon(300); } }
 }
-const CL_VOLATILE = new Set(['price', 'priceDate', 'hist', 'autoSrc', 'snapshots', 'fold', 'nudge', 'taxNudge', 'aiLog']);          // cio' che l'app cambia da sola ogni giorno
+const CL_VOLATILE = new Set(['price', 'priceDate', 'hist', 'autoSrc', 'snapshots', 'fold', 'nudge', 'taxNudge', 'aiLog', 'savedAt']);          // cio' che l'app cambia da sola ogni giorno
 function clCanon(v) { return Array.isArray(v) ? v.map(clCanon) : v && typeof v === 'object' ? Object.keys(v).filter(k => !CL_VOLATILE.has(k)).sort().map(k => [k, clCanon(v[k])]) : v; }
 const clCore = D => { try { return JSON.stringify(clCanon(D)); } catch { return Math.random() + ''; } };
 function clChoose(D, r) {          // due versioni diverse dei dati: si sceglie quale tenere
@@ -3813,7 +3835,7 @@ function tabPanoramica() {
   el.append(tiles([
     { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti',
       x: () => ({ num: tp.contrib, how: 'Somma di versamenti meno prelievi di ' + pl(pa.length, 'conto d\'investimento', 'conti d\'investimento') + ' = ' + eur(tp.contrib) + '. Per i conti senza storia conta il "valore di partenza" del giorno in cui hai cominciato a seguirli.', rows: perAcc(p => p.contrib).map(([a, , v]) => [a.name, v, '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto' }) },
-    { l: 'Guadagno / perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato',
+    { l: 'Guadagno / Perdita', v: tp.pnl == null ? '—' : gl(tp.pnl, seur(tp.pnl)), s: tp.pnlPct == null ? '' : spct(tp.pnlPct) + ' sul versato',
       x: () => ({ how: tp.pnl == null ? 'Servono i movimenti dei conti.' : eur(tp.value) + ' di valore oggi − ' + eur(tp.contrib) + ' versati = ' + seur(tp.pnl) + (fin(tp.pnlPct) ? ' (' + spct(tp.pnlPct) + ')' : '') + '.', rows: perAcc(p => p.pnl).map(([a, p, v]) => [a.name, v, fin(p.pnlPct) ? spct(p.pnlPct) : '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Chi ha guadagnato e chi ha perso', signed: true }) },
     { l: 'Rendimento annualizzato', v: tp.xirr == null ? '—' : gl(tp.xirr, spct(tp.xirr)), s: tp.xirr == null ? xirrWhy(tp) : 'XIRR, tiene conto delle date dei versamenti',
       x: () => ({ how: tp.xirr == null ? 'Compare dopo un anno di storia. Per i conti importati con il prezzo pagato (Fineco, Directa, Fondo Cometa) non sappiamo quando hai comprato: dividere il guadagno di anni per un solo mese darebbe numeri assurdi (per esempio +55% in un mese diventerebbe più del 20.000% "all\'anno"). Per ora guarda il guadagno sul versato.' : 'Il tasso annuo che, applicato a ogni versamento dal suo giorno, porta esattamente al valore di oggi: ' + spct(tp.xirr) + ' all\'anno.', rows: perAcc(p => p.xirr).map(([a, , v]) => [a.name, v, '', openAcc(a), spct(v)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto', signed: true }) },
@@ -3857,9 +3879,9 @@ function tabPanoramica() {
 }
 
 /* ---- i conti divisi in tre gruppi: soldi fermi, soldi investiti, fondo pensione ---- */
-const ACC_GROUPS = [['fermi', 'Soldi fermi', 'Conti correnti, contanti, carte, conti deposito e MetaTrader 5: soldi che non seguono i prezzi dei mercati titolo per titolo (le carte di credito contano come debito).'], ['investiti', 'Soldi investiti', 'Broker e crypto: titoli, ETF e crypto che cambiano valore ogni giorno.'], ['pensione', 'Fondo pensione', 'TFR e versamenti per la pensione: crescono nel tempo e si possono ritirare solo in casi precisi (pensione, prima casa, spese mediche).']];
+const ACC_GROUPS = [['fermi', 'Soldi fermi', 'Conti correnti, contanti, carte e conti deposito: soldi pronti da usare, che non salgono e non scendono con i mercati (le carte di credito contano come debito).'], ['investiti', 'Soldi investiti', 'Broker, crypto e trading (come MetaTrader 5, aggiornato a mano): titoli, ETF e crypto che cambiano valore ogni giorno.'], ['pensione', 'Fondo pensione', 'TFR e versamenti per la pensione: crescono nel tempo e si possono ritirare solo in casi precisi (pensione, prima casa, spese mediche).']];
 const accGroup = a => a.type === 'pensione' ? 'pensione' : ['broker', 'crypto', 'trading'].includes(a.type) ? 'investiti' : 'fermi';
-const accShow = a => a.type === 'trading' ? 'fermi' : accGroup(a);          // dove si VEDE il conto: MetaTrader 5 (trading) sta tra i soldi fermi; per il resto (da dove partono i soldi, controlli) resta un conto d'investimento
+const accShow = a => accGroup(a);          // dove si VEDE il conto: MetaTrader 5 (trading) sta tra i soldi fermi; per il resto (da dove partono i soldi, controlli) resta un conto d'investimento
 const groupAccs = () => ACC_GROUPS.map(([k, l, d]) => { const accs = S.accounts.filter(a => accShow(a) === k).sort((x, y) => (x.ord ?? 1e9) - (y.ord ?? 1e9) || accValue(y) - accValue(x)); return { k, l, d, accs, tot: accs.reduce((t, a) => t + accValue(a), 0) }; });
 function groupTiles() {          // tre riquadri parlanti: quanto c'e' in ogni gruppo e da quali conti
   const tot = totalValue();
@@ -3992,7 +4014,7 @@ function tabConti() {
   el.append(pianoCard());          // l'ex scheda Piano, ridotta all'essenziale
   el.append(opsCard());          // le ultime operazioni di tutti i conti
   el.append(h('p', { class: 'noconti muted', hidden: '' }, 'Nessun conto corrisponde alla ricerca.'));
-  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker e crypto = investiti; il resto (compreso MetaTrader 5) = fermi.'));
+  el.append(h('p', { class: 'muted' }, 'Il gruppo dipende dal tipo del conto (Modifica conto → Tipo): fondo pensione; broker e crypto = investiti; il resto = fermi.'));
   if (UI.contiQ) setTimeout(() => filterConti(UI.contiQ), 0);
   return el;
 }function accCharts(a) {
@@ -4042,7 +4064,7 @@ function viewAccount(id) {
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
   if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
-    { l: 'Guadagno / perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
+    { l: 'Guadagno / Perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   accCharts(a).forEach(c => c && el.append(c));          // grafici del conto: andamento, composizione, entrate e uscite, stima futura
   if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
   const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? (i.autoSrc === 'stima' ? ' ≈' : ' ⟳') : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
@@ -4138,9 +4160,17 @@ function buildSummary(o) {
   return L.join('\n');
 }
 
-function tabDati() {
+function autoCard() {
+  if (DEMO || LOC.off) return null;
+  const list = h('div', { id: 'autoList' }), sec = h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Salvataggi automatici'), btn('Salva un punto adesso', async () => { await autoPoint(true); list.fill(); setStatus('Punto di ripristino salvato'); }, 'pri sm')),
+    h('p', { class: 'muted' }, 'Ogni minuto, mentre l\'app è aperta e qualcosa è cambiato, tengo una copia cifrata su questo dispositivo (le ultime ' + AUTO_MAX + '). Se sbagli qualcosa, torni a uno di questi punti: prima di tornare indietro salvo anche com\'è adesso.'), list);
+  list.fill = async () => { const idx = await autoList(), when = id => new Date(id).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    list.replaceChildren(idx.length ? table([{ t: 'Quando' }, { t: 'Conti', n: 1 }, { t: 'Totale', n: 1 }, { t: '' }], idx.map(x => [when(x.id), String(x.n), eur(x.tot), btn('Torna a questo', async () => { if (!confirm('Torno ai dati di ' + when(x.id) + '? Le modifiche fatte dopo si perdono, ma salvo prima com\'è adesso: potrai tornare avanti.')) return; const m = await autoRestore(x.id); if (m) alert(m); }, 'sm')]), '') : h('p', { class: 'muted' }, 'Ancora nessun salvataggio automatico: il primo arriva entro un minuto da una modifica.')); };
+  list.fill(); return sec;
+}function tabDati() {
   const el = h('div');
   if (!DEMO) el.append(aiCard());
+  { const ac = autoCard(); if (ac) el.append(ac); }
   const ccys = [...new Set([...Object.keys(S.fx), ...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)].filter(c => c && c !== 'EUR'))];
   el.append(h('section', { class: 'card' }, h('h2', null, 'Tassi di cambio'), h('p', { class: 'muted' }, 'Quanti euro vale 1 unità della valuta. Si aggiornano a mano.'),
     ccys.length ? table([{ t: 'Valuta' }, { t: '1 unità = … €', n: 1 }], ccys.map(c => [c, h('input', { type: 'number', step: 'any', class: 'pin', value: S.fx[c] || '', onchange: e => { const v = parseFloat(e.target.value); if (v > 0) S.fx[c] = v; else delete S.fx[c]; done(); } })])) : h('p', { class: 'muted' }, 'Nessuna valuta estera in uso.'),
@@ -4186,7 +4216,7 @@ function tabDati() {
 /* ============ operazioni: acquisti, vendite, versamenti e prelievi registrati in un attimo ============ */
 const OPS = () => S.ops || (S.ops = []);
 const OP_KINDS = [['acquisto', 'Acquisto'], ['vendita', 'Vendita'], ['trasferimento', 'Trasferimento da un conto a un altro (es. dalla banca al broker)'], ['versamento', 'Versamento (soldi tuoi che entrano nel conto da fuori)'], ['prelievo', 'Prelievo (soldi tuoi che escono dal conto verso fuori)']];
-const OP_LABEL = { acquisto: 'Acquisto', vendita: 'Vendita', trasferimento: 'Trasferimento', versamento: 'Versamento', prelievo: 'Prelievo' };
+const OP_LABEL = { guadagno: 'Guadagno', perdita: 'Perdita', acquisto: 'Acquisto', vendita: 'Vendita', trasferimento: 'Trasferimento', versamento: 'Versamento', prelievo: 'Prelievo' };
 const accName = id => (S.accounts.find(a => a.id === id) || {}).name || '—';
 function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), liquidita' e movimenti; ricorda come tornare indietro. Restituisce un messaggio solo se qualcosa non va
   const a = S.accounts.find(x => x.id === o.accId); if (!a) return 'Scegli il conto.';
@@ -4202,6 +4232,9 @@ function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), 
     if (a.perf) { const f = { id: uid(), date: o.date, type: 'prelievo', amount: o.amount, note }; a.flows.push(f); u.flowIds.push([a.id, f.id]); }
     if (b.perf) { const f = { id: uid(), date: o.date, type: 'versamento', amount: o.amount, note }; b.flows.push(f); u.flowIds.push([b.id, f.id]); }
     Object.assign(op, { toId: b.id, amount: o.amount, fee });
+  } else if (o.kind === 'guadagno' || o.kind === 'perdita') {          // rendimento o perdita del conto (es. trading): cambia il valore ma NON i soldi versati, quindi nessun movimento
+    if (!(o.amount > 0)) return 'Inserisci l\'importo.';
+    u.dCash = (o.kind === 'guadagno' ? 1 : -1) * o.amount / cfx; a.cash = (a.cash || 0) + u.dCash; a.upd = today(); op.amount = o.amount;
   } else if (o.kind === 'versamento' || o.kind === 'prelievo') {
     if (!(o.amount > 0)) return 'Inserisci l\'importo.';
     const f = { id: uid(), date: o.date, type: o.kind, amount: o.amount, note: o.note || 'Operazione' }; a.flows.push(f); u.flowId = f.id;
@@ -4263,7 +4296,7 @@ function undoOp(op) {          // si puo' eliminare qualunque operazione, anche 
   if (u.price && last) { const i = inst(op.instId); if (i) { i.price = u.price.price; i.priceDate = u.price.priceDate; } }
   S.ops = OPS().filter(x => x !== op); done();
 }/* ---- finestra "+ Operazione": prima scegli che cosa e' successo, poi compaiono solo i campi che servono ---- */
-const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']]];
+const OP_UI = [['acquisto', 'Compra', 'Hai comprato un titolo, un ETF o una crypto', ['M4 12h16', 'M12 4v16']], ['vendita', 'Vendi', 'Hai venduto (in tutto o in parte)', ['M4 12h16']], ['versamento', 'Versa', 'Soldi tuoi entrati nel conto da fuori', ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14']], ['prelievo', 'Preleva', 'Soldi tuoi usciti dal conto verso fuori', ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14']], ['trasferimento', 'Sposta', 'Da un tuo conto a un altro (es. dalla banca al broker)', ['M4 8h14', 'M14 4l4 4-4 4', 'M20 16H6', 'M10 12l-4 4 4 4']], ['guadagno', 'Guadagno', 'Il conto vale di più per il rendimento (es. trading), non per soldi che hai messo tu', ['M4 17l6-6 4 4 6-8', 'M15 7h5v5']], ['perdita', 'Perdita', 'Il conto vale di meno per una perdita (es. trading), non per soldi che hai tolto tu', ['M4 7l6 6 4-4 6 8', 'M15 17h5v-5']]];
 /* ============ obiettivi: poche domande, una barra che si riempie ============ */
 const goalStart = () => Math.max(0, totalValue() - boxTotal());
 const goalRate = r => Math.pow(1 + r, 1 / 12) - 1;
@@ -4479,7 +4512,7 @@ function aiOpsReview(a, list) {
       }, 'pri big'), btn('Annulla', api.shut))] })] });
 }
 /* ============ + Operazione GUIDATA: una domanda per volta, scelte grandi da toccare, l'app suggerisce e va avanti da sola ============ */
-const OP_FLOW = { acquisto: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], vendita: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], versamento: ['kind', 'conto', 'importo', 'riepilogo'], prelievo: ['kind', 'conto', 'importo', 'riepilogo'], trasferimento: ['kind', 'conto', 'verso', 'importo', 'riepilogo'] };
+const OP_FLOW = { guadagno: ['kind', 'conto', 'importo', 'riepilogo'], perdita: ['kind', 'conto', 'importo', 'riepilogo'], acquisto: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], vendita: ['kind', 'conto', 'strumento', 'quanto', 'riepilogo'], versamento: ['kind', 'conto', 'importo', 'riepilogo'], prelievo: ['kind', 'conto', 'importo', 'riepilogo'], trasferimento: ['kind', 'conto', 'verso', 'importo', 'riepilogo'] };
 function opCands(q, accId, kind) {          // titoli proposti: i tuoi, quelli con prezzo automatico e tutto il catalogo
   const nq = normT(q), toks = nq.split(' ').filter(Boolean), held = new Map();
   for (const a of S.accounts) for (const p of a.positions) { const l = held.get(p.instId) || []; l.push({ a, p }); held.set(p.instId, l); }
@@ -4519,7 +4552,7 @@ function opWizard(pre, after) {
   const nav = (okLabel, okFn, okOff) => h('div', { class: 'wz-nav' }, hist.length ? btn('← Indietro', back) : h('span'), okLabel ? h('button', { type: 'button', class: 'btn pri big', disabled: okOff ? '' : null, onclick: okFn }, okLabel) : h('span'));
   const big = (title, sub, onclick, cls) => h('button', { type: 'button', class: 'wz-opt ' + (cls || ''), onclick }, h('span', { class: 'wz-t' }, title), sub ? h('span', { class: 'wz-s' }, sub) : null);
   const numInput = (val, ph, on) => { const i = h('input', { type: 'number', step: 'any', inputmode: 'decimal', class: 'wz-num', placeholder: ph, value: val ?? '', 'aria-label': ph }); i.addEventListener('input', () => on(num(i.value), i)); i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = dlg.querySelector('.wz-nav .pri:not([disabled])'); if (b) b.click(); } }); return i; };
-  const QUEST = { kind: 'Che cosa è successo?', conto: st.kind === 'trasferimento' ? 'Da quale conto sono partiti i soldi?' : st.kind === 'vendita' ? 'Da quale conto hai venduto?' : st.kind === 'prelievo' ? 'Da quale conto sono usciti i soldi?' : st.kind === 'versamento' ? 'In quale conto sono entrati i soldi?' : 'In quale conto hai comprato?', verso: 'A quale conto sono arrivati?', strumento: st.kind === 'vendita' ? 'Quale titolo hai venduto?' : 'Quale titolo hai comprato?', quanto: st.kind === 'vendita' ? 'Quanto hai venduto?' : 'Quanto hai comprato?', importo: 'Quanto?', pagamento: 'Come sono arrivati i soldi mancanti?', riepilogo: 'Controlla e conferma' };
+  const QUEST = { kind: 'Che cosa è successo?', conto: st.kind === 'trasferimento' ? 'Da quale conto sono partiti i soldi?' : st.kind === 'vendita' ? 'Da quale conto hai venduto?' : st.kind === 'prelievo' ? 'Da quale conto sono usciti i soldi?' : st.kind === 'guadagno' || st.kind === 'perdita' ? 'In quale conto?' : st.kind === 'versamento' ? 'In quale conto sono entrati i soldi?' : 'In quale conto hai comprato?', verso: 'A quale conto sono arrivati?', strumento: st.kind === 'vendita' ? 'Quale titolo hai venduto?' : 'Quale titolo hai comprato?', quanto: st.kind === 'vendita' ? 'Quanto hai venduto?' : 'Quanto hai comprato?', importo: st.kind === 'guadagno' ? 'Quanto hai guadagnato?' : st.kind === 'perdita' ? 'Quanto hai perso?' : 'Quanto?', pagamento: 'Come sono arrivati i soldi mancanti?', riepilogo: 'Controlla e conferma' };
   function body() {
     const w = [];
     if (cur === 'kind') { for (const [k, l, d, ico] of OP_UI) w.push(h('button', { type: 'button', class: 'wz-opt kindopt', onclick: () => { st.kind = k; go(nextOf()); } }, s('svg', { viewBox: '0 0 24 24', width: 26, height: 26, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(x => s('path', { d: x }))), h('span', { class: 'wz-tt' }, h('span', { class: 'wz-t' }, l), h('span', { class: 'wz-s' }, d)))); }
@@ -4566,9 +4599,9 @@ function opWizard(pre, after) {
       var nx = h('button', { type: 'button', class: 'btn pri big', onclick: () => go(nextOf()) }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), nx)); refresh(); setTimeout(() => main.focus(), 60); return w;
     }
     else if (cur === 'importo') {
-      const a = acc(), prev = h('div', { class: 'opsum' }); const refresh = () => { prev.textContent = st.eur > 0 ? (st.kind === 'versamento' ? 'Entrano ' : st.kind === 'prelievo' ? 'Escono ' : 'Sposti ') + eur(st.eur, true) + (st.kind === 'trasferimento' ? ' da ' + a.name + ' a ' + (accTo() ? accTo().name : '…') : ' · ' + a.name) : 'Scrivi l\'importo.'; nx.disabled = !(st.eur > 0); };
+      const a = acc(), prev = h('div', { class: 'opsum' }); const refresh = () => { prev.textContent = st.eur > 0 ? (st.kind === 'guadagno' ? 'Il conto guadagna ' : st.kind === 'perdita' ? 'Il conto perde ' : st.kind === 'versamento' ? 'Entrano ' : st.kind === 'prelievo' ? 'Escono ' : 'Sposti ') + eur(st.eur, true) + (st.kind === 'trasferimento' ? ' da ' + a.name + ' a ' + (accTo() ? accTo().name : '…') : ' · ' + a.name) : 'Scrivi l\'importo.'; nx.disabled = !(st.eur > 0); };
       const main = numInput(st.eur, 'Importo in €', v => { st.eur = v; refresh(); }); w.push(main, h('div', { class: 'wz-chips' }, [50, 100, 200, 500, 1000].map(v => btn(eur(v), () => { st.eur = v; draw(); }, 'sm'))));
-      if (st.kind !== 'versamento' && a) w.push(h('p', { class: 'muted' }, 'Liquidità disponibile in ' + a.name + ': ' + eur(cashOf(a), true)));
+      if (st.kind === 'guadagno' || st.kind === 'perdita') w.push(h('p', { class: 'muted' }, 'Non conta come versamento: cambia il valore del conto e il guadagno, ma non i soldi che hai messo.')); else if (st.kind !== 'versamento' && a) w.push(h('p', { class: 'muted' }, 'Liquidità disponibile in ' + a.name + ': ' + eur(cashOf(a), true)));
       w.push(prev); var nx = h('button', { type: 'button', class: 'btn pri big', onclick: () => go(nextOf()) }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), nx)); refresh(); setTimeout(() => main.focus(), 60); return w;
     }
     else if (cur === 'pagamento') {
@@ -4580,7 +4613,7 @@ function opWizard(pre, after) {
     else if (cur === 'riepilogo') {
       const q = qtyNow(), p = priceNow(), a = acc(), trade = st.kind === 'acquisto' || st.kind === 'vendita', nm = st.c ? st.c.name : st.nuovo ? st.nuovo.name : '';
       const how = st.how.startsWith('t:') ? 'Spostati da ' + accName(st.how.slice(2)) : st.how === 'ext' ? 'Versati da fuori' : st.how === 'no' ? 'Liquidità non toccata' : '';
-      const line = trade ? (st.kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' di ' + nm : st.kind === 'versamento' ? 'Entrano ' + eur(st.eur, true) : st.kind === 'prelievo' ? 'Escono ' + eur(st.eur, true) : 'Sposti ' + eur(st.eur, true);
+      const line = trade ? (st.kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' di ' + nm : st.kind === 'guadagno' ? 'Guadagno di ' + eur(st.eur, true) : st.kind === 'perdita' ? 'Perdita di ' + eur(st.eur, true) : st.kind === 'versamento' ? 'Entrano ' + eur(st.eur, true) : st.kind === 'prelievo' ? 'Escono ' + eur(st.eur, true) : 'Sposti ' + eur(st.eur, true);
       w.push(h('div', { class: 'wz-sum' }, h('div', { class: 'wz-sum-t' }, line), h('div', { class: 'wz-sum-s' }, a.name + (st.kind === 'trasferimento' ? ' → ' + accTo().name : '') + (trade ? ' · totale ' + eur(spend(), true) : ''))));
       if (how) w.push(h('p', { class: 'muted' }, '↳ ' + how + (st.how.startsWith('t:') ? ': registro prima il trasferimento di ' + eur(shortBy(), true) : '')));
       const dt = h('input', { type: 'date', value: st.date, 'aria-label': 'Data' }); dt.addEventListener('input', () => { st.date = dt.value || today(); });
@@ -4724,7 +4757,7 @@ function editOperationAdv(pre, after) {
     const nm = i ? i.name : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim() || 'lo strumento'), acc = S.accounts.find(a => a.id === I.accId.value), spend = (q && pr ? q * pr * (fxRate(i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) ?? 1) : am || 0) + fe;
     syncShort(spend);
     sumEl.textContent = trade ? (q && pr ? (kind === 'acquisto' ? 'Compri ' : 'Vendi ') + nfq.format(q) + ' × ' + nf2.format(pr) + ' ' + (i ? i.ccy : ext ? ext.ccy : normCcy(I.newCcy.value)) + ' di ' + nm + (fe ? ' + ' + eur(fe, true) + ' di commissioni' : '') + ' · conto ' + an : am ? (kind === 'acquisto' ? 'Spendi ' : 'Incassi ') + eur(am, true) + ' in ' + nm + ' · conto ' + an : 'Scrivi la quantità (e il prezzo) oppure l\'importo.')
-      : am ? (kind === 'versamento' ? 'Entrano ' + eur(am, true) + ' in ' + an : kind === 'prelievo' ? 'Escono ' + eur(am, true) + ' da ' + an : 'Sposti ' + eur(am, true) + ' da ' + an + ' a ' + bn) : 'Scrivi l\'importo.';
+      : am ? (kind === 'guadagno' ? 'Il conto ' + an + ' guadagna ' + eur(am, true) : kind === 'perdita' ? 'Il conto ' + an + ' perde ' + eur(am, true) : kind === 'versamento' ? 'Entrano ' + eur(am, true) + ' in ' + an : kind === 'prelievo' ? 'Escono ' + eur(am, true) + ' da ' + an : 'Sposti ' + eur(am, true) + ' da ' + an + ' a ' + bn) : 'Scrivi l\'importo.';
   }
   for (const el of Object.values(I)) { el.addEventListener('input', sync); el.addEventListener('change', sync); }
   const okb = h('button', { type: 'submit', class: 'btn pri' }, 'Registra');
