@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-J9fl0sZYMlG9GNXOftKCOg8eoBuUJJrcE91YptP1jxc='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cFWL+THzifQVoaH1QrZ2+srSQxpslV6CfDoLCcuB244='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -582,6 +582,10 @@ dialog.frm form{padding:0 16px 14px}
 .grp-d{font-size:13px;margin:-2px 4px 0 28px}
 .an-nav .chips{margin-top:10px}
 .pacv .acard .ac-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* scorrimento delle finestre: quando una scheda e' aperta si muove solo lei, la pagina sotto resta ferma */
+html.modal-open,html.modal-open body{overflow:hidden;overscroll-behavior:none}
+dialog{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;transform:translateZ(0)}
+@media (max-width:700px){dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(0,0,0,.42)}dialog.talk>*{animation-duration:.25s;animation-delay:calc(var(--i,0)*20ms)}}
 </style>
 </head>
 <body>
@@ -3781,6 +3785,10 @@ function dlgTopBar(dlg) {
   if (!bar.children.length) return; const host = dlg.querySelector('form') || dlg; host.insertBefore(bar, host.firstChild);
 }
 new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.tagName === 'DIALOG') setTimeout(() => dlgTopBar(n), 0); }).observe(document.body, { childList: true });
+(function modalScrollLock() {          // con una finestra aperta la pagina sotto non scorre (nemmeno a fine corsa della finestra)
+  const upd = () => document.documentElement.classList.toggle('modal-open', !!document.querySelector('dialog[open]'));
+  new MutationObserver(upd).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['open'] }); upd();
+})();
 (function sheetDrag() {          // sul telefono: trascina verso il basso la parte alta di una finestra per chiuderla
   let d = null, y0 = 0, dy = 0;
   document.addEventListener('touchstart', e => { const dlg = e.target.closest && e.target.closest('dialog[open]'); if (!dlg || innerWidth > 700 || e.touches.length !== 1) { d = null; return; } const r = dlg.getBoundingClientRect(), y = e.touches[0].clientY; d = dlg.scrollTop <= 0 && y - r.top < 70 ? dlg : null; y0 = y; dy = 0; }, { passive: true });
@@ -3871,7 +3879,6 @@ function tabPanoramica() {
       x: () => ({ how: pp.length ? eur(pv) + ' di valore − ' + eur(pcost) + ' di costo = ' + seur(pg) + ', su ' + pl(pp.length, 'posizione', 'posizioni') + ' di cui conosci il prezzo pagato.' : '', rows: pp.slice().sort((x, y) => Math.abs(y.pnl) - Math.abs(x.pnl)).slice(0, 10).map(x => [x.name, x.pnl, x.acc + ' · ' + spct(x.pct), () => talkPos(x.a, x.p)]), rowsTitle: 'Le 10 posizioni che pesano di più sul risultato', signed: true }) },
 
   ]));
-  const bxc = boxesCard(); if (bxc) el.append(bxc);
   const nmc = nextMoneyCard(); if (nmc) el.append(nmc);
   if (!DEMO && [4, 5, 6].includes(+today().slice(5, 7)) && S.settings.taxNudge !== today().slice(0, 4) && S.accounts.some(accForeign)) el.append(h('div', { class: 'banner' }, h('span', null, 'È il periodo della dichiarazione dei redditi: in Analisi → Tasse trovi i conti esteri da mettere nel quadro RW e le imposte stimate.'), h('span', { class: 'row', style: 'gap:8px;margin:0' }, btn('Più tardi', () => { S.settings.taxNudge = today().slice(0, 4); done(); }, 'sm'), btn('Apri', () => { UI.tab = 'analisi'; UI.sub = 'tasse'; render(); }, 'pri sm'))));
   const warns = [], mf = missingFx(); if (mf.length) warns.push('Manca il tasso di cambio per ' + mf.join(', ') + ': quei valori sono contati 1:1 (scheda "Dati e sicurezza").');
@@ -3892,12 +3899,8 @@ function tabPanoramica() {
     el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Valore e versato nel tempo'), btn(UI.chartTable ? 'Vedi grafico' : 'Vedi tabella', () => { UI.chartTable = !UI.chartTable; render(); }, 'sm')),
       h('div', { class: 'legend' }, h('span', null, h('span', { class: 'key', style: 'background:var(--s1)' }), 'Valore dei conti d\'investimento'), h('span', null, h('span', { class: 'key', style: 'background:var(--s2)' }), 'Versato netto')), body));
   }
-  const rows = S.accounts.map(a => { const p = perfOf([a]), v = accValue(a); return [h('a', { href: '#', onclick: e => { e.preventDefault(); UI.tab = 'conti'; UI.acc = a.id; render(); } }, a.name), eur(v), total > 0 ? pct(v / total) : '—', a.perf ? eur(p.contrib) : '—', a.perf && p.pnl != null ? gl(p.pnl, seur(p.pnl)) : '—', a.perf ? spct(p.pnlPct) : '—', a.perf ? spct(p.xirr) : '—']; });
   const dc = exposure('class'), da = exposure('area');
   if (total > 0 && dc.length) el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Per classe'), donut(dc, 'Totale', true, lab => talkMix('class', lab))), h('section', { class: 'card' }, h('h2', null, 'Per area'), donut(da, 'Totale', true, lab => talkMix('area', lab)))));
-  const rowOf = new Map(S.accounts.map((a, k) => [a, rows[k]])), grows = [];
-  for (const g of groupAccs()) if (g.accs.length) { grows.push([h('b', null, g.l), h('b', null, eur(g.tot)), h('b', null, total > 0 ? pct(g.tot / total) : '—'), '', '', '', '']); for (const a of g.accs) grows.push(rowOf.get(a)); }
-  el.append(h('section', { class: 'card' }, h('h2', null, 'I tuoi conti'), table([{ t: 'Conto' }, { t: 'Valore', n: 1 }, { t: 'Peso', n: 1 }, { t: 'Versato netto', n: 1 }, { t: 'Guadagno', n: 1 }, { t: '%', n: 1 }, { t: 'Annuo', n: 1 }], grows)));
   const good = pp.filter(x => x.pnl > 0).sort((a, b) => b.pnl - a.pnl).slice(0, 5), bad = pp.filter(x => x.pnl < 0).sort((a, b) => a.pnl - b.pnl).slice(0, 5);
   const li = x => h('li', { class: 'tapme', role: 'button', tabindex: '0', onclick: e => { tapFx(e.currentTarget); talkPos(x.a, x.p); } }, h('span', null, x.name, h('small', null, ' · ' + x.acc)), h('span', null, gl(x.pnl, seur(x.pnl)), h('small', null, ' ' + spct(x.pct))));
   el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Dove guadagni'), good.length ? h('ul', { class: 'list' }, good.map(li)) : h('p', { class: 'muted' }, pp.length ? 'Nessuna posizione in guadagno.' : 'Inserisci il costo di carico delle posizioni per vederlo.')),
@@ -4341,7 +4344,7 @@ function goalWizard() {
     wzOpt('Solo da alcuni conti', 'scegli tu quali conti contano per questo obiettivo', () => { pickSet('alcuni'); api.next(); }, g.pick === 'alcuni' ? 'on' : ''),
     wzOpt('Da zero, da oggi', 'conti solo i soldi che metterai da adesso', () => { pickSet('zero'); api.next(); }, g.pick === 'zero' ? 'on' : ''),
     wzOpt('Da una cifra che scelgo io', 'un budget di partenza tuo', () => { pickSet('cifra'); api.next(); }, g.pick === 'cifra' ? 'on' : '')])] });
-  const sConti = api => ({ q: 'Quali conti contano?', valid: Array.isArray(g.accs) && g.accs.length > 0, body: [h('div', { class: 'wz-opts' }, S.accounts.map(a => { const cb = h('input', { type: 'checkbox' }); cb.checked = Array.isArray(g.accs) && g.accs.includes(a.id); cb.addEventListener('change', () => { g.accs = (g.accs || []).filter(z => z !== a.id); if (cb.checked) g.accs.push(a.id); if (api.nextBtn) api.nextBtn.disabled = !g.accs.length; }); return h('label', { class: 'wz-opt', style: 'display:flex;gap:10px;align-items:center;cursor:pointer' }, cb, h('span', { class: 'wz-t grow' }, a.name), h('span', { class: 'wz-s' }, eur(accValue(a)))); })),
+  const sConti = api => ({ q: 'Quali conti contano?', valid: Array.isArray(g.accs) && g.accs.length > 0, body: [h('div', { class: 'wz-opts' }, S.accounts.map(a => { const cb = h('input', { type: 'checkbox' }); cb.checked = Array.isArray(g.accs) && g.accs.includes(a.id); cb.addEventListener('change', () => { g.accs = (g.accs || []).filter(z => z !== a.id); if (cb.checked) g.accs.push(a.id); if (api.nextBtn) api.nextBtn.disabled = !g.accs.length; }); return h('label', { class: 'wz-opt', style: 'flex-direction:row;align-items:center;gap:12px;cursor:pointer' }, cb, h('span', { class: 'wz-t', style: 'flex:1;text-align:left' }, a.name), h('span', { class: 'wz-s', style: 'flex:none' }, eur(accValue(a)))); })),
     (() => { const z = h('input', { type: 'checkbox' }); z.checked = g.mode === 'zero'; z.addEventListener('change', () => { g.mode = z.checked ? 'zero' : 'valore'; }); return h('label', { class: 'fld', style: 'display:flex;gap:10px;align-items:center;margin-top:10px' }, z, h('span', null, 'Parti da zero: conta solo quanto questi conti crescono da oggi')); })()] });
   const sCifra = api => ({ q: 'Da che cifra parti?', focus: '.wz-num', valid: g.amt != null, body: [wzNum(g.amt, 'Budget di partenza in €', v => { g.amt = v; if (api.nextBtn) api.nextBtn.disabled = v == null; }), wzChips([0, 1000, 5000, 10000], v => eur(v), v => { g.amt = v; api.next(); })] });
   const gOut = () => { const o = { mode: g.mode }; if (Array.isArray(g.accs)) o.accs = g.accs.slice(); if (g.mode === 'cifra') o.amt = g.amt || 0; return o; };
