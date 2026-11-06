@@ -599,6 +599,19 @@ body{background:var(--bg)}
 details.det{padding:0}details.det>summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}details.det>summary::-webkit-details-marker{display:none}details.det>summary::after{content:'›';transform:rotate(90deg);color:var(--muted);transition:transform .2s}details.det[open]>summary::after{transform:rotate(-90deg)}details.det>.tiles{margin:0;padding:0 12px 12px}
 .brand::before{background:var(--s1);box-shadow:none}
 @media (max-width:700px){.tabs{background:var(--bg)}}
+/* animazioni di entrata piu' brevi e leggere */
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.enter .view>section{animation-duration:.22s}
+.enter .view>div>*{animation-duration:.22s;animation-delay:calc(var(--i,0)*20ms)}
+.enter .tiles .tile{animation-duration:.22s;animation-delay:calc(var(--i,0)*20ms)}
+.start>*{animation-duration:.3s}
+/* riquadri dei conti e dell'analisi: niente barre colorate, ombre e rialzi */
+.acard{background:var(--card-s);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;animation-duration:.22s;animation-delay:0s}
+.acard::before{display:none}
+.acard:hover{transform:none;box-shadow:none;border-color:color-mix(in srgb,var(--ink) 18%,transparent)}
+.acard .ac-ico{background:var(--btn);color:var(--ink2)}
+.btn.pri{box-shadow:none}
+.grp,.grp *{animation-duration:.22s}
 </style>
 </head>
 <body>
