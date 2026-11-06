@@ -1,1 +1,298 @@
-{"app":"finanze-analisi","versione":1,"generato":"2026-11-05T22:08:55","data":"2026-11-05","titolo":"Mercati in tensione: l'onda blu scuote il settore tecnologico","sintesi":"I mercati azionari hanno reagito con nervosismo alla vittoria dei Democratici nelle elezioni di metà mandato negli Stati Uniti. Il timore di una regolamentazione più stringente sull'intelligenza artificiale e sui data center ha causato un forte calo del settore tecnologico e del Nasdaq. Al contrario, si osserva una maggiore attenzione verso la solidità dei bilanci aziendali e i dividendi. L'incertezza politica e normativa continua a condizionare le scelte degli investitori a breve termine. La prudenza rimane la linea guida principale in un contesto di volatilità crescente.","umore":{"valore":-1,"etichetta":"Cautamente preoccupato"},"classi":[{"classe":"Azioni","giudizio":-1,"etichetta":"Volatilità elevata","perche":"Il settore tecnologico ha subito un calo significativo, con il Nasdaq che registra perdite pesanti a causa dei timori normativi sull'AI [10, 63, 81]. Piazza Affari ha chiuso in ribasso dell'1,03% [8, 38].","mossa":"Mantenere la diversificazione geografica e settoriale evitando eccessi di concentrazione sul tech.","fonti":[1,2,3,4,5]},{"classe":"Obbligazioni","giudizio":1,"etichetta":"Stabilità relativa","perche":"Lo spread tra Btp e Bund si attesta a 109 punti base con rendimenti al 4,33% [3]. Le banche centrali mantengono un approccio cauto sui tassi [21].","mossa":"Privilegiare titoli di Stato di alta qualità per bilanciare il portafoglio.","fonti":[6,7]},{"classe":"Liquidita","giudizio":0,"etichetta":"Neutrale","perche":"La liquidità offre una protezione temporanea in attesa di maggiore chiarezza normativa e politica.","mossa":"Mantenere una riserva di liquidità per gestire eventuali opportunità di ingresso future.","fonti":null},{"classe":"Crypto","giudizio":-2,"etichetta":"Molto prudente","perche":"Il settore ha subito un calo del 7,13% nelle ultime 24 ore e permangono forti dubbi sulla sicurezza dei wallet dopo recenti attacchi informatici [80].","mossa":"Ridurre l'esposizione in attesa di una stabilizzazione dei prezzi e della sicurezza.","fonti":8},{"classe":"Materie prime","giudizio":0,"etichetta":"Neutrale","perche":"Il prezzo del petrolio torna a salire [10], mentre il gas registra un aumento dell'1,5% [2].","mossa":"Monitorare l'andamento dei prezzi energetici senza sovraesposizione.","fonti":[9,2]}],"temi":[{"titolo":"Regolamentazione AI","giudizio":-2,"perche":"La vittoria democratica solleva timori di restrizioni sui data center e sull'AI, colpendo i titoli tecnologici [10, 63, 73].","fonti":[2,4,10]},{"titolo":"Solidità bancaria","giudizio":1,"perche":"Molte banche europee e italiane riportano utili record e confermano dividendi solidi [1, 7, 20].","fonti":[11,12,13]},{"titolo":"Inflazione e Tassi","giudizio":0,"perche":"Le banche centrali restano vigili e le decisioni sui tassi di dicembre saranno cruciali [21, 65].","fonti":[7,14]}],"attenzione":[{"titolo":"Sicurezza informatica","perche":"Recenti attacchi a istituzioni finanziarie e piattaforme crypto sollevano rischi operativi significativi [64, 80]."},{"titolo":"Rischi geopolitici","perche":"Le tensioni in Medio Oriente continuano a pesare sugli utili di aziende globali come Emirates [13]."}],"idee":[{"classe":"Azioni","isin":"IE00B4L5Y983","perche":"ETF diversificato a livello globale per mitigare i rischi specifici del settore tecnologico USA."},{"classe":"Obbligazioni","isin":"LU1437018168","perche":"Esposizione a obbligazioni corporate ESG per una gestione prudente del reddito fisso."}],"indicatori":[{"nome":"Rendimento Treasury 10 anni","valore":"4.84%","nota":"In calo rispetto al 4.9% precedente."},{"nome":"Capitalizzazione Crypto","valore":"2572 mld USD","nota":"In calo del 7.13% nelle ultime 24 ore."},{"nome":"Spread Btp-Bund","valore":"109 bps","nota":"Indicatore di rischio paese in lieve rialzo."},{"nome":"VIX (Volatilità)","valore":"Netto -77466","nota":"Posizionamento dei grandi investitori sui futures."}],"fonti":[{"testata":"ANSA","titolo":"Borsa: Milano chiude in calo, Ftse Mib -1,03%","url":"https://www.ansa.it/sito/notizie/economia/2026/11/05/borsa-milano-chiude-in-calo-ftse-mib-103_3d6028d3-771c-4531-bcda-b1b69033704c.html","data":"2026-11-05"},{"testata":"Il Sole 24 Ore","titolo":"Borse, tonfo Wall Street: crolla il Nasdaq e affonda il tech anche a Milano (-1%)","url":"https://www.ilsole24ore.com/art/borsa-indici-giovedi-5-novembre-2026-AJerTS5B","data":"2026-11-05"},{"testata":"Money.it","titolo":"Piazza Affari chiude in calo, FTSE MIB a -1,03%: crolla STMicroelectronics, avanza Tenaris","url":"https://www.money.it/piazza-affari-chiude-in-calo-ftse-mib-05-11-2026","data":""},{"testata":"Financial Times","titolo":"Nasdaq drops the most since pandemic as Democratic ‘blue wave’ upends AI bets","url":"https://www.ft.com/content/7c6ceb4f-d7b1-49ec-9047-0e2e4cd2615c?syn-25a6b1a6=1","data":"2026-11-05"},{"testata":"Investing.com","titolo":"AI storm dooms tech stocks to $2 trillion decline on darkest day since 2025","url":"https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196","data":"2026-11-05"},{"testata":"ANSA","titolo":"Lo spread tra Btp e Bund chiude in rialzo a 109 punti base","url":"https://www.ansa.it/sito/notizie/economia/2026/11/05/lo-spread-tra-btp-e-bund-chiude-in-rialzo-a-109-punti-base_33afc7c5-a5bf-4270-b020-aecb05b5fc55.html","data":"2026-11-05"},{"testata":"la Repubblica","titolo":"Lagarde: “A dicembre capiremo se alzare i tassi. Midterm? Ci vorrà tempo per revisione dei dazi”","url":"https://www.repubblica.it/economia/2026/11/05/news/lagarde_a_dicembre_capiremo_se_alzare_i_tassi-425702141/?rss","data":"2026-11-05"},{"testata":"CNBC","titolo":"Binance’s $6.3 billion hack raises questions about crypto wallet safety","url":"https://www.cnbc.com/2026/10/31/binance-hack-crypto-wallet-safety.html","data":"2026-10-31"},{"testata":"ANSA","titolo":"Il gas in aumento (+1,5%) a 89,4 euro al Megawattora","url":"https://www.ansa.it/sito/notizie/economia/2026/11/05/il-gas-in-aumento-15-a-894-euro-al-megawattora_cc7beb6c-a28e-4f59-91d8-498a4e864c73.html","data":"2026-11-05"},{"testata":"CNBC","titolo":"Top Democrats call to rein in AI buildout after midterms sweep: 'National data center moratorium now'","url":"https://www.cnbc.com/2026/11/05/democrats-data-center-restrictions-midterms.html","data":"2026-11-05"},{"testata":"ANSA","titolo":"L'utile di Mediobanca cresce a doppia cifra oltre 1 miliardo, guidance confermata","url":"https://www.ansa.it/sito/notizie/economia/2026/11/05/lutile-di-mediobanca-cresce-a-doppia-cifra-oltre-1-miliardo-guidance-confermata_f54c81f5-a446-4155-bc0f-8994e07ff3a5.html","data":"2026-11-05"},{"testata":"ANSA","titolo":"Utile record sopra gli 1,5 miliardi, Banco Bpm ritocca la cedola","url":"https://www.ansa.it/sito/notizie/economia/2026/11/05/utile-record-sopra-gli-15-miliardi-banco-bpm-ritocca-la-cedola_d6138096-fe26-48b0-b3a1-f0ed08fe7743.html","data":"2026-11-05"},{"testata":"la Repubblica","titolo":"Mediobanca, gli utili volano di oltre un miliardo spinti da Generali: “Livelli migliori di sempre”","url":"https://www.repubblica.it/economia/2026/11/05/news/mediobanca_utili_record_generali-425702284/?rss","data":"2026-11-05"},{"testata":"BBC Business","titolo":"Interest rates hiked to 4% in first increase in over three years","url":"https://www.bbc.co.uk/news/articles/ck5ynw45jrgqo?at_medium=RSS&at_campaign=rss","data":"2026-11-05"}],"limiti":"Non ho potuto analizzare i bilanci completi di tutte le società citate, basandomi esclusivamente sulle notizie di stampa e sui dati di mercato forniti. Scritta dall'AI Gemini leggendo i titoli e i riassunti dei giornali, non gli articoli interi.","autore":"Gemini (cloud)"}
+{
+    "app":  "finanze-analisi",
+    "versione":  1,
+    "generato":  "2026-11-06T09:45:00+01:00",
+    "data":  "2026-11-06",
+    "titolo":  "Crollo dell\u0027AI a Wall Street: Nasdaq -5,5% e Borse europee in calo",
+    "sintesi":  "Ieri Wall Street ha avuto la peggior seduta dal 2020: il Nasdaq ha perso il 5,5%, l\u0027S\u0026P 500 il 4,35% e i chip circa il 12%, per il timore che il nuovo Congresso a maggioranza democratica rallenti i data center e l\u0027intelligenza artificiale. Questa mattina le Borse europee aprono in forte ribasso (Milano -1,7% in apertura) e oggi arrivano i dati sul lavoro USA. Con calma: dopo giorni così le oscillazioni restano ampie, meglio non vendere per paura né comprare d\u0027impulso, e restare su piani regolari e diversificati.",
+    "umore":  {
+                  "valore":  -1,
+                  "etichetta":  "Cauto, tensione sulla tecnologia"
+              },
+    "classi":  [
+                   {
+                       "classe":  "Azioni",
+                       "giudizio":  -1,
+                       "etichetta":  "Prudenza, volatilità alta",
+                       "perche":  "Ieri S\u0026P 500 -4,35% a 7.354 punti, Nasdaq -5,52% a 24.315, Dow -3,44% a 51.521; secondo MarketWatch è la peggior giornata per la tecnologia dal 2020 e il Nasdaq è in correzione. Il FTSE MIB ha chiuso a 50.505 (-1,03%) e stamattina apre in calo di circa 1,7%. Cambio rispetto a ieri (neutrale): c\u0027è stata una notizia vera, il crollo del settore AI. Caso contrario: dopo cali così violenti i rimbalzi sono frequenti e per chi investe da anni i prezzi più bassi possono essere un\u0027occasione; il rapporto sul lavoro di oggi può dare sollievo.",
+                       "mossa":  "Mantieni i piani regolari su ETF molto diversificati; evita sia le vendite di panico sia gli acquisti concentrati sulla tecnologia.",
+                       "fonti":  [
+                                     1,
+                                     3,
+                                     4,
+                                     5
+                                 ]
+                   },
+                   {
+                       "classe":  "Obbligazioni",
+                       "giudizio":  1,
+                       "etichetta":  "Interessanti, con cautela",
+                       "perche":  "Il rendimento dei titoli di Stato USA a 10 anni è sceso a 4,84% (4,90% ieri) e quello a 2 anni a 4,46%: segno di fuga verso la sicurezza. Il BTP decennale rende il 4,34% e lo spread BTP-Bund è a 109-110 punti (ieri 104-107), in lieve peggioramento. Lagarde non esclude un altro rialzo BCE a dicembre e l\u0027inflazione euro è al 4%. Giudizio invariato. Caso contrario: se l\u0027inflazione resta alta e i tassi salgono ancora, i prezzi dei titoli già in circolazione scendono.",
+                       "mossa":  "Aggiungi a rate, con scadenze medie e senza superare la tua quota obiettivo.",
+                       "fonti":  [
+                                     6,
+                                     7,
+                                     8
+                                 ]
+                   },
+                   {
+                       "classe":  "Crypto",
+                       "giudizio":  -1,
+                       "etichetta":  "Prudenza",
+                       "perche":  "Il Bitcoin è sceso intorno a 76.000 dollari (circa -5/-6%) e l\u0027Ethereum di circa 7,5%; oltre 1 miliardo di dollari di posizioni a leva è stato liquidato (CoinDesk). La capitalizzazione totale è circa 2.578 miliardi (-7% in 24 ore). L\u0027indice paura/avidità nel feed è a 50 (neutro, ieri 34), un dato che sembra poco coerente con il calo: non fidarti troppo. Giudizio invariato: le crypto seguono la tecnologia. Caso contrario: Wintermute vede il bicchiere mezzo pieno nel medio termine.",
+                       "mossa":  "Non rincorrere i ribassi né i rimbalzi; se vuoi, solo piccole quote e a rate.",
+                       "fonti":  [
+                                     9
+                                 ]
+                   },
+                   {
+                       "classe":  "Materie prime",
+                       "giudizio":  0,
+                       "etichetta":  "Volatile, oro stabile",
+                       "perche":  "Il Brent è intorno a 97 dollari e il WTI sopra 90, in risalita dopo il crollo del giorno prima perché una soluzione sulla guerra con l\u0027Iran appare incerta; il gas europeo è a circa 89-92 euro/MWh. L\u0027oro è intorno a 4.050-4.100 dollari, poco mosso in una giornata di vendite. Giudizio invariato. Caso contrario: una pace con l\u0027Iran farebbe scendere il petrolio, mentre il fallimento dei colloqui lo spingerebbe oltre 100.",
+                       "mossa":  "Non inseguire il petrolio; una piccola quota in oro resta una protezione, non una previsione.",
+                       "fonti":  [
+                                     6,
+                                     10
+                                 ]
+                   },
+                   {
+                       "classe":  "Liquidità",
+                       "giudizio":  0,
+                       "etichetta":  "Utile come cuscinetto",
+                       "perche":  "Con l\u0027inflazione euro al 4% e la BCE (17 dicembre) che può ancora alzare i tassi, la liquidità remunerata rende e dà tranquillità nei giorni di forte oscillazione; la Fed decide il 9 dicembre. Caso contrario: con inflazione al 4% troppa liquidità perde potere d\u0027acquisto.",
+                       "mossa":  "Tieni il cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
+                       "fonti":  [
+                                     8
+                                 ]
+                   }
+               ],
+    "temi":  [
+                 {
+                     "titolo":  "Wall Street: crollo dell\u0027AI dopo le elezioni",
+                     "giudizio":  -2,
+                     "perche":  "Il FT parla di 3.200 miliardi bruciati; i chip (indice Philadelphia circa -12%) e le grandi tecnologiche pagano il timore di regole più dure e di data center rallentati. L\u0027S\u0026P 500 ha perso oltre il 4% in una seduta, e in due giorni il rally post-voto è stato cancellato.",
+                     "fonti":  [
+                                   1,
+                                   3,
+                                   4
+                               ]
+                 },
+                 {
+                     "titolo":  "Tesla e SpaceX: perdite molto pesanti",
+                     "giudizio":  -1,
+                     "perche":  "Secondo MarketWatch le due società di Musk hanno perso insieme circa 456 miliardi di dollari di valore in due giorni dopo il voto: mostra quanto il mercato sia concentrato su pochi nomi.",
+                     "fonti":  [
+                                   11
+                               ]
+                 },
+                 {
+                     "titolo":  "Europa: Milano e Londra in calo, spread a 109",
+                     "giudizio":  -1,
+                     "perche":  "Il FTSE MIB ha chiuso a -1,03% e stamattina apre intorno a -1,7%; Londra -1,5%. La Banca d\u0027Inghilterra ha alzato i tassi al 4%, primo rialzo da oltre tre anni. Lo spread BTP-Bund è a 109-110 punti.",
+                     "fonti":  [
+                                   5,
+                                   7,
+                                   12
+                               ]
+                 },
+                 {
+                     "titolo":  "BCE: Lagarde non esclude altri rialzi",
+                     "giudizio":  0,
+                     "perche":  "A dicembre si capirà se serve un altro rialzo; l\u0027inflazione dell\u0027area euro è al 4% con energia in aumento di circa il 18% su base annua. Per chi ha un mutuo variabile o investe in obbligazioni, tassi più alti più a lungo sono il rischio principale.",
+                     "fonti":  [
+                                   8
+                               ]
+                 },
+                 {
+                     "titolo":  "Oggi i dati sul lavoro USA",
+                     "giudizio":  0,
+                     "perche":  "Il rapporto di ottobre sull\u0027occupazione, in uscita venerdì, può dare sollievo o aggiungere tensione dopo il crollo della tecnologia (MarketWatch, CNBC). Ieri il Fed Barkin ha parlato di possibili rialzi graduali dei tassi.",
+                     "fonti":  [
+                                   13,
+                                   14
+                               ]
+                 },
+                 {
+                     "titolo":  "Crypto trascinate dal crollo dell\u0027AI",
+                     "giudizio":  -1,
+                     "perche":  "Bitcoin a circa 76.000 dollari, minatori in calo del 15-20% perché legati ai data center AI; liquidazioni di oltre un miliardo di dollari.",
+                     "fonti":  [
+                                   9
+                               ]
+                 }
+             ],
+    "attenzione":  [
+                       {
+                           "titolo":  "Volatilità molto alta",
+                           "perche":  "Dopo un -4% in un giorno sono comuni forti rimbalzi e nuovi cali: evita decisioni d\u0027impulso in entrambe le direzioni."
+                       },
+                       {
+                           "titolo":  "Concentrazione sulla tecnologia",
+                           "perche":  "I settori tecnologici USA ieri hanno perso circa l\u00278%: chi ha molta tecnologia in pochi titoli è più esposto."
+                       },
+                       {
+                           "titolo":  "Tassi più alti più a lungo",
+                           "perche":  "Rendimenti USA a 10 anni al 4,84%, BoE al 4% e BCE che non esclude rialzi: azioni care e obbligazioni lunghe restano sensibili."
+                       },
+                       {
+                           "titolo":  "Petrolio e guerra con l\u0027Iran",
+                           "perche":  "Il greggio è risalito vicino a 97 dollari: se i colloqui falliscono può tornare sopra 100 e alimentare l\u0027inflazione."
+                       },
+                       {
+                           "titolo":  "Dati sul lavoro USA di oggi",
+                           "perche":  "Un dato molto forte può far temere altri rialzi dei tassi, uno molto debole può far temere una frenata dell\u0027economia."
+                       }
+                   ],
+    "idee":  [
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00BK5BQT80",
+                     "perche":  "Un solo ETF su migliaia di aziende di tutto il mondo, ad accumulo e a costo basso: base semplice per un piano regolare, che diluisce il peso della tecnologia."
+                 },
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00B4L5Y983",
+                     "perche":  "Mercati sviluppati di tutto il mondo, ad accumulo e a costo basso; la tecnologia pesa, quindi in giorni come questi oscilla molto."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "IE00BDBRDM35",
+                     "perche":  "Obbligazioni di governi e società di tutto il mondo, coperte dal rischio cambio verso l\u0027euro: diversificato, scadenze medie."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "IE00B4WXJJ64",
+                     "perche":  "Titoli di Stato dell\u0027area euro: più sensibile ai tassi, meglio a rate."
+                 },
+                 {
+                     "classe":  "Liquidità",
+                     "isin":  "LU0290358497",
+                     "perche":  "Segue il tasso a un giorno in euro: rischio molto basso."
+                 },
+                 {
+                     "classe":  "Materie prime",
+                     "isin":  "IE00B4ND3602",
+                     "perche":  "Oro fisico quotato in euro. Solo come piccola quota di protezione, non come previsione."
+                 }
+             ],
+    "indicatori":  [
+                       {
+                           "nome":  "S\u0026P 500",
+                           "valore":  "-4,35%",
+                           "nota":  "chiusura 5 novembre a 7.354 punti · Nasdaq -5,52% a 24.315 · Dow -3,44%"
+                       },
+                       {
+                           "nome":  "FTSE MIB",
+                           "valore":  "-1,03%",
+                           "nota":  "chiusura a 50.505 punti · apertura 6 novembre circa -1,7%"
+                       },
+                       {
+                           "nome":  "Titoli di Stato USA a 10 anni",
+                           "valore":  "4,84%",
+                           "nota":  "2 anni 4,46% · 30 anni 5,25% (ieri 10 anni 4,90%)"
+                       },
+                       {
+                           "nome":  "Spread BTP-Bund",
+                           "valore":  "109 punti",
+                           "nota":  "chiusura 5 novembre · apertura 6 novembre 110 · BTP 10 anni 4,34%"
+                       },
+                       {
+                           "nome":  "Petrolio Brent",
+                           "valore":  "circa 97 $",
+                           "nota":  "WTI sopra 90 $ · gas europeo 89-92 euro/MWh"
+                       },
+                       {
+                           "nome":  "Bitcoin",
+                           "valore":  "circa 76.000 $",
+                           "nota":  "-5/-6% in 24 ore · oro spot circa 4.050-4.100 $"
+                       }
+                   ],
+    "fonti":  [
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Wall Street sheds $3.2tn as Democratic midterm sweep triggers brutal AI rout",
+                      "url":  "https://www.ft.com/content/3d079b3d-580d-400b-bf9c-56af6a08f60f?syn-25a6b1a6=1",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Nasdaq drops the most since pandemic as Democratic \u0027blue wave\u0027 upends AI bets",
+                      "url":  "https://www.ft.com/content/7c6ceb4f-d7b1-49ec-9047-0e2e4cd2615c?syn-25a6b1a6=1",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "Il Sole 24 Ore",
+                      "titolo":  "Borse, Wall Street affonda e brucia 3.200 miliardi con la fuga dall\u0027AI",
+                      "url":  "https://www.ilsole24ore.com/art/borsa-indici-giovedi-5-novembre-2026-AJerTS5B",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "MarketWatch",
+                      "titolo":  "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+                      "url":  "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Worst US Stock Rout Since 2020 Leaves Virtually Nowhere to Hide",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-05/worst-us-stock-rout-since-2020-leaves-virtually-nowhere-to-hide",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Borsa: Milano chiude in calo, Ftse Mib -1,03%",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/05/borsa-milano-chiude-in-calo-ftse-mib-103_3d6028d3-771c-4531-bcda-b1b69033704c.html",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Lo spread tra Btp e Bund chiude in rialzo a 109 punti base",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/05/lo-spread-tra-btp-e-bund-chiude-in-rialzo-a-109-punti-base_33afc7c5-a5bf-4270-b020-aecb05b5fc55.html",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Lagarde: \u0027A dicembre capiremo se dovremo alzare ancora i tassi\u0027",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/05/lagarde-a-dicembre-capiremo-se-dovremo-alzare-ancora-i-tassi_b56dd0c3-738f-4e14-8246-ce1812ffc86d.html",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "Bitcion tumbles to $76,000 as collapsing AI trade drags stocks sharply lower",
+                      "url":  "https://www.coindesk.com/markets/2026/11/05/bitcoin-crypto-stocks-caught-in-ai-trade-meltdown-but-wintermute-trader-sees-glass-half-full",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Magnificent 7 loses $1 trillion. The most eye-popping stats from Thursday\u0027s tech stock plunge",
+                      "url":  "https://www.cnbc.com/2026/11/05/stock-market-selloff-ai-fears.html",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "MarketWatch",
+                      "titolo":  "The \u0027Musk selloff\u0027 deepens as Tesla and SpaceX combine for $456 billion two-day wipeout",
+                      "url":  "https://www.marketwatch.com/story/the-musk-selloff-deepens-as-tesla-and-spacex-combine-for-450-billion-two-day-wipeout-d300ab4f?mod=mw_rss_topstories",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "The Guardian",
+                      "titolo":  "Bank of England raises interest rates to 4%, the first increase for more than three years",
+                      "url":  "https://www.theguardian.com/business/2026/nov/05/bank-of-england-raises-interest-rates-first-increase-for-more-than-three-years",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "The October jobs report is out Friday. Here\u0027s everything to expect",
+                      "url":  "https://www.cnbc.com/2026/11/05/october-jobs-report-preview.html",
+                      "data":  "2026-11-05"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Barkin sees interest rate hikes ahead, but at a gradual pace",
+                      "url":  "https://www.cnbc.com/2026/11/05/barkin-sees-interest-rate-hikes-ahead-but-at-a-gradual-pace.html",
+                      "data":  "2026-11-05"
+                  }
+              ],
+    "limiti":  "Ho letto per intero solo Il Sole 24 Ore, due pagine ANSA e CoinDesk. FT, MarketWatch, Bloomberg, CNBC e Guardian: solo titolo, fonte e link (a pagamento o non accessibili; il Guardian non si è aperto). La ricerca web non è stata usata: i dati vengono da mercati.json e dalle pagine lette. Il livello del petrolio è approssimato (Brent circa 97 dollari) e la sua chiusura ufficiale non è stata verificata; l\u0027indice paura/avidità crypto a 50 sembra incoerente con il calo. Non è consulenza finanziaria personalizzata e può sbagliare."
+}
