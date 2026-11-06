@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2eoFi2JiauuLlBOmzVpJbsYZtg3wmPRVU5JrBfWzBd4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-J9fl0sZYMlG9GNXOftKCOg8eoBuUJJrcE91YptP1jxc='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2432,7 +2432,7 @@ const DATA = { hist: null, mercati: null, aziende: null };      // storico dei p
 const pnum = v => { const x = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(x) ? x : null; };
 const G = () => S.goal || (S.goal = { cagr: 20, years: 5, monthly: 0, assume: {} });
 const JR = () => S.journal || (S.journal = []);
-const DEFAULTS = { maxPos: 5, maxCrypto: 10, maxAny: 35, maxCash: 20, tol: 5 };
+const DEFAULTS = { maxPos: 5, maxCrypto: 10, maxAny: 35, maxCash: 20, tol: 5, maxUsa: 70, minEu: 5, minEm: 3 };
 const th = k => { const v = pnum(S.policy[k]); return v > 0 ? v : DEFAULTS[k]; };
 const LEV_RE = /leverage|\b[2-5]x\b|-1x\b|\bshort\b(?!\s*[- ]?(dur|term|matur))|inverse|ultra\s?(short|pro)|\bdaily\s+(leverag|short|inverse|[2-5]x)/i;          // 'Daily Hedged' (copertura del cambio) e 'Short Duration' (obbligazioni a breve scadenza) NON sono leva
 const CLASS_DEFAULT = { 'Azioni': [7, 16], 'Obbligazioni': [3, 5], 'Materie prime': [4, 15], 'Crypto': [10, 70], 'Monetario': [2, 1], 'Liquidità': [1.5, 0.5], 'Non classificato': [5, 15] };   // [rendimento atteso %, volatilità %]: IPOTESI modificabili, non previsioni
@@ -2872,11 +2872,20 @@ function anEsposizione() {
   return el;
 }
 
+const SOGLIE = [          // [chiave, nome breve, spiegazione chiara]
+  ['maxPos', 'Un singolo titolo (azione o crypto)', 'Quanto può pesare al massimo, in % di tutto il patrimonio, una singola azione o una singola crypto. Sopra questa soglia ti avviso e, in Consigli → Market movers, propongo di ridurre.'],
+  ['maxAny', 'Una singola posizione qualsiasi', 'Quanto può pesare al massimo, in % del patrimonio, qualsiasi posizione sola, anche un ETF molto diversificato (soglia più larga).'],
+  ['maxCrypto', 'Tutte le crypto insieme', 'Quanto possono pesare al massimo, in % del patrimonio, tutte le crypto sommate.'],
+  ['maxCash', 'Liquidità ferma nei conti d\'investimento', 'Quanta liquidità può restare ferma dentro i conti d\'investimento, in % del patrimonio, prima che ti avvisi.'],
+  ['tol', 'Tolleranza dalla tua divisione obiettivo', 'Di quanti punti percentuali una classe (Azioni, Obbligazioni…) può scostarsi dalla divisione obiettivo prima che ti dica di riequilibrare. Esempio: obiettivo Azioni 60% e tolleranza 5 → va bene tra 55% e 65%.'],
+  ['maxUsa', 'America: attenzione se supera', 'In % di quanto hai investito (liquidità esclusa). Sopra questa soglia, Market movers propone di diversificare fuori dagli USA.'],
+  ['minEu', 'Europa: attenzione se sotto', 'In % di quanto hai investito. Sotto questa soglia, Market movers propone di inserire Europa.'],
+  ['minEm', 'Mercati emergenti: attenzione se sotto', 'In % di quanto hai investito. Sotto questa soglia, Market movers propone di inserire i mercati emergenti.']];
 function anRegole() {
   const el = h('div'), al = alerts();
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Regole che ti sei dato'),
-    table([{ t: 'Regola' }, { t: 'Soglia', n: 1 }], [['Peso massimo di un singolo titolo', th('maxPos') + '%'], ['Peso massimo di una singola posizione', th('maxAny') + '%'], ['Crypto sul patrimonio', th('maxCrypto') + '%'], ['Liquidità ferma nei conti d\'investimento', th('maxCash') + '%'], ['Scostamento dall\'allocazione obiettivo', '±' + th('tol') + ' punti']]),
-    h('div', { class: 'row' }, btn('Cambia soglie', () => form('Soglie delle regole', [{ key: 'maxPos', label: 'Peso massimo di un singolo titolo (%)', type: 'number' }, { key: 'maxAny', label: 'Peso massimo di una singola posizione (%)', type: 'number' }, { key: 'maxCrypto', label: 'Crypto sul patrimonio (%)', type: 'number' }, { key: 'maxCash', label: 'Liquidità ferma nei conti d\'investimento (%)', type: 'number' }, { key: 'tol', label: 'Scostamento dall\'allocazione obiettivo (punti)', type: 'number' }], { maxPos: th('maxPos'), maxAny: th('maxAny'), maxCrypto: th('maxCrypto'), maxCash: th('maxCash'), tol: th('tol') }, o => { for (const k of ['maxPos', 'maxAny', 'maxCrypto', 'maxCash', 'tol']) S.policy[k] = o[k] > 0 ? o[k] : DEFAULTS[k]; done(); }), 'sm'))));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Regole che ti sei dato'), h('p', { class: 'muted' }, 'Sono i limiti oltre i quali l\'app ti avvisa. Tocca una riga per capire cosa significa.'),
+    table([{ t: 'Regola' }, { t: 'Soglia', n: 1 }], SOGLIE.map(([k, n, d]) => [h('span', { class: 'tapme', role: 'button', tabindex: '0', onclick: () => talk({ kind: 'Regola', title: n, value: (k === 'tol' ? '±' : '') + th(k) + (k === 'tol' ? ' punti' : '%'), say: d, tip: 'La cambi con "Cambia soglie": sono limiti di prudenza tuoi, non verità di mercato.' }) }, n), (k === 'tol' ? '±' : '') + th(k) + (k === 'tol' ? ' punti' : '%')])),
+    h('div', { class: 'row' }, btn('Cambia soglie', () => form('Soglie delle regole', SOGLIE.map(([k, n, d]) => ({ key: k, label: n + (k === 'tol' ? ' (punti)' : ' (%)'), type: 'number', hint: d })), Object.fromEntries(SOGLIE.map(([k]) => [k, th(k)])), o => { for (const [k] of SOGLIE) S.policy[k] = o[k] > 0 ? o[k] : DEFAULTS[k]; done(); }), 'sm'), btn('Divisione obiettivo…', () => targetForm(), 'sm'))));
   el.append(h('section', { class: 'card' }, h('h2', null, 'Cosa non rispetta le regole adesso'), al.length ? h('ul', { class: 'list' }, al.map(t => h('li', null, h('span', null, t)))) : h('p', { class: 'muted' }, 'Tutto in regola con le soglie attuali.')));
   return el;
 }
@@ -2991,19 +3000,36 @@ function rebalance(amount) {
   if (rest > 0.01) for (const [k, w] of tl) put.set(k, (put.get(k) || 0) + rest * w);        // tutto gia' a obiettivo: si ripartisce come l'obiettivo
   return [...names].map(([k, label]) => { const c = cur.get(k) || 0, p = put.get(k) || 0; return { label, cur: c, curPct: tot ? c / tot : 0, tgt: tl.get(k) || 0, put: p, after: T2 > 0 ? (c + p) / T2 : 0 }; }).sort((a, b) => b.put - a.put);
 }
+const TGT_CLS = ['Azioni', 'Obbligazioni', 'Materie prime', 'Crypto', 'Liquidità'];
+function targetRaw(txt) {          // la divisione scritta dall'utente, senza normalizzare: [[classe, numero]] (liquidita' e monetario insieme)
+  const m = new Map(); for (const item of String(txt || '').split(/[,;]/)) { const x = item.trim().match(/^(.*?)[\s:=]+(\d+(?:[.,]\d+)?)\s*%?$/); if (!x || !x[1].trim()) continue; let k = x[1].trim(); if (/^(liquidit|monetari)/i.test(k)) k = 'Liquidità'; const key = TGT_CLS.find(c => c.toLowerCase() === k.toLowerCase()) || k; m.set(key, (m.get(key) || 0) + parseFloat(x[2].replace(',', '.'))); }
+  return [...m.entries()];
+}
+const targetSum = txt => targetRaw(txt).reduce((t, [, v]) => t + v, 0);
+function targetForm(onSaved) {          // una casella per classe e il totale deve fare 100
+  const cur = new Map(targetRaw(S.policy.target)), extra = [...cur.keys()].filter(k => !TGT_CLS.includes(k)), cls = TGT_CLS.concat(extra), vals = {};
+  for (const k of cls) vals[k] = cur.has(k) ? cur.get(k) : '';
+  form('La tua divisione obiettivo', cls.map(k => ({ key: k, label: k + ' (%)', type: 'number', hint: k === 'Azioni' ? 'Quanto vuoi in ogni classe, in % di tutto il patrimonio. Il totale deve fare esattamente 100. Lascia vuota una classe che non vuoi.' : undefined })), vals, o => {
+    const rows = cls.map(k => [k, Number(o[k]) || 0]).filter(([, v]) => v > 0), sum = rows.reduce((t, [, v]) => t + v, 0), r2 = Math.round(sum * 100) / 100;
+    if (!rows.length) return 'Scrivi almeno una percentuale.';
+    if (Math.abs(sum - 100) > 0.01) return 'Il totale è ' + r2 + '%: ' + (sum < 100 ? 'mancano ' + Math.round((100 - sum) * 100) / 100 : 'ne hai ' + Math.round((sum - 100) * 100) / 100 + ' di troppo') + ' punti per arrivare a 100.';
+    S.policy.target = rows.map(([k, v]) => k + ' ' + (Math.round(v * 100) / 100)).join(', '); done(); if (onSaved) onSaved();
+  }, null, 'Salva');
+}
 function anRibilancia() {
   const el = h('div'), g = G(), amt = pnum(UI.newMoney) ?? (g.monthly > 0 ? g.monthly : 500);
   const inp = h('input', { type: 'number', step: 'any', class: 'pin', value: amt, 'aria-label': 'Importo da investire', onchange: e => { const v = pnum(e.target.value); UI.newMoney = v != null && v >= 0 ? v : amt; render(); } });
   const head = h('section', { class: 'card' }, h('h2', null, 'Dove mettere i prossimi soldi'), h('p', { class: 'muted' }, 'Quanto vuoi investire adesso? L\'app calcola come ripartirlo per avvicinare il portafoglio alla tua allocazione obiettivo, senza vendere nulla.'), h('label', { class: 'fld' }, h('span', null, 'Importo da investire (€)'), inp));
   const rb = rebalance(amt);
   const setT = t => { S.policy.target = t; done(); };
-  const own = () => form('La tua divisione', [{ key: 't', label: 'Classi e percentuali', ph: 'Azioni 65, Obbligazioni 20, Crypto 5, Liquidità 10', req: true, hint: 'Le classi sono quelle dell\'app: Azioni, Obbligazioni, Crypto, Liquidità, Materie prime.' }], { t: S.policy.target || '' }, o => { if (!parseMix(o.t, '').some(x => x[0])) return 'Scrivi per esempio: Azioni 65, Obbligazioni 20, Liquidità 15'; setT(o.t); });
+  const own = () => targetForm();
   if (!rb) {
     el.append(head, h('section', { class: 'card' }, h('h2', null, 'Com\'è fatto il portafoglio che vuoi?'), h('p', { class: 'muted' }, 'Scegli una divisione di partenza: la cambi quando vuoi. Le casse separate (come la Cassa cani) non contano.'),
       h('div', { class: 'row' }, MIXES.map(([n, t]) => btn(n, () => setT(t), 'pri')), btn('Scrivo la mia…', own)),
       h('ul', null, MIXES.map(([n, t, d]) => h('li', null, h('b', null, n + ': '), t + ' — ' + d)))));
     return el;
   }
+  if (Math.abs(targetSum(S.policy.target) - 100) > 0.01) head.append(h('div', { class: 'warn' }, 'La tua divisione somma ' + (Math.round(targetSum(S.policy.target) * 100) / 100) + '%, non 100: l\'app la riporta a 100 in proporzione, ma conviene sistemarla. ', h('a', { href: '#', onclick: e => { e.preventDefault(); own(); } }, 'Sistemala')));
   head.append(h('p', { class: 'muted' }, 'La tua divisione: ' + S.policy.target + ' · ', h('a', { href: '#', onclick: e => { e.preventDefault(); own(); } }, 'cambia'), ' · scegli tra: ', MIXES.map(([n, t], k) => [k ? ', ' : '', h('a', { href: '#', onclick: e => { e.preventDefault(); setT(t); } }, n)])));
   const sug = k => { const c = S.instruments.filter(i => parseMix(i.cls, 'Non classificato')[0][0].toLowerCase() === k.toLowerCase() && S.accounts.some(a => a.positions.some(p => p.instId === i.id))).sort((a, b) => (a.ter ?? 9) - (b.ter ?? 9)); return c[0] ? c[0].name + (c[0].ter != null ? ' (TER ' + nfp.format(c[0].ter) + '%)' : '') : '—'; };
   el.append(head, h('section', { class: 'card' }, h('h2', null, 'Come ripartirli'),
@@ -4186,9 +4212,8 @@ function autoCard() {
     btn('Modifica politica', () => form('Politica di investimento', [
       { key: 'horizon', label: 'Orizzonte temporale (anni)', ph: 'es. 20' },
       { key: 'maxLoss', label: 'Perdita massima tollerabile (%)', ph: 'es. 20' },
-      { key: 'target', label: 'Allocazione obiettivo per classe', ph: 'Azioni 70, Obbligazioni 20, Liquidità 10', hint: 'Appare come confronto nella scheda Allocazione.' },
       { key: 'notes', label: 'Note e vincoli', type: 'textarea' }
-    ], po, o => { Object.assign(S.policy, o); done(); })),
+    ], po, o => { Object.assign(S.policy, o); done(); })), ' ', btn('Divisione obiettivo…', () => targetForm(), 'sm'),
     h('p', null, po.horizon || po.maxLoss || po.target || po.notes ? 'Orizzonte: ' + (po.horizon || '—') + ' anni · Perdita massima: ' + (po.maxLoss ? po.maxLoss + '%' : '—') + ' · Obiettivo: ' + (po.target || '—') + (po.notes ? ' · ' + po.notes : '') : 'Non ancora definita.')));
   const O = UI.sum, ta = h('textarea', { rows: 14, 'aria-label': 'Riepilogo per l\'AI' }), regen = () => { ta.value = buildSummary(O); };
   const chk = (key, label) => h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: O[key], onchange: e => { O[key] = e.target.checked; regen(); } }), h('span', null, label));
@@ -5058,7 +5083,7 @@ function pacManager() {          // la stessa cosa in una finestra, dal menu
 }
 
 /* ============ Market movers (Consigli): il tuo portafoglio letto insieme ai movimenti del mercato. Solo regole e numeri veri (niente AI, niente previsioni): ogni suggerimento dice perche' ============ */
-const MM = { conc: 0.05, gap: 0.03, usa: 0.70, europa: 0.05, em: 0.03, ddForte: -30, stress: 0.30 };
+const MM = { get conc() { return th('maxPos') / 100; }, get gap() { return th('tol') / 100; }, get usa() { return th('maxUsa') / 100; }, get europa() { return th('minEu') / 100; }, get em() { return th('minEm') / 100; }, ddForte: -30, stress: 0.30 };          // le soglie sono quelle di Analisi > Regole (modificabili li')
 const spN = x => !fin(x) ? '—' : (x > 0 ? '+' : x < 0 ? '−' : '') + nfp.format(Math.abs(x)) + '%';          // x e' gia' in percentuale
 function mmHold() {          // i tuoi titoli (senza casse separate), uno per strumento, col peso e, se c'e', il dato di mercato delle classifiche (si abbina per ISIN)
   const C = DATA.classif, by = new Map(); if (C) for (const v of C.voci) by.set(String(v.isin).toUpperCase(), v);
@@ -5140,7 +5165,7 @@ function tabMovers() {
   if (an && an.classi && an.classi.length) el.append(h('section', { class: 'card' }, h('h3', null, 'Cosa dice l\'analisi di oggi'), h('p', { class: 'muted', style: 'font-size:13px' }, 'È la lettura delle notizie scritta da un\'AI (' + fmtDate(an.data) + '): serve come contesto, non cambia i calcoli qui sopra.'), table([{ t: 'Classe' }, { t: 'Giudizio' }, { t: 'Mossa suggerita' }], an.classi.slice(0, 6).map(c => [c.classe, judLabel(c.giudizio), String(c.mossa || '—')]))));
   el.append(h('section', { class: 'card' }, h('h3', null, 'Come ho deciso, e i limiti'), h('ul', null,
     h('li', null, 'Titolo singolo (azione o crypto) sopra il ' + pct(MM.conc) + ' del patrimonio → "valuta di ridurre".'),
-    h('li', null, 'Classe oltre ' + (MM.gap * 100) + ' punti sopra o sotto la tua divisione obiettivo (Analisi → Nuovi soldi) → ridurre o integrare. Senza divisione obiettivo questa regola non scatta.'),
+    h('li', null, 'Classe oltre ' + nfp.format(MM.gap * 100) + ' punti sopra o sotto la tua divisione obiettivo (Analisi → Nuovi soldi) → ridurre o integrare. Senza divisione obiettivo questa regola non scatta.'),
     h('li', null, 'America oltre il ' + pct(MM.usa) + ' di quanto investito, Europa sotto il ' + pct(MM.europa) + ' o mercati emergenti sotto il ' + pct(MM.em) + ' → inserire. Le aree vengono da quelle che hai assegnato agli strumenti.'),
     h('li', null, 'Titolo oltre il ' + Math.abs(MM.ddForte) + '% sotto il massimo di 52 settimane e in calo da 3 mesi → "da ricontrollare" (mai "vendi").'),
     h('li', null, 'Le soglie sono regole di prudenza comuni, non verità: nessuno sa dove andrà il mercato. Tasse e prezzi sono stime con i dati che ho; i titoli senza dato di mercato non vengono valutati sul mercato. Decidi tu.'))));
