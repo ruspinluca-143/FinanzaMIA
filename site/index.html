@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Q8jUQ91VH6XpwWD+DwdJ2iSoqU5++pHoss2yGRsEsUg='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2eoFi2JiauuLlBOmzVpJbsYZtg3wmPRVU5JrBfWzBd4='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -189,6 +189,7 @@ dialog.wz{max-width:520px;padding:18px 18px 16px}
 .wz-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;padding:14px 16px;border-radius:16px;border:1.5px solid var(--ring);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;transition:transform .2s var(--ease),border-color .2s,background .2s;animation:rise .35s var(--ease) both}
 .wz-opt:hover,.wz-opt:focus-visible{border-color:var(--s1);background:color-mix(in srgb,var(--s1) 7%,var(--card));outline:none}
 .wz-opt:active{transform:scale(.98)}
+.mm-card{padding:12px 0;border-top:1px solid var(--line,#ddd)}.mm-card ul{margin:6px 0 6px 18px;padding:0}.mm-card li{margin:4px 0}
 .wz-opts{display:flex;flex-direction:column;gap:8px}
 .wz-opt.sel{border-color:var(--s1)}
 .wz-opt.soft{opacity:.85}
@@ -3085,8 +3086,8 @@ function analisiBanner() {
   return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
 }
 function tabConsigli() {          // due viste: l'analisi di oggi (scritta dall'AI) e le classifiche dei titoli
-  const sub = UI.csub || 'analisi', seg = h('div', { class: 'chips', role: 'group', 'aria-label': 'Vista' }, [['analisi', 'Analisi di oggi'], ['titoli', 'Classifiche titoli'], ['chiedi', 'Chiedi all\'AI']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
-  return h('div', null, seg, sub === 'titoli' ? tabClassifiche() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
+  const sub = UI.csub || 'analisi', seg = h('div', { class: 'chips', role: 'group', 'aria-label': 'Vista' }, [['analisi', 'Analisi di oggi'], ['movers', 'Market movers'], ['titoli', 'Classifiche titoli'], ['chiedi', 'Chiedi all\'AI']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
+  return h('div', null, seg, sub === 'movers' ? tabMovers() : sub === 'titoli' ? tabClassifiche() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
 }
 function dataContext() {          // cio' che si manda all'AI: totali e pesi, MAI nomi dei conti o codici; per i titoli solo il nome e il peso
   const tot = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), cls = exposure('class', true).map(([l, v]) => ({ classe: l, peso_pct: Math.round(v / tot * 1000) / 10 })), area = exposure('area', true).map(([l, v]) => ({ area: l, peso_pct: Math.round(v / tot * 1000) / 10 }));
@@ -5053,6 +5054,96 @@ function pacManager() {          // la stessa cosa in una finestra, dal menu
       h('h4', null, 'Le prossime scadenze'),
       table([{ t: 'Data' }, { t: 'Voce' }, { t: 'Importo', n: 1 }], upc.slice(0, 8).map(({ p, d }) => [fmtDate(d), p.label + ' · ' + accName(p.accId), eur(p.amount)]))));
   }
+  return el;
+}
+
+/* ============ Market movers (Consigli): il tuo portafoglio letto insieme ai movimenti del mercato. Solo regole e numeri veri (niente AI, niente previsioni): ogni suggerimento dice perche' ============ */
+const MM = { conc: 0.05, gap: 0.03, usa: 0.70, europa: 0.05, em: 0.03, ddForte: -30, stress: 0.30 };
+const spN = x => !fin(x) ? '—' : (x > 0 ? '+' : x < 0 ? '−' : '') + nfp.format(Math.abs(x)) + '%';          // x e' gia' in percentuale
+function mmHold() {          // i tuoi titoli (senza casse separate), uno per strumento, col peso e, se c'e', il dato di mercato delle classifiche (si abbina per ISIN)
+  const C = DATA.classif, by = new Map(); if (C) for (const v of C.voci) by.set(String(v.isin).toUpperCase(), v);
+  const tot = totalValue() - boxTotal(), m = new Map();
+  for (const r of sellRows()) { if (r.a.box || !(r.v > 0)) continue; const o = m.get(r.i.id) || { i: r.i, v: 0, gain: 0, tax: 0, net: 0, known: true, pens: true }; o.v += r.v; o.tax += r.tax; o.net += r.net; if (r.known) o.gain += r.gain; else o.known = false; if (!/pension/i.test(r.a.type || '')) o.pens = false; m.set(r.i.id, o); }
+  const hold = [...m.values()].map(o => { const mk = o.i.code ? by.get(String(o.i.code).toUpperCase()) : null; return Object.assign(o, { w: tot > 0 ? o.v / tot : 0, mk, dd: mk && clDD(mk) != null ? clDD(mk) * 100 : null, cls: parseMix(o.i.cls, 'Non classificato')[0][0], kind: kindOf(o.i) }); }).sort((a, b) => b.v - a.v);
+  return { tot, hold, by };
+}
+function mmMarket() {          // com'e' andato il mercato nell'ultima seduta, dai dati delle classifiche (circa 100 grandi azioni USA)
+  const C = DATA.classif; if (!C) return null;
+  const az = C.voci.filter(v => v.ty === 'azione' && fin(v.d1)); if (az.length < 20) return null;
+  const avg = az.reduce((t, v) => t + v.d1, 0) / az.length, d3 = az.filter(v => v.d1 <= -3).length, d5 = az.filter(v => v.d1 <= -5).length, up = az.filter(v => v.d1 > 0).length;
+  const sec = new Map(); for (const v of az) if (v.set) { const o = sec.get(v.set) || { n: v.set, k: 0, s: 0 }; o.k++; o.s += v.d1; sec.set(v.set, o); }
+  const secs = [...sec.values()].filter(o => o.k >= 3).map(o => ({ n: o.n, k: o.k, avg: o.s / o.k })).sort((a, b) => a.avg - b.avg);
+  const big = az.filter(v => fin(v.cap)).sort((a, b) => b.cap - a.cap).slice(0, 30).sort((a, b) => a.d1 - b.d1);
+  return { n: az.length, avg, d3, d5, up, secs, worst: big.slice(0, 5), stress: d3 / az.length >= MM.stress };
+}
+function mmAdvice(B) {
+  const out = { riduci: [], integra: [], compra: [] }, tot = B.tot, M = mmMarket(); if (!(tot > 0)) return out;
+  const mkLine = o => o.mk ? 'Dati di mercato: ultima seduta ' + spN(o.mk.d1) + ', ultimo mese ' + spN(o.mk.m1) + ', 3 mesi ' + spN(o.mk.m3) + (o.dd != null ? ', ' + spN(o.dd) + ' dal massimo di 52 settimane' : '') + '.' : 'Non ho dati di mercato su questo titolo (non è nelle classifiche): decido solo dal peso.';
+  const taxLine = o => o.known ? 'Se vendessi tutto: ' + (o.gain >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(o.gain)) + ', tasse stimate ' + eur(o.tax) + ', netto ' + eur(o.net) + '.' : 'Costo di carico non noto: le tasse non si possono stimare.';
+  const card = (tag, tone, title, why, contro, extra) => h('div', { class: 'mm-card' }, h('div', { class: 'row', style: 'margin:0;flex-wrap:nowrap' }, h('span', { class: 'pill ' + tone }, tag), h('b', { class: 'grow' }, title)), h('ul', null, why.map(w => h('li', null, w))), contro ? h('p', { class: 'muted', style: 'font-size:13px' }, h('b', null, 'Caso contrario: '), contro) : null, extra || null);
+  // 1) un titolo singolo che pesa troppo
+  for (const o of B.hold) if ((o.kind === 'azione' || o.kind === 'crypto') && o.w > MM.conc && !o.pens)
+    out.riduci.push({ k: o.w, n: card('Valuta di ridurre', 'dn', nm(o.i.name), ['Pesa ' + pct(o.w) + ' del patrimonio (' + eur(o.v) + '): per un singolo titolo la soglia di prudenza è ' + pct(MM.conc) + '. Per tornare sotto soglia basterebbe vendere circa ' + eur((o.w - MM.conc) * tot) + '.', mkLine(o), taxLine(o)], 'Un titolo che sale può continuare a salire: la soglia limita il rischio di un singolo evento, non prevede il prezzo. Se lo tieni per scelta, va bene: è una tua decisione.') });
+  // 2) classi sopra o sotto la tua divisione obiettivo
+  const hasT = !!(S.policy.target && S.policy.target.trim());
+  if (hasT) for (const [k] of parseMix(S.policy.target, '')) {
+    if (!k) continue; const my = myClass(k); if (my.tgt == null) continue; const gap = my.tgt - my.cur, names = k.toLowerCase() === 'liquidità' ? ['liquidità', 'monetario'] : [k.toLowerCase()];
+    const inCls = B.hold.filter(o => names.includes(o.cls.toLowerCase()) && !o.pens);
+    const head = 'Oggi la classe ' + k + ' pesa ' + pct(my.cur) + ' e il tuo obiettivo è ' + pct(my.tgt) + ' (' + (gap > 0 ? 'mancano ' : 'in più ') + nfp.format(Math.abs(gap) * 100) + ' punti, circa ' + eur(Math.abs(gap) * tot) + ').';
+    if (gap < -MM.gap && names.includes('liquidità')) {
+      out.integra.push({ k: -gap, n: card('Liquidità in più', 'up', "Hai più liquidità dell'obiettivo", [head, 'Non è da vendere: è denaro fermo che puoi usare per le classi sotto l\'obiettivo (vedi sotto), meglio a rate. Tieni da parte un fondo per le emergenze prima di investire tutto.'], 'Se la liquidità serve per una spesa vicina (casa, tasse), tienila: l\'obiettivo può aspettare.') });
+    } else if (gap < -MM.gap) {
+      const c = inCls.filter(o => !o.pens).sort((a, b) => (a.known ? a.tax / a.v : 9) - (b.known ? b.tax / b.v : 9)).slice(0, 2);
+      out.riduci.push({ k: -gap, n: card('Valuta di ridurre', 'dn', 'Classe ' + k + ' sopra l\'obiettivo', [head, c.length ? 'Dove costerebbe meno in tasse (ordine per tasse sul valore): ' + c.map(o => nm(o.i.name) + ' (' + pct(o.w) + ' del patrimonio)').join('; ') + '.' : 'Non ci sono posizioni vendibili in questa classe.'].concat(c.map(o => nm(o.i.name) + ': ' + taxLine(o) + ' ' + mkLine(o))), 'Prima di vendere, valuta se ti basta smettere di aggiungere a questa classe (PAC e nuovi soldi altrove): riequilibra senza tasse.') });
+    } else if (gap > MM.gap) {
+      const ctx = k.toLowerCase() === 'azioni' && M ? (M.stress ? 'Nell\'ultima seduta ' + M.d3 + ' grandi azioni USA su ' + M.n + ' hanno perso almeno il 3% (media ' + spN(M.avg) + '): giornata di forte stress. Chi aggiunge in giornate così lo fa meglio a rate, perché le oscillazioni restano ampie.' : 'Nell\'ultima seduta le grandi azioni USA sono andate in media ' + spN(M.avg) + ' (' + M.d3 + ' su ' + M.n + ' sotto il −3%): nessuno stress particolare.') : null;
+      const ex = inCls.slice(0, 3).map(o => nm(o.i.name) + ' (peso ' + pct(o.w) + '). ' + mkLine(o));
+      const why = [head].concat(inCls.length ? ['Strumenti che hai già in questa classe: aggiungere a questi non complica il portafoglio.'].concat(ex) : ['Non hai ancora nessuno strumento in questa classe.'], ctx ? [ctx] : []);
+      (inCls.length ? out.integra : out.compra).push({ k: gap, n: card(inCls.length ? 'Valuta di integrare' : 'Valuta di inserire', 'up', 'Classe ' + k + ' sotto l\'obiettivo', why, 'Se il tuo obiettivo è cambiato, aggiorna la divisione in Analisi → Nuovi soldi: i consigli seguono quella.', ideasNode(k)) });
+    }
+  }
+  // 3) troppa America / poca Europa e mercati emergenti (dalle aree che hai assegnato agli strumenti)
+  const ar = exposure('area', true).filter(([l]) => !/liquid/i.test(l)), at = ar.reduce((t, [, v]) => t + v, 0);
+  if (at > 0 && ar.length) {
+    const sh = re => ar.filter(([l]) => re.test(l)).reduce((t, [, v]) => t + v, 0) / at, usa = sh(/usa|stati uniti|america/i), eu = sh(/europ/i), em = sh(/emerg/i);
+    const held = heldIsins(), C = DATA.classif;
+    const pickEtf = re => C ? C.voci.filter(v => (v.ty === 'etf' || v.ty === 'altro') && re.test(v.n) && !held.has(String(v.isin).toUpperCase()) && fin(v.y1)).sort((a, b) => b.y1 - a.y1).slice(0, 3) : [];
+    const etfRows = arr => arr.length ? h('div', { class: 'ideas' }, arr.map(v => { const c = ideaCand(v.isin); return h('div', { class: 'idea' }, h('div', null, h('b', null, nm(v.n)), h('small', { class: 'muted' }, ' · ' + v.isin), h('div', { class: 'muted', style: 'font-size:13px' }, '1 anno ' + spN(v.y1) + ' · 1 mese ' + spN(v.m1) + (clDD(v) != null ? ' · ' + spN(clDD(v) * 100) + ' dal massimo' : '') + ' (dati delle classifiche)')), c ? h('div', { class: 'row', style: 'gap:6px;margin:4px 0 8px' }, btn('Compra', () => opWizard({ kind: 'acquisto', c, _wz: 1 }), 'sm pri'), btn('Fanne un PAC', () => pacWizard({ c }), 'sm')) : h('small', { class: 'muted' }, 'non ancora nel tuo catalogo')); })) : h('p', { class: 'muted', style: 'font-size:13px' }, 'Nelle classifiche di oggi non trovo ETF di questa area che tu non abbia già: guarda la vista Classifiche titoli.');
+    if (usa > MM.usa) out.compra.push({ k: usa, n: card('Valuta di inserire', 'up', 'Troppo concentrato sull\'America', ['Gli Stati Uniti pesano ' + pct(usa) + ' di quello che hai investito (soglia di attenzione ' + pct(MM.usa) + '). Europa: ' + pct(eu) + ', mercati emergenti: ' + pct(em) + '.', 'Il dato viene dall\'area che hai assegnato a ogni strumento (negli ETF "mondo" l\'America pesa per sua natura): controlla in Analisi → Sovrapposizioni.', M ? 'Ultima seduta: grandi azioni USA ' + spN(M.avg) + ' in media; settori più colpiti: ' + M.secs.slice(0, 3).map(s => s.n + ' ' + spN(s.avg)).join(', ') + '.' : 'Dati di mercato di oggi non disponibili.'], 'Concentrarsi sull\'America ha pagato negli ultimi anni; diversificare non garantisce rendimenti migliori, riduce solo la dipendenza da un\'unica area.', etfRows(pickEtf(/europe|europa|stoxx/i).concat(pickEtf(/emerging|emergenti/i)).slice(0, 4))) });
+    else {
+      if (eu < MM.europa && usa > 0.5) out.compra.push({ k: 0.1, n: card('Valuta di inserire', 'up', 'Europa quasi assente', ['L\'Europa pesa ' + pct(eu) + ' di quello che hai investito (soglia ' + pct(MM.europa) + ').'], 'Se l\'esposizione europea arriva già dagli ETF "mondo", non serve altro.', etfRows(pickEtf(/europe|europa|stoxx/i))) });
+      if (em < MM.em && usa > 0.5) out.compra.push({ k: 0.05, n: card('Valuta di inserire', 'up', 'Mercati emergenti quasi assenti', ['I mercati emergenti pesano ' + pct(em) + ' di quello che hai investito (soglia ' + pct(MM.em) + ').'], 'Hanno oscillazioni più ampie: pochi punti percentuali bastano per diversificare.', etfRows(pickEtf(/emerging|emergenti/i))) });
+    }
+  }
+  // 4) titoli in forte calo da tempo (da ricontrollare, non da vendere per il calo di un giorno)
+  for (const o of B.hold) if (o.mk && !o.pens && !((o.kind === 'azione' || o.kind === 'crypto') && o.w > MM.conc) && o.dd != null && o.dd <= MM.ddForte && fin(o.mk.m3) && o.mk.m3 < 0)
+    out.riduci.push({ k: 0.02, n: card('Da ricontrollare', 'dn', nm(o.i.name), ['È ' + spN(o.dd) + ' dal massimo di 52 settimane e negli ultimi 3 mesi fa ' + spN(o.mk.m3) + '. Pesa ' + pct(o.w) + '.', mkLine(o), taxLine(o)], 'Un calo forte può essere un\'occasione o un problema vero: l\'app non conosce il motivo. Leggi le notizie sull\'azienda prima di decidere; non vendere solo per il ribasso di un giorno.') });
+  for (const k of Object.keys(out)) out[k].sort((a, b) => b.k - a.k);
+  return out;
+}
+function tabMovers() {
+  const el = h('div'), C = DATA.classif, B = mmHold();
+  if (!(B.tot > 0) || !B.hold.length) return h('section', { class: 'card' }, h('h2', null, 'Market movers'), h('p', { class: 'muted' }, 'Servono almeno un conto con dei titoli: aggiungili e qui leggo il tuo portafoglio insieme ai movimenti del mercato.'));
+  const M = mmMarket(), mv = todayMovers(), oggi = mv.reduce((t, r) => t + r.d, 0), withMk = B.hold.filter(o => o.mk).length, ageD = C && C.generato ? Math.round((Date.now() - Date.parse(C.generato)) / 864e5) : null;
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Market movers'), h('p', { class: 'muted' }, 'Il tuo portafoglio letto insieme a come si è mosso il mercato. Ogni indicazione nasce da regole con numeri veri (i tuoi saldi e i dati delle classifiche), non da previsioni né da un\'AI: sotto ogni voce trovi il perché e il caso contrario. Non è una consulenza.'),
+    tiles([{ l: 'Patrimonio considerato', v: eur(B.tot), s: 'senza le casse separate' }, { l: 'Oggi sui tuoi titoli', v: mv.length ? seur(oggi) : '—', s: mv.length ? 'dai tuoi prezzi' : 'servono i prezzi di ieri' }, { l: 'Titoli con dati di mercato', v: withMk + ' su ' + B.hold.length, s: 'abbinati per ISIN alle classifiche' }, { l: 'Dati di mercato', v: C ? fmtDate(String(C.generato).slice(0, 10)) : 'non disponibili', s: ageD != null && ageD >= 2 ? 'vecchi di ' + ageD + ' giorni' : 'aggiornati ogni giorno' }]),
+    ageD != null && ageD >= 2 ? h('div', { class: 'warn' }, 'I dati di mercato hanno ' + ageD + ' giorni: le indicazioni sul mercato possono essere superate.') : null,
+    !C ? h('div', { class: 'warn' }, 'Le classifiche non sono ancora arrivate: uso solo i tuoi dati (pesi, obiettivi).') : null));
+  if (M) el.append(h('section', { class: 'card' }, h('h3', null, 'Cosa ha fatto il mercato'), h('p', null, 'Tra le ' + M.n + ' grandi azioni USA delle classifiche, nell\'ultima seduta la media è ' + spN(M.avg) + ': ' + M.up + ' salgono, ' + (M.n - M.up) + ' scendono, ' + M.d3 + ' perdono almeno il 3% e ' + M.d5 + ' almeno il 5%. ' + (M.stress ? 'È una giornata di forte stress (più del ' + pct(MM.stress) + ' dei titoli sotto il −3%).' : 'Non è una giornata di stress diffuso.')),
+    table([{ t: 'Settori più colpiti (media)' }, { t: 'Titoli', n: 1 }, { t: 'Media', n: 1 }], M.secs.slice(0, 4).map(s => [s.n, String(s.k), spN(s.avg)])),
+    table([{ t: 'Grandi aziende più scese' }, { t: 'Oggi', n: 1 }, { t: 'Ce l\'hai?', n: 1 }], M.worst.map(v => [nm(v.n), spN(v.d1), B.hold.some(o => o.mk === v) ? '★ sì' : 'no'])),
+    h('p', { class: 'muted', style: 'font-size:13px' }, 'Fonte: classifiche (onvista), dati giornalieri non in tempo reale.')));
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Il tuo portafoglio sotto la lente'), table([{ t: 'Titolo' }, { t: 'Peso', n: 1 }, { t: 'Oggi', n: 1 }, { t: '1 mese', n: 1 }, { t: 'Dal massimo', n: 1 }], B.hold.slice(0, 15).map(o => [nm(o.i.name), pct(o.w), o.mk ? spN(o.mk.d1) : 'n.d.', o.mk ? spN(o.mk.m1) : 'n.d.', o.dd != null ? spN(o.dd) : 'n.d.'])), h('p', { class: 'muted', style: 'font-size:13px' }, 'n.d. = il titolo non è nelle classifiche, quindi non ho un dato di mercato affidabile (non lo stimo). Pesi sul patrimonio senza casse separate.')));
+  const A = mmAdvice(B), sec = (t, sub, arr) => h('section', { class: 'card' }, h('h3', null, t), h('p', { class: 'muted', style: 'font-size:13px' }, sub), arr.length ? arr.map(x => x.n) : h('p', { class: 'muted' }, 'Nessun segnale con le regole di oggi.'));
+  el.append(sec('Cosa ha senso ridurre o rivedere', 'Solo dove una regola ha scattato: peso eccessivo, classe sopra l\'obiettivo, calo forte e prolungato.', A.riduci), sec('Cosa ha senso integrare', 'Strumenti che hai già, in classi sotto la tua divisione obiettivo.', A.integra), sec('Cosa ha senso inserire per diversificare', 'Classi o aree che mancano o pesano troppo poco.', A.compra));
+  const an = DATA.analisi;
+  if (an && an.classi && an.classi.length) el.append(h('section', { class: 'card' }, h('h3', null, 'Cosa dice l\'analisi di oggi'), h('p', { class: 'muted', style: 'font-size:13px' }, 'È la lettura delle notizie scritta da un\'AI (' + fmtDate(an.data) + '): serve come contesto, non cambia i calcoli qui sopra.'), table([{ t: 'Classe' }, { t: 'Giudizio' }, { t: 'Mossa suggerita' }], an.classi.slice(0, 6).map(c => [c.classe, judLabel(c.giudizio), String(c.mossa || '—')]))));
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Come ho deciso, e i limiti'), h('ul', null,
+    h('li', null, 'Titolo singolo (azione o crypto) sopra il ' + pct(MM.conc) + ' del patrimonio → "valuta di ridurre".'),
+    h('li', null, 'Classe oltre ' + (MM.gap * 100) + ' punti sopra o sotto la tua divisione obiettivo (Analisi → Nuovi soldi) → ridurre o integrare. Senza divisione obiettivo questa regola non scatta.'),
+    h('li', null, 'America oltre il ' + pct(MM.usa) + ' di quanto investito, Europa sotto il ' + pct(MM.europa) + ' o mercati emergenti sotto il ' + pct(MM.em) + ' → inserire. Le aree vengono da quelle che hai assegnato agli strumenti.'),
+    h('li', null, 'Titolo oltre il ' + Math.abs(MM.ddForte) + '% sotto il massimo di 52 settimane e in calo da 3 mesi → "da ricontrollare" (mai "vendi").'),
+    h('li', null, 'Le soglie sono regole di prudenza comuni, non verità: nessuno sa dove andrà il mercato. Tasse e prezzi sono stime con i dati che ho; i titoli senza dato di mercato non vengono valutati sul mercato. Decidi tu.'))));
   return el;
 }
 
