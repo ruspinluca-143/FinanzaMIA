@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-f0zMNJi0MSym2hUiLqZ+Q9bl/zKlFBYXT3LWqmOURjs='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qG5nmBsu4TcGfPraEY0NwiJDr2mTe6hMGwCNvphNcEA='; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -612,6 +612,12 @@ details.det{padding:0}details.det>summary{cursor:pointer;list-style:none;padding
 .acard .ac-ico{background:var(--btn);color:var(--ink2)}
 .btn.pri{box-shadow:none}
 .grp,.grp *{animation-duration:.22s}
+.st-svg{width:100%;height:auto;display:block;touch-action:pan-y;margin-top:6px}.st-cap{font-size:13px;margin:4px 0 8px;min-height:18px}.st-chart{margin:6px 0}
+/* sezioni di Consigli: una riga che scorre di lato, voce aperta sottolineata */
+.subtabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:6px -2px 10px;padding:0 2px;border-bottom:1px solid var(--ring);-webkit-overflow-scrolling:touch}
+.subtabs::-webkit-scrollbar{display:none}
+.subtab{flex:none;font:inherit;font-size:14px;font-weight:500;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 12px;cursor:pointer;white-space:nowrap}
+.subtab[aria-selected=true]{color:var(--ink);font-weight:600;border-bottom-color:var(--s1)}
 </style>
 </head>
 <body>
@@ -1756,6 +1762,7 @@ const GLOSS = {
   'dentro i fondi': ['Le aziende che possiedi attraverso gli ETF, quando la loro composizione è nota.', ''],
   'fondi senza composizione': ['I fondi di cui l\'app non conosce il contenuto: per questi non sa dire in quali aziende sei investito.', ''],
   'decennale usa': ['Il rendimento dei titoli di Stato americani a 10 anni: è il "prezzo del denaro" nel mondo. Quando sale, di solito Borse e obbligazioni soffrono.', ''],
+  'vix (indice della paura)': ['Misura quanta oscillazione si aspettano gli operatori sulle azioni USA (S&P 500) nel prossimo mese. Sotto 15 il mercato è tranquillo, 15-20 normale, 20-30 teso, sopra 30 c\'è paura. Sale quando le Borse scendono in fretta. Dato di chiusura, con un giorno di ritardo (fonte: FRED, Federal Reserve di St. Louis). Non è una previsione.', ''],
   'paura / avidità crypto': ['Un indice da 0 (paura estrema) a 100 (avidità estrema) sull\'umore del mercato crypto. Agli estremi spesso il mercato cambia direzione.', ''],
   'mercato crypto': ['Il valore di tutte le criptovalute insieme e come è cambiato nelle ultime 24 ore.', ''],
   'stablecoin': ['Le crypto legate al dollaro, come USDC. Quando crescono, entrano soldi "pronti" nel mondo crypto.', ''],
@@ -2568,7 +2575,8 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm, az, ct, an, gs, cl] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json'), get('classifiche.json')]);
+  const [hh, mm, az, ct, an, gs, cl, sto] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json'), get('classifiche.json'), get('storico-mercato.json')]);
+  if (sto) { try { const j = JSON.parse(sto); if (j && j.app === 'finanze-storico' && j.vix && j.vix.d.length > 5000 && j.spd && j.spm) DATA.storico = j; } catch { /* file non valido: ignorato */ } }
   if (cl) { try { const j = normClass(JSON.parse(cl)); if (j) DATA.classif = j; } catch { /* file non valido: ignorato */ } }
   if (gs) { try { const j = normGrandi(JSON.parse(gs)); if (j) DATA.grandi = j; } catch { /* file non valido: ignorato */ } }
   if (an) { try { const j = normAnalisi(JSON.parse(an)); if (j) { DATA.analisi = j; logAnalisi(); } } catch { /* file non valido: ignorato */ } }
@@ -2577,7 +2585,7 @@ async function loadOnlineData() {          // dal sito: storico prezzi e dati di
   if (mm) { try { const j = normMercati(JSON.parse(mm)); if (j) DATA.mercati = j; } catch { /* file non valido: ignorato */ } }
   if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
   if (S && !DEMO && DATA.cat) { const n = applyCatalog(); if (n) { touch(); setStatus('Prezzi dal catalogo: ' + pl(n, 'strumento aggiornato', 'strumenti aggiornati')); } }
-  if (S && !LOCKED && (hh || mm || az || ct || an || gs || cl)) render();
+  if (S && !LOCKED && (hh || mm || az || ct || an || gs || cl || sto)) render();
 }
 /* ============ catalogo: i prezzi di TUTTI gli ETF, ETC/ETN, BTP e obbligazioni quotati in Italia e delle crypto principali (catalogo.json, scritto dal sito) ============ */
 const normT = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -3143,9 +3151,11 @@ function analisiBanner() {
   const an = DATA.analisi; if (!an) return null;
   return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
 }
-function tabConsigli() {          // due viste: l'analisi di oggi (scritta dall'AI) e le classifiche dei titoli
-  const sub = UI.csub || 'analisi', seg = h('div', { class: 'chips', role: 'group', 'aria-label': 'Vista' }, [['analisi', 'Analisi di oggi'], ['movers', 'Market movers'], ['titoli', 'Classifiche titoli'], ['chiedi', 'Chiedi all\'AI']].map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
-  return h('div', null, seg, sub === 'movers' ? tabMovers() : sub === 'titoli' ? tabClassifiche() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
+const CONS_VISTE = [['analisi', 'Oggi'], ['movers', 'Market movers'], ['storia', 'Storia'], ['grandi', 'Grandi fondi'], ['titoli', 'Classifiche'], ['chiedi', 'Chiedi all\'AI']];
+function tabConsigli() {          // una riga di sezioni da scorrere di lato (sottolineata quella aperta), poi la vista scelta
+  const sub = UI.csub || 'analisi', seg = h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Consigli' }, CONS_VISTE.map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
+  setTimeout(() => { const a = seg.querySelector('[aria-selected=true]'); if (a && a.scrollIntoView) { try { seg.scrollLeft = Math.max(0, a.offsetLeft - 16); } catch (e) { /* ok */ } } }, 0);
+  return h('div', null, seg, sub === 'movers' ? tabMovers() : sub === 'storia' ? tabStoria() : sub === 'grandi' ? tabGrandi() : sub === 'titoli' ? tabClassifiche() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
 }
 function dataContext() {          // cio' che si manda all'AI: totali e pesi, MAI nomi dei conti o codici; per i titoli solo il nome e il peso
   const tot = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), cls = exposure('class', true).map(([l, v]) => ({ classe: l, peso_pct: Math.round(v / tot * 1000) / 10 })), area = exposure('area', true).map(([l, v]) => ({ area: l, peso_pct: Math.round(v / tot * 1000) / 10 }));
@@ -3522,6 +3532,7 @@ function tabGrafici() {
 /* ============ scheda Mercati ============ */
 const upcoming = (m, n) => asArr(m.indicatori && m.indicatori.calendario).filter(e => e.data >= today()).slice(0, n);
 const whenIn = d => { const n = Math.round((dayMs(d) - dayMs(today())) / 864e5); return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; };
+const vixLab = v => v < 15 ? 'Calma' : v < 20 ? 'Normale' : v < 30 ? 'Tensione' : 'Paura alta';          // lettura semplice del VIX (soglie di uso comune: 15, 20, 30)
 const FG_IT = { 'Extreme Fear': 'Paura estrema', 'Fear': 'Paura', 'Neutral': 'Neutrale', 'Greed': 'Avidità', 'Extreme Greed': 'Avidità estrema' };
 function readMarket(m) {            // lettura a regole dei dati (non e' una previsione)
   const I = m.indicatori || {}, out = [], t = I.tassi_usa;
@@ -3529,6 +3540,7 @@ function readMarket(m) {            // lettura a regole dei dati (non e' una pre
     out.push((t.spread_2_10 < 0 ? 'La curva dei tassi USA è invertita' : 'La curva dei tassi USA è normale') + ' (decennale ' + nf2.format(t.y10) + '%, biennale ' + nf2.format(t.y2) + '%, differenza ' + (t.spread_2_10 > 0 ? '+' : '') + nf2.format(t.spread_2_10) + ' punti).' + (t.spread_2_10 < 0 ? ' Storicamente è un segnale di cautela sull\'economia.' : ''));
     if (t.y10_prec != null) { const bp = Math.round((t.y10 - t.y10_prec) * 100); if (Math.abs(bp) >= 5) out.push('Il decennale USA si è mosso di ' + (bp > 0 ? '+' : '') + bp + ' punti base in un giorno: ' + (bp > 0 ? 'rendimenti in salita, di solito una pressione per obbligazioni e azioni di crescita.' : 'rendimenti in calo, di solito un sostegno per le obbligazioni.')); }
   }
+  const vx = I.vix; if (vx) out.push('Il VIX, l\'indice della paura sulle azioni USA, è a ' + nf2.format(vx.valore) + ' (' + vixLab(vx.valore).toLowerCase() + '; chiusura del ' + fmtDate(vx.data) + ', ieri ' + nf2.format(vx.prec) + ', mediana dell\'ultimo anno ' + nf2.format(vx.mediana_1a) + ').' + (vx.valore >= 30 ? ' Sopra 30 è una fase di forte paura: le oscillazioni di Borsa sono ampie, e dopo picchi simili i rimbalzi sono frequenti ma non garantiti.' : vx.valore >= 20 ? ' Tra 20 e 30 gli operatori si aspettano oscillazioni più forti del normale.' : vx.valore < 15 ? ' Sotto 15 il mercato è molto tranquillo: a volte è compiacenza.' : '') + (vx.prec > 0 && Math.abs(vx.valore / vx.prec - 1) >= 0.25 ? ' In un giorno è cambiato del ' + (vx.valore > vx.prec ? '+' : '') + nfp.format((vx.valore / vx.prec - 1) * 100) + '%: un salto del genere indica uno shock improvviso.' : ''));
   const fg = I.paura_avidita_crypto; if (fg) out.push('Il termometro paura/avidità delle crypto è a ' + fg.valore + ' su 100 (' + (FG_IT[fg.classe] || fg.classe) + (fg.ieri != null ? ', ieri ' + fg.ieri : '') + ').' + (fg.valore <= 25 ? ' Paura estrema: storicamente fasi di forte pessimismo.' : fg.valore >= 75 ? ' Avidità estrema: storicamente fasi di euforia.' : ''));
   const c = I.crypto; if (c) out.push('Le crypto valgono ' + nf0.format(c.capitalizzazione_mld_usd) + ' miliardi di dollari (' + (c.var_24h_pct > 0 ? '+' : '') + nf2.format(c.var_24h_pct) + '% in 24 ore); il Bitcoin pesa il ' + nfp.format(c.dominanza_btc_pct) + '% del totale.');
   const sc = I.stablecoin; if (sc) out.push('Le stablecoin in circolazione sono ' + nfp.format(sc.totale_mld_usd) + ' miliardi di dollari (' + (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni): ' + (sc.var_7g_pct < 0 ? 'meno liquidità pronta a entrare nelle crypto.' : 'più liquidità pronta a entrare nelle crypto.'));
@@ -3585,11 +3597,13 @@ function tabMercati() {
   const meter = v => h('div', { class: 'meter', 'aria-hidden': 'true' }, h('i', { style: 'left:' + Math.max(0, Math.min(100, v)) + '%' }));
   const tl = [];
   if (t) tl.push({ l: 'Decennale USA', v: nf2.format(t.y10) + '%', s: 'biennale ' + nf2.format(t.y2) + '% · differenza ' + (t.spread_2_10 > 0 ? '+' : '') + nf2.format(t.spread_2_10) });
+  if (I.vix) tl.push({ l: 'VIX (indice della paura)', v: nf2.format(I.vix.valore), s: h('span', null, vixLab(I.vix.valore) + ' · ieri ' + nf2.format(I.vix.prec), meter(I.vix.valore * 2)) });
   if (fg) tl.push({ l: 'Paura / avidità crypto', v: String(fg.valore), s: h('span', null, FG_IT[fg.classe] || fg.classe, meter(fg.valore)) });
   if (c) tl.push({ l: 'Mercato crypto', v: nf0.format(c.capitalizzazione_mld_usd) + ' mld $', s: (c.var_24h_pct > 0 ? '+' : '') + nf2.format(c.var_24h_pct) + '% in 24 ore · Bitcoin ' + nfp.format(c.dominanza_btc_pct) + '%' });
   if (sc) tl.push({ l: 'Stablecoin', v: nfp.format(sc.totale_mld_usd) + ' mld $', s: (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni' });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Mercati oggi'), load), h('p', { class: 'muted' }, 'Aggiornato il ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ' · ' + pl(ok.length, 'fonte letta', 'fonti lette') + (ko.length ? ' su ' + m.fonti.length : ''))));
   if (tl.length) el.append(tiles(tl));
+  if (DATA.storico) el.append(stVixCard(DATA.storico, true));
   const blc = bigLosersCard(); if (blc) el.append(blc);
   const notes = readMarket(m); if (notes.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Come leggerli'), h('ul', { class: 'list' }, notes.map(x => h('li', null, h('span', null, x)))), h('p', { class: 'muted' }, 'È una lettura meccanica dei dati, non una previsione né un consiglio.')));
   const cal = upcoming(m, 5);
@@ -5203,6 +5217,118 @@ function tabMovers() {
     h('li', null, 'America oltre il ' + pct(MM.usa) + ' di quanto investito, Europa sotto il ' + pct(MM.europa) + ' o mercati emergenti sotto il ' + pct(MM.em) + ' → inserire. Le aree vengono da quelle che hai assegnato agli strumenti.'),
     h('li', null, 'Titolo oltre il ' + Math.abs(MM.ddForte) + '% sotto il massimo di 52 settimane e in calo da 3 mesi → "da ricontrollare" (mai "vendi").'),
     h('li', null, 'Le soglie sono regole di prudenza comuni, non verità: nessuno sa dove andrà il mercato. Tasse e prezzi sono stime con i dati che ho; i titoli senza dato di mercato non vengono valutati sul mercato. Decidi tu.'))));
+  return el;
+}
+
+/* ---- Storia e confronti: calcoli puri sui dati di storico-mercato.json (nessuna AI, nessuna previsione) ---- */
+const ST_NOMI = [          // nomi dei grandi crolli, scelti dalla data del minimo (fatti storici noti)
+  ['1932-12', '1929-01', 'Grande Depressione'], ['1938-12', '1937-01', 'Recessione del 1937-38'], ['1942-12', '1941-01', 'Seconda guerra mondiale'], ['1949-12', '1946-01', 'Dopoguerra'],
+  ['1962-12', '1961-01', 'Crollo del 1962'], ['1966-12', '1966-01', 'Credit crunch del 1966'], ['1970-12', '1968-01', 'Fine anni Sessanta'], ['1974-12', '1973-01', 'Shock petrolifero'],
+  ['1982-12', '1980-01', 'Rialzo dei tassi di Volcker'], ['1987-12', '1987-01', 'Lunedì nero 1987'], ['1990-12', '1990-01', 'Guerra del Golfo'], ['1998-12', '1998-01', 'Crisi LTCM e Russia'],
+  ['2003-12', '2000-01', 'Bolla dot-com'], ['2010-12', '2007-01', 'Crisi finanziaria globale'], ['2011-12', '2011-01', 'Debito USA ed Europa 2011'], ['2016-12', '2015-01', 'Rallentamento Cina 2015-16'],
+  ['2018-12', '2018-01', 'Fine 2018: tassi e dazi'], ['2020-12', '2020-01', 'Covid-19'], ['2022-12', '2022-01', 'Inflazione e rialzo dei tassi'], ['2025-12', '2025-01', 'Dazi di aprile 2025']];
+function stNome(e) { const t = e.td.slice(0, 7), p = e.pd.slice(0, 7); const r = ST_NOMI.find(([tf, ps]) => t <= tf && t >= ps && p >= ps && p <= tf); return r ? r[2] : null; }
+function stSerie(D) {          // S&P 500 in un'unica serie: medie mensili fino a prima dei dati giornalieri, poi chiusure giornaliere
+  const dm = D.spd.d[0].slice(0, 7), out = []; D.spm.m.forEach((m, i) => { if (m < dm) out.push([m + '-15', D.spm.v[i]]); }); D.spd.d.forEach((d, i) => out.push([d, D.spd.v[i]])); return out;
+}
+function stEpisodi(ser, thr) {          // cali dal massimo di almeno thr (es. 0,15): massimo, minimo e, se c'e', il ritorno al massimo
+  const eps = []; let peak = ser[0], cur = null;
+  for (const [d, v] of ser) {
+    if (v >= peak[1]) { if (cur) { cur.rec = d; eps.push(cur); cur = null; } peak = [d, v]; continue; }
+    const dd = v / peak[1] - 1;
+    if (!cur && dd <= -thr) cur = { pd: peak[0], pv: peak[1], td: d, tv: v, dd };
+    if (cur && v < cur.tv) { cur.td = d; cur.tv = v; cur.dd = v / cur.pv - 1; }
+  }
+  if (cur) eps.push(cur); return eps;
+}
+const stMesi = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 2629800000);
+function stAltoVix(D, da, a) { let m = 0, d = null; for (let i = 0; i < D.vix.d.length; i++) if (D.vix.d[i] >= da && D.vix.d[i] <= a && D.vix.v[i] > m) { m = D.vix.v[i]; d = D.vix.d[i]; } return m ? { v: m, d } : null; }
+function stOggi(D) {          // la situazione di oggi: S&P dal massimo, VIX e posizione rispetto alla storia
+  const ser = stSerie(D), last = ser[ser.length - 1]; let pk = ser[0]; for (const p of ser) if (p[1] >= pk[1]) pk = p;
+  const n = D.vix.v.length, v = D.vix.v[n - 1], pr = D.vix.v[n - 2], below = D.vix.v.filter(x => x < v).length, srt = D.vix.v.slice(-250).sort((a, b) => a - b), mx = Math.max(...D.vix.v), imx = D.vix.v.indexOf(mx);
+  const w30 = D.vix.v.slice(-30);
+  return { spData: last[0], sp: last[1], spMax: pk[1], spMaxData: pk[0], dd: last[1] / pk[1] - 1, vixData: D.vix.d[n - 1], vix: v, vixPrec: pr, vixPct: below / n, vixMed1a: srt[Math.floor(srt.length / 2)], vixMax: mx, vixMaxData: D.vix.d[imx], vixMin30: Math.min(...w30), vixMax30: Math.max(...w30) };
+}
+function stSalti(D, soglia) {          // giorni in cui il VIX e' salito di almeno `soglia` in un giorno (eventi distanti almeno 10 giorni di borsa) e cosa e' successo al VIX dopo
+  const V = D.vix.v, ev = []; let ultimo = -99;
+  for (let i = 1; i < V.length; i++) if (V[i - 1] > 0 && V[i] / V[i - 1] - 1 >= soglia && i - ultimo > 10) { ultimo = i; const a21 = i + 21 < V.length ? V[i + 21] : null, a63 = i + 63 < V.length ? V[i + 63] : null; ev.push({ d: D.vix.d[i], prec: V[i - 1], v: V[i], a21, a63, salto: V[i] / V[i - 1] - 1 }); }
+  const ok = ev.filter(e => e.a21 != null), calo = ok.filter(e => e.a21 < e.v).length, ch = ok.map(e => e.a21 / e.v - 1).sort((a, b) => a - b);
+  return { ev, n: ev.length, nOk: ok.length, calo, med: ch.length ? ch[Math.floor(ch.length / 2)] : null };
+}
+function stFascie(D) {          // fine mese: VIX di quel giorno e cosa ha fatto l'S&P 500 (media mensile) nei 3, 6 e 12 mesi dopo
+  const lastV = new Map(); D.vix.d.forEach((d, i) => lastV.set(d.slice(0, 7), D.vix.v[i]));
+  const idx = new Map(D.spm.m.map((m, i) => [m, i])), bands = [['calma', 'VIX sotto 15', 0, 15], ['normale', 'VIX tra 15 e 20', 15, 20], ['teso', 'VIX tra 20 e 30', 20, 30], ['paura', 'VIX sopra 30', 30, 1e9]];
+  return bands.map(([k, l, lo, hi]) => {
+    const meseI = []; for (const [m, v] of lastV) if (v >= lo && v < hi && idx.has(m)) meseI.push(idx.get(m));
+    meseI.sort((a, b) => a - b); let eps = 0, prev = -9; for (const i of meseI) { if (i - prev > 1) eps++; prev = i; }
+    const f = h => { const r = meseI.filter(i => i + h < D.spm.v.length).map(i => D.spm.v[i + h] / D.spm.v[i] - 1).sort((a, b) => a - b); return r.length ? { n: r.length, pos: r.filter(x => x > 0).length / r.length, med: r[Math.floor(r.length / 2)], min: r[0], max: r[r.length - 1] } : null; };
+    return { k, l, lo, hi, mesi: meseI.length, eps, f3: f(3), f6: f(6), f12: f(12) };
+  });
+}
+const stVixLab = v => v < 15 ? 'Calma' : v < 20 ? 'Normale' : v < 30 ? 'Tensione' : 'Paura alta';
+const stDate = d => fmtDate(String(d).slice(0, 10));
+const stSp = x => !fin(x) ? '—' : (x > 0 ? '+' : x < 0 ? '−' : '') + nfp.format(Math.abs(x * 100)) + '%';          // x e' una frazione
+function stChart(pts, o) {          // grafico a linea con lettura al tocco; pts = [[data, valore]]; o = { min, max, guides: [[valore, etichetta]], fmt, col, h }
+  const W = 320, H = o.h || 130, L = 34, R = 8, T = 8, B = 18, step = Math.max(1, Math.ceil(pts.length / 420)), P = pts.filter((p, i) => i % step === 0 || i === pts.length - 1), ts = P.map(p => Date.parse(p[0])), t0 = ts[0], t1 = ts[ts.length - 1];
+  const X = t => L + (t - t0) / ((t1 - t0) || 1) * (W - L - R), Y = v => T + (1 - (Math.max(o.min, Math.min(o.max, v)) - o.min) / ((o.max - o.min) || 1)) * (H - T - B), col = o.col || 'var(--s1)';
+  const d = P.map((p, i) => (i ? 'L' : 'M') + X(ts[i]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
+  const yrs = []; const y0 = new Date(t0).getFullYear(), y1 = new Date(t1).getFullYear(), span = y1 - y0, stp = span > 60 ? 20 : span > 25 ? 10 : span > 8 ? 5 : span > 3 ? 1 : 0;
+  if (stp) for (let y = Math.ceil(y0 / stp) * stp; y <= y1; y += stp) yrs.push(y); else yrs.push(y0, y1);
+  const cap = h('div', { class: 'st-cap muted' }, `Ultimo: ${stDate(P[P.length - 1][0])} · ${o.fmt(P[P.length - 1][1])}`), cur = s('line', { y1: T, y2: H - B, stroke: 'var(--muted)', 'stroke-width': .8, opacity: 0, 'pointer-events': 'none' }), dot = s('circle', { r: 3.2, fill: col, opacity: 0, 'pointer-events': 'none' });
+  const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, class: 'st-svg', role: 'img', 'aria-label': o.alt || 'Grafico' },
+    (o.guides || []).flatMap(([v, l]) => [s('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: 'var(--muted)', 'stroke-width': .6, 'stroke-dasharray': '3 3', opacity: .55 }), s('text', { x: L - 4, y: Y(v) + 3, 'text-anchor': 'end', 'font-size': 8, fill: 'var(--muted)' }, l)]),
+    s('path', { d, fill: 'none', stroke: col, 'stroke-width': 1.7, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }),
+    yrs.map(y => s('text', { x: X(Date.parse(y + '-01-01')), y: H - 4, 'text-anchor': 'middle', 'font-size': 8, fill: 'var(--muted)' }, String(y))),
+    s('circle', { cx: X(t1), cy: Y(P[P.length - 1][1]), r: 3.4, fill: col }), cur, dot);
+  const move = e => { const r = svg.getBoundingClientRect(), fx = ((e.clientX - r.left) / r.width * W - L) / (W - L - R); if (!(fx >= -0.02 && fx <= 1.02)) return; const t = t0 + Math.max(0, Math.min(1, fx)) * (t1 - t0); let k = 0, best = 1e18; for (let i = 0; i < ts.length; i++) { const dd = Math.abs(ts[i] - t); if (dd < best) { best = dd; k = i; } } cur.setAttribute('x1', X(ts[k])); cur.setAttribute('x2', X(ts[k])); cur.setAttribute('opacity', .7); dot.setAttribute('cx', X(ts[k])); dot.setAttribute('cy', Y(P[k][1])); dot.setAttribute('opacity', 1); cap.textContent = `${stDate(P[k][0])} · ${o.fmt(P[k][1])}`; };
+  svg.addEventListener('pointermove', move); svg.addEventListener('pointerdown', move);
+  return h('div', { class: 'st-chart' }, svg, cap);
+}
+function stVixCard(D, compact) {
+  const O = stOggi(D), per = compact ? 'a1' : (UI.stPer || 'a5'), n = D.vix.d.length, k = per === 'a1' ? 250 : per === 'a5' ? 1250 : n, pts = D.vix.d.slice(n - k).map((d, i) => [d, D.vix.v[n - k + i]]);
+  const mx = Math.max(...pts.map(p => p[1]), 35), jump = O.vixPrec > 0 ? O.vix / O.vixPrec - 1 : null;
+  const tl = [{ l: 'VIX oggi', v: nf2.format(O.vix), s: `${stVixLab(O.vix)} · chiusura del ${stDate(O.vixData)}` }, { l: 'Ieri', v: nf2.format(O.vixPrec), s: jump != null ? `${stSp(jump)} in un giorno` : '' }, { l: 'Mediana dell\'ultimo anno', v: nf2.format(O.vixMed1a), s: `oggi è ${nf2.format(O.vix / O.vixMed1a)} volte la mediana` }, { l: 'Massimo storico', v: nf2.format(O.vixMax), s: stDate(O.vixMaxData) }, { l: 'Posizione nella storia', v: Math.round(O.vixPct * 100) + '° percentile', s: `dal 1990 il VIX è stato più basso nel ${Math.round(O.vixPct * 100)}% dei giorni` }, { l: 'Ultimi 30 giorni', v: `${nf2.format(O.vixMin30)} – ${nf2.format(O.vixMax30)}`, s: 'minimo e massimo' }];
+  const chips = compact ? null : h('div', { class: 'chips', role: 'group', 'aria-label': 'Periodo' }, [['a1', '1 anno'], ['a5', '5 anni'], ['tutto', 'Dal 1990']].map(([kk, l]) => h('button', { class: 'chip', 'aria-pressed': per === kk ? 'true' : 'false', onclick: () => { UI.stPer = kk; render(); } }, l)));
+  return h('section', { class: 'card' }, h('h2', null, 'VIX, l\'indice della paura'), h('p', { class: 'muted' }, 'Misura quanta oscillazione si aspettano gli operatori sulle azioni USA (S&P 500) nel prossimo mese. Sotto 15 il mercato è calmo, tra 15 e 20 normale, tra 20 e 30 teso, sopra 30 c\'è paura. Dato di chiusura con un giorno di ritardo (fonte: FRED).'),
+    tiles(compact ? tl.slice(0, 4) : tl), chips, stChart(pts, { min: 8, max: Math.ceil(mx / 10) * 10, guides: [[15, '15'], [20, '20'], [30, '30']], fmt: v => nf2.format(v), col: 'var(--loss)', alt: 'VIX nel tempo' }),
+    compact ? btn('Storia, crisi e confronti →', () => { UI.tab = 'consigli'; UI.csub = 'storia'; render(); window.scrollTo(0, 0); }, 'sm pri') : null);
+}
+function tabStoria() {
+  const D = DATA.storico;
+  if (!D) return h('section', { class: 'card' }, h('h2', null, 'Storia e confronti'), h('p', { class: 'muted' }, ONLINE ? 'Lo storico del mercato non è ancora disponibile: il sito lo aggiorna una volta al giorno. Riprova più tardi.' : 'Apri l\'app dal sito per vedere lo storico.'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null);
+  const el = h('div'), O = stOggi(D), ser = stSerie(D), eps = stEpisodi(ser, 0.15), fa = stFascie(D), salti = stSalti(D, 0.4), jump = O.vixPrec > 0 ? O.vix / O.vixPrec - 1 : null;
+  let giorniPari = 0; if (jump != null) for (let i = 1; i < D.vix.v.length - 1; i++) if (D.vix.v[i - 1] > 0 && D.vix.v[i] / D.vix.v[i - 1] - 1 >= jump) giorniPari++;
+  const band = fa.find(b => O.vix >= b.lo && O.vix < b.hi);
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Storia e confronti'), h('p', { class: 'muted' }, 'Il mercato di oggi messo accanto a quello degli anni scorsi: i grandi crolli, i momenti di calma e cosa è successo dopo, in passato, in situazioni simili. Sono dati storici veri (VIX dal 1990, S&P 500 dal 1928), non previsioni: nessuno sa cosa farà il mercato.'),
+    tiles([{ l: 'S&P 500 dal massimo', v: stSp(O.dd), s: `massimo del ${stDate(O.spMaxData)}: ${nf0.format(O.spMax)}, oggi ${nf0.format(O.sp)}` }, { l: 'VIX', v: nf2.format(O.vix), s: `${stVixLab(O.vix)} · ieri ${nf2.format(O.vixPrec)}` }, { l: 'Salto del VIX in un giorno', v: jump != null ? stSp(jump) : '—', s: jump != null ? (giorniPari === 0 ? 'il più forte dal 1990' : `dal 1990 solo ${pl(giorniPari, 'altro giorno', 'altri giorni')} con un salto uguale o maggiore`) : '' }])));
+  el.append(stVixCard(D, false));
+  // S&P 500: quanto e' sceso dal massimo, nel tempo
+  { const dd = []; let pk = 0; for (const [d, v] of ser) { pk = Math.max(pk, v); dd.push([d, (v / pk - 1) * 100]); }
+    el.append(h('section', { class: 'card' }, h('h3', null, 'Quanto è sceso l\'S&P 500 dal suo massimo, dal 1928'), h('p', { class: 'muted', style: 'font-size:13px' }, 'Ogni valle è una crisi: più è profonda, più il mercato era sceso rispetto al massimo precedente. Fino al 2016 sono medie mensili, poi chiusure giornaliere.'),
+      stChart(dd, { min: Math.floor(Math.min(...dd.map(p => p[1])) / 10) * 10, max: 0, guides: [[0, '0%'], [-20, '−20%'], [-40, '−40%'], [-60, '−60%']], fmt: v => nfp.format(v) + '%', col: 'var(--loss)', h: 150, alt: 'S&P 500 dal massimo' }))); }
+  // le grandi crisi e oggi
+  const rows = eps.slice().sort((a, b) => a.dd - b.dd).map(e => { const v = stAltoVix(D, e.pd, e.td.slice(0, 7) + '-31'); return [stNome(e) || `Calo ${e.pd.slice(0, 4)}-${e.td.slice(0, 4)}`, `${e.pd.slice(0, 7)} → ${e.td.slice(0, 7)}`, stSp(e.dd), pl(stMesi(e.pd, e.td), 'mese', 'mesi'), e.rec ? pl(stMesi(e.td, e.rec), 'mese', 'mesi') : 'non ancora', v ? nf0.format(v.v) : '—']; });
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Le grandi crisi e oggi'), h('p', { class: 'muted', style: 'font-size:13px' }, `Tutti i cali dell'S&P 500 di almeno il 15% dal massimo dal 1928. "Recupero" = mesi dal minimo per tornare al vecchio massimo. Oggi: ${stSp(O.dd)} dal massimo, quindi ${O.dd <= -0.15 ? 'siamo dentro un calo del genere' : 'ancora lontano da una crisi vera (−15% o più)'}.`),
+    table([{ t: 'Crisi' }, { t: 'Dal → al minimo' }, { t: 'Calo', n: 1 }, { t: 'Per il minimo', n: 1 }, { t: 'Recupero', n: 1 }, { t: 'VIX max', n: 1 }], [[h('b', null, 'Oggi'), `da ${O.spMaxData.slice(0, 7)}`, h('b', null, stSp(O.dd)), '—', '—', h('b', null, nf0.format(O.vix))]].concat(rows)),
+    h('p', { class: 'muted', style: 'font-size:13px' }, 'Prima del 2016 i cali sono calcolati su medie mensili: i minimi di un solo giorno sono più profondi (il 19 ottobre 1987, per esempio, il mercato perse circa il 20% in una seduta). Il VIX esiste dal 1990, per le crisi precedenti non c\'è. Valori nominali, senza dividendi.')));
+  // cosa e' successo dopo
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Cosa è successo dopo, in situazioni simili'), h('p', { class: 'muted', style: 'font-size:13px' }, 'Per ogni fascia del VIX a fine mese: quante volte è capitata e come è andato l\'S&P 500 nei 3, 6 e 12 mesi dopo (medie mensili). "Saliva" = quota dei casi con l\'S&P più alto; "tipico" = valore di mezzo; "peggio" = il caso peggiore.'),
+    table([{ t: 'Fascia' }, { t: 'Mesi', n: 1 }, { t: '3 mesi dopo', n: 1 }, { t: '6 mesi dopo', n: 1 }, { t: '12 mesi dopo', n: 1 }], fa.map(b => { const c = f => f ? `${Math.round(f.pos * 100)}% sale · tipico ${stSp(f.med)} · peggio ${stSp(f.min)}` : '—'; const cur = b === band, w = x => cur ? h('b', null, x) : x; return [w(b.l + (cur ? ' ← oggi' : '')), w(`${b.mesi} (${b.eps} periodi)`), w(c(b.f3)), w(c(b.f6)), w(c(b.f12))]; })),
+    band && band.f12 ? h('p', null, `Oggi il VIX è a ${nf2.format(O.vix)} (${band.l.toLowerCase()}). Nelle ${band.mesi} volte in cui fu in questa fascia, a 12 mesi l'S&P 500 era più alto nel ${Math.round(band.f12.pos * 100)}% dei casi (tipico ${stSp(band.f12.med)}), ma nel caso peggiore era ${stSp(band.f12.min)}. Non è una previsione: dice cosa è successo, non cosa succederà.`) : null,
+    h('p', { class: 'muted', style: 'font-size:13px' }, 'Attenzione: mesi vicini si somigliano (sono "periodi" di più mesi di fila, indicati tra parentesi), quindi i casi davvero indipendenti sono molto meno dei mesi. Pochi casi = poca affidabilità.')));
+  // i salti del VIX
+  const okS = salti.ev.filter(e => e.a21 != null), ultimi = salti.ev.slice(-8).reverse();
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Quando il VIX salta di colpo'), h('p', { class: 'muted', style: 'font-size:13px' }, `Dal 1990 il VIX è salito di almeno il 40% in un giorno ${pl(salti.n, 'volta', 'volte')} (eventi distinti). Un mese di borsa dopo (21 giorni) era sceso rispetto al giorno del salto in ${salti.calo} casi su ${salti.nOk}, con un calo tipico del ${nfp.format(Math.abs((salti.med || 0) * 100))}%. Ma i salti più forti sono quelli delle crisi vere (2008, 2020), dove la paura è continuata.`),
+    table([{ t: 'Giorno' }, { t: 'VIX', n: 1 }, { t: 'Salto', n: 1 }, { t: '1 mese dopo', n: 1 }, { t: '3 mesi dopo', n: 1 }], ultimi.map(e => [stDate(e.d), `${nf2.format(e.prec)} → ${nf2.format(e.v)}`, stSp(e.salto), e.a21 != null ? nf2.format(e.a21) : 'ancora da vedere', e.a63 != null ? nf2.format(e.a63) : 'ancora da vedere']))));
+  // grandi fiducia
+  const calm = fa[0];
+  el.append(h('section', { class: 'card' }, h('h3', null, 'I momenti di grande fiducia'), h('p', null, `Il VIX è stato sotto 15 in ${pl(calm.mesi, 'mese', 'mesi')} di fine mese dal 1990 (${calm.eps} periodi): il mercato era tranquillo e gli operatori fiduciosi.${calm.f12 ? ` Dodici mesi dopo l'S&P 500 era più alto nel ${Math.round(calm.f12.pos * 100)}% dei casi (tipico ${stSp(calm.f12.med)}, peggio ${stSp(calm.f12.min)}).` : ''}`),
+    h('p', { class: 'muted', style: 'font-size:13px' }, 'La calma non protegge: i grandi crolli sono spesso partiti da periodi tranquilli. Il VIX basso dice che il mercato è sereno, non che sia al sicuro. Analogamente, la paura alta non garantisce un rimbalzo.')));
+  el.append(h('section', { class: 'card' }, h('h3', null, 'Come leggere queste pagine, e i limiti'), h('ul', null,
+    h('li', null, 'Fonti pubbliche e gratuite: VIX e S&P 500 giornaliero da FRED (Federal Reserve di St. Louis), S&P 500 mensile dal 1928 da Robert Shiller. Aggiornati ogni giorno dal sito (con un giorno di ritardo).'),
+    h('li', null, 'Non è una previsione e non è un consiglio: è la storia. Il passato mostra cosa è già successo, non cosa succederà: ogni crisi ha cause diverse.'),
+    h('li', null, 'Poche crisi vere (circa 14 in quasi cento anni): le percentuali sono indicative, non leggi.'),
+    h('li', null, 'Prima del 2016 i dati dell\'S&P 500 sono medie mensili e i valori sono nominali, senza dividendi e senza inflazione.'))));
   return el;
 }
 

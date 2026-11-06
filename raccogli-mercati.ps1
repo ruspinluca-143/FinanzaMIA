@@ -111,6 +111,19 @@ try {   # curva dei tassi del Tesoro USA
   $ind['tassi_usa'] = [ordered]@{ data = $a.d; y2 = $a.y2; y10 = $a.y10; y30 = $a.y30; spread_2_10 = [math]::Round($a.y10 - $a.y2, 3); y10_prec = $(if ($p) { $p.y10 } else { $null }); y2_prec = $(if ($p) { $p.y2 } else { $null }) }
 } catch { $indErr.Add('Curva dei tassi USA: ' + $_.Exception.Message) }
 
+try {   # indice VIX (paura sulle azioni USA): chiusure giornaliere dalla Federal Reserve di St. Louis (FRED), con un giorno di ritardo
+  $v = New-Object Collections.Generic.List[object]
+  $vu = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS&cosd=' + (Get-Date).AddDays(-400).ToString('yyyy-MM-dd')
+  try { $csv = [string](Invoke-WebRequest -Uri $vu -UseBasicParsing -TimeoutSec 20 -UserAgent $ua).Content }
+  catch { $cx = Get-Command curl.exe, curl -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $cx) { throw }; $csv = (& $cx.Source -s -m 30 -A $ua $vu) -join "`n" }          # alcune reti bloccano Invoke-WebRequest di PowerShell 5.1 ma non curl
+  foreach ($ln in ($csv -split "`r?`n")) {
+    $p = $ln.Trim() -split ','; if ($p.Count -ge 2 -and $p[0] -match '^\d{4}-\d{2}-\d{2}$') { $n = Num $p[1]; if ($null -ne $n) { $v.Add([pscustomobject]@{ d = $p[0]; v = $n }) } }
+  }
+  if ($v.Count -lt 30) { throw 'dati insufficienti' }
+  $last = $v[$v.Count - 1]; $prev = $v[$v.Count - 2]; $w = @($v | Select-Object -Last 30 | ForEach-Object { $_.v }); $y = @($v | Select-Object -Last 250 | ForEach-Object { $_.v }) | Sort-Object
+  $ind['vix'] = [ordered]@{ data = $last.d; valore = [math]::Round($last.v, 2); prec = [math]::Round($prev.v, 2); min_30g = [math]::Round(($w | Measure-Object -Minimum).Minimum, 2); max_30g = [math]::Round(($w | Measure-Object -Maximum).Maximum, 2); mediana_1a = [math]::Round($y[[int][math]::Floor($y.Count / 2)], 2) }
+} catch { $indErr.Add('VIX: ' + $_.Exception.Message) }
+
 try {   # mercato crypto globale
   $g = (Get-Text 'https://api.coingecko.com/api/v3/global' | ConvertFrom-Json).data
   $ind['crypto'] = [ordered]@{ capitalizzazione_mld_usd = [math]::Round($g.total_market_cap.usd / 1e9, 0); var_24h_pct = [math]::Round($g.market_cap_change_percentage_24h_usd, 2); dominanza_btc_pct = [math]::Round($g.market_cap_percentage.btc, 1) }

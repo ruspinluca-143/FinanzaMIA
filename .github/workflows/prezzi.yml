@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'raccogli-grandi-soldi.ps1', 'classifiche.ps1', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'promemoria-pac.json', 'catalogo.ps1', 'site/analisi.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
+    paths: ['site/index.html', 'site/manifest.webmanifest', 'watchlist-pubblica.json', 'aggiorna-prezzi.ps1', 'raccogli-mercati.ps1', 'raccogli-grandi-soldi.ps1', 'classifiche.ps1', 'storico.js', 'notifica.ps1', 'aziende.ps1', 'aziende-lista.json', 'promemoria-pac.json', 'catalogo.ps1', 'site/analisi.json', 'sveglia.txt', '.github/workflows/prezzi.yml']
 permissions:
   contents: write
   pages: write
@@ -59,6 +59,13 @@ jobs:
         timeout-minutes: 25
         shell: pwsh
         run: ./classifiche.ps1 -Uscita ./site -Lista ./aziende-lista.json -Watch ./watchlist-pubblica.json
+      - name: Storico del mercato (VIX dal 1990 e S&P 500 dal 1928, dati pubblici FRED e Shiller; al massimo una volta ogni 12 ore)
+        id: storico
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          if [ -f ./site/storico-mercato.json ] && [ -n "$(find ./site/storico-mercato.json -mmin -720)" ]; then echo 'Storico recente: riuso quello di prima'; else node ./storico.js ./site; fi
       - name: Catalogo dei prezzi di tutti gli ETF, ETC, BTP, obbligazioni e crypto principali
         id: catalogo
         continue-on-error: true
