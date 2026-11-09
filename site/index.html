@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-g5N7QCNrrOP5glZljDIybFWAizGMYy6G+o3VazYJ09s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-f3kN4J64rhMrhC7FebHzxUQ+eD7x50kqwMcngR/ZaIY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -684,7 +684,9 @@ dialog{border-radius:min(var(--r),22px)}
 .thm-n{display:block;font:600 17px/1.1 var(--tf);color:var(--ti)}
 .thm-bar{display:block;height:5px;width:60%;border-radius:3px;background:var(--ta);margin-top:8px}
 .thm-t{font-weight:600;font-size:14px}
-.thm-d{font-size:12px;color:var(--muted)}@media (prefers-reduced-motion:reduce){.btn,.chip,.tile{transition:none}.btn:hover,.chip:hover,.tile:hover{transform:none}}
+.thm-d{font-size:12px;color:var(--muted)}.wz-accs{display:grid;gap:14px}.wz-grp{display:grid;gap:8px}.wz-gh{margin:6px 2px 0;font-size:13px;font-weight:600;color:var(--muted)}
+.wz-opt{contain:layout style}
+@media (max-width:700px){dialog{box-shadow:none}.wz-in{animation:none}.wz-opt{animation:none;transition:border-color .15s,background .15s}.wz-opt:active{transform:none}dialog>*{animation:none}}@media (prefers-reduced-motion:reduce){.btn,.chip,.tile{transition:none}.btn:hover,.chip:hover,.tile:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -1519,7 +1521,7 @@ function wzRun(cfg) {          // cfg = { steps: () => [api => ({ q, body, valid
       h('div', { class: 'wz-prog', 'aria-hidden': 'true' }, L.map((_, k) => h('i', { class: k <= i ? 'on' : '' }))),
       h('h3', { class: 'wz-q' }, d.q || ''), h('div', { class: 'wz-b' }, d.body || []), d.err ? h('p', { class: 'err' }, d.err) : null,
       h('div', { class: 'wz-nav' }, canBack ? btn('← Indietro', api.back) : h('span'), nxt || h('span'))].filter(Boolean));
-    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
+    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in'); dlg.scrollTop = 0;
     if (d.focus) setTimeout(() => { const f = view.querySelector(d.focus); if (f) f.focus(); }, 60);
   }
   dlg.append(view); dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); draw(); dlg.showModal(); return api;
@@ -4770,7 +4772,13 @@ function opWizard(pre, after) {
       list.sort((x, y) => (accGroup(x) === 'investiti' ? 0 : 1) - (accGroup(y) === 'investiti' ? 0 : 1) || accValue(y) - accValue(x));
       if (st.kind === 'acquisto' || isTo) list.sort((x, y) => (accGroup(x) === 'investiti' ? 0 : 1) - (accGroup(y) === 'investiti' ? 0 : 1));
       if (st.kind === 'trasferimento' && !isTo) list.sort((x, y) => cashOf(y) - cashOf(x));
-      for (const a of list) w.push(big(a.name, (TYPES[a.type] ? TYPES[a.type].label : '') + ' · liquidità ' + eur(cashOf(a), true) + (a.box ? ' · ' + a.box : ''), () => { if (isTo) st.toId = a.id; else { st.accId = a.id; skipAcc = false; } go(nextOf()); }, (isTo ? st.toId : st.accId) === a.id ? 'sel' : ''));
+      const mkAcc = a => big(a.name, (TYPES[a.type] ? TYPES[a.type].label : '') + ' · liquidità ' + eur(cashOf(a), true) + (a.box ? ' · ' + a.box : ''), () => { if (isTo) st.toId = a.id; else { st.accId = a.id; skipAcc = false; } go(nextOf()); }, (isTo ? st.toId : st.accId) === a.id ? 'sel' : '');
+      const first = st.kind === 'trasferimento' && !isTo ? 'fermi' : 'investiti', gOrder = [...ACC_GROUPS].sort((x, y) => (x[0] === first ? 0 : 1) - (y[0] === first ? 0 : 1)), box = h('div', { class: 'wz-accs' });          // i conti in gruppi (soldi fermi, investiti, pensione) e una ricerca: si trova subito quello giusto
+      const fillAcc = (qv) => { const toks = normT(qv || '').split(' ').filter(Boolean), L = toks.length ? list.filter(a => { const s2 = normT([a.name, (TYPES[a.type] || {}).label, a.box || '', (ACC_GROUPS.find(g => g[0] === accShow(a)) || [])[1]].join(' ')); return toks.every(x => s2.includes(x)); }) : list;
+        box.replaceChildren(...gOrder.map(([k, l]) => { const g = L.filter(a => accShow(a) === k); return g.length ? h('div', { class: 'wz-grp' }, h('h4', { class: 'wz-gh' }, l + ' · ' + g.length), h('div', { class: 'wz-b' }, g.map(mkAcc))) : null; }).filter(Boolean));
+        if (toks.length && !L.length) box.append(h('p', { class: 'muted' }, 'Nessun conto corrisponde: prova con meno parole.')); };
+      if (list.length > 5) { const sq = h('input', { type: 'search', class: 'wz-search ops-q', placeholder: 'Cerca un conto…', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca un conto' }); sq.addEventListener('input', () => fillAcc(sq.value)); w.push(sq); }
+      fillAcc(''); w.push(box);
       if (!list.length) w.push(h('p', { class: 'muted' }, 'Nessun conto adatto: per vendere serve un conto con dei titoli.'));
     }
     else if (cur === 'strumento') {
@@ -4856,7 +4864,7 @@ function opWizard(pre, after) {
     const top = h('div', { class: 'wz-top' }, hist.length ? btn('← Indietro', back, 'sm') : h('span'), h('span', { class: 'wz-step muted' }, cur === 'riepilogo' ? 'Ultimo passo' : 'Passo ' + (idx + 1) + ' di ' + (tot - 1 || 1)), btn('✕', shut, 'sm'));
     const b = body();
     view.replaceChildren(top, bar, h('h3', { class: 'wz-q' }, QUEST[cur] || ''), h('div', { class: 'wz-b' }, b), cur === 'kind' ? h('p', { class: 'muted wz-adv' }, h('a', { href: '#', onclick: e => { e.preventDefault(); shut(); editOperationAdv(Object.assign({}, pre, { _adv: 1 }), after); } }, 'Preferisco il modulo completo')) : null);
-    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in');
+    view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in'); dlg.scrollTop = 0;
   }
   if (pre.kind && OP_FLOW[pre.kind]) {          // l'operazione puo' arrivare gia' compilata in parte (da un titolo, da una frase): si parte dal primo dato che manca
     st.kind = pre.kind; if (pre.accId) { st.accId = pre.accId; skipAcc = true; } if (pre.toId) st.toId = pre.toId; if (pre.c) st.c = pre.c; if (pre.price > 0) st.price = pre.price;
