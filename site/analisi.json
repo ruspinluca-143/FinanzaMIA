@@ -1,133 +1,324 @@
 {
-  "app": "finanze-analisi",
-  "versione": 1,
-  "generato": "2026-11-09T09:30:00+01:00",
-  "data": "2026-11-09",
-  "titolo": "Rimbalzo parziale a Wall Street, ma tassi alti e tensione sull'AI tengono i mercati cauti",
-  "sintesi": "Venerdì Wall Street ha recuperato una parte del crollo di giovedì (S&P 500 +0,3%, Nasdaq +1,1%), ma resta con la peggior settimana da giugno. Il mercato del lavoro USA solido rafforza l'idea di rialzi graduali dei tassi della Fed, e nel weekend si è aggiunto il caso Nvidia (il consiglio indaga sul CEO per i rapporti con una presunta spia cinese). Con calma: dopo giorni così le oscillazioni restano ampie, meglio piani regolari e diversificati, senza vendere per paura né comprare d'impulso.",
-  "umore": { "valore": -1, "etichetta": "Cauto, tensione sulla tecnologia" },
-  "classi": [
-    {
-      "classe": "Azioni",
-      "giudizio": -1,
-      "etichetta": "Prudenza, volatilità alta",
-      "perche": "Venerdì l'S&P 500 ha chiuso a circa 7.377 punti (+0,3%), il Nasdaq a circa 24.579 (+1,1%) e il Dow a circa 51.286 (-0,5%): un rimbalzo dopo il -4,4% di giovedì, ma il Nasdaq resta in correzione. Il FTSE MIB ha chiuso a circa 50.053 (-0,90%). In più pesano il caso Nvidia e le tensioni sul credito legato all'AI (rendimento di un bond CoreWeave sopra il 16%, secondo CNBC). Giudizio invariato rispetto a venerdì scorso. Caso contrario: i rimbalzi dopo cali violenti sono frequenti, i prezzi più bassi possono essere un'occasione per chi investe da anni, e i grandi gruppi tecnologici trovano ancora investitori per le loro nuove obbligazioni (Handelsblatt).",
-      "mossa": "Mantieni i piani regolari su ETF molto diversificati; evita sia le vendite di panico sia gli acquisti concentrati sulla tecnologia.",
-      "fonti": [3, 4, 5, 1, 15]
-    },
-    {
-      "classe": "Obbligazioni",
-      "giudizio": 1,
-      "etichetta": "Interessanti, con cautela",
-      "perche": "Il rendimento dei titoli di Stato USA a 10 anni è al 4,86% (4,84% prima) e quello a 2 anni al 4,51% (4,46%): sono saliti leggermente dopo i dati sul lavoro. Il BTP decennale rende circa il 4,33% e lo spread BTP-Bund è intorno a 107 punti, in lieve miglioramento. Bloomberg segnala comunque flussi verso i titoli di Stato dopo il voto americano. Giudizio invariato. Caso contrario: la Fed (decisione il 9 dicembre) e la BCE (17 dicembre) possono ancora alzare i tassi, e allora i prezzi dei titoli già in circolazione scendono.",
-      "mossa": "Aggiungi a rate, con scadenze medie e senza superare la tua quota obiettivo.",
-      "fonti": [9, 7, 0, 15]
-    },
-    {
-      "classe": "Crypto",
-      "giudizio": -1,
-      "etichetta": "Prudenza",
-      "perche": "Le crypto sono ai minimi da due mesi dopo il voto americano (Investing.com). La capitalizzazione totale è circa 2.483 miliardi di dollari (-5,4% in 24 ore) e l'indice paura/avidità è a 29 (Paura, ieri 28). Le stablecoin sono in calo (-4,4% in 30 giorni): meno liquidità nel settore. Giudizio invariato. Caso contrario: gli indici di paura spesso precedono rimbalzi, e CoinDesk analizza anche possibili effetti regolatori del voto.",
-      "mossa": "Non rincorrere i ribassi né i rimbalzi; se vuoi, solo piccole quote e a rate.",
-      "fonti": [11, 12]
-    },
-    {
-      "classe": "Materie prime",
-      "giudizio": 0,
-      "etichetta": "Volatile, oro sotto pressione",
-      "perche": "Bloomberg titola che l'oro tiene il calo perché i dati sul lavoro alimentano le scommesse su un rialzo dei tassi a dicembre: tassi più alti penalizzano l'oro. Sul petrolio pesa la guerra con l'Iran: Trump dice che nuovi attacchi sono 'molto improbabili' se i colloqui avanzano, ma non esclude di colpire (CNBC). Non ho potuto verificare i livelli di prezzo di oggi. Giudizio invariato. Caso contrario: un accordo con l'Iran farebbe scendere il petrolio; un fallimento dei colloqui lo spingerebbe di nuovo sopra 100 dollari. Gli investitori istituzionali restano molto lunghi sull'oro nei futures.",
-      "mossa": "Non inseguire il petrolio; una piccola quota in oro resta una protezione, non una previsione.",
-      "fonti": [8, 2, 17]
-    },
-    {
-      "classe": "Liquidità",
-      "giudizio": 0,
-      "etichetta": "Utile come cuscinetto",
-      "perche": "Con inflazione ancora alta, rialzi dei tassi possibili (Fed e BCE a dicembre) e mercati molto mossi, la liquidità remunerata dà tranquillità e rende. Caso contrario: con prezzi in aumento troppa liquidità perde potere d'acquisto.",
-      "mossa": "Tieni il cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
-      "fonti": [0, 7]
-    }
-  ],
-  "temi": [
-    {
-      "titolo": "Rimbalzo venerdì, ma settimana pesante",
-      "giudizio": -1,
-      "perche": "Dopo il crollo di giovedì, venerdì Nasdaq +1,1% e S&P 500 +0,3%, mentre il Dow ha perso lo 0,5%. Per l'S&P 500 e il Nasdaq resta la peggior settimana da giugno. I dati di chiusura vengono da riepiloghi web e possono variare di qualche decimale tra le fonti.",
-      "fonti": [3, 10]
-    },
-    {
-      "titolo": "Caso Nvidia: indagine sul CEO",
-      "giudizio": -1,
-      "perche": "Il consiglio di Nvidia indaga sul rapporto del CEO Jensen Huang con una presunta spia cinese; il FT riporta che Huang ha ammesso una relazione. MarketWatch lo definisce un nuovo colpo al settore AI. Nvidia pesa molto sugli indici: è un rischio di concentrazione.",
-      "fonti": [4, 5]
-    },
-    {
-      "titolo": "Lavoro USA solido, Fed verso rialzi graduali",
-      "giudizio": 0,
-      "perche": "Il NYT titola che le assunzioni forti confermano un mercato del lavoro solido e che la Fed resta sulla strada di rialzi graduali; Daly (Fed) parla di 'tapis roulant dell'inflazione alta' e di più rialzi probabili. Bloomberg: le scommesse su un rialzo a dicembre sono aumentate. Per le obbligazioni è il rischio principale.",
-      "fonti": [6, 7, 0, 8]
-    },
-    {
-      "titolo": "Stress sul credito legato all'AI",
-      "giudizio": -1,
-      "perche": "Il rendimento di un bond di CoreWeave supera il 16% (CNBC): chi finanzia l'AI con il debito paga molto di più. Dall'altra parte Handelsblatt osserva che gli investitori si contendono le nuove obbligazioni dei grandi gruppi tecnologici: il quadro è misto.",
-      "fonti": [1, 16]
-    },
-    {
-      "titolo": "Italia: via libera all'offerta Intesa su Mps",
-      "giudizio": 0,
-      "perche": "La Consob ha dato il via libera all'offerta di Intesa per Mps, che partirà il 24 novembre (ANSA). Restano aperti la manovra alla Camera e il caso ex Ilva. Le banche sono un tema da seguire per Piazza Affari.",
-      "fonti": [13]
-    },
-    {
-      "titolo": "Carburanti e Iran",
-      "giudizio": -1,
-      "perche": "In Italia i prezzi dei carburanti restano alti nonostante lo stop al taglio delle accise (gasolio a 2,23 euro al litro, ANSA); il NYT ricorda come la guerra con l'Iran spinga insieme energie rinnovabili e fossili.",
-      "fonti": [14, 17, 2]
-    }
-  ],
-  "attenzione": [
-    { "titolo": "Volatilità molto alta", "perche": "Dopo un -4% in un giorno sono comuni forti rimbalzi e nuovi cali: evita decisioni d'impulso in entrambe le direzioni." },
-    { "titolo": "Concentrazione sulla tecnologia", "perche": "Nvidia, caso giudiziario e AI pesano molto sugli indici: chi ha molta tecnologia in pochi titoli è più esposto." },
-    { "titolo": "Tassi più alti più a lungo", "perche": "Rendimenti USA a 10 anni al 4,86%, Fed e BCE che non escludono rialzi: azioni care e obbligazioni lunghe restano sensibili." },
-    { "titolo": "Petrolio e guerra con l'Iran", "perche": "Se i colloqui falliscono il greggio può tornare sopra 100 dollari e alimentare l'inflazione." },
-    { "titolo": "Rischi nelle crypto", "perche": "Indice di Paura, stablecoin in calo e notizie di violazioni informatiche su piattaforme: il settore è fragile." }
-  ],
-  "idee": [
-    { "classe": "Azioni", "isin": "IE00BK5BQT80", "perche": "Un solo ETF su migliaia di aziende di tutto il mondo, ad accumulo e a costo basso: base semplice per un piano regolare, che diluisce il peso della tecnologia." },
-    { "classe": "Azioni", "isin": "IE00B4L5Y983", "perche": "Mercati sviluppati di tutto il mondo, ad accumulo e a costo basso; la tecnologia pesa, quindi in giorni come questi oscilla molto." },
-    { "classe": "Obbligazioni", "isin": "IE00BDBRDM35", "perche": "Obbligazioni di governi e società di tutto il mondo, coperte dal rischio cambio verso l'euro: diversificato, scadenze medie." },
-    { "classe": "Obbligazioni", "isin": "IE00B4WXJJ64", "perche": "Titoli di Stato dell'area euro: più sensibile ai tassi, meglio a rate." },
-    { "classe": "Liquidità", "isin": "LU0290358497", "perche": "Segue il tasso a un giorno in euro: rischio molto basso." },
-    { "classe": "Materie prime", "isin": "IE00B4ND3602", "perche": "Oro fisico quotato in euro. Solo come piccola quota di protezione, non come previsione." }
-  ],
-  "indicatori": [
-    { "nome": "S&P 500", "valore": "+0,3%", "nota": "chiusura 6 novembre circa 7.377 punti · Nasdaq +1,1% · Dow -0,5%" },
-    { "nome": "FTSE MIB", "valore": "-0,90%", "nota": "chiusura 6 novembre a circa 50.053 punti" },
-    { "nome": "Titoli di Stato USA a 10 anni", "valore": "4,86%", "nota": "2 anni 4,51% · 30 anni 5,26% (10 anni prima: 4,84%)" },
-    { "nome": "Spread BTP-Bund", "valore": "circa 107 punti", "nota": "chiusura 6 novembre · BTP 10 anni circa 4,33%" },
-    { "nome": "Indice paura/avidità crypto", "valore": "29 (Paura)", "nota": "ieri 28 · capitalizzazione totale circa 2.483 miliardi di dollari (-5,4% in 24 ore)" },
-    { "nome": "Stablecoin", "valore": "293 mld $", "nota": "-1,7% in 7 giorni · -4,4% in 30 giorni" }
-  ],
-  "fonti": [
-    { "testata": "CNBC", "titolo": "Americans are on a 'treadmill of high inflation' and more rate hikes are likely, Fed's Daly says", "url": "https://www.cnbc.com/2026/11/06/fed-daly-interest-rates-inflation.html", "data": "2026-11-06" },
-    { "testata": "CNBC", "titolo": "The AI 'credit card' is getting costlier as CoreWeave bond yield tops 16%", "url": "https://www.cnbc.com/2026/11/06/coreweave-bond-yield-tops-16percent-as-ai-credit-stress-rises.html", "data": "2026-11-06" },
-    { "testata": "CNBC", "titolo": "Trump says renewed Iran strikes 'highly unlikely' if talks progress but warns he could still strike", "url": "https://www.cnbc.com/2026/11/08/trump-iran-strikes-unlikely-talks-hormuz.html", "data": "2026-11-08" },
-    { "testata": "CNBC", "titolo": "Here are the 2 big things we're watching in the stock market in the week ahead", "url": "https://www.cnbc.com/investingclub/2026/11/08/here-are-the-2-big-things-were-watching-in-the-stock-market-in-the-week-ahead.html", "data": "2026-11-08" },
-    { "testata": "MarketWatch", "titolo": "A new setback for the AI trade: Nvidia's board is probing CEO Huang's relationship with alleged spy", "url": "https://www.marketwatch.com/story/nvidias-board-will-probe-ceo-jensen-huangs-relationship-with-an-alleged-spy-heres-what-to-know-86656cd9?mod=mw_rss_topstories", "data": "2026-11-08" },
-    { "testata": "Financial Times", "titolo": "Nvidia's Huang admits to affair after allegations of relationship with Chinese spy", "url": "https://www.ft.com/content/1397e2f4-d7f5-4cbb-a4d9-04ecf661d1aa?syn-25a6b1a6=1", "data": "2026-11-08" },
-    { "testata": "New York Times", "titolo": "Strong Hiring Reinforces a Sturdy Job Market", "url": "https://www.nytimes.com/2026/11/06/business/economy/economy-jobs-unemployment.html", "data": "2026-11-06" },
-    { "testata": "New York Times", "titolo": "Stable Labor Market Keeps Fed on Track to Raise Rates Gradually", "url": "https://www.nytimes.com/2026/11/06/business/economy/stable-labor-market-to-keep-fed-on-track-to-raise-rates-gradually.html", "data": "2026-11-06" },
-    { "testata": "Bloomberg", "titolo": "Gold Holds Decline as US Jobs Data Fan December Rate Hike Bets", "url": "https://www.bloomberg.com/news/articles/2026-11-08/gold-holds-decline-as-us-jobs-data-fan-december-rate-hike-bets", "data": "2026-11-08" },
-    { "testata": "Bloomberg", "titolo": "Treasury Rally Gets New Boost as Election Hammers the AI Trade", "url": "https://www.bloomberg.com/news/articles/2026-11-08/treasury-rally-gets-new-boost-as-election-hammers-the-ai-trade", "data": "2026-11-08" },
-    { "testata": "Bloomberg", "titolo": "Asian Stocks to Open Higher, Nvidia Probe Looms: Markets Wrap", "url": "https://www.bloomberg.com/news/articles/2026-11-08/stock-market-today-dow-s-p-live-updates", "data": "2026-11-08" },
-    { "testata": "Investing.com", "titolo": "Cryptocurrencies slide to two-month lows after US midterms", "url": "https://www.investing.com/news/forex-news/cryptocurrencies-slide-to-twomonth-lows-after-us-midterms-5010335", "data": "2026-11-08" },
-    { "testata": "CoinDesk", "titolo": "What the election results mean for crypto: State of Crypto", "url": "https://www.coindesk.com/policy/2026/11/08/what-the-election-results-mean-for-crypto-state-of-crypto", "data": "2026-11-08" },
-    { "testata": "ANSA", "titolo": "Via libera della Consob all'offerta di Intesa per Mps, si parte il 24 novembre", "url": "https://www.ansa.it/sito/notizie/economia/2026/11/08/via-libera-della-consob-allofferta-di-intesa-per-mps-si-parte-il-24-novembre_15c55497-bc22-4473-aef0-930c9724f4f4.html", "data": "2026-11-08" },
-    { "testata": "ANSA", "titolo": "Prezzi carburanti fermi malgrado lo stop al taglio delle accise, gasolio a 2,23 euro", "url": "https://www.ansa.it/sito/notizie/economia/2026/11/08/mimit-prezzi-carburanti-fermi-malgrado-stop-taglio-accise-gasolio-a-223_3a4e4aa5-2d2a-4119-bd93-63dba8a9828c.html", "data": "2026-11-08" },
-    { "testata": "Il Sole 24 Ore", "titolo": "Borse Ue positive nella settimana delle Midterm, Milano +1,1%. WS chiude contrastata. Giù i tech con dubbi su AI", "url": "https://www.ilsole24ore.com/art/borsa-europa-avvio-calo-il-giovedi-nero-nasdaq-AJN9Lv6B", "data": "2026-11-06" },
-    { "testata": "Handelsblatt", "titolo": "Märkte Insight: Von wegen KI-Ängste – Investoren reißen sich um neue Anleihen von Big Tech", "url": "https://www.handelsblatt.com/finanzen/anlagestrategie/kolumnen/geldanlage-ki-aengste-investoren-reissen-sich-um-neue-anleihen-von-big-tech/100266249.html", "data": "2026-11-08" },
-    { "testata": "New York Times", "titolo": "Why the Iran War Has Spurred Both Clean Energy and Fossil Fuels", "url": "https://www.nytimes.com/2026/11/08/business/cop-31-iran-war-oil.html", "data": "2026-11-08" }
-  ],
-  "limiti": "Di questi articoli ho letto solo titolo, fonte e link (feed di mercati.json): non ho aperto le pagine di FT, NYT, Bloomberg, MarketWatch, CNBC, ANSA, CoinDesk, Investing.com e Handelsblatt (a pagamento, bloccate o non lette). I dati di chiusura del 6 novembre (indici USA, FTSE MIB, spread) vengono da riepiloghi web trovati con la ricerca (AP/Teleborsa) e possono differire di qualche decimale. Non ho potuto verificare i livelli di petrolio, oro e Bitcoin di oggi, né il dettaglio dei dati sul lavoro (le fonti sono discordanti): per questo non li riporto. Non è consulenza finanziaria personalizzata e può sbagliare."
+    "app":  "finanze-analisi",
+    "versione":  1,
+    "generato":  "2026-11-10T09:40:00+01:00",
+    "data":  "2026-11-10",
+    "titolo":  "Maxi rimbalzo a Wall Street con il petrolio in calo, ma Nvidia e i dati sull\u0027inflazione di oggi tengono alta l\u0027attenzione",
+    "sintesi":  "Lunedì Wall Street ha recuperato forte (S\u0026P 500 +2,4%, Nasdaq +2,7%, Dow +2,2%), aiutata dal calo del petrolio dopo i segnali di distensione tra USA e Iran; anche Milano ha chiuso in netto rialzo. Resta però molto nervosismo: Nvidia è caduta del 4,2% per l\u0027indagine sul suo CEO e oggi escono i prezzi al consumo USA di ottobre, che possono rimettere in discussione il rialzo dei tassi Fed di dicembre (dato dal mercato all\u002784%). Con calma: un giorno di rimbalzo non cancella la volatilità, meglio piani regolari e diversificati.",
+    "umore":  {
+                  "valore":  0,
+                  "etichetta":  "Neutrale, con cautela"
+              },
+    "classi":  [
+                   {
+                       "classe":  "Azioni",
+                       "giudizio":  0,
+                       "etichetta":  "Rimbalzo, ma cautela",
+                       "perche":  "Lunedì l\u0027S\u0026P 500 ha chiuso a circa 7.550 punti (+2,4%, miglior giorno da aprile), il Dow a circa 52.390 (+2,2%) e il Nasdaq ha guadagnato il 2,7%; Milano è salita del 2,7% con le banche e il Dax è tornato sopra 26.000. Il rialzo si allarga oltre i grandi nomi tecnologici, ma il Dow ha avuto tre oscillazioni da oltre 1.000 punti in quattro giorni (MarketWatch). Giudizio alzato da -1 a 0 solo perché il rimbalzo è stato ampio e il petrolio scende; la volatilità resta alta. Caso contrario: oggi i dati sull\u0027inflazione possono riaccendere i timori sui tassi, e il caso Nvidia pesa su un titolo che conta molto negli indici.",
+                       "mossa":  "Mantieni i piani regolari su ETF molto diversificati; non inseguire il rimbalzo con acquisti concentrati sulla tecnologia.",
+                       "fonti":  [
+                                     0,
+                                     1,
+                                     4,
+                                     17,
+                                     14
+                                 ]
+                   },
+                   {
+                       "classe":  "Obbligazioni",
+                       "giudizio":  1,
+                       "etichetta":  "Interessanti, con cautela",
+                       "perche":  "Il rendimento dei titoli di Stato USA a 10 anni è intorno al 4,88% (4,86% prima), quello a 2 anni al 4,56% (4,51%) e quello a 30 anni oltre il 5,2%: rendimenti alti per chi compra oggi. Il mercato prezza all\u002784% un rialzo Fed a dicembre (decisione il 9 dicembre; BCE il 17). Giudizio invariato. Caso contrario: se l\u0027inflazione di ottobre sorprende al rialzo, i tassi possono salire ancora e i prezzi dei titoli già in circolazione scendere; i fondi speculativi restano molto corti sui titoli di Stato USA.",
+                       "mossa":  "Aggiungi a rate, con scadenze medie e senza superare la tua quota obiettivo.",
+                       "fonti":  [
+                                     0,
+                                     8,
+                                     9
+                                 ]
+                   },
+                   {
+                       "classe":  "Crypto",
+                       "giudizio":  -1,
+                       "etichetta":  "Prudenza",
+                       "perche":  "La capitalizzazione totale è circa 2.523 miliardi di dollari (-1,2% in 24 ore) e l\u0027indice paura/avidità è a 32 (Paura, ieri 29): un lieve miglioramento ma sempre in zona di timore. Le stablecoin, il carburante del settore, sono a 293 miliardi (-4,3% in 30 giorni). Giudizio invariato. Caso contrario: gli indici di paura spesso precedono rimbalzi, e il rimbalzo delle azioni potrebbe trascinare anche le crypto. CoinDesk segnala inoltre pressione di Google sui chip AI e nuovi rischi di sicurezza (hacker nordcoreani).",
+                       "mossa":  "Non rincorrere né ribassi né rimbalzi; se vuoi, solo piccole quote e a rate.",
+                       "fonti":  [
+                                     11
+                                 ]
+                   },
+                   {
+                       "classe":  "Materie prime",
+                       "giudizio":  0,
+                       "etichetta":  "Petrolio in calo, oro stabile",
+                       "perche":  "Il petrolio è sceso sulle speranze di pace tra USA e Iran: WTI circa 85 dollari e Brent circa 91 (-1,8%), dopo un calo fino al -5,6% del Brent lunedì (ANSA); Trump parla di \u0027slancio positivo\u0027 (FT). L\u0027oro tiene sopra 4.100 dollari (circa 4.123) perché meno petrolio significa meno timori di inflazione (Bloomberg). Giudizio invariato. Caso contrario: se i colloqui falliscono il petrolio può risalire in fretta; con tassi più alti l\u0027oro può calare. I grandi investitori sono molto lunghi sull\u0027oro, quindi un\u0027inversione può essere rapida.",
+                       "mossa":  "Non inseguire il petrolio; una piccola quota in oro resta una protezione, non una previsione.",
+                       "fonti":  [
+                                     0,
+                                     2,
+                                     3,
+                                     5,
+                                     6
+                                 ]
+                   },
+                   {
+                       "classe":  "Liquidità",
+                       "giudizio":  0,
+                       "etichetta":  "Utile come cuscinetto",
+                       "perche":  "Il rendimento a 3 mesi dei titoli USA è circa 4,2%, e con rialzi dei tassi ancora possibili la liquidità remunerata dà tranquillità e rende. Giudizio invariato. Caso contrario: con prezzi in aumento troppa liquidità perde potere d\u0027acquisto, e dopo un rimbalzo si rischia di restare fuori dal mercato.",
+                       "mossa":  "Tieni il cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
+                       "fonti":  [
+                                     0,
+                                     9
+                                 ]
+                   }
+               ],
+    "temi":  [
+                 {
+                     "titolo":  "Maxi rimbalzo con il petrolio in calo",
+                     "giudizio":  1,
+                     "perche":  "Wall Street ha avuto il miglior giorno da aprile (S\u0026P 500 +2,4%) grazie al calo del greggio dopo i segnali di distensione con l\u0027Iran. Anche Milano (+2,7%, trainata dalle banche) e il Dax (sopra 26.000) hanno chiuso bene. Un solo giorno però non cambia la tendenza di una settimana molto mossa.",
+                     "fonti":  [
+                                   1,
+                                   2,
+                                   7,
+                                   15
+                               ]
+                 },
+                 {
+                     "titolo":  "Nvidia cade per l\u0027indagine sul CEO",
+                     "giudizio":  -1,
+                     "perche":  "Il titolo ha perso il 4,2% (minimo da aprile) mentre la maggior parte dei chip saliva: il consiglio indaga sui rapporti del CEO Jensen Huang con una presunta spia cinese e Trump dice che l\u0027FBI se ne occupa (FT). Il Nasdaq-100 è molto concentrato su pochi nomi: è un rischio per chi ha ETF sul settore.",
+                     "fonti":  [
+                                   14,
+                                   4
+                               ]
+                 },
+                 {
+                     "titolo":  "Oggi l\u0027inflazione USA di ottobre",
+                     "giudizio":  0,
+                     "perche":  "Esce oggi l\u0027indice dei prezzi al consumo USA, venerdì quello alla produzione. Dopo i dati forti sul lavoro, il mercato dà l\u002784% di probabilità a un rialzo Fed di dicembre (CME FedWatch). Il consigliere Fed Daly parla di \u0027tapis roulant dell\u0027inflazione alta\u0027. Un dato sopra le attese farebbe male a azioni e obbligazioni.",
+                     "fonti":  [
+                                   0,
+                                   8,
+                                   9,
+                                   17
+                               ]
+                 },
+                 {
+                     "titolo":  "Credito legato all\u0027AI e investitori",
+                     "giudizio":  -1,
+                     "perche":  "Il rendimento di un bond di CoreWeave ha superato il 16% (CNBC): finanziare i data center costa di più. Damodaran analizza l\u0027AI separando costruttori, fornitori e prodotti, ricordando che non tutte le aziende sono esposte allo stesso modo.",
+                     "fonti":  [
+                                   10,
+                                   12
+                               ]
+                 },
+                 {
+                     "titolo":  "Italia: banche e risiko",
+                     "giudizio":  1,
+                     "perche":  "Banco BPM è balzata di circa il 10% dopo la proposta di fusione di Crédit Agricole (1 miliardo di dividendo ai soci e premio del 20%, ANSA). Il governo ha approvato il decreto Bollette (\u002715 euro in meno al megawattora\u0027). Le notizie sulle singole banche non indicano la direzione dell\u0027intero mercato.",
+                     "fonti":  [
+                                   13,
+                                   16,
+                                   1
+                               ]
+                 }
+             ],
+    "attenzione":  [
+                       {
+                           "titolo":  "Dati sull\u0027inflazione di oggi",
+                           "perche":  "Un numero più alto del previsto potrebbe rafforzare i rialzi dei tassi e far ripartire le vendite."
+                       },
+                       {
+                           "titolo":  "Volatilità ancora alta",
+                           "perche":  "Tre oscillazioni da oltre 1.000 punti del Dow in quattro giorni: dopo un rimbalzo forte possono arrivare ricadute."
+                       },
+                       {
+                           "titolo":  "Concentrazione sulla tecnologia e caso Nvidia",
+                           "perche":  "Pochi titoli pesano molto negli indici; notizie su un solo gruppo possono muovere tutto il mercato."
+                       },
+                       {
+                           "titolo":  "Colloqui con l\u0027Iran",
+                           "perche":  "Il calo del petrolio dipende da trattative ancora fragili: un fallimento farebbe risalire energia e inflazione."
+                       },
+                       {
+                           "titolo":  "Crypto fragili",
+                           "perche":  "Liquidità in calo (stablecoin -4,3% in 30 giorni) e indice di paura: i movimenti possono essere bruschi."
+                       }
+                   ],
+    "idee":  [
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00BK5BQT80",
+                     "perche":  "ETF azionario mondiale diversificato ad accumulo, a costo basso: base semplice per un piano regolare."
+                 },
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00B4L5Y983",
+                     "perche":  "ETF sulle azioni dei paesi sviluppati, molto diffuso e a costo contenuto."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "IE00BDBRDM35",
+                     "perche":  "ETF su obbligazioni mondiali di buona qualità, copertura dal rischio cambio: dà stabilità al portafoglio."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "IE00B4WXJJ64",
+                     "perche":  "ETF su titoli di Stato dell\u0027area euro: semplice, con rendimenti oggi interessanti."
+                 },
+                 {
+                     "classe":  "Liquidità",
+                     "isin":  "LU0290358497",
+                     "perche":  "ETF monetario sull\u0027euro: segue i tassi a breve, utile come cuscinetto."
+                 },
+                 {
+                     "classe":  "Materie prime",
+                     "isin":  "IE00B4ND3602",
+                     "perche":  "ETC sull\u0027oro fisico: protezione, non previsione, da tenere in quota piccola."
+                 }
+             ],
+    "indicatori":  [
+                       {
+                           "nome":  "S\u0026P 500 (chiusura 9/11)",
+                           "valore":  "circa 7.550 (+2,4%)",
+                           "nota":  "miglior giorno da aprile"
+                       },
+                       {
+                           "nome":  "Titoli di Stato USA a 10 anni",
+                           "valore":  "4,88%",
+                           "nota":  "2 anni 4,56%, 30 anni 5,26%"
+                       },
+                       {
+                           "nome":  "Petrolio Brent",
+                           "valore":  "circa 91 $",
+                           "nota":  "WTI circa 85 $, in calo"
+                       },
+                       {
+                           "nome":  "Oro",
+                           "valore":  "circa 4.123 $",
+                           "nota":  "stabile sopra 4.100"
+                       },
+                       {
+                           "nome":  "Rialzo Fed a dicembre",
+                           "valore":  "84%",
+                           "nota":  "probabilità implicita nei mercati (CME FedWatch)"
+                       },
+                       {
+                           "nome":  "Indice paura/avidità crypto",
+                           "valore":  "32 (Paura)",
+                           "nota":  "ieri 29; stablecoin 293 mld $"
+                       }
+                   ],
+    "fonti":  [
+                  {
+                      "testata":  "Investing.com",
+                      "titolo":  "U.S. stock futures steady after tech-led rebound; CPI in focus",
+                      "url":  "https://www.investing.com/news/stock-market-news/us-stock-futures-steady-after-techled-rebound-cpi-in-focus-5013763",
+                      "data":  "2026-11-10"
+                  },
+                  {
+                      "testata":  "Il Sole 24 Ore",
+                      "titolo":  "Borse, maxi rimbalzo con tech e calo greggio. A Milano (+2,7%) vola Banco Bpm",
+                      "url":  "https://www.ilsole24ore.com/art/borsa-indici-lunedi-9-novembre-2026-AJjuZt9B",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Il petrolio crolla su possibili progressi in Medio Oriente, Brent -5,6%",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/09/il-petrolio-crolla-su-possibili-progressi-in-medio-oriente-brent-56_f901fbee-a79b-4eaa-93f8-af8aa550295a.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Oil Prices Fall on Hopes for Peace Between U.S. and Iran",
+                      "url":  "https://www.nytimes.com/2026/11/09/business/energy-environment/oil-price-iran-trump-war.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "MarketWatch",
+                      "titolo":  "Dow sees its third 1,000-point swing in four days. Why the volatility isn\u0027t over yet.",
+                      "url":  "https://www.marketwatch.com/story/dow-sees-its-third-1-000-point-swing-in-four-days-why-volatility-isnt-over-yet-5380567b?mod=mw_rss_topstories",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Trump hails \u0027positive momentum\u0027 towards ending Iran war",
+                      "url":  "https://www.ft.com/content/4a75299e-a705-493f-91a7-07d3b87ecc4e?syn-25a6b1a6=1",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Gold Holds Gain Above $4,100 as Lower Oil Eases Inflation Woes",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-10/gold-holds-gain-above-4-100-as-lower-oil-eases-inflation-woes",
+                      "data":  "2026-11-10"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Wall Street: US-Börsen profitieren von sinkenden Ölpreisen und schließen im Plus",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dow-jones-sp-500-nasdaq-us-boersen-profitieren-von-sinkenden-oelpreisen-und-schliessen-im-plus/100268441.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Americans are on a \u0027treadmill of high inflation\u0027 and more rate hikes are likely, Fed\u0027s Daly says",
+                      "url":  "https://www.cnbc.com/2026/11/06/fed-daly-interest-rates-inflation.html",
+                      "data":  "2026-11-06"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Stable Labor Market Keeps Fed on Track to Raise Rates Gradually",
+                      "url":  "https://www.nytimes.com/2026/11/06/business/economy/stable-labor-market-to-keep-fed-on-track-to-raise-rates-gradually.html",
+                      "data":  "2026-11-06"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "The AI \u0027credit card\u0027 is getting costlier as CoreWeave bond yield tops 16%",
+                      "url":  "https://www.cnbc.com/2026/11/06/coreweave-bond-yield-tops-16percent-as-ai-credit-stress-rises.html",
+                      "data":  "2026-11-06"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "Google\u0027s AI chip push adds more pressure on Nvidia",
+                      "url":  "https://www.coindesk.com/markets/2026/11/09/google-s-ai-chip-push-adds-more-pressure-on-nvidia",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "Aswath Damodaran",
+                      "titolo":  "The AI Trade Deconstructed: AI Builders, AI Suppliers and AI Product firms!",
+                      "url":  "https://aswathdamodaran.blogspot.com/2026/11/the-ai-trade-deconstructed-ai-builders.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Credit Agricole propone le nozze a Bpm, ai soci 1 miliardo e premio del 20%",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/09/credit-agricole-propone-le-nozze-a-bpm-ai-soci-1-miliardo-e-premio-del-20_1f4370d5-8277-4bc4-9aea-4cb9ca81d368.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Nvidia\u0027s Stock Price Drops After Investigation Into CEO Jensen Huang",
+                      "url":  "https://www.nytimes.com/2026/11/09/business/nvidia-stock-price-jensen-huang-ceo.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Dax aktuell: Dax klettert wieder über 26.000-Punkte-Marke und schließt deutlich im Plus",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dax-aktuell-dax-klettert-wieder-ueber-26.000-punkte-marke-und-schliesst-im-plus/100268348.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Dal Cdm ok al Decreto Bollette, \u002715 euro in meno al megawattora\u0027",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/09/dal-cdm-ok-al-decreto-bollette-15-euro-in-meno-al-megawattora_cbf74d76-2c12-4718-89af-73ab9c1e6fec.html",
+                      "data":  "2026-11-09"
+                  },
+                  {
+                      "testata":  "MarketWatch",
+                      "titolo":  "The stock-market rally keeps spreading beyond Big Tech. October inflation data could put it to the test.",
+                      "url":  "https://www.marketwatch.com/story/the-stock-market-rally-keeps-spreading-beyond-big-tech-october-inflation-data-could-put-it-to-the-test-c1b87dcd?mod=mw_rss_topstories",
+                      "data":  "2026-11-09"
+                  }
+              ],
+    "limiti":  "Di quasi tutti gli articoli ho letto solo titolo, fonte e link dai feed di mercati.json (FT, NYT, Bloomberg, MarketWatch, CNBC, Sole 24 Ore, ANSA, Handelsblatt e CoinDesk sono a pagamento o non aperti). Ho aperto solo la pagina di Investing.com per i dati di chiusura e le quotazioni, che possono differire di qualche decimale tra le fonti. Non sono riuscito a trovare con la ricerca web dati di oggi su spread BTP-Bund e FTSE MIB (per questo non li riporto), né le attese degli analisti sull\u0027inflazione di ottobre. Non è consulenza finanziaria personalizzata e può sbagliare."
 }
