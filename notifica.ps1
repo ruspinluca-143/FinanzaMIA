@@ -1,4 +1,4 @@
-# Manda sul telefono (con ntfy.sh: gratuito, senza account) il recap della mattina o della sera: qualche numero di mercato e gli articoli da leggere, con i link.
+﻿# Manda sul telefono (con ntfy.sh: gratuito, senza account) il recap della mattina o della sera: qualche numero di mercato e gli articoli da leggere, con i link.
 # - Usa SOLO i dati pubblici gia' raccolti in mercati.json: non conosce i tuoi conti, i tuoi importi o i tuoi strumenti.
 # - Serve il nome di un "argomento" segreto (variabile NTFY_TOPIC). Senza, non fa nulla.
 # - Sono spunti presi da testate e ricerche pubbliche: non sono consigli personalizzati di acquisto o vendita.
@@ -16,6 +16,7 @@ function ToJson($o) {
   if ($null -eq $o) { return 'null' }
   if ($o -is [string]) { return (JStr $o) }
   if ($o -is [System.Collections.IDictionary]) { return '{' + (($o.Keys | ForEach-Object { (JStr ([string]$_)) + ':' + (ToJson $o[$_]) }) -join ',') + '}' }
+  if ($o -is [int] -or $o -is [long] -or $o -is [double]) { return ([string]$o).Replace(',', '.') }          # i numeri restano numeri (ntfy rifiuta priority scritta come testo)
   if ($o -is [System.Collections.IEnumerable]) { return '[' + (($o | ForEach-Object { ToJson $_ }) -join ',') + ']' }
   return (JStr ([string]$o))
 }
@@ -63,10 +64,13 @@ if (Test-Path $azf) { try {
 $roma = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($ora, $(if ($IsLinux -or $IsMacOS) { 'Europe/Rome' } else { 'W. Europe Standard Time' }))
 $mese = $roma.ToString('yyyy-MM'); $promemoria = ($roma.Day -le 3 -and $st['promemoria'] -ne $mese)
 if ($promemoria) {
-  $t = 'Promemoria del mese: apri l''app, guarda "Da aggiornare" e aggiorna i saldi dei conti fermi.'
+  $t = 'Promemoria del mese: apri l''app, guarda "Da aggiornare" e aggiorna i saldi dei conti fermi; poi scarica gli estratti di Revolut e Trade Republic e mandameli.'
   if (@(1, 4, 7, 10) -contains $roma.Month) { $t += ' Tocca anche ai conti trimestrali: mandami gli estratti di fine trimestre.' }
   $righe.Insert(0, $t)
 }
+# promemoria trimestrale (gennaio, aprile, luglio, ottobre, dal 5 al 9, una volta sola): i documenti di Fineco, Directa e Fondo Cometa
+$trim = (@(1, 4, 7, 10) -contains $roma.Month -and $roma.Day -ge 5 -and $roma.Day -le 9 -and $st['trimestre'] -ne $mese)
+if ($trim) { $righe.Insert(0, 'Promemoria trimestrale: scarica i documenti di Fineco, Directa e Fondo Cometa e mandameli per aggiornare l''app.') }
 # giorni dei PAC (promemoria-pac.json: solo i giorni del mese): "oggi c'e' un acquisto programmato, confermalo nell'app"
 $pf = Join-Path (Split-Path $Sito -Parent) 'promemoria-pac.json'; if (-not (Test-Path $pf)) { $pf = './promemoria-pac.json' }
 $oggiPac = $false
@@ -92,9 +96,9 @@ $testo += "`n`nSpunti dalle fonti, non consigli personalizzati."
 
 $sito = if ($env:GITHUB_REPOSITORY) { 'https://' + ($env:GITHUB_REPOSITORY -split '/')[0] + '.github.io/' + ($env:GITHUB_REPOSITORY -split '/')[1] + '/' } else { '' }
 $azioni = @(); foreach ($s in ($sel | Select-Object -First 3)) { $azioni += [ordered]@{ action = 'view'; label = $s.tag; url = $s.a.link } }
-$titolo = if ($promemoria) { 'Promemoria del mese e recap della ' + $Momento } elseif ($forti.Count) { 'Movimenti forti - recap della ' + $Momento } else { 'Recap della ' + $Momento + ' - mercati e articoli' }
-$msg = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = $titolo; message = $testo; tags = @($(if ($forti.Count) { 'warning' } elseif ($promemoria) { 'calendar' } else { 'chart_with_upwards_trend' })) }
-if ($forti.Count -or $promemoria) { $msg['priority'] = '4' }
+$titolo = if ($promemoria) { 'Promemoria del mese e recap della ' + $Momento } elseif ($trim) { 'Promemoria trimestrale e recap della ' + $Momento } elseif ($forti.Count) { 'Movimenti forti - recap della ' + $Momento } else { 'Recap della ' + $Momento + ' - mercati e articoli' }
+$msg = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = $titolo; message = $testo; tags = @($(if ($forti.Count) { 'warning' } elseif ($promemoria -or $trim) { 'calendar' } else { 'chart_with_upwards_trend' })) }
+if ($forti.Count -or $promemoria -or $trim) { $msg['priority'] = 4 }
 if ($sito) { $msg['click'] = $sito + $(if ($oggiPac) { '#pac' } else { '' }) }          # nei giorni dei PAC la notifica apre la scheda PAC
 if ($azioni.Count) { $msg['actions'] = $azioni }
 $json = ToJson $msg
@@ -104,6 +108,7 @@ $body = [Text.Encoding]::UTF8.GetBytes($json)
 $null = Invoke-RestMethod -Uri 'https://ntfy.sh/' -Method Post -Body $body -ContentType 'application/json; charset=utf-8' -TimeoutSec 30
 $st[$Momento] = $oggi
 if ($promemoria) { $st['promemoria'] = $mese }
+if ($trim) { $st['trimestre'] = $mese }
 $out = '{' + (($st.Keys | Sort-Object | ForEach-Object { (JStr $_) + ':' + (JStr $st[$_]) }) -join ',') + '}'
 [IO.File]::WriteAllText($stFile, $out, (New-Object Text.UTF8Encoding($false)))
 "Recap della $Momento mandato (" + $sel.Count + ' articoli).'
