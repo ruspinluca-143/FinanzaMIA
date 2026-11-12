@@ -1,8 +1,8 @@
 {
   "app": "finanze-prezzi",
   "versione": 1,
-  "generato": "2026-11-12T22:16:41+00:00",
-  "cambi": {"USD": 0.904912, "JPY": 0.005661, "GBP": 1.197547, "CHF": 1.083529, "AUD": 0.616325, "CAD": 0.634848},
+  "generato": "2026-11-12T22:39:27+00:00",
+  "cambi": {"USD": 0.904658, "JPY": 0.00566, "GBP": 1.197576, "CHF": 1.083541, "AUD": 0.616014, "CAD": 0.634457},
   "prezzi": [
     {"nome":"iShares Core MSCI World UCITS ETF USD (Acc)","id":"IE00B4L5Y983","prezzo":131.57,"valuta":"EUR","data":"2026-11-12","ter":0.2,"bench":"MSCI TRN WORLD INDEX","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"Amundi Core Nasdaq-100 Swap UCITS ETF Acc","id":"LU1829221024","prezzo":104.72,"valuta":"EUR","data":"2026-11-12","ter":0.3,"bench":"NASDAQ-100 Notional Net Total Return","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -28,11 +28,11 @@
     {"nome":"Apple","id":"aapl","prezzo":354.88,"valuta":"USD","data":"2026-11-12","fonte":"stockanalysis"},
     {"nome":"Alumis Inc","id":"alms","prezzo":6.13,"valuta":"USD","data":"2026-11-12","fonte":"stockanalysis"},
     {"nome":"Accenture","id":"acn","prezzo":249.95,"valuta":"USD","data":"2026-11-12","fonte":"stockanalysis"},
-    {"nome":"Bitcoin","id":"bitcoin","prezzo":64497,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
-    {"nome":"XRP","id":"ripple","prezzo":0.935186,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
-    {"nome":"Ether","id":"ethereum","prezzo":1817.48,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
-    {"nome":"Solana","id":"solana","prezzo":73.5,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
-    {"nome":"Cardano","id":"cardano","prezzo":0.156628,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"Bitcoin","id":"bitcoin","prezzo":64572,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"XRP","id":"ripple","prezzo":0.935515,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"Ether","id":"ethereum","prezzo":1818.46,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"Solana","id":"solana","prezzo":73.53,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"Cardano","id":"cardano","prezzo":0.15667,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
     {"nome":"Cosmos","id":"cosmos","prezzo":1.29,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
     {"nome":"iShares Core MSCI Europe UCITS ETF EUR (Acc)","id":"IE00B4K48X80","prezzo":108.24,"valuta":"EUR","data":"2026-11-12","ter":0.12,"bench":"MSCI DAILY NET TR E","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"WisdomTree Physical Gold EUR Daily Hedged","id":"JE00B8DFY052","prezzo":20.105,"valuta":"EUR","data":"2026-11-12","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -58,7 +58,7 @@
     {"nome":"BTP Valore ott 2031","id":"IT0005735201","prezzo":101.16,"valuta":"EUR","data":"2026-11-12","fonte":"borsa_italiana"},
     {"nome":"T-Bond USA 4,75% nov 2053","id":"US912810TV08","prezzo":90.33,"valuta":"USD","data":"2026-11-12","fonte":"borsa_italiana"},
     {"nome":"Innodata Inc.","id":"inod","prezzo":36.29,"valuta":"USD","data":"2026-11-12","fonte":"stockanalysis"},
-    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.903936,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
+    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.904179,"valuta":"EUR","data":"2026-11-12","fonte":"coingecko"},
     {"nome":"Xtrackers MSCI Korea UCITS ETF (riferimento)","id":"LU0292100046","prezzo":165.93,"valuta":"EUR","data":"2026-11-12","ter":0.45,"bench":"MSCI KOREA 20/35 CUS","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"Xtrackers MSCI World Value UCITS ETF (riferimento)","id":"IE00BL25JM42","prezzo":72.94,"valuta":"EUR","data":"2026-11-12","ter":0.25,"bench":"DB EQUITY VALUE FACT","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento)","id":"LU0908500753","prezzo":328.3,"valuta":"EUR","data":"2026-11-12","ter":0.1,"bench":"Stoxx Europe 600 NTR","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -71,9 +71,9 @@
     {"nome":"Apple 2045 (riferimento)","id":"US037833BH21","prezzo":81.638,"valuta":"USD","data":"2026-11-12","fonte":"onvista"},
     {"nome":"McDonald's 2052 (riferimento)","id":"US58013MFT62","prezzo":85.037,"valuta":"USD","data":"2026-11-12","fonte":"onvista"},
     {"nome":"Goldman Sachs 4,75% 2045 (riferimento)","id":"US38148LAF31","prezzo":85.8,"valuta":"USD","data":"2026-11-12","fonte":"onvista"},
-    {"nome":"Sunrise Energy Metals Ltd.","id":"AU0000143729","prezzo":8.16,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
+    {"nome":"Sunrise Energy Metals Ltd.","id":"AU0000143729","prezzo":9.17,"valuta":"USD","data":"2026-11-12","fonte":"onvista"},
     {"nome":"Apollo Global Private Markets ELTIF","id":"LU3170240538","prezzo":114.2567,"valuta":"EUR","data":"2026-09-30","fonte":"onvista"},
-    {"nome":"Corning Inc.","id":"US2193501051","prezzo":108.02,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
+    {"nome":"Corning Inc.","id":"US2193501051","prezzo":119.5,"valuta":"USD","data":"2026-11-12","fonte":"onvista"},
     {"nome":"Marvell Technology Inc.","id":"US5738741041","prezzo":150.16,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
     {"nome":"Xtrackers MSCI Japan UCITS ETF 1C","id":"LU0274209740","prezzo":103.77,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
     {"nome":"iShares Core EURO STOXX 50 UCITS ETF (Acc)","id":"IE00B53L3W79","prezzo":249.2,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
@@ -83,6 +83,6 @@
     {"nome":"Invesco EQQQ NASDAQ-100 UCITS ETF Acc","id":"IE00BFZXGZ54","prezzo":438.05,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
     {"nome":"iShares NASDAQ 100 UCITS ETF EUR Hedged (Acc)","id":"IE00BYVQ9F29","prezzo":16.332,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
     {"nome":"Amundi Nasdaq-100 UCITS ETF Acc","id":"LU1681038243","prezzo":293.35,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"},
-    {"nome":"Leonardo SpA","id":"IT0003856405","prezzo":49.51,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"}
+    {"nome":"Leonardo SpA","id":"IT0003856405","prezzo":49.7,"valuta":"EUR","data":"2026-11-12","fonte":"onvista"}
   ]
 }
