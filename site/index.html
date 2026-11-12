@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-p7JAPTaDVd2W3c9ezHha8IRJfICeGSgEk3DVZYrL0GY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wHaG50Y7mZ8PU/fbSRHon/QC9satHT0tdkkS64B4uO8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -711,7 +711,19 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-cn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tr-cb{height:8px;border-radius:4px;background:var(--btn);overflow:hidden}.tr-cb i{display:block;height:100%;background:var(--s1);border-radius:4px}
 .tr-cv{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;display:flex;flex-direction:column;line-height:1.15}.tr-cv small{font-size:11px;color:var(--muted);font-weight:400}
 .tr-chartw{margin-top:6px}.tr-chart{width:100%;height:auto;display:block;color:var(--ink)}.tr-g{cursor:pointer;outline:none}.tr-g:focus-visible rect:first-child{stroke:var(--s1)}
-.tr-s{width:100%;margin:0 0 10px}.tr-be{fill:var(--gain,#30d158)}.tr-bs{fill:var(--loss,#ff453a)}.undo-toast.tr-toast{animation:none;white-space:nowrap}.tr-per{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.tr-inc{margin:2px 0 8px;font-size:14px}
+.tr-s{width:100%;margin:0 0 10px}.tr-be{fill:var(--gain,#30d158)}.tr-bs{fill:var(--loss,#ff453a)}.undo-toast.tr-toast{animation:none;white-space:nowrap}.tr-ro{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;margin:2px 0 6px;min-height:44px}.tr-rt{font-weight:600;font-size:15px;flex:1 1 100%}
+.tr-rv{display:flex;gap:12px;font-size:14px;font-variant-numeric:tabular-nums;font-weight:600;flex-wrap:wrap}.tr-rv .in{color:var(--gain,#1f9d55)}.tr-rv .out{color:var(--loss,#d93025)}.tr-rv .net{color:var(--muted);font-weight:500}
+.tr-grid{stroke:var(--grid);stroke-width:1;stroke-dasharray:3 5;vector-effect:non-scaling-stroke}.tr-axis{stroke:var(--ring);stroke-width:1;vector-effect:non-scaling-stroke}
+.tr-yl,.tr-xl{font-size:10px;fill:var(--muted);font-family:inherit}
+.tr-bar{transform-box:fill-box;transform-origin:50% 100%;animation:trgrow .55s var(--ease) both;animation-delay:calc(var(--i,0)*16ms);transition:opacity .2s}
+@keyframes trgrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.tr-g.dim .tr-bar{opacity:.28}@media (prefers-reduced-motion:reduce){.tr-bar{animation:none}}
+.tr-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+.tr-chart{max-width:640px;margin:0 auto}.tr-in{fill:var(--gain,#30d158);stroke:var(--card);stroke-width:1.5}.tr-g.dim .tr-in{opacity:.3}.tr-bgs{display:flex;flex-direction:column}.tr-bgt{font:inherit;display:block;width:100%;text-align:left;padding:12px 0;border:0;border-top:1px solid var(--grid);background:none;color:var(--ink);cursor:pointer}.tr-bgt:first-child{border-top:0}
+.tr-bh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.tr-bh .muted{font-size:12px}
+.tr-bb{height:10px;border-radius:5px;background:var(--btn);overflow:hidden;margin:8px 0 5px}.tr-bb i{display:block;height:100%;border-radius:5px;background:var(--gain,#30d158);transition:width .5s var(--ease)}.tr-bb i.warn{background:#ff9f0a}.tr-bb i.over{background:var(--loss,#ff453a)}
+.tr-bf{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}.tr-bf .over{color:var(--loss,#d93025);font-weight:600}
+.tr-rep{margin-top:14px}.tr-per{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.tr-inc{margin:2px 0 8px;font-size:14px}
 </style>
 </head>
 <body>
@@ -829,14 +841,14 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento'], ['prelievo', 'Prelievo'], ['partenza', 'Valore di partenza']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [], trx: [], trh: [] });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [], trx: [], trh: [], trb: { income: 0, pct: {} }, trr: [] });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
-  d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || [];          // casse separate: { "Cassa cani": { goal: 8000 } }
+  d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || []; d.trr = d.trr || []; d.trb = Object.assign({ income: 0, pct: {} }, d.trb); d.trb.pct = d.trb.pct || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
 
@@ -1567,6 +1579,7 @@ function todoItems() {
   for (const { al, v } of priceAlertsHit()) t.push({ t: nm(v.n) + ' è ' + (al.dir === 'sotto' ? 'sceso sotto ' : 'salito sopra ') + nf2.format(al.px) + ' ' + v.ccy, s: 'ora ' + nf2.format(v.p) + ' ' + v.ccy + ' · avviso impostato da te', b: 'Apri', c: nm(v.n) + (al.dir === 'sotto' ? ' sotto ' : ' sopra ') + nf2.format(al.px), f: () => { UI.tab = 'consigli'; UI.csub = 'titoli'; render(); talkTitolo(v, heldIsins()); } });
   const old = S.instruments.filter(i => held.has(i.id) && daysSince(i.priceDate) > 14 && !/valore totale/i.test(i.name)); if (old.length) t.push({ t: pl(old.length, 'prezzo non aggiornato da più di 14 giorni', 'prezzi non aggiornati da più di 14 giorni'), s: old.slice(0, 3).map(i => i.name).join(', ') + (old.length > 3 ? '…' : ''), b: 'Controlla', f: () => { UI.tab = 'analisi'; UI.sub = 'affidabilita'; render(); } });
   const due = planDueAll(); if (due.length) t.push({ t: pl(due.length, 'acquisto programmato da confermare', 'acquisti programmati da confermare'), s: 'è stato preso davvero?', b: 'Conferma', f: () => confirmDue() });
+  { const dt = trDueAll(); if (dt.length) t.push({ t: pl(dt.length, 'spesa ricorrente da confermare', 'spese ricorrenti da confermare'), s: dt.slice(0, 3).map(x => x.r.name).join(', ') + (dt.length > 3 ? '…' : ''), b: 'Conferma', f: () => trConfirmDue() }); }
   const dueA = S.accounts.map(a => [a, accDue(a)]).filter(x => x[1] != null); if (dueA.length) t.push({ t: pl(dueA.length, 'conto da aggiornare', 'conti da aggiornare'), s: dueA.slice(0, 3).map(x => x[0].name).join(', ') + (dueA.length > 3 ? '…' : ''), b: 'Aggiorna', f: () => balancesWizard() });
   const man = S.instruments.filter(i => held.has(i.id) && !isAuto(i) && !i.track && !/valore totale|^altre crypto/i.test(i.name)); if (man.length) t.push({ t: pl(man.length, 'titolo senza prezzo automatico', 'titoli senza prezzo automatico'), s: man.slice(0, 3).map(i => i.name).join(', ') + (man.length > 3 ? '…' : ''), b: 'Collega', f: () => askLink() });
   const al = alerts(); if (al.length) t.push({ t: al[0].replace(/[«»]/g, ''), s: al.length > 1 ? 'e altri ' + (al.length - 1) + ' avvisi' : '', b: 'Vedi', f: () => { UI.tab = 'analisi'; UI.sub = 'regole'; render(); } });
@@ -3821,8 +3834,8 @@ function render() {
     window.scrollTo(0, fresh ? 0 : y); afterRender();          // cambiando schermata (es. apri un conto) si parte dall'inizio, non da meta'
   }
 }
-window.addEventListener('hashchange', () => { const k = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash]; if (k && S && !LOCKED) { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } });          // i collegamenti delle notifiche (sito/#pac) aprono la scheda giusta
-function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); if (S && S.settings && S.settings.theme) applyTheme(S.settings.theme); UI.tab = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash] || 'panoramica'; UI.acc = null; UI.planId = null; UI.sub = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); dogsSync(false); loadOnlineData(); }
+window.addEventListener('hashchange', () => { const k = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi', '#transazioni': 'transazioni' })[location.hash]; if (k && S && !LOCKED) { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } });          // i collegamenti delle notifiche (sito/#pac) aprono la scheda giusta
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); if (S && S.settings && S.settings.theme) applyTheme(S.settings.theme); UI.tab = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi', '#transazioni': 'transazioni' })[location.hash] || 'panoramica'; UI.acc = null; UI.planId = null; UI.sub = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); dogsSync(false); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -4119,7 +4132,7 @@ function trAccPicker(api, onPick, skipId, title) {          // i conti piu' usat
 function trWizard(pre, after) {          // inserimento guidato: che cosa, quanto e quando, categoria, conto, nota (con suggerimenti)
   if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
   pre = pre || {};
-  const st = { kind: pre.kind || '', amt: pre.amt || null, date: pre.date || today(), cat: '', sub: '', accId: '', toId: '', note: '', quick: false, stage: 0, cq: '', all: false, err: '' }, before = JSON.stringify(S);
+  const st = { kind: pre.kind || '', amt: pre.amt || null, date: pre.date || today(), cat: '', sub: '', accId: '', toId: '', note: '', quick: false, stage: 0, cq: '', all: false, err: '', rep: pre.askRep ? 'mensile' : '', rate: 12 }, before = JSON.stringify(S);
   const yday = () => trYmd(new Date(Date.now() - 864e5)), money = v => eur(v, true);
   const sKind = api => {
     const I = trIdx(), cands = [];
@@ -4159,14 +4172,84 @@ function trWizard(pre, after) {          // inserimento guidato: che cosa, quant
     const sumEl = h('div', { class: 'tr-sum' }), sum = () => { const a = S.accounts.find(x => x.id === st.accId), b = S.accounts.find(x => x.id === st.toId); sumEl.replaceChildren(h('b', null, TR_LAB[st.kind] + ' ' + money(st.amt)), h('span', null, (st.kind === 'trasf' ? (a ? a.name : '') + ' → ' + (b ? b.name : '') : [st.cat, st.sub].filter(Boolean).join(' › ') + (a ? ' · ' + a.name : '')) + ' · ' + trDayName(st.date))); };
     inp.addEventListener('input', () => { st.note = inp.value; fill(); }); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('dialog.wz .wz-nav .pri:not([disabled])'); if (b) b.click(); } });
     fill(); sum();
-    return { q: 'Vuoi aggiungere una nota?', nextLabel: 'Salva', focus: '.wz-search', err: st.err, body: [sumEl, inp, sug, h('p', { class: 'muted' }, 'I suggerimenti vengono da quello che hai già scritto.')],
-      onNext: async a2 => { st.err = ''; const r = trApply({ kind: st.kind, date: st.date, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, note: st.note.trim() }); if (r) { st.err = r; a2.redraw(); return false; } a2.shut(); trAllDone(before, TR_LAB[st.kind] + ' salvata: ' + money(st.amt)); if (after) after(); return false; } };
+    return { q: 'Vuoi aggiungere una nota?', nextLabel: 'Salva', focus: '.wz-search', err: st.err, body: [sumEl, inp, sug, h('p', { class: 'muted' }, 'I suggerimenti vengono da quello che hai già scritto.'), h('div', { class: 'tr-rep' }, h('h4', { class: 'wz-gh' }, 'Si ripete?'), h('div', { class: 'tr-chips' }, [['', 'No'], ['mensile', 'Ogni mese'], ['annuale', 'Ogni anno'], ['rate', 'A rate']].map(([k, l]) => h('button', { type: 'button', class: 'tr-chip sm' + (st.rep === k ? ' sel' : ''), onclick: () => { st.rep = k; api.redraw(); } }, l))), st.rep === 'rate' ? h('label', { class: 'fld' }, h('span', null, 'Quante rate in tutto (questa compresa)'), wzNum(st.rate, 'es. 12', v => { st.rate = v; })) : null)],
+      onNext: async a2 => { st.err = ''; const r = trApply({ kind: st.kind, date: st.date, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, note: st.note.trim() }); if (r) { st.err = r; a2.redraw(); return false; } if (st.rep) trAddRec(st); a2.shut(); trAllDone(before, TR_LAB[st.kind] + ' salvata: ' + money(st.amt) + (st.rep ? ' · si ripete' : '')); if (after) after(); return false; } };
   };
   const steps = () => st.kind === 'trasf' ? [sKind, sAmt, sFrom, sTo, sNote] : [sKind, sAmt, sCat, sAcc, sNote];
   return wzRun({ steps });
 }
 function trAllDone(before, text) { touch(); render(); trToast(before, text); }
-/* ---------- importazione dello storico (file "#Finanze;storico=si") ---------- */
+/* ---------- spese ricorrenti e rate: l'app chiede "e' stato pagato?" come per i PAC ---------- */
+const TRR = () => S.trr || (S.trr = []);
+const trOcc = r => occurrences(r.start, freqMonths(r.freq), r.day, r.start, addMonthsStr(today(), 400), r.end);
+function trDueAll() { const t = today(), out = []; for (const r of TRR()) { const dn = new Set(r.done || []); trOcc(r).forEach((d, i) => { if (d >= (r.since || r.start) && d <= t && !dn.has(d)) out.push({ r, d, k: i + 1 }); }); } return out.sort((a, b) => a.d < b.d ? -1 : 1); }
+function trAddRec(st) {
+  const fr = st.rep === 'annuale' ? 'annuale' : 'mensile', step = freqMonths(fr), day = +st.date.slice(8, 10) || 1, occ = occurrences(st.date, step, day, st.date, addMonthsStr(today(), 400), ''), n = st.rep === 'rate' ? Math.max(2, Math.round(st.rate || 12)) : 0;
+  TRR().push({ id: uid(), name: (st.note || st.cat || TR_LAB[st.kind]).trim(), kind: st.kind, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, freq: fr, day, start: st.date, since: occ[1] || addMonthsStr(st.date, step), end: n ? (occ[n - 1] || '') : '', total: n, done: [] });
+}
+const trRecNote = (r, k) => r.name + (r.total ? ' (' + k + '/' + r.total + ')' : '');
+function trConfirmDue(auto) {
+  const due = trDueAll(); if (!due.length) { if (!auto) alert('Nessuna spesa ricorrente da confermare.'); return; }
+  const dlg = h('dialog', { class: 'wide duedlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); render(); }, head = h('p', { class: 'muted' }), list = h('div', { class: 'duelist' });
+  const left = () => { const n = list.querySelectorAll('.due:not(.ok):not(.no)').length; head.textContent = n ? 'Controlla l\'importo e dimmi se è stato pagato davvero: Sì lo registro, No lo salto.' : 'Fatto: niente altro da confermare.'; };
+  const row = ({ r, d, k }) => {
+    const amt = h('input', { type: 'number', step: 'any', inputmode: 'decimal', value: r.amount, 'aria-label': 'Importo in euro' }), msg = h('div', { class: 'err' });
+    const el = h('div', { class: 'due' }, h('div', { class: 'due-h' }, h('b', null, trRecNote(r, k)), h('span', { class: 'muted' }, fmtDate(d) + ' · ' + accName(r.accId))), h('div', { class: 'due-what' }, TR_LAB[r.kind] + (r.cat ? ' · ' + r.cat : '')), h('label', { class: 'due-amt' }, h('span', null, 'Importo (€)'), amt), msg,
+      h('div', { class: 'due-acts' },
+        btn('Sì, è stato pagato', () => { const m = trApply({ kind: r.kind, date: d, accId: r.accId, toId: r.toId, amount: parseFloat(amt.value), cat: r.cat, sub: r.sub, note: trRecNote(r, k) }); if (m) { msg.textContent = m; return; } (r.done = r.done || []).push(d); touch(); el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Registrato: ' + trRecNote(r, k) + ' del ' + fmtDate(d))); left(); }, 'pri'),
+        btn('No, saltalo', () => { (r.done = r.done || []).push(d); touch(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + trRecNote(r, k) + ' del ' + fmtDate(d))); left(); })));
+    return el;
+  };
+  due.forEach(x => list.append(row(x))); left();
+  dlg.append(h('h3', null, 'Spese ricorrenti da confermare'), head, list, h('div', { class: 'dlgacts' }, btn('Chiudi', shut, 'pri')));
+  dlg.addEventListener('close', () => { dlg.remove(); render(); }); document.body.append(dlg); dlg.showModal();
+}
+function trRec() {
+  const el = h('div'), due = trDueAll();
+  if (due.length) el.append(h('div', { class: 'banner' }, h('span', null, pl(due.length, 'pagamento da confermare', 'pagamenti da confermare')), btn('Conferma', () => trConfirmDue(), 'pri sm')));
+  const sq = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca una spesa ricorrente…', autocomplete: 'off', 'aria-label': 'Cerca una spesa ricorrente' }), box = h('div');
+  const fill = () => { const toks = normT(sq.value).split(' ').filter(Boolean), L = TRR().filter(r => toks.every(x => normT([r.name, r.cat, accName(r.accId)].join(' ')).includes(x)));
+    box.replaceChildren(...L.map(r => { const nx = trOcc(r).find(d => d > today() || !(r.done || []).includes(d)), k = trOcc(r).indexOf(nx) + 1; return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, r.name + (r.total ? ' · rate ' + r.total : '')), h('span', { class: 'muted' }, freqLabel(r.freq) + ' · ' + eur(r.amount, true) + ' · ' + accName(r.accId) + (nx ? ' · prossima ' + fmtDate(nx) + (r.total ? ' (' + k + '/' + r.total + ')' : '') : ' · finita'))), h('div', { class: 'tr-am' }, btn('Elimina', () => { if (confirm('Elimino questa spesa ricorrente? Quelle già registrate restano.')) { S.trr = TRR().filter(x => x !== r); done(); } }, 'sm danger'))); }));
+    if (!L.length) box.append(h('p', { class: 'muted' }, TRR().length ? 'Nessuna corrisponde.' : 'Ancora nessuna. Quando registri una spesa, alla fine scegli «Si ripete?» (ogni mese, ogni anno o a rate): poi ti chiedo io se è stata pagata.')); };
+  sq.addEventListener('input', fill); fill();
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Spese ricorrenti e rate'), btn('+ Nuova', () => trWizard({ date: today(), askRep: true }), 'pri sm')), h('p', { class: 'muted gs' }, 'Abbonamenti, affitto, assicurazioni, rate: il giorno della scadenza ti chiedo «è stato pagato?» e, se dici sì, lo registro.'), TRR().length > 6 ? sq : null, box));
+  return el;
+}
+/* ---------- budget: una percentuale del guadagno per ogni categoria, contro quanto spendi davvero ---------- */
+const TRB = () => S.trb || (S.trb = { income: 0, pct: {} });
+const trMonthsBack = n => { const c = today().slice(0, 7), out = []; for (let i = 1; i <= n; i++) out.push(trShiftMonth(c, -i)); return out; };
+function trIncomeAuto() { const by = new Map(trMonthsBack(12).map(m => [m, 0])); for (const r of trAll()) if (r.k === 'entrata' && by.has(r.d.slice(0, 7))) by.set(r.d.slice(0, 7), by.get(r.d.slice(0, 7)) + r.amt); const v = [...by.values()].filter(x => x > 0).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : 0; }          // la mediana: un mese eccezionale non sposta la cifra
+const trIncome = () => TRB().income > 0 ? TRB().income : trIncomeAuto();
+const trPf = v => String(Math.round(v * 10) / 10).replace('.', ',');
+function trBudget() {
+  const el = h('div'), B = TRB(), now = today().slice(0, 7), ym = UI.trm || now, inc = trIncome(), exc = (S.settings.trEx || []);
+  const month = trAll().filter(r => r.k === 'spesa' && r.d.slice(0, 7) === ym), spent = new Map(); for (const r of month) spent.set(r.cat || 'Senza categoria', (spent.get(r.cat || 'Senza categoria') || 0) + r.amt);
+  const cats = Object.entries(B.pct).filter(([, p]) => p > 0).sort((a, b) => b[1] - a[1]), alloc = cats.reduce((t, [, p]) => t + p, 0), allocE = inc * alloc / 100, inB = cats.reduce((t, [c]) => t + (spent.get(c) || 0), 0), out = month.reduce((t, r) => t + r.amt, 0) - inB;
+  const setIncome = () => form('Quanto guadagni al mese', [{ key: 'v', label: 'Guadagno mensile (€)', type: 'number', hint: 'Lascia vuoto per usare la cifra tipica dei tuoi ultimi 12 mesi: ' + eur(trIncomeAuto()) }], { v: B.income || null }, o => { B.income = o.v > 0 ? o.v : 0; done(); });
+  const edit = c => form('Budget: ' + c, [{ key: 'p', label: 'Percentuale del guadagno (%)', type: 'number', hint: inc > 0 ? 'Oggi ogni 1% sono ' + eur(inc / 100, true) + ' al mese. Metti 0 per toglierla.' : 'Prima imposta quanto guadagni al mese.' }], { p: B.pct[c] || null }, o => { if (o.p > 0) B.pct[c] = Math.round(o.p * 10) / 10; else delete B.pct[c]; done(); });
+  const add = () => { const L = trCats('spesa').filter(c => !(B.pct[c] > 0)); form('Nuova categoria nel budget', [{ key: 'c', label: 'Categoria', type: 'select', options: L.map(c => [c, c]) }, { key: 'p', label: 'Percentuale del guadagno (%)', type: 'number', req: true }], { c: L[0] }, o => { if (!(o.p > 0)) return 'Scrivi una percentuale.'; B.pct[o.c] = Math.round(o.p * 10) / 10; done(); }); };
+  const suggest = () => {
+    if (!(inc > 0)) { alert('Prima imposta quanto guadagni al mese: da lì calcolo le percentuali.'); return; }
+    const ms = new Set(trMonthsBack(12)), sums = new Map(); for (const r of trAll()) if (r.k === 'spesa' && ms.has(r.d.slice(0, 7)) && !exc.includes(r.cat || 'Senza categoria')) sums.set(r.cat || 'Senza categoria', (sums.get(r.cat || 'Senza categoria') || 0) + r.amt);
+    const L = [...sums.entries()].map(([c, v]) => [c, v / 12, Math.round(v / 12 / inc * 1000) / 10]).filter(x => x[2] >= 1).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    if (!L.length) { alert('Non ho abbastanza spese degli ultimi 12 mesi per proporre qualcosa.'); return; }
+    if (Object.keys(B.pct).length && !confirm('Sostituisco le percentuali che hai già con quelle calcolate dalla tua media degli ultimi 12 mesi?')) return;
+    B.pct = {}; for (const [c, , p] of L) B.pct[c] = p; done();
+  };
+  const navRow = h('div', { class: 'tr-nav' }, btn('‹', () => { UI.trm = trShiftMonth(ym, -1); render(); }, 'sm'), h('b', null, trCap(trMonthName(ym))), h('span', { class: 'row', style: 'gap:6px;margin:0' }, ym !== now ? btn('Oggi', () => { UI.trm = now; render(); }, 'sm') : null, btn('›', () => { UI.trm = trShiftMonth(ym, 1); render(); }, 'sm')));
+  el.append(navRow, tiles([{ l: 'Guadagno mensile', v: eur(inc), s: B.income > 0 ? 'cifra scelta da te' : inc > 0 ? 'cifra tipica degli ultimi 12 mesi' : 'impostalo per cominciare', x: () => ({ kind: 'Budget', num: inc, say: 'È la base: ogni percentuale del budget si calcola su questa cifra.', how: B.income > 0 ? 'L\'hai scelta tu.' : 'Per default uso la cifra "di mezzo" (la mediana) dei mesi in cui hai guadagnato, così un mese eccezionale non la sposta.', acts: [['Scegli la cifra…', setIncome, 'pri']] }) },
+    { l: 'Budget assegnato', v: eur(allocE), s: alloc ? trPf(alloc) + '% del guadagno' : 'nessuna categoria ancora', x: () => ({ kind: 'Budget', num: allocE, say: 'La somma delle percentuali che hai dato alle categorie, in euro al mese.', rows: cats.map(([c, p]) => [c, inc * p / 100, trPf(p) + '%', () => edit(c)]), rowsTitle: 'Categoria per categoria' }) },
+    { l: 'Da mettere da parte', v: eur(Math.max(0, inc - allocE)), s: alloc > 100 ? '⚠ il budget supera il guadagno' : 'guadagno meno budget', x: () => ({ kind: 'Budget', num: Math.max(0, inc - allocE), say: 'Quello che resta del guadagno dopo il budget: è il risparmio che ti dai come obiettivo.' }) },
+    { l: 'Speso nel mese', v: eur(out + inB), s: allocE > 0 ? 'di ' + eur(allocE) + ' di budget' : '', x: () => ({ kind: trCap(trMonthName(ym)), num: out + inB, say: 'Tutte le spese del mese. Dentro il budget: ' + eur(inB) + ' · fuori dalle categorie del budget: ' + eur(out) + '.' }) }]));
+  el.append(h('div', { class: 'row' }, btn('Guadagno mensile…', setIncome), btn('Proponi per me', suggest, 'pri'), btn('+ Categoria', add)));
+  const sec = h('section', { class: 'card' }, h('h2', null, 'Categorie'), h('p', { class: 'muted gs' }, 'Per ogni categoria una percentuale del guadagno. La barra si riempie con quello che spendi nel mese: rossa se superi il budget.'));
+  const sq = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca una categoria…', autocomplete: 'off', 'aria-label': 'Cerca una categoria' }), box = h('div', { class: 'tr-bgs' });
+  const fill = () => { const toks = normT(sq.value).split(' ').filter(Boolean), L = cats.filter(([c]) => toks.every(x => normT(c).includes(x)));
+    box.replaceChildren(...L.map(([c, p]) => { const b = inc * p / 100, sp = spent.get(c) || 0, r = b > 0 ? sp / b : 0; return h('button', { type: 'button', class: 'tr-bgt', onclick: () => edit(c) }, h('div', { class: 'tr-bh' }, h('b', null, c), h('span', { class: 'muted' }, trPf(p) + '% · ' + eur(b) + ' al mese')), h('div', { class: 'tr-bb' }, h('i', { class: r > 1 ? 'over' : r > .85 ? 'warn' : '', style: 'width:' + Math.min(100, Math.max(r > 0 ? 3 : 0, r * 100)) + '%' })), h('div', { class: 'tr-bf' }, h('span', null, 'Speso ' + eur(sp)), h('span', { class: sp > b ? 'over' : 'muted' }, sp > b ? 'oltre di ' + eur(sp - b) : 'restano ' + eur(b - sp)))); }));
+    if (!L.length) box.append(h('p', { class: 'muted' }, cats.length ? 'Nessuna categoria corrisponde.' : 'Ancora nessuna: tocca «Proponi per me» e calcolo io le percentuali dalle tue spese, poi le ritocchi.')); };
+  sq.addEventListener('input', fill); fill(); if (cats.length > 8) sec.append(sq); sec.append(box); if (out > 0) sec.append(h('p', { class: 'muted' }, 'Fuori dalle categorie del budget questo mese: ' + eur(out) + '.')); el.append(sec);
+  return el;
+}/* ---------- importazione dello storico (file "#Finanze;storico=si") ---------- */
 function applyStoricoFile(text) {          // Data;Tipo;Conto;A conto;Categoria;Sotto-categoria;Nota;Importo;Descrizione. Non muove nessun saldo: serve per statistiche, suggerimenti e andamento
   const rows = []; let bad = 0;
   for (const line of String(text).split(/\r?\n/)) {
@@ -4180,8 +4263,9 @@ function applyStoricoFile(text) {          // Data;Tipo;Conto;A conto;Categoria;
 /* ---------- la scheda ---------- */
 function tabTransazioni() {
   const v = UI.trv || 'cal', el = h('div');
-  el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['sta', 'Statistiche']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
-  el.append(v === 'sta' ? trStats() : trCal());
+  el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['sta', 'Statistiche'], ['bud', 'Budget'], ['rec', 'Ricorrenti']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
+  { const dd = trDueAll(); if (dd.length && v !== 'rec') el.append(h('div', { class: 'banner' }, h('span', null, pl(dd.length, 'spesa ricorrente da confermare', 'spese ricorrenti da confermare')), btn('Conferma', () => trConfirmDue(), 'pri sm'))); }
+  el.append(v === 'sta' ? trStats() : v === 'bud' ? trBudget() : v === 'rec' ? trRec() : trCal());
   return el;
 }
 function trItem(r, showDate) {          // una riga: che cosa, categoria e conto, importo (e Elimina se e' una transazione tua)
@@ -4237,31 +4321,47 @@ function trStats() {
   el.append(h('label', { class: 'chk tr-inc' }, h('input', { type: 'checkbox', checked: inclH, onchange: ev => { UI.trh = ev.target.checked; render(); } }), h('span', null, 'Includi lo storico importato')));
   if (ex.length) el.append(h('div', { class: 'chips' }, h('span', { class: 'muted', style: 'align-self:center' }, 'Escluse dai totali:'), ex.map(c => h('button', { type: 'button', class: 'chip', title: 'Tocca per rimetterla', onclick: () => { S.settings.trEx = ex.filter(x => x !== c); done(); } }, c + ' ✕'))));
   el.append(tiles([{ l: 'Guadagni', v: eur(e), s: title, x: () => ({ kind: title, num: e, say: 'Tutti i soldi entrati nel periodo.' }) }, { l: 'Spese', v: eur(s0), s: 'media ' + eur(s0 / days) + ' al giorno', x: () => ({ kind: title, num: s0, say: 'Tutto quello che hai speso nel periodo. I trasferimenti tra i tuoi conti non contano.', how: 'Media al giorno = spese ÷ ' + pl(days, 'giorno', 'giorni') + '.' }) }, { l: 'Saldo', v: seur(e - s0), s: e - s0 >= 0 ? 'in avanzo' : 'in disavanzo', x: () => ({ kind: title, num: e - s0, fmt: seur, say: 'Guadagni meno spese.' }) }]));
-  const byMonth = (to.slice(0, 7) !== from.slice(0, 7)) && days > 62, bk = new Map();
-  for (const r of rows) { const k = byMonth ? r.d.slice(0, 7) : r.d, o = bk.get(k) || { e: 0, s: 0 }; if (r.k === 'entrata') o.e += r.amt; else o.s += r.amt; bk.set(k, o); }
-  const keys = []; if (byMonth) { for (let m0 = from.slice(0, 7); m0 <= to.slice(0, 7); m0 = trShiftMonth(m0, 1)) keys.push(m0); } else { for (let d = new Date(from + 'T00:00:00'), n = 0; trYmd(d) <= to && n < 400; d.setDate(d.getDate() + 1), n++) keys.push(trYmd(d)); }
-  if (keys.length > 1) el.append(h('section', { class: 'card' }, h('h2', null, 'Guadagni e spese'), h('p', { class: 'muted gs' }, 'Verde i guadagni, rosso le spese: ' + (byMonth ? 'un gruppo per mese' : 'un gruppo per giorno') + '. Tocca un gruppo per i dettagli.'), trBars(keys, bk, byMonth)));
-  const K = UI.trk || 'spesa', cm = new Map(), tot = K === 'spesa' ? s0 : e;
+  const mdiff = (+to.slice(0, 4) * 12 + +to.slice(5, 7)) - (+from.slice(0, 4) * 12 + +from.slice(5, 7)), g = days <= 31 ? 'd' : days <= 120 ? 'w' : mdiff < 24 ? 'm' : 'y';          // giorni, settimane, mesi o anni: mai troppe barre sottili
+  const wk = d => { const dt = new Date(d + 'T00:00:00'); dt.setDate(dt.getDate() - (dt.getDay() + 6) % 7); return trYmd(dt); };
+  const kOf = d => g === 'd' ? d : g === 'w' ? wk(d) : g === 'm' ? d.slice(0, 7) : d.slice(0, 4), bk = new Map(), keys = [];
+  for (const r of rows) { const k = kOf(r.d), o = bk.get(k) || { e: 0, s: 0 }; if (r.k === 'entrata') o.e += r.amt; else o.s += r.amt; bk.set(k, o); }
+  for (let k = kOf(from), n = 0; k <= kOf(to) && n < 500; n++) { keys.push(k); k = g === 'd' ? trYmd(new Date(new Date(k + 'T00:00:00').getTime() + 864e5)) : g === 'w' ? trYmd(new Date(new Date(k + 'T00:00:00').getTime() + 7 * 864e5)) : g === 'm' ? trShiftMonth(k, 1) : String(+k + 1); }
+  if (keys.length > 1) el.append(h('section', { class: 'card' }, h('h2', null, 'Guadagni e spese'), h('p', { class: 'muted gs' }, (g === 'd' || g === 'w' ? 'Le barre rosse sono le spese; un puntino verde segna dove sono entrati dei soldi. ' : 'Verde i guadagni, rosso le spese. ') + 'Un gruppo per ' + ({ d: 'giorno', w: 'settimana', m: 'mese', y: 'anno' })[g] + ': tocca per vederlo da vicino.'), trBars(keys, bk, g, { e, s: s0, title })));  const K = UI.trk || 'spesa', cm = new Map(), tot = K === 'spesa' ? s0 : e;
   for (const r of rows) if (r.k === K) cm.set(r.cat || 'Senza categoria', (cm.get(r.cat || 'Senza categoria') || 0) + r.amt);
   const cats = [...cm.entries()].sort((a, b) => b[1] - a[1]), mx = cats.length ? cats[0][1] : 1;
   const sec = h('section', { class: 'card' }, h('h2', null, K === 'spesa' ? 'Dove vanno i soldi' : 'Da dove arrivano'), h('div', { class: 'chips' }, [['spesa', 'Spese'], ['entrata', 'Guadagni']].map(([k, l]) => h('button', { type: 'button', class: 'chip', 'aria-pressed': K === k ? 'true' : 'false', onclick: () => { UI.trk = k; render(); } }, l))));
+  if (cats.length) sec.append(donut(cats, K === 'spesa' ? 'Spese' : 'Guadagni', true, lab => { if (lab === 'Altro' && !cm.has('Altro')) { talk({ kind: title, title: 'Altre categorie', rows: cats.slice(7).map(([c, v]) => [c, v]), rowsTitle: 'Le più piccole', say: 'Le categorie che non stanno nella ciambella.' }); } else trCatTalk(K, lab, rows, cm.get(lab) || 0, tot, title); }));
   const qi = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca una categoria…', autocomplete: 'off', 'aria-label': 'Cerca una categoria' }), list = h('div', { class: 'tr-cats' });
   const fillC = () => { const toks = normT(qi.value).split(' ').filter(Boolean), L = toks.length ? cats.filter(([c]) => toks.every(x => normT(c).includes(x))) : cats;
-    list.replaceChildren(...L.map(([c, v]) => h('button', { type: 'button', class: 'tr-cat', onclick: () => trCatTalk(K, c, rows, v, tot, title) }, h('span', { class: 'tr-cn' }, c), h('span', { class: 'tr-cb' }, h('i', { style: 'width:' + Math.max(2, v / mx * 100) + '%' })), h('span', { class: 'tr-cv' }, eur(v), h('small', null, tot > 0 ? Math.round(v / tot * 100) + '%' : ''))))); if (!L.length) list.append(h('p', { class: 'muted' }, cats.length ? 'Nessuna categoria corrisponde.' : 'Niente in questo periodo.')); };
+    list.replaceChildren(...L.map(([c, v]) => h('button', { type: 'button', class: 'tr-cat', onclick: () => trCatTalk(K, c, rows, v, tot, title) }, h('span', { class: 'tr-cn' }, h('i', { class: 'tr-dot', style: 'background:' + (cats.findIndex(x => x[0] === c) < 7 ? PALETTE[cats.findIndex(x => x[0] === c) % PALETTE.length] : OTHER) }), c), h('span', { class: 'tr-cb' }, h('i', { style: 'width:' + Math.max(2, v / mx * 100) + '%' })), h('span', { class: 'tr-cv' }, eur(v), h('small', null, tot > 0 ? Math.round(v / tot * 100) + '%' : ''))))); if (!L.length) list.append(h('p', { class: 'muted' }, cats.length ? 'Nessuna categoria corrisponde.' : 'Niente in questo periodo.')); };
   qi.addEventListener('input', fillC); fillC(); if (cats.length > 8) sec.append(qi); sec.append(list); el.append(sec);
   return el;
 }
-function trBars(keys, bk, byMonth) {          // due barre (guadagni verdi, spese rosse) per ogni giorno o mese
-  const W = 340, H = 150, pad = 18, mx = Math.max(1, ...keys.map(k => Math.max((bk.get(k) || { e: 0 }).e, (bk.get(k) || { s: 0 }).s))), bw = (W - 8) / keys.length, svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'tr-chart', role: 'img', 'aria-label': 'Guadagni e spese nel periodo' });
-  const every = keys.length > 24 ? Math.ceil(keys.length / 12) : 1;
-  keys.forEach((k, i) => { const o = bk.get(k) || { e: 0, s: 0 }, x = 4 + i * bw, he = o.e / mx * (H - pad - 4), hs = o.s / mx * (H - pad - 4), g = s('g', { class: 'tr-g', tabindex: '0', role: 'button', 'aria-label': (byMonth ? trCap(trMonthName(k)) : trDayName(k)) + ': guadagni ' + eur(o.e) + ', spese ' + eur(o.s) });
-    g.append(s('rect', { x: x + 0.5, y: 0, width: Math.max(bw - 1, 1), height: H - pad, fill: 'transparent' }), s('rect', { x: x + 1, y: H - pad - he, width: Math.max(bw / 2 - 1.5, 1), height: Math.max(he, o.e > 0 ? 1 : 0), class: 'tr-be', rx: 1 }), s('rect', { x: x + bw / 2, y: H - pad - hs, width: Math.max(bw / 2 - 1.5, 1), height: Math.max(hs, o.s > 0 ? 1 : 0), class: 'tr-bs', rx: 1 }));
-    if (i % every === 0) g.append(s('text', { x: x + bw / 2, y: H - 4, 'text-anchor': 'middle', 'font-size': 9, fill: 'currentColor', opacity: .6 }, byMonth ? new Date(k + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }) : k.slice(8, 10)));
-    const go = () => talk({ kind: byMonth ? trCap(trMonthName(k)) : trDayName(k), title: 'Guadagni e spese', value: seur(o.e - o.s), say: 'Guadagni ' + eur(o.e, true) + ' · spese ' + eur(o.s, true) + '.', tip: byMonth ? 'Per vedere le singole voci apri il Calendario su questo mese.' : null, acts: byMonth ? [['Apri il mese', () => { UI.trv = 'cal'; UI.trm = k; UI.trd = null; render(); window.scrollTo(0, 0); }]] : [['Apri il giorno', () => { UI.trv = 'cal'; UI.trm = k.slice(0, 7); UI.trd = k; render(); window.scrollTo(0, 0); }]] });
-    g.addEventListener('click', go); g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } }); svg.append(g); });
-  return h('div', { class: 'tr-chartw' }, svg);
-}
-function trCatTalk(K, cat, rows, v, tot, title) {
+function trBars(keys, bk, g, tot) {          // grafico a barre moderno: griglia leggera, barre arrotondate con sfumatura, tocco = lettura sopra il grafico
+  const W = 360, H = 196, L = 34, T = 10, B = 24, n = keys.length, sw = (W - L - 6) / n, bw = Math.max(3, Math.min(15, sw * 0.38)), val = k => bk.get(k) || { e: 0, s: 0 };
+  const fine = g === 'd' || g === 'w', mx0 = Math.max(1, ...keys.map(k => fine ? val(k).s : Math.max(val(k).e, val(k).s))), mag = Math.pow(10, Math.floor(Math.log10(mx0 / 3))), st = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v * 3 >= mx0) || mag * 10, top = st * 3, Y = v => T + (H - T - B) * (1 - v / top);
+  const kf = v => v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0).replace('.', ',') + 'k' : String(Math.round(v));
+  const lab = k => g === 'd' ? trDayName(k) : g === 'w' ? 'Settimana dal ' + fmtDate(k) : g === 'm' ? trCap(trMonthName(k)) : k, short = k => g === 'd' ? k.slice(8, 10) : g === 'w' ? k.slice(8, 10) + '/' + k.slice(5, 7) : g === 'm' ? new Date(k + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }).replace('.', '') : k;
+  const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'tr-chart', role: 'img', 'aria-label': 'Guadagni e spese nel periodo' });
+  svg.append(s('defs', null, s('linearGradient', { id: 'trge', x1: 0, y1: 0, x2: 0, y2: 1 }, s('stop', { offset: '0%', style: 'stop-color:var(--gain,#30d158)' }), s('stop', { offset: '100%', style: 'stop-color:var(--gain,#30d158);stop-opacity:.55' })), s('linearGradient', { id: 'trgs', x1: 0, y1: 0, x2: 0, y2: 1 }, s('stop', { offset: '0%', style: 'stop-color:var(--loss,#ff453a)' }), s('stop', { offset: '100%', style: 'stop-color:var(--loss,#ff453a);stop-opacity:.55' }))));
+  for (let i = 0; i <= 3; i++) { const y = Y(i * st); svg.append(s('line', { x1: L, x2: W - 4, y1: y, y2: y, class: i ? 'tr-grid' : 'tr-axis' }), s('text', { x: L - 6, y: y + 3.5, 'text-anchor': 'end', class: 'tr-yl' }, kf(i * st))); }
+  const every = n > 14 ? Math.ceil(n / 8) : 1, ro = h('div', { class: 'tr-ro' }), groups = [];
+  const show = k => { const o = k == null ? null : val(k); groups.forEach((x, j) => x.classList.toggle('dim', k != null && keys[j] !== k)); ro.replaceChildren(h('div', { class: 'tr-rt' }, k == null ? tot.title : lab(k)), h('div', { class: 'tr-rv' }, h('span', { class: 'in' }, '+' + eur(o ? o.e : tot.e)), h('span', { class: 'out' }, '−' + eur(o ? o.s : tot.s)), h('span', { class: 'net' }, seur((o ? o.e - o.s : tot.e - tot.s)))), k != null ? btn('Dettagli', () => det(k), 'sm') : h('span', { class: 'muted', style: 'font-size:12px' }, 'Tocca una barra'));  };
+  const det = k => { const o = val(k); talk({ kind: lab(k), title: 'Guadagni e spese', value: seur(o.e - o.s), num: o.e - o.s, fmt: seur, say: 'Guadagni ' + eur(o.e, true) + ' · spese ' + eur(o.s, true) + '.', acts: g === 'm' ? [['Apri il mese', () => { UI.trv = 'cal'; UI.trm = k; UI.trd = null; render(); window.scrollTo(0, 0); }]] : g === 'd' ? [['Apri il giorno', () => { UI.trv = 'cal'; UI.trm = k.slice(0, 7); UI.trd = k; render(); window.scrollTo(0, 0); }]] : g === 'w' ? [['Apri il calendario', () => { UI.trv = 'cal'; UI.trm = k.slice(0, 7); UI.trd = k; render(); window.scrollTo(0, 0); }]] : null }); };
+  let sel = null;
+  keys.forEach((k, i) => {
+    const o = val(k), x = L + i * sw + sw / 2, he = (H - T - B) * o.e / top, hs = (H - T - B) * o.s / top, gp = s('g', { class: 'tr-g', tabindex: '0', role: 'button', 'aria-label': lab(k) + ': guadagni ' + eur(o.e) + ', spese ' + eur(o.s), style: '--i:' + i });
+    gp.append(s('rect', { x: x - sw / 2, y: T, width: sw, height: H - T - B, fill: 'transparent' }));
+    if (fine && o.e > 0) gp.append(s('circle', { class: 'tr-in', cx: x, cy: T + 6, r: 4 }));
+    if (!fine && o.e > 0) gp.append(s('rect', { class: 'tr-bar', x: x - bw - 1, y: H - B - Math.max(he, 2), width: bw, height: Math.max(he, 2), rx: Math.min(4, bw / 2), fill: 'url(#trge)' }));
+    if (o.s > 0) gp.append(s('rect', { class: 'tr-bar', x: fine ? x - bw / 2 : x + 1, y: H - B - Math.max(hs, 2), width: bw, height: Math.max(hs, 2), rx: Math.min(4, bw / 2), fill: 'url(#trgs)' }));
+    if (i % every === 0) gp.append(s('text', { x, y: H - 7, 'text-anchor': 'middle', class: 'tr-xl' }, short(k)));
+    const pick = () => { sel = sel === k ? null : k; show(sel); };
+    gp.addEventListener('click', pick); gp.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(); } });
+    svg.append(gp); groups.push(gp);
+  });
+  show(null); return h('div', { class: 'tr-chartw' }, ro, svg);
+}function trCatTalk(K, cat, rows, v, tot, title) {
   const R = rows.filter(r => r.k === K && (r.cat || 'Senza categoria') === cat), sm = new Map(), nm = new Map();
   for (const r of R) { sm.set(r.sub || 'Senza sotto-categoria', (sm.get(r.sub || 'Senza sotto-categoria') || 0) + r.amt); if (r.note) nm.set(r.note, (nm.get(r.note) || 0) + r.amt); }
   const subs = [...sm.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10), notes = [...nm.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);

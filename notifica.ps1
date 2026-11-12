@@ -76,6 +76,9 @@ $pf = Join-Path (Split-Path $Sito -Parent) 'promemoria-pac.json'; if (-not (Test
 $oggiPac = $false
 if (Test-Path $pf) { try { $pc = Get-Content $pf -Raw | ConvertFrom-Json; $dow = if ([int]$roma.DayOfWeek -eq 0) { 7 } else { [int]$roma.DayOfWeek }; $oggiPac = (@($pc.giorni) -contains $roma.Day) -or (@($pc.settimanale) -contains $dow) -or ($pc.trimestrale -and (@($pc.trimestrale.mesi) -contains $roma.Month) -and $roma.Day -eq [int]$pc.trimestrale.giorno) } catch { } }
 if ($oggiPac -and $Momento -eq 'sera') { $righe.Insert(0, 'Oggi ci sono acquisti programmati (PAC): quando sono stati eseguiti apri l''app, ti chiede di confermarli con Si o No.') }
+# la sera: promemoria delle spese di oggi (le transazioni sono cifrate nell'app: non so se le hai gia' segnate, quindi lo chiedo ogni sera)
+$spese = ($Momento -eq 'sera')
+if ($spese) { $righe.Insert(0, 'Hai segnato le spese di oggi? Apri la scheda Spese: con "come le altre volte" basta un tocco.') }
 
 # articoli: 1-2 di ricerca (professori, banche centrali), 1 dagli Stati Uniti, 1 dall'Europa; i piu' recenti, con la fonte
 function Pick($fonti, $re, $n) {
@@ -99,7 +102,7 @@ $azioni = @(); foreach ($s in ($sel | Select-Object -First 3)) { $azioni += [ord
 $titolo = if ($promemoria) { 'Promemoria del mese e recap della ' + $Momento } elseif ($trim) { 'Promemoria trimestrale e recap della ' + $Momento } elseif ($forti.Count) { 'Movimenti forti - recap della ' + $Momento } else { 'Recap della ' + $Momento + ' - mercati e articoli' }
 $msg = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = $titolo; message = $testo; tags = @($(if ($forti.Count) { 'warning' } elseif ($promemoria -or $trim) { 'calendar' } else { 'chart_with_upwards_trend' })) }
 if ($forti.Count -or $promemoria -or $trim) { $msg['priority'] = 4 }
-if ($sito) { $msg['click'] = $sito + $(if ($oggiPac) { '#pac' } else { '' }) }          # nei giorni dei PAC la notifica apre la scheda PAC
+if ($sito) { $msg['click'] = $sito + $(if ($oggiPac) { '#pac' } elseif ($spese) { '#transazioni' } else { '' }) }          # nei giorni dei PAC la notifica apre la scheda PAC
 if ($azioni.Count) { $msg['actions'] = $azioni }
 $json = ToJson $msg
 if ($SoloProva) { $json; return }
