@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fOX2HrjuDcLviMYqyvMhLcv9HgYwA73FXkaMTxnOtQU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-21B7/6OEEFBP44plpQlcc/NUuVNWNRqCDk/jI/krAQ0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1479,7 +1479,7 @@ function editAccount(a) {
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
     { key: 'type', label: 'Tipo', type: 'select', options: Object.entries(TYPES).map(([k, t]) => [k, t.label]), ...(isNew ? { sync: i => { i.perf.checked = TYPES[i.type.value].perf; } } : {}) },
     { key: 'perf', label: 'Includi nel calcolo di guadagno e rendimento', type: 'check', hint: 'sì per broker, crypto, pensione, trading; no per conti correnti e carte' },
-    { key: 'cash', label: 'Liquidità nel conto', type: 'number' },
+    { key: 'cash', label: 'Liquidità nel conto', type: 'number', ...(a && dogsLinkOf(a) ? { hint: '🔗 Collegato a DOGsitterini: alla prossima apertura questo saldo torna uguale a quello di DOGsitterini.' } : {}) },
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
     { key: 'note', label: 'Note' },
     { key: 'freq', label: 'Ogni quanto lo aggiorni', type: 'select', options: [['', 'Non serve un promemoria'], ['mese', 'Ogni mese'], ['trimestre', 'Ogni 3 mesi']], hint: 'Passato quel tempo, in Panoramica compare "Da aggiornare".' },
@@ -3797,7 +3797,7 @@ function render() {
   }
 }
 window.addEventListener('hashchange', () => { const k = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash]; if (k && S && !LOCKED) { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } });          // i collegamenti delle notifiche (sito/#pac) aprono la scheda giusta
-function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); if (S && S.settings && S.settings.theme) applyTheme(S.settings.theme); UI.tab = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash] || 'panoramica'; UI.acc = null; UI.planId = null; UI.sub = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); loadOnlineData(); }
+function enter() { setTimeout(() => { if (S && KEY && !DEMO && !FH && !LOCKED && backupDays() >= 7 && !(CLOUD_ON() && CL.code)) save(true); }, 4000); if (CLOUD_ON() && !DEMO && !CL.ready) setTimeout(() => clAttach(), 300); snapSoon(8000); askDueSoon(); if (S && S.settings && S.settings.theme) applyTheme(S.settings.theme); UI.tab = ({ '#pac': 'pac', '#consigli': 'consigli', '#grafici': 'grafici', '#analisi': 'analisi', '#grandi': 'grandi' })[location.hash] || 'panoramica'; UI.acc = null; UI.planId = null; UI.sub = null; UI.shock = null; lastActivity = Date.now(); LOCKED = false; LASTVIEW = ''; NUMS.clear(); render(); checkOnlinePrices(); dogsSync(false); loadOnlineData(); }
 async function forgetLocal() {
   if (!confirm('Cancello la copia salvata su questo dispositivo? I dati restano soltanto nei file di copia che hai salvato: se non ne hai, vanno persi.')) return;
   try { await locDel(); } catch (e) { alert('Non sono riuscito a cancellarla: ' + (e.message || e)); return; }
@@ -4252,7 +4252,7 @@ function viewAccount(id) {
   const a = S.accounts.find(x => x.id === id); if (!a) { UI.acc = null; return tabConti(); }
   const pf = perfOf([a]), el = h('div');
   el.append(h('div', null, btn('← Tutti i conti', () => { UI.acc = null; render(); })), h('h2', { class: 'acc-h' }, a.name), h('div', { class: 'acc-acts' }, btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger')),
-    h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '')));
+    h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '') + (dogsLinkOf(a) ? ' · 🔗 collegato a DOGsitterini (saldo ' + dogsLinkOf(a) + '): non scriverlo a mano, viene riallineato a ogni apertura' : '')));
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
   if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
@@ -4370,6 +4370,7 @@ function autoCard() {
   const el = h('div');
   el.append(themeCard());
   if (!DEMO) el.append(aiCard());
+  if (!DEMO) el.append(dogsCard());
   { const ac = autoCard(); if (ac) el.append(ac); }
   const ccys = [...new Set([...Object.keys(S.fx), ...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)].filter(c => c && c !== 'EUR'))];
   el.append(h('section', { class: 'card' }, h('h2', null, 'Tassi di cambio'), h('p', { class: 'muted' }, 'Quanti euro vale 1 unità della valuta. Si aggiornano a mano.'),
@@ -4678,6 +4679,67 @@ function aiCard() {
     h('label', { class: 'fld' }, h('span', null, 'Chiave AI'), h('input', { type: 'password', id: 'aikey', value: key, placeholder: 'incolla qui la chiave', autocomplete: 'off', onchange: e => { S.settings.aiKey = e.target.value.trim(); done(); } })),
     h('div', { class: 'row' }, btn('Salva chiave', () => { const v = ((document.getElementById('aikey') || {}).value || '').trim(); if (!v) { alert('Incolla prima la chiave nel campo.'); return; } S.settings.aiKey = v; done(); setStatus('Chiave AI salvata'); }, 'pri sm'), h('span', { class: 'muted' }, key ? '✓ Chiave salvata (resta nei tuoi dati cifrati)' : 'Nessuna chiave salvata')),
     h('div', { class: 'row' }, key ? btn('Leggi le operazioni da uno screenshot…', aiOpsStart, 'pri') : null, key ? btn('Leggi i saldi da uno screenshot…', aiScreenshot) : null, key ? btn('Togli la chiave', () => { delete S.settings.aiKey; done(); }) : null));
+}
+/* ============ collegamento a DOGsitterini: SOLO lettura di due saldi (Contanti, Revolut) ============ */
+/* DOGsitterini comanda, questa app non scrive mai li'. Il segreto sta in S.settings.dogs.secret (archivio cifrato), mai nel codice. */
+const DOGS_HOST = 'https://dogsitterini.vercel.app';
+const DOGS_OLD_DAYS = 3;          // se l'ultimo salvataggio dei dati di DOGsitterini e' piu' vecchio di cosi', si avvisa
+let DOGS_BUSY = false, DOGS_LAST = null, DOGS_AT = 0;
+const dogsCfg = () => (S && S.settings ? (S.settings.dogs = S.settings.dogs || {}) : {});
+const dogsLinkOf = a => { const c = S && S.settings && S.settings.dogs; return c ? (c.contAcc === a.id ? 'Contanti' : c.revAcc === a.id ? 'Revolut' : '') : ''; };
+const dogsReady = () => { const c = dogsCfg(); return !!(c.secret && (c.contAcc || c.revAcc)); };
+const dogsEur = n => (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' €';          // sempre con i centesimi e mai nascosto
+const dogsTime = iso => { const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+function dogsAlign(acc, target, label) {          // porta il conto al saldo di DOGsitterini con un'operazione Guadagno/Perdita: annullabile da Conti > Operazioni
+  if (!acc) return label + ': conto non trovato (ricollegalo).';
+  if (acc.positions.length || acc.dep) return label + ': il conto "' + acc.name + '" ha titoli o e\' un deposito, non lo tocco.';
+  const cur = accCash(acc), delta = Math.round((target - cur) * 100) / 100;
+  if (Math.abs(delta) < 0.005) return null;
+  const m = applyOp({ accId: acc.id, kind: delta > 0 ? 'guadagno' : 'perdita', date: today(), amount: Math.abs(delta), note: 'Allineato al saldo di DOGsitterini (' + label + '): era ' + dogsEur(cur) + ', ora ' + dogsEur(target) });
+  return m ? label + ': ' + m : { label, old: cur, nu: target, delta };
+}
+async function dogsSync(manual) {
+  const c = dogsCfg(); if (!S || DEMO && !manual) return;
+  if (DOGS_BUSY) return; if (!dogsReady()) { if (manual) toastMsg('Prima inserisci il segreto e scegli almeno un conto (Dati e sicurezza).'); return; }
+  if (!manual && Date.now() - DOGS_AT < 10 * 60000) return;
+  DOGS_BUSY = true; DOGS_AT = Date.now(); if (manual) toastMsg('Chiedo i saldi a DOGsitterini…', 20000);
+  let msg = '', ok = false, data = null;
+  try {
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 12000);
+    let r; try { r = await fetch(DOGS_HOST + '/api/siri-departure?azione=saldi', { headers: { 'x-finanze-secret': c.secret }, cache: 'no-store', signal: ac.signal }); } finally { clearTimeout(to); }
+    if (r.status === 401) msg = 'Il segreto non e\' giusto: ricontrollalo in Dati e sicurezza.';
+    else if (r.status === 503) msg = 'DOGsitterini non ha ancora il segreto configurato (503).';
+    else if (!r.ok) msg = 'DOGsitterini ha risposto con errore ' + r.status + '.';
+    else { data = await r.json(); ok = true; }
+  } catch (e) { msg = e && e.name === 'AbortError' ? 'DOGsitterini non risponde (tempo scaduto).' : 'Non riesco a collegarmi a DOGsitterini (rete?).'; }
+  DOGS_BUSY = false;
+  if (!ok) { DOGS_LAST = { at: new Date().toISOString(), err: msg }; if (manual) toastMsg(msg, 7000); if (UI.tab === 'dati') render(); return; }
+  const num = v => typeof v === 'number' && isFinite(v) ? v : null, cont = num(data.contanti), rev = num(data.revolut), changes = [], notes = [];
+  for (const [id, val, label] of [[c.contAcc, cont, 'Contanti'], [c.revAcc, rev, 'Revolut']]) {
+    if (!id) continue;
+    if (val === null) { notes.push(label + ': DOGsitterini non ha un saldo iniziale, conto non toccato.'); continue; }          // mai trattare "senza saldo" come zero
+    const res = dogsAlign(S.accounts.find(x => x.id === id), val, label);
+    if (typeof res === 'string') notes.push(res); else if (res) changes.push(res);
+  }
+  const old = data.datiAl && (Date.now() - new Date(data.datiAl).getTime()) > DOGS_OLD_DAYS * 86400000;
+  if (!data.datiAl) notes.push('Non so quando sono stati salvati i dati di DOGsitterini.'); else if (old) notes.push('Attenzione: i dati di DOGsitterini sono fermi al ' + dogsTime(data.datiAl) + ' (apri DOGsitterini per aggiornarli).');
+  const txt = changes.length ? changes.map(x => x.label + ' ' + dogsEur(x.old) + ' → ' + dogsEur(x.nu) + ' (' + (x.delta > 0 ? '+' : '') + dogsEur(x.delta) + ')').join(' · ') : 'Saldi già uguali a DOGsitterini.';
+  DOGS_LAST = { at: new Date().toISOString(), datiAl: data.datiAl || null, txt, notes };
+  if (changes.length || manual) { c.last = { at: DOGS_LAST.at, datiAl: DOGS_LAST.datiAl, txt, notes }; done(); } else if (UI.tab === 'dati') render();
+  if (manual || changes.length) toastMsg('DOGsitterini: ' + txt + (notes.length ? ' ' + notes[0] : ''), 9000);
+}
+function dogsCard() {
+  const c = dogsCfg(), last = DOGS_LAST || c.last, cand = S.accounts.filter(a => !a.positions.length && !a.dep);
+  const pick = (key, lbl, other) => h('label', { class: 'fld' }, h('span', null, lbl), h('select', { onchange: e => { const v = e.target.value; if (v && v === c[other]) { alert('Un conto non può prendere due saldi diversi.'); e.target.value = c[key] || ''; return; } c[key] = v; done(); } },
+    [h('option', { value: '' }, '— nessuno —')].concat(cand.map(a => h('option', { value: a.id, selected: c[key] === a.id }, a.name)))));
+  return h('section', { class: 'card' }, h('h2', null, 'Collegamento a DOGsitterini'),
+    h('p', { class: 'muted' }, 'Questa app legge da DOGsitterini SOLO due saldi (Contanti e Revolut) e li porta sui due conti che scegli qui sotto. Non scrive mai in DOGsitterini e non legge i movimenti. Ogni aggiornamento è un\'operazione "Guadagno/Perdita" che puoi annullare da Conti → Operazioni.'),
+    h('label', { class: 'fld' }, h('span', null, 'Segreto di DOGsitterini'), h('input', { type: 'password', id: 'dogsecret', value: c.secret || '', placeholder: 'incollalo qui (resta solo nei tuoi dati cifrati)', autocomplete: 'off' })),
+    h('div', { class: 'row' }, btn('Salva segreto', () => { const v = ((document.getElementById('dogsecret') || {}).value || '').trim(); if (!v) { alert('Incolla prima il segreto nel campo.'); return; } c.secret = v; DOGS_AT = 0; done(); setStatus('Segreto salvato'); }, 'pri sm'), h('span', { class: 'muted' }, c.secret ? '✓ Segreto salvato' : 'Nessun segreto salvato')),
+    pick('contAcc', 'Conto che prende il saldo Contanti (cassa cani contanti)', 'revAcc'), pick('revAcc', 'Conto che prende il saldo Revolut (Revolut risparmi)', 'contAcc'),
+    h('p', { class: 'muted' }, 'I conti collegati si riallineano a DOGsitterini a ogni apertura: se scrivi a mano un saldo diverso, viene sovrascritto. Si vedono solo conti senza titoli.'),
+    h('div', { class: 'row' }, btn('Aggiorna ora', () => { DOGS_AT = 0; dogsSync(true); }, 'pri'), c.secret || c.contAcc || c.revAcc ? btn('Togli il collegamento', () => { if (!confirm('Tolgo il collegamento e il segreto? I conti restano com\'erano.')) return; S.settings.dogs = {}; DOGS_LAST = null; done(); }) : null),
+    last ? h('p', { class: 'muted' }, last.err ? 'Ultimo tentativo ' + dogsTime(last.at) + ': ' + last.err : 'Ultimo aggiornamento: ' + dogsTime(last.at) + ' · dati di DOGsitterini del ' + (last.datiAl ? dogsTime(last.datiAl) : '—') + ' · ' + (last.txt || '') + ((last.notes || []).length ? ' ⚠ ' + last.notes.join(' ') : '')) : h('p', { class: 'muted' }, 'Ancora nessun aggiornamento.'));
 }
 /* ============ operazioni da uno screenshot (AI): si controlla riga per riga prima di registrare ============ */
 function aiOpsStart() {
