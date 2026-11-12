@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-E3LkqB5vGhiwHKa+1K+kVstRGbDEGRT2Oopk4wuSgyQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gbGrq62T1sIfl2FdW4lLDUKniOKPa/4SB9QqwcOw464='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -222,7 +222,7 @@ dialog.wz{max-width:520px;padding:18px 18px 16px}
 .pl-a{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
 .pl-r .pill{font-size:12px;padding:1px 8px}
 .pacfil{margin-top:10px}.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.pf-row .fld{margin:0}.pf-sel select{width:100%}
-.wz-res{display:grid;gap:8px}
+.wz-res{display:grid;gap:8px;max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:2px 2px 6px}
 .wz-chip{padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 8%,transparent);display:grid;gap:2px}
 .wz-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .wz-tabs{margin-top:2px}
@@ -977,7 +977,7 @@ async function autoRestore(id) {
   migrate(D); await autoPoint(true);          // prima di tornare indietro si salva com'e' adesso: si puo' sempre tornare avanti
   S = D; UI.acc = null; UI.planId = null; touch(); render(); setStatus('Ripristinato il salvataggio automatico'); return '';
 }
-setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
+setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (ACC_DAY !== today()) { ACC_DAY = today(); if (accrueInterest()) render(); } if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
 async function seal() {
   S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
@@ -1571,7 +1571,7 @@ const done = () => { touch(); render(); if (PAC_UI) PAC_UI(); undoToast(); };
 
 /* ============ modifiche ai dati ============ */
 function editAccount(a) {
-  const isNew = !a, v = a ? Object.assign({ freq: '', box: '' }, a, { estero: a.estero === true ? 'si' : a.estero === false ? 'no' : '', regime: a.regime || '', prefund: a.prefund === true ? 'si' : a.prefund === false ? 'no' : '' }, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }) : { name: '', type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26, estero: '', regime: '', box: '' };
+  const isNew = !a, v = a ? Object.assign({ freq: '', box: '' }, a, { estero: a.estero === true ? 'si' : a.estero === false ? 'no' : '', regime: a.regime || '', prefund: a.prefund === true ? 'si' : a.prefund === false ? 'no' : '' }, a.dep ? { dpP: a.dep.principal, dpR: a.dep.rate, dpS: a.dep.start, dpE: a.dep.end, dpT: a.dep.taxPct } : { dpT: 26 }, { intR: a.intRate ?? '', intT: a.intTax ?? 0 }) : { name: '', intT: 0, type: 'broker', perf: true, cash: 0, cashCcy: 'EUR', note: '', dpT: 26, estero: '', regime: '', box: '' };
   const boxes = [...new Set(S.accounts.map(x => x.box).filter(Boolean))];
   form(isNew ? 'Nuovo conto' : 'Modifica conto', [
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
@@ -1579,6 +1579,8 @@ function editAccount(a) {
     { key: 'perf', label: 'Includi nel calcolo di guadagno e rendimento', type: 'check', hint: 'sì per broker, crypto, pensione, trading; no per conti correnti e carte' },
     { key: 'cash', label: 'Liquidità nel conto', type: 'number', ...(a && dogsLinkOf(a) ? { hint: '🔗 Collegato a DOGsitterini: alla prossima apertura questo saldo torna uguale a quello di DOGsitterini.' } : {}) },
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
+    { key: 'intR', label: 'Interesse annuo sulla liquidità (%)', type: 'number', hint: 'Per i conti di risparmio senza vincoli (es. Revolut risparmi cani, 2,5%): ogni giorno aggiungo alla liquidità l\'interesse di quel giorno sul saldo che hai. Lascia vuoto se non serve.' },
+    { key: 'intT', label: 'Imposta sugli interessi (%)', type: 'number', hint: '0 se gli interessi ti arrivano già netti; 26 se vanno tassati.' },
     { key: 'note', label: 'Note' },
     { key: 'freq', label: 'Ogni quanto lo aggiorni', type: 'select', options: [['', 'Non serve un promemoria'], ['mese', 'Ogni mese'], ['trimestre', 'Ogni 3 mesi']], hint: 'Passato quel tempo, in Panoramica compare "Da aggiornare".' },
     { key: 'box', label: 'Cassa separata (facoltativa)', list: 'dl-box', ph: 'es. Cassa cani', hint: 'Soldi che non sono "tuoi" da investire: i conti con la stessa cassa si vedono insieme in Panoramica e non contano nel ribilanciamento.' },
@@ -1594,8 +1596,8 @@ function editAccount(a) {
     if (!o.name) return 'Inserisci un nome.';
     let dep = null;
     if (o.type === 'deposito') { if (!(o.dpP > 0) || !o.dpS) return 'Per un conto deposito indica capitale e data di inizio.'; dep = { principal: o.dpP, rate: o.dpR || 0, start: o.dpS, end: o.dpE || '', taxPct: o.dpT ?? 26 }; }
-    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep, freq: o.freq || '', box: (o.box || '').trim(), estero: o.estero === 'si' ? true : o.estero === 'no' ? false : undefined, regime: o.regime || undefined, prefund: o.prefund === 'si' ? true : o.prefund === 'no' ? false : undefined };
-    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], upd: today(), ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else { if (!dep && d.cash !== a.cash) a.upd = today(); Object.assign(a, d); }
+    const d = { name: o.name, type: o.type, perf: o.perf, cash: dep ? 0 : (o.cash || 0), cashCcy: normCcy(o.cashCcy), note: o.note, dep, freq: o.freq || '', box: (o.box || '').trim(), intRate: o.intR > 0 && !dep ? o.intR : undefined, intTax: o.intR > 0 && !dep ? (o.intT || 0) : undefined, estero: o.estero === 'si' ? true : o.estero === 'no' ? false : undefined, regime: o.regime || undefined, prefund: o.prefund === 'si' ? true : o.prefund === 'no' ? false : undefined };
+    if (isNew) { const n = { id: uid(), positions: [], flows: [], imports: [], upd: today(), intLast: d.intRate ? today() : undefined, ...d }; if (dep) n.flows.push({ id: uid(), date: dep.start, type: 'partenza', amount: dep.principal, note: 'Capitale iniziale' }); S.accounts.push(n); UI.acc = n.id; UI.tab = 'conti'; } else { if (!dep && d.cash !== a.cash) a.upd = today(); if (d.intRate && !(a.intRate > 0)) d.intLast = today(); if (!d.intRate) d.intLast = undefined; Object.assign(a, d); }
     done();
   }, h('span', null, ccyList(), h('datalist', { id: 'dl-box' }, boxes.concat(boxes.includes('Cassa cani') ? [] : ['Cassa cani']).map(b => h('option', { value: b })))));
 }
@@ -3886,7 +3888,25 @@ window.addEventListener('resize', () => { const nav = $app.querySelector('.tabs'
   window.addEventListener('orientationchange', repin);
   if (window.visualViewport) { visualViewport.addEventListener('resize', repin); }
 })();
+let ACC_DAY = '';
+function accrueInterest() {          // conti di risparmio senza vincoli: ogni giorno trascorso si aggiunge alla liquidita' l'interesse di quel giorno (tasso annuo / 365, sul saldo di quel momento, al netto dell'imposta)
+  if (!S || DEMO || LOCKED) return false; const t = today(); let any = false;
+  for (const a of S.accounts) {
+    if (!(a.intRate > 0) || a.dep) continue;
+    if (!a.intLast) { a.intLast = t; any = true; continue; }
+    const days = Math.min(Math.round((dayMs(t) - dayMs(a.intLast)) / 864e5), 800); if (days <= 0) continue;
+    const r = a.intRate / 100 / 365 * (1 - (a.intTax || 0) / 100); let bal = a.cash || 0; const b0 = bal; a.intM = a.intM || {};
+    for (let i = 0; i < days; i++) { const ym = isoOf(dayMs(a.intLast) + i * 864e5).slice(0, 7), x = bal > 0 ? bal * r : 0; bal += x; a.intM[ym] = (a.intM[ym] || 0) + x; }
+    a.cash = Math.round(bal * 1e6) / 1e6; a.intTot = (a.intTot || 0) + (bal - b0); a.intLast = t; a.upd = t; any = true;
+  }
+  if (any) touch(); return any;
+}
+function intLine(a) {          // nella pagina del conto: quanto ha fruttato finora
+  const ym = today().slice(0, 7), m = (a.intM || {})[ym] || 0, perDay = Math.max(0, a.cash || 0) * a.intRate / 100 / 365 * (1 - (a.intTax || 0) / 100);
+  return h('p', { class: 'muted' }, 'Interesse ' + nfp.format(a.intRate) + '% annuo' + (a.intTax ? ' (al netto del ' + nfp.format(a.intTax) + '%)' : '') + ', calcolato ogni giorno sulla liquidità: finora ' + eur(a.intTot || 0, true) + ', questo mese ' + eur(m, true) + ', circa ' + eur(perDay, true) + ' al giorno.');
+}
 function syncLayout() {          // una volta sola: chi usava lo "stile Revolut" scuro tiene il suo aspetto, ora scelto in Aspetto
+  if (S && !LOCKED && ACC_DAY !== today()) { ACC_DAY = today(); accrueInterest(); }
   if (!S || LOCKED || !S.settings || S.settings.rvMig) return;
   S.settings.rvMig = 1;
   if (LAYOUT() !== 'classico') { const id = { nero: 'rv-nero', grafite: 'rv-grafite' }[RV_TONE()] || 'rv-scuro'; S.settings.theme = id; try { applyTheme(id); } catch (x) { /* tema di base */ } touch(); }
@@ -4444,7 +4464,18 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v11 (Satispay anche per Sati)';
+const APP_VER = '12/11/2026 · v13 (dog sitting separato dalle plusvalenze)';
+function swipeTab(dir) {          // scorri da destra a sinistra (o al contrario) per passare da una scheda all'altra
+  const mt = mainTabs(), cur = LAYOUT() === 'classico' ? mt.indexOf(UI.tab) : mt.indexOf(TAB_GROUP(UI.tab)), n = cur + dir;
+  if (cur < 0 || n < 0 || n >= mt.length) return;
+  Object.assign(UI, { tab: mt[n], acc: null, planId: null, sub: null, fondo: null }); render(); window.scrollTo(0, 0);
+}
+(function () {
+  let sx = 0, sy = 0, t0 = 0, ok = false;
+  const scrollsX = el => { for (let e = el; e && e !== document.body; e = e.parentElement) if (e.scrollWidth > e.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(e).overflowX)) return true; return false; };
+  document.addEventListener('touchstart', e => { const t = e.touches[0]; ok = e.touches.length === 1 && !!S && !LOCKED && !document.querySelector('dialog[open]') && !e.target.closest('input,textarea,select,svg,canvas,table,.tabs,[data-noswipe]') && !scrollsX(e.target); sx = t.clientX; sy = t.clientY; t0 = Date.now(); }, { passive: true });
+  document.addEventListener('touchend', e => { if (!ok) return; ok = false; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; if (Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6 || Date.now() - t0 > 700) return; swipeTab(dx < 0 ? 1 : -1); }, { passive: true });
+})();
 function tabsBar() { const mt = mainTabs(); return h('nav', { class: 'tabs', role: 'tablist', style: 'grid-template-columns:repeat(' + mt.length + ',1fr)' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), mt.map(k => [k, (TABS.find(t => t[0] === k) || [k, k])[1]]).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': (LAYOUT() === 'classico' ? UI.tab === k : TAB_GROUP(UI.tab) === k) ? 'true' : 'false', onclick: () => { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { plusvalenze: ['M3 17l6-6 4 4 8-8', 'M15 7h6v6'], investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
@@ -4607,16 +4638,18 @@ function tabInvestimenti() {
   return el;
 }
 /* ============ PLUSVALENZE E MINUSVALENZE REALIZZATE: quello che hai venduto (e non hai piu'), con il guadagno o la perdita di ogni operazione ============ */
+const isDogAcc = a => !!a && (/cani|\bdog/i.test(a.name || '') || /cani/i.test(a.box || ''));          // conti dei cani (Cassa cani, Revolut risparmi cani): i loro guadagni sono dog sitting, non plusvalenze
 function pvEntries() {
-  const out = [], unk = [];
+  const out = [], unk = [], dog = [];
   for (const o of OPS()) {
+    if (isDogAcc(S.accounts.find(x => x.id === o.accId))) { if (o.kind === 'guadagno' || o.kind === 'perdita' || o.kind === 'vendita') dog.push({ d: o.date, name: o.instName || accName(o.accId), acc: accName(o.accId), pnl: o.kind === 'vendita' ? (o.realized != null ? o.realized : (o.gross || 0) - (o.fee || 0)) : (o.kind === 'guadagno' ? 1 : -1) * (o.amount || 0), o, how: 'Dog sitting' }); continue; }
     if (o.kind === 'vendita') {
       const net = (o.gross || 0) - (o.fee || 0);
       if (o.realized != null) out.push({ d: o.date, name: o.instName || '—', acc: accName(o.accId), pnl: o.realized, cost: net - o.realized, proceeds: net, o, how: 'Venduto' });
       else unk.push(o);
     } else if (o.kind === 'guadagno' || o.kind === 'perdita') out.push({ d: o.date, name: o.instName || accName(o.accId), acc: accName(o.accId), pnl: (o.kind === 'guadagno' ? 1 : -1) * (o.amount || 0), cost: null, proceeds: null, o, how: o.kind === 'guadagno' ? 'Guadagno registrato' : 'Perdita registrata' });
   }
-  return { out, unk };
+  return { out, unk, dog };
 }
 const PV_PER = [['tutto', 'Sempre'], ['anno', 'Quest\'anno'], ['scorso', 'Anno scorso'], ['12m', '12 mesi']];
 function pvInRange(d, per) {
@@ -4627,7 +4660,7 @@ function talkPvGroup(g) {
   talk({ kind: 'Plusvalenze e minusvalenze', title: g.name, value: gl(g.pnl, seur(g.pnl)), num: g.pnl, say: (g.pnl >= 0 ? 'Con questo titolo hai guadagnato in tutto ' : 'Con questo titolo hai perso in tutto ') + eur(Math.abs(g.pnl)) + ' in ' + pl(g.items.length, 'operazione', 'operazioni') + (g.cost > 0 ? ' (' + spct(g.pnlK / g.cost) + ' sul costo di ' + eur(g.cost) + ').' : '.'), how: 'Per ogni vendita: incasso meno commissioni, meno il costo di carico delle quote vendute. Sono le cifre che contano per le tasse (Analisi → Tasse).', rows: g.items.slice().sort((x, y) => x.d < y.d ? 1 : -1).map(x => [fmtDate(x.d) + ' · ' + x.how, x.pnl, x.acc + (x.cost > 0 ? ' · ' + spct(x.pnl / x.cost) : ''), () => talkOp(x.o)]), rowsTitle: 'Le operazioni (tocca per i dettagli)', signed: true });
 }
 function tabPlusvalenze() {
-  const el = h('div', { class: 'rv-pv' }), { out, unk } = pvEntries();
+  const el = h('div', { class: 'rv-pv' }), { out, unk, dog } = pvEntries();
   const per = UI.pvPer || 'tutto', kind = UI.pvKind || 'tutte', grp = UI.pvGrp || 'op';
   const inR = out.filter(x => pvInRange(x.d, per)), plus = inR.filter(x => x.pnl > 0).reduce((t, x) => t + x.pnl, 0), minus = inR.filter(x => x.pnl < 0).reduce((t, x) => t + x.pnl, 0), tot = plus + minus;
   const chips = (list, cur, key) => h('div', { class: 'row', style: 'gap:6px;margin:6px 0' }, list.map(([k, l]) => btn(l, () => { UI[key] = k; render(); }, 'sm' + (cur === k ? ' pri' : ''))));
@@ -4654,6 +4687,8 @@ function tabPlusvalenze() {
   };
   q.addEventListener('input', () => { UI.pvQ = q.value; draw(); }); draw();
   el.append(h('div', { class: 'cq-row' }, q), list);
+  { const D = dog.filter(x => pvInRange(x.d, per)).sort((a, b) => a.d < b.d ? 1 : -1), dt = D.reduce((x, r) => x + r.pnl, 0);
+    if (D.length) el.append(h('div', { class: 'rv-sec' }, 'Guadagni da dog sitting · ' + seur(dt)), h('section', { class: 'card rv' }, rvHead('Non sono plusvalenze', null), ...D.slice(0, 100).map(x => rvRow(rvSvg(RV_DOG, 22), 'Dog sitting', fmtDate(x.d) + ' · ' + x.acc, gl(x.pnl, seur(x.pnl)), '', () => talkOp(x.o), 'rv-dog')))); }
   if (unk.length) el.append(h('p', { class: 'muted' }, pl(unk.length, 'vendita non è', 'vendite non sono') + ' nell\'elenco perché non conosco il costo di carico del titolo: senza quel dato non si può calcolare il guadagno. Lo inserisci da «Modifica posizione», oppure dimmelo e lo sistemo.'));
   el.append(h('p', { class: 'muted' }, 'Il risultato di ogni vendita è l\'incasso (meno le commissioni) meno il costo delle quote vendute; la percentuale è sul costo. Sono contate le operazioni registrate nell\'app, comprese «Guadagno» e «Perdita» dei conti di trading (oro XAUUSD, CFD). Le imposte stimate sono in Analisi → Tasse.'));
   return el;
@@ -4919,6 +4954,7 @@ function viewAccount(id) {
   const pf = perfOf([a]), el = h('div');
   el.append(...(LAYOUT() === 'classico' ? [h('div', null, btn('← Tutti i conti', () => { UI.acc = null; render(); })), h('h2', { class: 'acc-h' }, a.name), h('div', { class: 'acc-acts' }, btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger'))] : [rvAccHead(a)]),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '') + (dogsLinkOf(a) ? ' · 🔗 collegato a DOGsitterini (saldo ' + dogsLinkOf(a) + '): non scriverlo a mano, viene riallineato a ogni apertura' : '')));
+  if (a.intRate > 0 && !a.dep) el.append(intLine(a));
   const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
   if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
@@ -5535,7 +5571,7 @@ function opWizard(pre, after) {
       }
       const inp = h('input', { type: 'search', class: 'wz-search', placeholder: st.kind === 'vendita' ? 'Cerca tra i tuoi titoli' : 'Scrivi nome, ISIN o crypto (es. msci world, IE00B4L5Y983, bitcoin)', autocomplete: 'off', value: st.q, enterkeyhint: 'search', 'aria-label': 'Cerca il titolo' }), res = h('div', { class: 'wz-res' });
       const fill = () => {
-        res.replaceChildren(); st.q = inp.value; const list = opCands(inp.value, st.accId, st.kind), shown = list.slice(0, 7);
+        res.replaceChildren(); st.q = inp.value; const list = opCands(inp.value, st.accId, st.kind), shown = list.slice(0, 60);
         if (!inp.value.trim() && st.kind !== 'vendita') res.append(h('p', { class: 'muted' }, shown.length ? 'I tuoi titoli (o scrivi per cercare tra più di 13.000 strumenti):' : 'Scrivi il nome o l\'ISIN del titolo: ti suggerisco quelli che esistono.'));
         for (const c of shown) { const here = c.held.find(x => x.a.id === st.accId); res.append(h('button', { type: 'button', class: 'wz-opt cand', onclick: () => { st.c = c; st.price = null; st.nuovo = null; go(nextOf()); } },
           h('span', { class: 'wz-t' }, c.name, c.code ? h('small', null, ' · ' + c.code) : null),
