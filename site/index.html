@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-M9pYIN+DQFVVTfdF+jvcJpCZdZfNBoDbLp7J0wi0t2s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WqaSsDnjJoVXRj3HdDjrN3F0ogLanGyD6X1Fcw+WXRY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4390,7 +4390,11 @@ function trBars(keys, bk, g, tot) {          // grafico a barre moderno: griglia
     acts: [['Escludi dai totali', () => { const ex = (S.settings.trEx = S.settings.trEx || []); if (!ex.includes(cat)) ex.push(cat); done(); }, ''], ['Vedi nel calendario', () => { UI.trv = 'cal'; UI.trq = cat; render(); window.scrollTo(0, 0); }, '']] });
 }
           // le altre viste sono nel menu a sinistra
-function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), MAIN_TABS.map(k => [k, (TABS.find(t => t[0] === k) || [k, k])[1]]).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': TAB_GROUP(UI.tab) === k ? 'true' : 'false', onclick: () => { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
+const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';          // "Disposizione" in Dati e sicurezza: 'revolut' (4 schede) o 'classico' (6 schede)
+const CLASSIC_TABS = ['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
+const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
+const APP_VER = '12/11/2026 · layout Revolut';
+function tabsBar() { const mt = mainTabs(); return h('nav', { class: 'tabs', role: 'tablist', style: 'grid-template-columns:repeat(' + mt.length + ',1fr)' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), mt.map(k => [k, (TABS.find(t => t[0] === k) || [k, k])[1]]).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': (LAYOUT() === 'classico' ? UI.tab === k : TAB_GROUP(UI.tab) === k) ? 'true' : 'false', onclick: () => { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
 const ICONS = { investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
@@ -4503,7 +4507,7 @@ function tabPanoramica() {
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
   el.append(h('section', { class: 'card hero' }, h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), h('div', { class: 'hero-pills' }, heroPill(tp), heroDelta()), heroChart(), boxTotal() ? h('div', { class: 'sub' }, 'Tuoi da investire, senza le casse separate: ' + eur(total - boxTotal())) : null, h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today())), h('div', { class: 'qa-row' }, qaBtn('Aggiorna prezzi', ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4'], () => { ONLINE ? pricesOnline() : pickPrices(); }), qaBtn('Importa file', MICO.imp, () => pickBatch()), qaBtn('Operazione', MICO.op, () => editOperation({})), qaBtn('Da screenshot', ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z'], () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza: in Aiuto dell\'AI trovi il link e il punto dove incollarla. Vuoi andarci?')) { UI.tab = 'dati'; render(); window.scrollTo(0, 0); } }))));
-  rvHome(el, total);          // riquadri stile Revolut subito sotto il totale
+  if (LAYOUT() !== 'classico') rvHome(el, total);          // riquadri stile Revolut subito sotto il totale
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
@@ -4513,6 +4517,7 @@ function tabPanoramica() {
   { const ab = analisiBanner(); if (ab) el.append(ab); }
   if (!DEMO) { const gc = goalsCard(); if (gc) el.append(gc); }
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
+  if (LAYOUT() === 'classico') el.append(groupTiles());          // soldi fermi, soldi investiti, fondo pensione
   const perfTiles = tiles([
     { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti',
       x: () => ({ num: tp.contrib, how: 'Somma di versamenti meno prelievi di ' + pl(pa.length, 'conto d\'investimento', 'conti d\'investimento') + ' = ' + eur(tp.contrib) + '. Per i conti senza storia conta il "valore di partenza" del giorno in cui hai cominciato a seguirli.', rows: perAcc(p => p.contrib).map(([a, , v]) => [a.name, v, '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto' }) },
@@ -4855,8 +4860,18 @@ function autoCard() {
   return h('section', { class: 'card' }, h('h2', null, 'Aspetto'), h('p', { class: 'muted' }, 'Scegli il tema dell\'app: cambiano colori, caratteri e forma dei pulsanti, non le funzioni. Si ricorda da solo su questo dispositivo e dentro i tuoi dati.'),
     h('div', { class: 'thm-grid' }, THEMES.map(t => h('button', { type: 'button', class: 'thm' + (cur === t.id ? ' on' : ''), 'aria-pressed': cur === t.id ? 'true' : 'false', style: '--tb:' + t.bg + ';--tc:' + t.card + ';--ti:' + t.ink + ';--ta:' + t.acc + ';--tf:"' + t.f + '",' + (t.serif ? 'Georgia,serif' : 'system-ui,sans-serif'), onclick: () => pick(t.id) },
       h('span', { class: 'thm-pv' }, h('span', { class: 'thm-card' }, h('b', { class: 'thm-n' }, '1.234 €'), h('span', { class: 'thm-bar' }))), h('span', { class: 'thm-t' }, t.n + (cur === t.id ? ' · in uso' : '')), h('span', { class: 'thm-d' }, t.d)))));
-}function tabDati() {
+}
+function layoutCard() {
+  const cur = LAYOUT(), pick = id => { S.settings.layout = id; UI.tab = 'dati'; touch(); render(); };
+  const opt = (id, t, d) => h('button', { type: 'button', class: 'thm' + (cur === id ? ' on' : ''), 'aria-pressed': cur === id ? 'true' : 'false', onclick: () => pick(id) }, h('span', { class: 'thm-t' }, t + (cur === id ? ' · in uso' : '')), h('span', { class: 'thm-d' }, d));
+  return h('section', { class: 'card' }, h('h2', null, 'Disposizione'), h('p', { class: 'muted' }, 'Scegli come è organizzata l\'app: stile Revolut con 4 schede (Home, Investimenti, Spese, Altro) oppure la disposizione classica con 6 schede. Cambiano solo l\'ordine e l\'aspetto, i dati sono gli stessi.'),
+    h('div', { class: 'thm-grid' }, opt('revolut', 'Stile Revolut', 'Home a riquadri, Investimenti con i conti a fisarmonica, tutto il resto in Altro'), opt('classico', 'Classica', 'Panoramica, Conti, PAC, Spese, Consigli e Analisi nella barra')),
+    h('p', { class: 'muted' }, 'Versione dell\'app: ' + APP_VER + '. Se qui non leggi questa data, il telefono sta usando una copia vecchia.'),
+    h('div', { class: 'row' }, btn('Scarica l\'ultima versione', async () => { try { if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); if (window.caches) for (const k of await caches.keys()) await caches.delete(k); } catch (e) { /* si ricarica lo stesso */ } try { clearTimeout(saveTimer); await save(false); } catch (e) { /* idem */ } location.reload(); }, 'sm')));
+}
+function tabDati() {
   const el = h('div');
+  el.append(layoutCard());
   el.append(themeCard());
   if (!DEMO) el.append(aiCard());
   if (!DEMO) el.append(dogsCard());
