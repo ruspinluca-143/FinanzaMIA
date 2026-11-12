@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-21B7/6OEEFBP44plpQlcc/NUuVNWNRqCDk/jI/krAQ0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UaxNwfnSmw/sNRBodVRbLayio7gxEGD1/WX6QRvsgKU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -89,6 +89,7 @@ dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0
 .acard .pill{font-size:12px;padding:3px 10px;margin:2px 0 4px}
 .ac-auto{display:block;width:100%;text-align:left;margin-top:10px;padding:8px 10px;border:0;border-radius:14px;font:inherit;font-size:12px;line-height:1.35;color:var(--ink2);background:color-mix(in srgb,var(--ink) 5%,transparent)}
 button.ac-auto{cursor:pointer}
+.ac-tiny{font-size:10px;line-height:1.2;color:var(--ink2);opacity:.75;margin-top:3px}
 .ac-auto.ok{color:var(--gain);background:color-mix(in srgb,var(--gain) 10%,transparent)}
 .ac-auto.mix{color:var(--ink2);background:color-mix(in srgb,#ff9f0a 12%,transparent)}
 /* piano: intestazione e controllo a segmenti */
@@ -1505,7 +1506,7 @@ function editAccount(a) {
 const CASH_PRESETS = [['Revolut (conto)', 'banca', 'revolut'], ['BancoPosta', 'banca', 'bancoposta'], ['Contanti (portafoglio)', 'contanti', 'contanti'], ['Satispay', 'pagamenti', 'satispay'], ['PayPal', 'pagamenti', 'paypal']];
 const isCashAcc = a => !a.perf && !a.dep;          // conti fermi: banche, contanti, carte e pagamenti
 const FREQ_DAYS = { mese: 31, trimestre: 92 };
-const accDue = a => { if (!a.freq || !a.upd || !FREQ_DAYS[a.freq]) return null; const d = daysSince(a.upd); return d >= FREQ_DAYS[a.freq] ? d : null; };          // giorni dall'ultimo aggiornamento, se e' scaduto
+const accDue = a => { if (dogsLinkOf(a)) return null; if (!a.freq || !a.upd || !FREQ_DAYS[a.freq]) return null; const d = daysSince(a.upd); return d >= FREQ_DAYS[a.freq] ? d : null; };          // giorni dall'ultimo aggiornamento, se e' scaduto
 /* ============ procedure guidate (motore comune): una domanda per volta, avanti e indietro ============ */
 function wzRun(cfg) {          // cfg = { steps: () => [api => ({ q, body, valid, next, nextLabel, onNext, focus, noBack, err })], onClose }
   const dlg = h('dialog', { class: 'wz' }), view = h('div', { class: 'wz-view' }); let i = 0;
@@ -1560,8 +1561,8 @@ function todoCard() {
 
 /* ============ aggiornamento dei saldi guidato: un conto per volta ============ */
 function balancesWizard() {
-  const have = S.accounts.filter(isCashAcc).sort((a, b) => (accDue(b) != null) - (accDue(a) != null) || a.name.localeCompare(b.name));
-  const vals = new Map(), add = new Map(), extra = () => CASH_PRESETS.filter(p => !have.some(a => a.name.toLowerCase().includes(p[2])));
+  const haveAll = S.accounts.filter(isCashAcc), have = haveAll.filter(a => !dogsLinkOf(a)).sort((a, b) => (accDue(b) != null) - (accDue(a) != null) || a.name.localeCompare(b.name));          // i conti collegati a DOGsitterini si aggiornano da soli: qui non compaiono
+  const vals = new Map(), add = new Map(), extra = () => CASH_PRESETS.filter(p => !haveAll.some(a => a.name.toLowerCase().includes(p[2])));
   const stepAcc = a => api => ({ q: 'Quanto c\'è adesso su ' + a.name + '?', focus: '.wz-num', valid: true,
     body: [h('div', { class: 'wz-chip' }, h('b', null, 'Ultimo saldo: ' + eur(a.cash || 0, true)), h('span', { class: 'wz-s' }, a.upd ? 'aggiornato il ' + fmtDate(a.upd) + (accDue(a) != null ? ' · è ora di aggiornarlo' : '') : 'mai aggiornato')),
       wzNum(vals.has(a.id) ? vals.get(a.id) : a.cash || 0, 'Saldo in €', v => { if (v == null) vals.delete(a.id); else vals.set(a.id, v); if (api.nextBtn) api.nextBtn.disabled = v == null; }, true),
@@ -1594,7 +1595,7 @@ function onboard() {
 }
 function openBalances() { return balancesWizard(); }
 function openBalancesTable() {
-  const have = S.accounts.filter(isCashAcc), extra = CASH_PRESETS.filter(p => !have.some(a => a.name.toLowerCase().includes(p[2])));
+  const haveAll = S.accounts.filter(isCashAcc), have = haveAll.filter(a => !dogsLinkOf(a)), extra = CASH_PRESETS.filter(p => !haveAll.some(a => a.name.toLowerCase().includes(p[2])));
   const fields = [...have.map(a => ({ key: 'a_' + a.id, label: a.name + ' (€)', type: 'number' })), ...extra.map((p, k) => ({ key: 'n_' + k, label: p[0] + ' (€)', type: 'number', hint: have.length || k ? '' : 'Scrivi quanti soldi ci sono adesso. I conti che non usi lasciali vuoti: non vengono creati.' }))];
   const vals = {}; for (const a of have) vals['a_' + a.id] = a.cash || 0;
   form('Saldi dei conti fermi', fields, vals, o => {
@@ -4123,6 +4124,10 @@ function dayTag(a) {          // in alto a destra del riquadro: la giornata del 
   const d = accDay(a); if (!d) return null; const z = Math.abs(d.pct) < 0.0005;
   return h('span', { class: 'pill ac-day ' + (z ? '' : d.pct > 0 ? 'up' : 'dn'), title: 'Oggi ' + seur(d.abs) + ' rispetto all\'ultima chiusura' }, z ? '0,0%' : (d.pct > 0 ? '▲ +' : '▼ −') + nfp.format(Math.abs(d.pct) * 100) + '%');
 }
+function autoTiny(a, x, nA, nT) {          // scritta piccola piccola sui conti che si aggiornano da soli
+  const l = dogsLinkOf(a); if (!l && !(x && nT > 0 && nA === nT)) return null;
+  return h('div', { class: 'ac-tiny', title: l ? 'Saldo letto da DOGsitterini a ogni apertura' : 'Tutti i prezzi si aggiornano da soli' }, '⟳ si aggiorna da solo');
+}
 function accCard(a, total, k) {          // riquadro quadrato e compatto: due per riga sul telefono
   const v = accValue(a), p = perfOf([a]), open = () => { UI.acc = a.id; render(); }, grp = accShow(a), x = grp === 'fermi' || !a.positions.length ? null : autoInfo(a), nA = x ? x.auto.length : 0, nT = x ? x.auto.length + x.fermi.length : 0;
   const badge = !x ? h('div', { class: 'ac-auto man' }, '✎ saldo a mano') : h('button', { type: 'button', class: 'ac-auto ' + (x.fermi.length ? (nA ? 'mix' : 'man') : 'ok'), onclick: e => { e.stopPropagation(); tapFx(e.currentTarget); talkAuto(a); } }, nA === nT ? '⟳ tutto automatico' : nA ? '⟳ ' + nA + ' su ' + nT + ' automatici' : '✎ prezzi a mano');
@@ -4132,6 +4137,7 @@ function accCard(a, total, k) {          // riquadro quadrato e compatto: due pe
     h('div', { class: 'ac-name', title: a.name }, a.name),
     h('div', { class: 'ac-val' }, eur(v)),
     a.perf && p.pnl != null ? h('div', null, h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + (fin(p.pnlPct) ? spct(p.pnlPct).replace('+', '') : seur(p.pnl).replace('+', '')))) : h('div', { class: 'ac-sub' }, total > 0 ? pct(v / total) + ' del totale' : ''),
+    autoTiny(a, x, nA, nT),
     h('div', { class: 'ac-bar' }, h('i', { style: '--w:' + (total > 0 ? Math.max(1, Math.abs(v) / total * 100) : 0).toFixed(1) + '%' })));
   return card;
 }
