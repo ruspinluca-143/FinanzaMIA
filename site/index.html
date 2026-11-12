@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wHaG50Y7mZ8PU/fbSRHon/QC9satHT0tdkkS64B4uO8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-M9pYIN+DQFVVTfdF+jvcJpCZdZfNBoDbLp7J0wi0t2s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -598,7 +598,26 @@ body{background:var(--bg)}
 .qa{background:var(--card-s)!important;border-color:var(--ring)!important}
 .banner{background:var(--card-s);border-color:var(--ring)}
 .tchip{background:var(--btn);color:var(--ink2)}
-.tabs{grid-template-columns:repeat(6,1fr)}
+.tabs{grid-template-columns:repeat(4,1fr)}
+.rv-act{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 4px}
+.rv-act button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;font:inherit;font-size:12px;color:var(--ink2);cursor:pointer;padding:0}
+.rv-act .c{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--btn);color:var(--ink);border:1px solid var(--ring);transition:transform .15s}
+.rv-act button:active .c{transform:scale(.92)}
+.card.rv{padding:12px 16px}
+.rv-h{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;font-weight:600;margin:2px 0 4px}
+.rv-more{background:none;border:0;font:inherit;font-size:13px;font-weight:600;color:var(--s1);cursor:pointer;padding:2px 0}
+.rv-row{display:flex;align-items:center;gap:12px;padding:9px 0;width:100%;text-align:left;background:none;border:0;font:inherit;color:inherit;cursor:pointer;border-radius:0}
+.rv-row+.rv-row{border-top:1px solid var(--ring)}
+.rv-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--gc,var(--s1)) 16%,transparent);color:var(--gc,var(--s1))}
+.rv-nm{flex:1;min-width:0}.rv-nm b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rv-nm small{color:var(--muted);font-size:12px}
+.rv-v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}.rv-v small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.rv-big{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;margin:2px 0}
+.rv-spark{width:100%;height:46px;display:block;margin-top:4px}
+.rv-acc{padding:0;overflow:hidden}.rv-acc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px}.rv-acc>summary::-webkit-details-marker{display:none}
+.rv-acc>summary::after{content:'›';color:var(--muted);transform:rotate(90deg);transition:transform .2s;margin-left:2px}.rv-acc[open]>summary::after{transform:rotate(-90deg)}
+.rv-acc .rv-body{padding:0 16px 10px;border-top:1px solid var(--ring)}
+.rv-sec{margin:18px 4px 4px;font-size:13px;font-weight:600;color:var(--muted)}
+.rv-menu .rv-row{padding:11px 0}
 details.det{padding:0}details.det>summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}details.det>summary::-webkit-details-marker{display:none}details.det>summary::after{content:'›';transform:rotate(90deg);color:var(--muted);transition:transform .2s}details.det[open]>summary::after{transform:rotate(-90deg)}details.det>.tiles{margin:0;padding:0 12px 12px}
 .brand::before{background:var(--s1);box-shadow:none}
 @media (max-width:700px){.tabs{background:var(--bg)}}
@@ -4040,8 +4059,9 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
+const TABS = [['panoramica', 'Home'], ['investimenti', 'Investimenti'], ['altro', 'Altro'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'investimenti', 'transazioni', 'altro'];
+const TAB_GROUP = k => k === 'panoramica' ? 'panoramica' : ['investimenti', 'conti', 'pac'].includes(k) ? 'investimenti' : k === 'transazioni' ? 'transazioni' : 'altro';          // a quale delle 4 schede della barra appartiene ogni vista
 /* ============ TRANSAZIONI: spese, guadagni e trasferimenti (calendario, inserimento guidato, statistiche). Le operazioni nuove muovono la liquidita' dei conti; lo storico importato (S.trh) e' solo andamento e non tocca i saldi ============ */
 const TR_DEF = { spesa: { 'Cibo': ['Colazione', 'Pranzo', 'Cena', 'Aperitivo', 'Caffè'], 'Spesa': [], 'Trasporti': ['Autobus', 'Treno', 'Aereo', 'Taxi', 'Autostrada'], 'Rifornimento': [], 'Casa': ['Affitto', 'Bollette'], 'Telefonia': [], 'Salute': [], 'Bellezza': [], 'Shopping': [], 'Divertimento': [], 'Regalo': [], 'Vacanza': [], 'Assicurazione': [], 'Servizio/Canone': [], 'Altro': [] }, entrata: { 'Stipendio': [], 'Bonus': [], 'Vendita': [], 'Rimborso': [], 'Altro': [] } };
 const TR_KIND = [['spesa', 'Spesa', 'Ho speso dei soldi'], ['entrata', 'Guadagno', 'Mi sono entrati dei soldi'], ['trasf', 'Trasferimento', 'Sposto soldi tra due miei conti']];
@@ -4370,13 +4390,111 @@ function trBars(keys, bk, g, tot) {          // grafico a barre moderno: griglia
     acts: [['Escludi dai totali', () => { const ex = (S.settings.trEx = S.settings.trEx || []); if (!ex.includes(cat)) ex.push(cat); done(); }, ''], ['Vedi nel calendario', () => { UI.trv = 'cal'; UI.trq = cat; render(); window.scrollTo(0, 0); }, '']] });
 }
           // le altre viste sono nel menu a sinistra
-function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; UI.planId = null; if (k === 'analisi') UI.sub = null; UI.fondo = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), MAIN_TABS.map(k => [k, (TABS.find(t => t[0] === k) || [k, k])[1]]).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': TAB_GROUP(UI.tab) === k ? 'true' : 'false', onclick: () => { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
+const ICONS = { investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, investimenti: tabInvestimenti, altro: tabAltro, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
+/* ============ LAYOUT STILE REVOLUT: Home a riquadri, scheda Investimenti (conti a fisarmonica), scheda Altro ============ */
+const RV_ICO = { plus: MICO.op, move: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], down: ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14'], dots: ['M5 12h.01', 'M12 12h.01', 'M19 12h.01'], bank: ['M3 10l9-6 9 6', 'M5 10v8', 'M9.5 10v8', 'M14.5 10v8', 'M19 10v8', 'M3 20h18'], trend: ['M3 17l6-6 4 4 8-8', 'M15 7h6v6'], cal: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], repeat: MICO.pac };
+const rvSvg = (d, n) => s('svg', { viewBox: '0 0 24 24', width: n || 20, height: n || 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, d.map(x => s('path', { d: x })));
+const rvRow = (ico, name, sub, val, subv, fn, cls) => h('button', { type: 'button', class: 'rv-row ' + (cls || ''), onclick: fn }, h('span', { class: 'rv-ic' }, ico), h('span', { class: 'rv-nm' }, h('b', null, name), sub ? h('small', null, sub) : null), h('span', { class: 'rv-v' }, val, subv ? h('small', null, subv) : null));
+const rvHead = (t, more, fn) => h('div', { class: 'rv-h' }, h('span', null, t), more ? h('button', { type: 'button', class: 'rv-more', onclick: fn }, more + ' ›') : null);
+const rvActs = list => h('div', { class: 'rv-act' }, list.map(([l, d, fn]) => h('button', { type: 'button', onclick: fn }, h('span', { class: 'c' }, rvSvg(d, 22)), l)));
+const rvGo = (tab, extra) => () => { closeTalks(); Object.assign(UI, { tab, acc: null, planId: null, sub: null, fondo: null }, extra || {}); render(); window.scrollTo(0, 0); };
+const rvCard = (...kids) => h('section', { class: 'card rv' }, ...kids);
+function rvLast() {          // l'ultima cosa registrata: un'operazione sui conti oppure una spesa/guadagno
+  const o = OPS()[OPS().length - 1], t = trAll().find(r => r.own);
+  if (t && (!o || t.d > o.date)) return rvCard(rvHead('Ultima operazione', 'Tutte', rvGo('transazioni')), rvRow(rvSvg(RV_ICO.move), (t.cat || TR_LAB[t.k]) + (t.note ? ' · ' + t.note : ''), fmtDate(t.d) + ' · ' + t.acc + (t.to ? ' → ' + t.to : ''), (t.k === 'spesa' ? '−' : t.k === 'entrata' ? '+' : '') + eur(t.amt, true), '', rvGo('transazioni')));
+  if (!o) return null;
+  return rvCard(rvHead('Ultima operazione', 'Tutte', rvGo('conti')), rvRow(rvSvg(RV_ICO.move), (OP_LABEL[o.kind] || o.kind) + (o.instName ? ' · ' + o.instName : ''), fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), eur(o.gross != null ? o.gross : o.amount, true), '', () => talkOp(o)));
+}
+function rvGroupTalk(g, tot) {
+  talk({ kind: 'Come sono divisi i tuoi soldi', title: g.l, value: eur(g.tot), num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)',
+    acts: [['Apri in Investimenti', rvGo('investimenti', { rvOpen: g.k }), '']] });
+}
+function rvPatr(total) {
+  const G = groupAccs().filter(g => g.accs.length); if (!G.length) return null;
+  const ic = { fermi: ACC_ICO.banca, investiti: RV_ICO.trend, pensione: ACC_ICO.pensione };
+  return rvCard(rvHead('Il tuo patrimonio', 'Vedi tutto', rvGo('investimenti')), G.map(g => rvRow(rvSvg(ic[g.k]), g.l, pl(g.accs.length, 'conto', 'conti') + (total > 0 ? ' · ' + pct(g.tot / total) : ''), eur(g.tot), '', () => rvGroupTalk(g, total), 'g-' + g.k)));
+}
+function rvSpese() {
+  const t = today(), ym = t.slice(0, 7), ex = S.settings.trEx || [], sp = r => r.k === 'spesa' && !ex.includes(r.cat);
+  const L = trAll().filter(r => sp(r) && r.d.slice(0, 7) === ym), tot = L.reduce((x, r) => x + r.amt, 0), by = {}; L.forEach(r => { by[r.d] = (by[r.d] || 0) + r.amt; });
+  const dN = +t.slice(8, 10), ymP = trShiftMonth(ym, -1), prev = trAll().filter(r => sp(r) && r.d.slice(0, 7) === ymP && +r.d.slice(8, 10) <= dN).reduce((x, r) => x + r.amt, 0);
+  const sec = rvCard(rvHead('Spese questo mese', 'Apri', rvGo('transazioni')));
+  if (!L.length) { sec.append(h('p', { class: 'muted' }, 'Ancora nessuna spesa questo mese: registrane una in pochi tocchi.'), btn('+ Aggiungi spesa', () => trWizard(), 'pri sm')); return sec; }
+  let c = 0; const pts = []; for (let d = 1; d <= dN; d++) { c += by[ym + '-' + String(d).padStart(2, '0')] || 0; pts.push(c); }
+  const mx = Math.max(...pts, 1), W = 260, H = 44, xy = pts.map((v, i) => (pts.length > 1 ? i / (pts.length - 1) * W : W).toFixed(1) + ',' + (H - 4 - v / mx * (H - 8)).toFixed(1)).join(' ');
+  sec.append(h('button', { type: 'button', class: 'rv-row', style: 'display:block', onclick: rvGo('transazioni') }, h('div', { class: 'rv-big' }, eur(tot)), prev > 0 ? h('div', { class: 'muted' }, (tot <= prev ? '▼ ' : '▲ ') + eur(Math.abs(tot - prev)) + (tot <= prev ? ' in meno' : ' in più') + ' del mese scorso alla stessa data') : null,
+    pts.length > 1 ? s('svg', { class: 'rv-spark', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'none', 'aria-hidden': 'true' }, s('polyline', { points: xy, fill: 'none', stroke: 'var(--s1)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke' })) : null));
+  return sec;
+}
+let RV_PRJ = null;
+function rvProiez() {
+  const has = BG().items.length > 0 || PL().length > 0, sec = rvCard(rvHead('Proiezioni', 'Dettagli', () => { UI.pvOpen = true; rvGo('conti')(); }));
+  if (!has) { sec.append(h('p', { class: 'muted' }, 'Scrivi le tue entrate e spese: ti mostro dove può arrivare il patrimonio tra 1, 5 e 10 anni.'), btn('Entrate e spese…', () => panelDialog('Entrate e spese', piBudget), 'pri sm')); return sec; }
+  const key = S.accounts.length + '|' + Math.round(totalValue()) + '|' + PL().length + '|' + BG().items.length + '|' + today();
+  if (!RV_PRJ || RV_PRJ.key !== key) RV_PRJ = { key, R: projectPlan(120) };
+  const R = RV_PRJ.R;
+  sec.append(...[[12, 'Tra 1 anno'], [60, 'Tra 5 anni'], [120, 'Tra 10 anni']].map(([k, l]) => rvRow(rvSvg(RV_ICO.trend), l, 'se continui così · ' + addMonthsStr(today(), k).slice(0, 4), '~' + eur(R.p50[k]), eur(R.p10[k]) + ' … ' + eur(R.p90[k]), () => { UI.pvOpen = true; rvGo('conti')(); })));
+  return sec;
+}
+function rvProssimi() {          // acquisti programmati e spese ricorrenti dei prossimi 30 giorni
+  const t = today(), to = addMonthsStr(t, 1), L = [];
+  for (const p of PL()) occurrences(p.start, freqMonths(p.freq), p.day, p.since || p.start, to, p.end).filter(d => d >= t).slice(0, 1).forEach(d => L.push({ d, n: p.label || 'Acquisto ricorrente', a: -p.amount, f: () => openPlan(p) }));
+  for (const r of TRR()) trOcc(r).filter(d => d >= t && d <= to && d >= (r.since || r.start) && !(r.done || []).includes(d)).slice(0, 1).forEach(d => L.push({ d, n: r.name, a: r.kind === 'entrata' ? r.amount : r.kind === 'spesa' ? -r.amount : 0, f: rvGo('transazioni') }));
+  if (!L.length) return null; L.sort((x, y) => x.d < y.d ? -1 : 1);
+  return rvCard(rvHead('Prossimi pagamenti', 'Spese', rvGo('transazioni')), L.slice(0, 4).map(x => rvRow(rvSvg(RV_ICO.cal), x.n, fmtDate(x.d), x.a ? (x.a > 0 ? '+' : '−') + eur(Math.abs(x.a), true) : '', '', x.f)));
+}
+function rvHome(el, total) { for (const c of [rvLast(), rvPatr(total), rvSpese(), rvProiez(), rvProssimi()]) if (c) el.append(c); }
+function tabInvestimenti() {
+  if (!S.accounts.length) return tabPanoramica();
+  const el = h('div', { class: 'rv-inv' }), G = groupAccs().filter(g => g.accs.length), inv = G.find(g => g.k === 'investiti'), pa = (inv ? inv.accs : []).filter(a => a.perf), p = perfOf(pa);
+  el.append(h('section', { class: 'card hero' }, h('div', { class: 'lbl' }, 'Investito'), h('div', { class: 'hero-n' }, eur(inv ? inv.tot : 0)),
+    h('div', { class: 'hero-pills' }, p.pnl != null ? h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + seur(p.pnl).replace(/^[+\-−]/, '') + (fin(p.pnlPct) ? ' · ' + spct(p.pnlPct) : '')) : null, heroDelta()), heroChart(),
+    rvActs([['Operazione', RV_ICO.plus, () => editOperation({})], ['Preleva', RV_ICO.down, () => editOperation({ kind: 'prelievo' })], ['Conti', RV_ICO.bank, rvGo('conti')], ['Altro', RV_ICO.dots, openMenu]])));
+  const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca un conto o un titolo', 'aria-label': 'Cerca un conto o un titolo', autocomplete: 'off', enterkeyhint: 'search', value: UI.rvQ || '' }), list = h('div');
+  const accBlock = (a, g, toks) => {
+    const pos = a.positions.map(pp => ({ p: pp, i: inst(pp.instId) })).filter(x => x.i && (x.p.qty > 0 || posValue(x.p) !== 0)).sort((x, y) => posValue(y.p) - posValue(x.p));
+    const hay = normT(a.name + ' ' + ((TYPES[a.type] || {}).label || '') + ' ' + (a.box || '')), accHit = toks.every(t => hay.includes(t)), shown = toks.length && !accHit ? pos.filter(x => toks.every(t => normT(x.i.name + ' ' + (x.i.code || '')).includes(t))) : pos;
+    if (toks.length && !accHit && !shown.length) return null;
+    const pf = a.perf ? perfOf([a]) : null, open = !!toks.length || UI.rvOpen === g.k || UI.rvOpen === a.id;
+    return h('details', { class: 'card rv-acc g-' + g.k, open: open ? '' : null },
+      h('summary', null, h('span', { class: 'rv-ic' }, accIco(a)), h('span', { class: 'rv-nm' }, h('b', null, a.name), h('small', null, (TYPES[a.type] || {}).label || '')), h('span', { class: 'rv-v' }, eur(accValue(a)), pf && fin(pf.pnlPct) ? h('small', null, gl(pf.pnl, spct(pf.pnlPct))) : null)),
+      h('div', { class: 'rv-body' },
+        accCash(a) > 0.005 && pos.length ? rvRow(rvSvg(ACC_ICO.contanti), 'Liquidità', 'saldo disponibile', eur(accCash(a)), '', openAcc(a)) : null,
+        shown.map(x => { const v = posValue(x.p); return rvRow(h('span', { style: 'font-weight:600;font-size:14px' }, x.i.name.trim().charAt(0).toUpperCase()), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }),
+        h('div', { class: 'actbar', style: 'margin-top:8px' }, btn('Apri il conto', openAcc(a), 'sm'), btn('+ Operazione', () => editOperation({ accId: a.id }), 'sm pri'))));
+  };
+  const draw = () => {
+    const toks = normT(q.value).split(' ').filter(Boolean), out = [];
+    for (const g of G) { const blocks = g.accs.map(a => accBlock(a, g, toks)).filter(Boolean); if (blocks.length) out.push(h('div', { class: 'rv-sec' }, g.l + ' · ' + eur(g.tot)), ...blocks); }
+    list.replaceChildren(...(out.length ? out : [h('p', { class: 'muted' }, 'Nessun conto o titolo corrisponde: prova con meno parole.')]));
+  };
+  q.addEventListener('input', () => { UI.rvQ = q.value; draw(); }); draw();
+  el.append(h('div', { class: 'cq-row' }, q), list);
+  const t = today(), ord = OPS().slice().reverse().slice(0, 5), rec = [];
+  for (const pp of PL()) { const d = occurrences(pp.start, freqMonths(pp.freq), pp.day, pp.since || pp.start, addMonthsStr(t, 14), pp.end).find(x => x >= t); if (d) rec.push([pp, d]); }
+  rec.sort((x, y) => x[1] < y[1] ? -1 : 1);
+  if (rec.length) el.append(rvCard(rvHead('Ordini ricorrenti', 'Gestisci', () => pacManager()), rec.slice(0, 6).map(([pp, d]) => rvRow(rvSvg(RV_ICO.repeat), pp.label || 'Acquisto ricorrente', freqLabel(pp.freq) + ' · prossimo ' + fmtDate(d), '−' + eur(pp.amount, true), '', () => openPlan(pp)))));
+  if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvGo('conti')), ord.map(x => rvRow(rvSvg(RV_ICO.move), (OP_LABEL[x.kind] || x.kind) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x)))));
+  return el;
+}
+function tabAltro() {
+  const el = h('div', { class: 'rv-menu' }), D = DEMO;
+  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Consigli', 'analisi del giorno, idee e titoli', rvGo('consigli')], ['analisi', 'Analisi', 'tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['grafici', 'Grafici', 'andamento e confronti nel tempo', rvGo('grafici')], ['strumenti', 'Strumenti', 'i tuoi titoli, uno per uno', rvGo('strumenti')], ['allocazione', 'Allocazione', 'come sei diviso per classe, area e valuta', rvGo('allocazione')], ['grandi', 'Grandi fondi', 'che cosa comprano i grandi investitori', rvGo('grandi')], ['mercati', 'Mercati', 'notizie, tassi e dati di mercato', rvGo('mercati')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
+  const more = [!D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean);
+  const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' });
+  const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), hit = t => toks.every(w => normT(t).includes(w));
+    const rows = [...ITEMS.filter(i => hit(i[1] + ' ' + i[2])).map(i => rvRow(rvSvg(ICONS[i[0]] || ICONS.altro), i[1], i[2], '›', '', i[3])), ...more.filter(i => hit(i[0] + ' ' + i[1])).map(i => rvRow(rvSvg(i[3]), i[0], i[1], '›', '', i[2]))];
+    box.replaceChildren(...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nessuna sezione corrisponde.')])); };
+  q.addEventListener('input', draw); draw();
+  el.append(h('div', { class: 'rv-sec' }, 'Tutte le altre sezioni'), h('div', { class: 'cq-row' }, q), box);
+  return el;
+}
 function tabPanoramica() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('h2', null, 'Per cominciare'),
     h('p', null, 'Scegli i file dei tuoi conti (oppure trascinali su questa pagina): i conti, le posizioni e la liquidità si creano da soli.'),
@@ -4385,6 +4503,7 @@ function tabPanoramica() {
   const total = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), el = h('div');
   const heroTap = e => { tapFx(e.currentTarget); talkTotal(); };
   el.append(h('section', { class: 'card hero' }, h('div', { class: 'lbl tapme', onclick: heroTap }, 'Patrimonio totale'), h('div', { class: 'hero-n tapme', 'data-num': total, 'data-key': 'tot', role: 'button', tabindex: '0', title: 'Tocca per vedere da che cosa è fatto', onclick: heroTap }, eur(total)), h('div', { class: 'hero-pills' }, heroPill(tp), heroDelta()), heroChart(), boxTotal() ? h('div', { class: 'sub' }, 'Tuoi da investire, senza le casse separate: ' + eur(total - boxTotal())) : null, h('div', { class: 'sub' }, S.accounts.length + ' conti · dati al ' + fmtDate(today())), h('div', { class: 'qa-row' }, qaBtn('Aggiorna prezzi', ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4'], () => { ONLINE ? pricesOnline() : pickPrices(); }), qaBtn('Importa file', MICO.imp, () => pickBatch()), qaBtn('Operazione', MICO.op, () => editOperation({})), qaBtn('Da screenshot', ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z'], () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza: in Aiuto dell\'AI trovi il link e il punto dove incollarla. Vuoi andarci?')) { UI.tab = 'dati'; render(); window.scrollTo(0, 0); } }))));
+  rvHome(el, total);          // riquadri stile Revolut subito sotto il totale
   const lastSnap = S.snapshots.length ? S.snapshots[S.snapshots.length - 1].date : null;
   const pp = positionsPnl(), pv = pp.reduce((t, x) => t + x.v, 0), pg = pp.reduce((t, x) => t + x.pnl, 0), pcost = pv - pg;
   if (PRICE_BANNER) el.append(h('div', { class: 'banner' }, h('span', null, PRICE_BANNER.review ? pl(PRICE_BANNER.n, 'prezzo con una variazione molto forte da controllare', 'prezzi con una variazione molto forte da controllare') : pl(PRICE_BANNER.n, 'prezzo nuovo', 'prezzi nuovi') + ' da applicare'), btn(PRICE_BANNER.review ? 'Controlla' : 'Rivedi e applica', () => openPrices(planPrices(PRICE_BANNER.text), 'prezzi.json (online)'), 'pri sm')));
@@ -4394,7 +4513,6 @@ function tabPanoramica() {
   { const ab = analisiBanner(); if (ab) el.append(ab); }
   if (!DEMO) { const gc = goalsCard(); if (gc) el.append(gc); }
   const perAcc = f => pa.map(a => { const p = perfOf([a]); return [a, p, f(p)]; }).filter(x => fin(x[2]));
-  el.append(groupTiles());          // soldi fermi, soldi investiti, fondo pensione
   const perfTiles = tiles([
     { l: 'Versato netto (conti d\'investimento)', v: eur(tp.contrib), s: tp.has ? 'versamenti − prelievi' : 'aggiungi i movimenti dei conti',
       x: () => ({ num: tp.contrib, how: 'Somma di versamenti meno prelievi di ' + pl(pa.length, 'conto d\'investimento', 'conti d\'investimento') + ' = ' + eur(tp.contrib) + '. Per i conti senza storia conta il "valore di partenza" del giorno in cui hai cominciato a seguirli.', rows: perAcc(p => p.contrib).map(([a, , v]) => [a.name, v, '', openAcc(a)]).sort((x, y) => y[1] - x[1]), rowsTitle: 'Conto per conto' }) },
@@ -5203,7 +5321,7 @@ function opWizard(pre, after) {
   const nav = (okLabel, okFn, okOff) => h('div', { class: 'wz-nav' }, hist.length ? btn('← Indietro', back) : h('span'), okLabel ? h('button', { type: 'button', class: 'btn pri big', disabled: okOff ? '' : null, onclick: okFn }, okLabel) : h('span'));
   const big = (title, sub, onclick, cls) => h('button', { type: 'button', class: 'wz-opt ' + (cls || ''), onclick }, h('span', { class: 'wz-t' }, title), sub ? h('span', { class: 'wz-s' }, sub) : null);
   const numInput = (val, ph, on) => { const i = h('input', { type: 'number', step: 'any', inputmode: 'decimal', class: 'wz-num', placeholder: ph, value: val ?? '', 'aria-label': ph }); i.addEventListener('input', () => on(num(i.value), i)); i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = dlg.querySelector('.wz-nav .pri:not([disabled])'); if (b) b.click(); } }); return i; };
-  const QUEST = { kind: 'Che cosa è successo?', conto: st.kind === 'trasferimento' ? 'Da quale conto sono partiti i soldi?' : st.kind === 'vendita' ? 'Da quale conto hai venduto?' : st.kind === 'prelievo' ? 'Da quale conto sono usciti i soldi?' : st.kind === 'guadagno' || st.kind === 'perdita' ? 'In quale conto?' : st.kind === 'versamento' ? 'In quale conto sono entrati i soldi?' : 'In quale conto hai comprato?', verso: 'A quale conto sono arrivati?', strumento: st.kind === 'vendita' ? 'Quale titolo hai venduto?' : 'Quale titolo hai comprato?', quanto: st.kind === 'vendita' ? 'Quanto hai venduto?' : 'Quanto hai comprato?', dove: 'Su che cosa?', importo: st.kind === 'guadagno' ? 'Quanto hai guadagnato?' : st.kind === 'perdita' ? 'Quanto hai perso?' : 'Quanto?', pagamento: 'Come sono arrivati i soldi mancanti?', riepilogo: 'Controlla e conferma' };
+  const QUESTF = () => ({ kind: 'Che cosa è successo?', conto: st.kind === 'trasferimento' ? 'Da quale conto sono partiti i soldi?' : st.kind === 'vendita' ? 'Da quale conto hai venduto?' : st.kind === 'prelievo' ? 'Da quale conto sono usciti i soldi?' : st.kind === 'guadagno' || st.kind === 'perdita' ? 'In quale conto?' : st.kind === 'versamento' ? 'In quale conto sono entrati i soldi?' : 'In quale conto hai comprato?', verso: 'A quale conto sono arrivati?', strumento: st.kind === 'vendita' ? 'Quale titolo hai venduto?' : 'Quale titolo hai comprato?', quanto: st.kind === 'vendita' ? 'Quanto hai venduto?' : 'Quanto hai comprato?', dove: 'Su che cosa?', importo: st.kind === 'guadagno' ? 'Quanto hai guadagnato?' : st.kind === 'perdita' ? 'Quanto hai perso?' : 'Quanto?', pagamento: 'Come sono arrivati i soldi mancanti?', riepilogo: 'Controlla e conferma' });
   function body() {
     const w = [];
     if (cur === 'kind') { for (const [k, l, d, ico] of OP_UI) w.push(h('button', { type: 'button', class: 'wz-opt kindopt', onclick: () => { st.kind = k; go(nextOf()); } }, s('svg', { viewBox: '0 0 24 24', width: 26, height: 26, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(x => s('path', { d: x }))), h('span', { class: 'wz-tt' }, h('span', { class: 'wz-t' }, l), h('span', { class: 'wz-s' }, d)))); }
@@ -5304,7 +5422,7 @@ function opWizard(pre, after) {
     const bar = h('div', { class: 'wz-prog', 'aria-hidden': 'true' }, f.map((_, i) => h('i', { class: i <= idx ? 'on' : '' })));
     const top = h('div', { class: 'wz-top' }, hist.length ? btn('← Indietro', back, 'sm') : h('span'), h('span', { class: 'wz-step muted' }, cur === 'riepilogo' ? 'Ultimo passo' : 'Passo ' + (idx + 1) + ' di ' + (tot - 1 || 1)), btn('✕', shut, 'sm'));
     const b = body();
-    view.replaceChildren(top, bar, h('h3', { class: 'wz-q' }, QUEST[cur] || ''), h('div', { class: 'wz-b' }, b), cur === 'kind' ? h('p', { class: 'muted wz-adv' }, h('a', { href: '#', onclick: e => { e.preventDefault(); shut(); editOperationAdv(Object.assign({}, pre, { _adv: 1 }), after); } }, 'Preferisco il modulo completo')) : null);
+    view.replaceChildren(top, bar, h('h3', { class: 'wz-q' }, QUESTF()[cur] || ''), h('div', { class: 'wz-b' }, b), cur === 'kind' ? h('p', { class: 'muted wz-adv' }, h('a', { href: '#', onclick: e => { e.preventDefault(); shut(); editOperationAdv(Object.assign({}, pre, { _adv: 1 }), after); } }, 'Preferisco il modulo completo')) : null);
     view.classList.remove('wz-in'); void view.offsetWidth; view.classList.add('wz-in'); dlg.scrollTop = 0;
   }
   if (pre.kind && OP_FLOW[pre.kind]) {          // l'operazione puo' arrivare gia' compilata in parte (da un titolo, da una frase): si parte dal primo dato che manca
