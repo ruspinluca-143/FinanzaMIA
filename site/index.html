@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-f3kN4J64rhMrhC7FebHzxUQ+eD7x50kqwMcngR/ZaIY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fOX2HrjuDcLviMYqyvMhLcv9HgYwA73FXkaMTxnOtQU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3779,6 +3779,14 @@ function foldAll(closed) {          // dal menu: chiude o apre tutte le sezioni 
 }
 function afterRender() { const nav = $app.querySelector('.tabs'); if (nav) placeThumb(nav); runNumbers(); foldInit(); }
 window.addEventListener('resize', () => { const nav = $app.querySelector('.tabs'); if (nav) { LASTTHUMB = null; placeThumb(nav); } });
+/* iPhone: dopo la tastiera (ricerca, importi) Safari a volte lascia la barra in basso a meta' schermo; si rimette a posto da sola */
+(function () {
+  let t = 0;
+  const repin = () => { clearTimeout(t); t = setTimeout(() => { const nav = $app && $app.querySelector('.tabs'); if (!nav) return; const y = window.scrollY; window.scrollTo(window.scrollX, y + 1); window.scrollTo(window.scrollX, y); nav.style.transform = 'translateZ(0)'; requestAnimationFrame(() => { nav.style.transform = ''; }); }, 120); };
+  document.addEventListener('focusout', repin);
+  window.addEventListener('orientationchange', repin);
+  if (window.visualViewport) { visualViewport.addEventListener('resize', repin); }
+})();
 function render() {
   const y = window.scrollY;
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
