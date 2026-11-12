@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UaxNwfnSmw/sNRBodVRbLayio7gxEGD1/WX6QRvsgKU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-p7JAPTaDVd2W3c9ezHha8IRJfICeGSgEk3DVZYrL0GY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -598,7 +598,7 @@ body{background:var(--bg)}
 .qa{background:var(--card-s)!important;border-color:var(--ring)!important}
 .banner{background:var(--card-s);border-color:var(--ring)}
 .tchip{background:var(--btn);color:var(--ink2)}
-.tabs{grid-template-columns:repeat(5,1fr)}
+.tabs{grid-template-columns:repeat(6,1fr)}
 details.det{padding:0}details.det>summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}details.det>summary::-webkit-details-marker{display:none}details.det>summary::after{content:'›';transform:rotate(90deg);color:var(--muted);transition:transform .2s}details.det[open]>summary::after{transform:rotate(-90deg)}details.det>.tiles{margin:0;padding:0 12px 12px}
 .brand::before{background:var(--s1);box-shadow:none}
 @media (max-width:700px){.tabs{background:var(--bg)}}
@@ -688,6 +688,30 @@ dialog{border-radius:min(var(--r),22px)}
 .thm-d{font-size:12px;color:var(--muted)}.wz-accs{display:grid;gap:14px}.wz-grp{display:grid;gap:8px}.wz-gh{margin:6px 2px 0;font-size:13px;font-weight:600;color:var(--muted)}
 .wz-opt{contain:layout style}
 @media (max-width:700px){dialog{box-shadow:none}.wz-in{animation:none}.wz-opt{animation:none;transition:border-color .15s,background .15s}.wz-opt:active{transform:none}dialog>*{animation:none}}@media (prefers-reduced-motion:reduce){.btn,.chip,.tile{transition:none}.btn:hover,.chip:hover,.tile:hover{transform:none}}
+/* ---- Transazioni (spese, guadagni, trasferimenti) ---- */
+.tr-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}.tr-top .subtabs{flex:1;margin:0;min-width:0}
+.tr-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 10px}.tr-nav b{font-size:17px}
+.tr-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.tr-wd{font-size:11px;color:var(--muted);padding:2px 0}
+.tr-day{font:inherit;font-size:14px;border:0;background:var(--btn);color:var(--ink);border-radius:10px;min-height:48px;padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer}
+.tr-day.off{visibility:hidden;pointer-events:none}.tr-day.today{box-shadow:inset 0 0 0 1.5px var(--s1)}
+.tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
+.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
+.tr-day.sel .tr-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.7)}
+.tr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--grid)}.tr-item:first-of-type{border-top:0}
+.tr-it{display:flex;flex-direction:column;gap:1px;min-width:0}.tr-it b{font-size:15px;overflow:hidden;text-overflow:ellipsis}.tr-it .muted{font-size:12px}
+.tr-am{display:flex;align-items:center;gap:8px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.tr-am.in{color:var(--gain,#1f9d55)}.tr-am.out{color:var(--loss,#d93025)}.tr-am.tf{color:var(--muted)}
+.tr-chips{display:flex;flex-wrap:wrap;gap:8px}.tr-chips.c{justify-content:center;margin-top:10px}
+.tr-chip{font:inherit;font-size:16px;font-weight:500;padding:11px 16px;min-height:46px;border-radius:14px;border:1.5px solid var(--ring);background:var(--card);color:var(--ink);cursor:pointer}
+.tr-chip.sm{font-size:14px;min-height:38px;padding:6px 13px;border-radius:99px}.tr-chip.sel{border-color:var(--s1);background:var(--btn)}.tr-chip.ghost{border-style:dashed;color:var(--muted)}.tr-chip.new{border-color:var(--s1);color:var(--s1)}
+.tr-kinds{display:grid;gap:10px}.tr-k{border-left-width:6px}.tr-k-spesa{border-left-color:var(--loss,#ff453a)}.tr-k-entrata{border-left-color:var(--gain,#30d158)}.tr-k-trasf{border-left-color:#0a84ff}
+.tr-quick{margin-top:18px}.tr-when{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:16px}.tr-when input[type=date]{min-height:38px}
+.tr-sum{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:var(--btn);margin-bottom:12px}.tr-sum span{font-size:13px;color:var(--muted)}
+.tr-cats{display:flex;flex-direction:column}.tr-cat{font:inherit;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 0;border:0;border-top:1px solid var(--grid);background:none;color:var(--ink);cursor:pointer}.tr-cat:first-child{border-top:0}
+.tr-cn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tr-cb{height:8px;border-radius:4px;background:var(--btn);overflow:hidden}.tr-cb i{display:block;height:100%;background:var(--s1);border-radius:4px}
+.tr-cv{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;display:flex;flex-direction:column;line-height:1.15}.tr-cv small{font-size:11px;color:var(--muted);font-weight:400}
+.tr-chartw{margin-top:6px}.tr-chart{width:100%;height:auto;display:block;color:var(--ink)}.tr-g{cursor:pointer;outline:none}.tr-g:focus-visible rect:first-child{stroke:var(--s1)}
+.tr-s{width:100%;margin:0 0 10px}.tr-be{fill:var(--gain,#30d158)}.tr-bs{fill:var(--loss,#ff453a)}.undo-toast.tr-toast{animation:none;white-space:nowrap}.tr-per{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.tr-inc{margin:2px 0 8px;font-size:14px}
 </style>
 </head>
 <body>
@@ -805,14 +829,14 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento'], ['prelievo', 'Prelievo'], ['partenza', 'Valore di partenza']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [] });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [], trx: [], trh: [] });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
-  d.boxes = d.boxes || {}; d.goals = d.goals || [];          // casse separate: { "Cassa cani": { goal: 8000 } }
+  d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || [];          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
 
@@ -2447,7 +2471,7 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
     if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.replaced ? ' · ' + pl(r.replaced, 'PAC singolo assorbito', 'PAC singoli assorbiti') : '') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
-    if (it.fin.meta.operazioni) { const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
+    if (it.fin.meta.storico) { const r = applyStoricoFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'transazione dello storico caricata', 'transazioni dello storico caricate') + ' (non toccano i saldi)' + (r.bad ? ' · ' + pl(r.bad, 'riga scartata', 'righe scartate') : '') }); continue; }          // file \ const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
@@ -4003,13 +4027,254 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
-const MAIN_TABS = ['panoramica', 'conti', 'pac', 'consigli', 'analisi'];          // le altre viste sono nel menu a sinistra
+const TABS = [['panoramica', 'Panoramica'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const MAIN_TABS = ['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
+/* ============ TRANSAZIONI: spese, guadagni e trasferimenti (calendario, inserimento guidato, statistiche). Le operazioni nuove muovono la liquidita' dei conti; lo storico importato (S.trh) e' solo andamento e non tocca i saldi ============ */
+const TR_DEF = { spesa: { 'Cibo': ['Colazione', 'Pranzo', 'Cena', 'Aperitivo', 'Caffè'], 'Spesa': [], 'Trasporti': ['Autobus', 'Treno', 'Aereo', 'Taxi', 'Autostrada'], 'Rifornimento': [], 'Casa': ['Affitto', 'Bollette'], 'Telefonia': [], 'Salute': [], 'Bellezza': [], 'Shopping': [], 'Divertimento': [], 'Regalo': [], 'Vacanza': [], 'Assicurazione': [], 'Servizio/Canone': [], 'Altro': [] }, entrata: { 'Stipendio': [], 'Bonus': [], 'Vendita': [], 'Rimborso': [], 'Altro': [] } };
+const TR_KIND = [['spesa', 'Spesa', 'Ho speso dei soldi'], ['entrata', 'Guadagno', 'Mi sono entrati dei soldi'], ['trasf', 'Trasferimento', 'Sposto soldi tra due miei conti']];
+const TR_LAB = { spesa: 'Spesa', entrata: 'Guadagno', trasf: 'Trasferimento' }, TR_CODE = { s: 'spesa', e: 'entrata', t: 'trasf' };
+const TRX = () => S.trx || (S.trx = []), TRH = () => S.trh || (S.trh = []);
+const trCap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+const trMonthName = ym => new Date(ym + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+const trDayName = d => trCap(new Date(d + 'T00:00:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }));
+const trYmd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const trShiftMonth = (ym, n) => { const d = new Date(+ym.slice(0, 4), +ym.slice(5, 7) - 1 + n, 1); return trYmd(d).slice(0, 7); };
+const trSigned = r => r.k === 'entrata' ? r.amt : r.k === 'spesa' ? -r.amt : 0;
+function trNote(n, cat, sub) { n = String(n || '').trim(); const m = /^([^/]+)\/(.+)$/.exec(n); if (m) { const p = normT(m[1]); if (p === normT(cat) || p === normT(sub)) n = m[2].trim(); } return n; }
+let TR_MEMO = null;
+function trAll() {          // tutte le righe (nuove e storico), dalla piu' recente; in memoria finche' non cambia il numero di righe
+  const key = TRX().length + '|' + TRH().length + '|' + S.accounts.map(a => a.name).join('/');
+  if (TR_MEMO && TR_MEMO.key === key) return TR_MEMO.list;
+  const nm = id => (S.accounts.find(a => a.id === id) || {}).name || '(conto eliminato)', out = [];
+  for (const r of TRX()) out.push({ d: r.date, k: r.kind, acc: nm(r.accId), to: r.toId ? nm(r.toId) : '', cat: r.cat || '', sub: r.sub || '', note: trNote(r.note, r.cat, r.sub), amt: r.amount, own: true, rec: r });
+  for (const r of TRH()) out.push({ d: r[0], k: TR_CODE[r[1]] || 'spesa', acc: r[2], to: r[3], cat: r[4], sub: r[5], note: trNote(r[6], r[4], r[5]), amt: r[7], own: false });
+  out.sort((x, y) => x.d < y.d ? 1 : x.d > y.d ? -1 : 0);
+  TR_MEMO = { key, list: out, idx: null }; return out;
+}
+function trIdx() {          // quante volte hai usato ogni categoria, sottocategoria, nota e conto: serve per proporre prima le cose che usi di piu'
+  trAll(); if (TR_MEMO.idx) return TR_MEMO.idx;
+  const I = { cats: { spesa: new Map(), entrata: new Map() }, subs: new Map(), notes: { spesa: new Map(), entrata: new Map(), trasf: new Map() }, acc: new Map() }, bump = (m, k, by) => m.set(k, (m.get(k) || 0) + (by || 1)), now = Date.now();
+  for (const r of TR_MEMO.list) {
+    if (r.k !== 'trasf' && r.cat) { bump(I.cats[r.k], r.cat); if (r.sub) { const key = r.k + '|' + r.cat; if (!I.subs.has(key)) I.subs.set(key, new Map()); bump(I.subs.get(key), r.sub); } }
+    const age = (now - new Date(r.d + 'T00:00:00').getTime()) / 864e5, w = age < 120 ? 3 : age < 400 ? 1.5 : 1;
+    bump(I.acc, r.acc, w);
+    if (r.note) { const nk = normT(r.note), m = I.notes[r.k]; let e = m.get(nk); if (!e) { e = { note: r.note, n: 0, w: 0, last: '', cat: '', sub: '', acc: '', to: '', amt: 0 }; m.set(nk, e); } e.n++; e.w += w; if (r.d >= e.last) { e.last = r.d; e.cat = r.cat; e.sub = r.sub; e.acc = r.acc; e.to = r.to; e.amt = r.amt; } }
+  }
+  return (TR_MEMO.idx = I);
+}
+function trList(map, extra) { const seen = new Set(), out = [], add = c => { const k = normT(c); if (c && !seen.has(k)) { seen.add(k); out.push(c); } }; [...(map || new Map()).entries()].sort((a, b) => b[1] - a[1]).forEach(([c]) => add(c)); (extra || []).forEach(add); return out; }
+const trCats = kind => trList(trIdx().cats[kind], [...Object.keys(((S.trc || {})[kind]) || {}), ...Object.keys(TR_DEF[kind])]);
+const trSubs = (kind, cat) => trList(trIdx().subs.get(kind + '|' + cat), [...(((S.trc || {})[kind] || {})[cat] || []), ...(TR_DEF[kind][cat] || [])]);
+const trAccMatch = (hn, a) => { const x = normT(hn), y = normT(a.name); return !!x && !!y && (x === y || (x.length > 3 && y.length > 3 && (x.includes(y) || y.includes(x)))); };
+function trAccByName(n) {          // il conto dell'app che corrisponde al nome usato nello storico (esatto, oppure l'unico che gli somiglia)
+  const L = S.accounts.filter(a => !a.dep), ex = L.find(a => a.name.toLowerCase() === String(n || '').toLowerCase()); if (ex) return ex;
+  const c = L.filter(a => trAccMatch(n, a)); return c.length === 1 ? c[0] : null;
+}
+function trApply(t) {          // registra una transazione e muove la liquidita': ritorna un messaggio solo se qualcosa non va
+  const a = S.accounts.find(x => x.id === t.accId); if (!a) return 'Scegli il conto.';
+  if (!(t.amount > 0)) return 'Scrivi l\'importo.'; if (!t.date) return 'Scegli la data.';
+  if (a.dep) return 'Un conto deposito non si muove da qui: usa "Modifica conto".';
+  const rec = { id: uid(), date: t.date, kind: t.kind, accId: a.id, amount: t.amount, cat: t.cat || '', sub: t.sub || '', note: t.note || '' };
+  if (t.kind === 'trasf') {
+    const m = applyOp({ accId: a.id, toId: t.toId, kind: 'trasferimento', date: t.date, amount: t.amount, note: t.note || ('Trasferimento ' + a.name + ' → ' + accName(t.toId)) }); if (m) return m;
+    rec.toId = t.toId; rec.opId = OPS()[OPS().length - 1].id;
+  } else {
+    const cfx = fxRate(a.cashCcy) ?? 1, u = { dCash: (t.kind === 'entrata' ? 1 : -1) * t.amount / cfx };
+    if (a.perf) { const f = { id: uid(), date: t.date, type: t.kind === 'entrata' ? 'versamento' : 'prelievo', amount: t.amount, note: t.note || t.cat || 'Movimento' }; a.flows.push(f); u.flowId = f.id; }          // un conto d'investimento: l'entrata e' un versamento e la spesa un prelievo (cosi' il rendimento resta giusto)
+    a.cash = (a.cash || 0) + u.dCash; a.upd = today(); rec.u = u;
+  }
+  TRX().push(rec); return '';
+}
+function trUndo(rec) {          // toglie una transazione e rimette a posto il saldo; vero se e' stata tolta
+  if (rec.kind === 'trasf') { const op = OPS().find(o => o.id === rec.opId); if (op) { undoOp(op); if (OPS().includes(op)) return false; } }
+  else { const a = S.accounts.find(x => x.id === rec.accId); if (a && rec.u) { a.cash = (a.cash || 0) - rec.u.dCash; if (rec.u.flowId) a.flows = a.flows.filter(f => f.id !== rec.u.flowId); a.upd = today(); } }
+  S.trx = TRX().filter(x => x !== rec && x.id !== rec.id); return true;
+}
+function trDelete(r) {
+  if (!r.own) return;
+  const q = r.k === 'trasf' ? null : 'Elimino questa ' + (r.k === 'spesa' ? 'spesa' : 'entrata') + ' e rimetto a posto il saldo di ' + r.acc + '?';
+  if (q && !confirm(q)) return;
+  if (trUndo(r.rec)) done();
+}
+function trToast(json, text) {          // dopo il salvataggio: una riga con "Annulla" per qualche secondo
+  document.querySelectorAll('.undo-toast').forEach(x => x.remove());
+  const bar = h('div', { class: 'undo-toast tr-toast', role: 'status' }, h('span', null, text), h('button', { type: 'button', class: 'btn pri sm' }, 'Annulla'));
+  bar.querySelector('button').onclick = () => { bar.remove(); S = JSON.parse(json); migrate(S); touch(); render(); setStatus('Annullato'); };
+  document.body.append(bar); setTimeout(() => bar.remove(), 7000);
+}
+function trAccPicker(api, onPick, skipId, title) {          // i conti piu' usati in alto, poi tutti in gruppi con la ricerca
+  const I = trIdx(), list = S.accounts.filter(a => !a.dep && a.id !== skipId), w = [];
+  const used = list.map(a => [a, [...I.acc.entries()].reduce((t, [hn, w]) => t + (trAccByName(hn) === a ? w : 0), 0)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
+  const chip = a => h('button', { type: 'button', class: 'tr-chip', onclick: () => onPick(a) }, a.name);
+  if (used.length) w.push(h('h4', { class: 'wz-gh' }, 'I più usati'), h('div', { class: 'tr-chips' }, used.map(chip)));
+  const box = h('div', { class: 'wz-accs' });
+  const fill = qv => {
+    const toks = normT(qv || '').split(' ').filter(Boolean), L = toks.length ? list.filter(a => { const s2 = normT([a.name, (TYPES[a.type] || {}).label, a.box || ''].join(' ')); return toks.every(x => s2.includes(x)); }) : list;
+    box.replaceChildren(...ACC_GROUPS.map(([k, l]) => { const g = L.filter(a => accShow(a) === k); return g.length ? h('div', { class: 'wz-grp' }, h('h4', { class: 'wz-gh' }, l + ' · ' + g.length), h('div', { class: 'tr-chips' }, g.map(chip))) : null; }).filter(Boolean));
+    if (toks.length && !L.length) box.append(h('p', { class: 'muted' }, 'Nessun conto corrisponde: prova con meno parole.'));
+  };
+  const sq = h('input', { type: 'search', class: 'wz-search', placeholder: 'Cerca un conto…', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca un conto' }); sq.addEventListener('input', () => fill(sq.value));
+  fill(''); if (list.length > 6) w.push(sq); w.push(box); return w;
+}
+function trWizard(pre, after) {          // inserimento guidato: che cosa, quanto e quando, categoria, conto, nota (con suggerimenti)
+  if (!S.accounts.length) { alert('Crea prima un conto (scheda Conti).'); return; }
+  pre = pre || {};
+  const st = { kind: pre.kind || '', amt: pre.amt || null, date: pre.date || today(), cat: '', sub: '', accId: '', toId: '', note: '', quick: false, stage: 0, cq: '', all: false, err: '' }, before = JSON.stringify(S);
+  const yday = () => trYmd(new Date(Date.now() - 864e5)), money = v => eur(v, true);
+  const sKind = api => {
+    const I = trIdx(), cands = [];
+    for (const k of ['spesa', 'entrata', 'trasf']) for (const e of I.notes[k].values()) { const a = trAccByName(e.acc); if (a && e.amt > 0 && (k !== 'trasf' || trAccByName(e.to))) cands.push({ k, e, a, sc: e.w + (e.last > trYmd(new Date(Date.now() - 90 * 864e5)) ? 5 : 0) }); }
+    cands.sort((x, y) => y.sc - x.sc);
+    const quick = cands.slice(0, 5).map(c => h('button', { type: 'button', class: 'tr-chip', onclick: () => { Object.assign(st, { kind: c.k, note: c.e.note, cat: c.e.cat || '', sub: c.e.sub || '', accId: c.a.id, toId: c.k === 'trasf' ? trAccByName(c.e.to).id : '', amt: c.e.amt, quick: true, stage: 0 }); api.jump(1); } }, c.e.note + ' · ' + money(c.e.amt)));
+    return { q: 'Che cosa è successo?', next: false, noBack: true, body: [h('div', { class: 'tr-kinds' }, TR_KIND.map(([k, l, d]) => h('button', { type: 'button', class: 'wz-opt tr-k tr-k-' + k, onclick: () => { st.kind = k; st.cat = ''; st.sub = ''; st.quick = false; st.stage = 0; api.next(); } }, h('span', { class: 'wz-t' }, l), h('span', { class: 'wz-s' }, d)))),
+      quick.length ? h('div', { class: 'tr-quick' }, h('h4', { class: 'wz-gh' }, 'Oppure come le altre volte (un tocco)'), h('div', { class: 'tr-chips' }, quick)) : null].filter(Boolean) };
+  };
+  const sAmt = api => {
+    const inp = wzNum(st.amt, 'Quanto?', v => { st.amt = v; if (api.nextBtn) api.nextBtn.disabled = !(v > 0); }), isToday = st.date === today(), isY = st.date === yday();
+    const dt = h('input', { type: 'date', value: st.date, 'aria-label': 'Data', onchange: e => { if (e.target.value) { st.date = e.target.value; api.redraw(); } } });
+    return { q: st.kind === 'entrata' ? 'Quanto hai guadagnato?' : st.kind === 'trasf' ? 'Quanto sposti?' : 'Quanto hai speso?', focus: '.wz-num', valid: st.amt > 0,
+      body: [inp, h('div', { class: 'tr-chips c' }, [5, 10, 20, 50, 100].map(v => h('button', { type: 'button', class: 'tr-chip sm', onclick: () => { st.amt = v; api.redraw(); } }, v + ' €'))),
+        h('div', { class: 'tr-when' }, h('span', { class: 'muted' }, trDayName(st.date)), h('div', { class: 'tr-chips' }, h('button', { type: 'button', class: 'tr-chip sm' + (isToday ? ' sel' : ''), onclick: () => { st.date = today(); api.redraw(); } }, 'Oggi'), h('button', { type: 'button', class: 'tr-chip sm' + (isY ? ' sel' : ''), onclick: () => { st.date = yday(); api.redraw(); } }, 'Ieri'), dt))],
+      onNext: a2 => { if (!(st.amt > 0)) return false; if (st.quick) { a2.jump(4); return false; } st.cat = ''; st.sub = ''; st.stage = 0; a2.next(); return false; } };
+  };
+  const sCat = api => {
+    const kind = st.kind;
+    if (st.cat && st.stage === 1) { const subs = trSubs(kind, st.cat); return { q: st.cat + ': che tipo?', next: false, body: [h('div', { class: 'tr-chips' }, subs.slice(0, 40).map(sb => h('button', { type: 'button', class: 'tr-chip', onclick: () => { st.sub = sb; st.stage = 0; api.next(); } }, sb)), h('button', { type: 'button', class: 'tr-chip ghost', onclick: () => { st.sub = ''; st.stage = 0; api.next(); } }, 'Nessuna in particolare'))] }; }
+    const all = trCats(kind), toks = normT(st.cq).split(' ').filter(Boolean), L = toks.length ? all.filter(c => toks.every(x => normT(c).includes(x))) : (st.all ? all : all.slice(0, 12));
+    const pick = c => { st.cat = c; st.sub = ''; st.cq = ''; if (trSubs(kind, c).length) { st.stage = 1; api.redraw(); } else api.next(); };
+    const sq = h('input', { type: 'search', class: 'wz-search', placeholder: 'Cerca o scrivi una categoria…', value: st.cq, autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca la categoria' });
+    const chips = h('div', { class: 'tr-chips' }), fill = () => { const t2 = normT(st.cq).split(' ').filter(Boolean), L2 = t2.length ? all.filter(c => t2.every(x => normT(c).includes(x))) : (st.all ? all : all.slice(0, 12)); chips.replaceChildren(...L2.map(c => h('button', { type: 'button', class: 'tr-chip', onclick: () => pick(c) }, c)));
+      const nm = st.cq.trim(); if (nm && !all.some(c => normT(c) === normT(nm))) chips.append(h('button', { type: 'button', class: 'tr-chip new', onclick: () => { const c = trCap(nm); ((S.trc = S.trc || {})[kind] = S.trc[kind] || {})[c] = S.trc[kind][c] || []; pick(c); } }, '+ Crea «' + trCap(nm) + '»'));
+      if (!t2.length && !st.all && all.length > 12) chips.append(h('button', { type: 'button', class: 'tr-chip ghost', onclick: () => { st.all = true; fill(); } }, 'Tutte (' + all.length + ')')); };
+    sq.addEventListener('input', () => { st.cq = sq.value; fill(); }); sq.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const f = chips.querySelector('.tr-chip:not(.ghost)'); if (f) f.click(); } });
+    fill(); return { q: kind === 'entrata' ? 'Che tipo di guadagno?' : 'In che categoria?', next: false, body: [sq, chips] };
+  };
+  const sAcc = api => ({ q: st.kind === 'entrata' ? 'In quale conto sono entrati?' : 'Da quale conto hai pagato?', next: false, body: trAccPicker(api, a => { st.accId = a.id; api.next(); }) });
+  const sFrom = api => ({ q: 'Da quale conto partono i soldi?', next: false, body: trAccPicker(api, a => { st.accId = a.id; if (st.toId === a.id) st.toId = ''; api.next(); }) });
+  const sTo = api => ({ q: 'A quale conto arrivano?', next: false, body: trAccPicker(api, a => { st.toId = a.id; api.next(); }, st.accId) });
+  const sNote = api => {
+    const I = trIdx(), map = I.notes[st.kind], inp = h('input', { type: 'text', class: 'wz-search', placeholder: st.kind === 'trasf' ? 'Nota (facoltativa)' : 'Dove o che cosa (facoltativo)', value: st.note, autocomplete: 'off', 'aria-label': 'Nota' }), sug = h('div', { class: 'tr-chips' });
+    const fill = () => { const q = normT(inp.value), L = [...map.values()].filter(e => !q ? e.cat === st.cat : normT(e.note).includes(q) && normT(e.note) !== q).sort((a, b) => (b.cat === st.cat ? 1000 : 0) + b.w - ((a.cat === st.cat ? 1000 : 0) + a.w)).slice(0, 6);
+      sug.replaceChildren(...L.map(e => h('button', { type: 'button', class: 'tr-chip', onclick: () => { inp.value = e.note; st.note = e.note; if (!st.sub && e.cat === st.cat && e.sub) st.sub = e.sub; fill(); sum(); } }, e.note))); };
+    const sumEl = h('div', { class: 'tr-sum' }), sum = () => { const a = S.accounts.find(x => x.id === st.accId), b = S.accounts.find(x => x.id === st.toId); sumEl.replaceChildren(h('b', null, TR_LAB[st.kind] + ' ' + money(st.amt)), h('span', null, (st.kind === 'trasf' ? (a ? a.name : '') + ' → ' + (b ? b.name : '') : [st.cat, st.sub].filter(Boolean).join(' › ') + (a ? ' · ' + a.name : '')) + ' · ' + trDayName(st.date))); };
+    inp.addEventListener('input', () => { st.note = inp.value; fill(); }); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('dialog.wz .wz-nav .pri:not([disabled])'); if (b) b.click(); } });
+    fill(); sum();
+    return { q: 'Vuoi aggiungere una nota?', nextLabel: 'Salva', focus: '.wz-search', err: st.err, body: [sumEl, inp, sug, h('p', { class: 'muted' }, 'I suggerimenti vengono da quello che hai già scritto.')],
+      onNext: async a2 => { st.err = ''; const r = trApply({ kind: st.kind, date: st.date, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, note: st.note.trim() }); if (r) { st.err = r; a2.redraw(); return false; } a2.shut(); trAllDone(before, TR_LAB[st.kind] + ' salvata: ' + money(st.amt)); if (after) after(); return false; } };
+  };
+  const steps = () => st.kind === 'trasf' ? [sKind, sAmt, sFrom, sTo, sNote] : [sKind, sAmt, sCat, sAcc, sNote];
+  return wzRun({ steps });
+}
+function trAllDone(before, text) { touch(); render(); trToast(before, text); }
+/* ---------- importazione dello storico (file "#Finanze;storico=si") ---------- */
+function applyStoricoFile(text) {          // Data;Tipo;Conto;A conto;Categoria;Sotto-categoria;Nota;Importo;Descrizione. Non muove nessun saldo: serve per statistiche, suggerimenti e andamento
+  const rows = []; let bad = 0;
+  for (const line of String(text).split(/\r?\n/)) {
+    const c = line.split(';').map(x => (x || '').trim()); if (!c[0] || /^data$/i.test(c[0]) || c[0][0] === '#') continue;
+    const amt = parseNum(c[7], ','), k = /^spesa$/i.test(c[1]) ? 's' : /^entrata$/i.test(c[1]) ? 'e' : /^trasf/i.test(c[1]) ? 't' : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(c[0]) || !k || !(amt > 0)) { bad++; continue; }
+    rows.push([c[0], k, c[2], c[3], c[4], c[5], c[6], Math.round(amt * 100) / 100]);
+  }
+  S.trh = rows; TR_MEMO = null; return { n: rows.length, bad };
+}
+/* ---------- la scheda ---------- */
+function tabTransazioni() {
+  const v = UI.trv || 'cal', el = h('div');
+  el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['sta', 'Statistiche']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
+  el.append(v === 'sta' ? trStats() : trCal());
+  return el;
+}
+function trItem(r, showDate) {          // una riga: che cosa, categoria e conto, importo (e Elimina se e' una transazione tua)
+  const head = r.note || r.cat || TR_LAB[r.k], line = r.k === 'trasf' ? r.acc + ' → ' + r.to : [r.cat, r.sub].filter(Boolean).join(' › ') + (r.acc ? ' · ' + r.acc : '');
+  const amt = r.k === 'trasf' ? eur(r.amt, true) : (r.k === 'entrata' ? '+' : '−') + eur(r.amt, true);
+  return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, head), h('span', { class: 'muted' }, (showDate ? fmtDate(r.d) + ' · ' : '') + line + (r.own ? '' : ' · storico'))),
+    h('div', { class: 'tr-am ' + (r.k === 'entrata' ? 'in' : r.k === 'spesa' ? 'out' : 'tf') }, amt, r.own ? btn('Elimina', () => trDelete(r), 'sm danger') : null));
+}
+function trCal() {
+  const el = h('div'), today0 = today(), ym = UI.trm || today0.slice(0, 7), sel = UI.trd && UI.trd.slice(0, 7) === ym ? UI.trd : (ym === today0.slice(0, 7) ? today0 : ym + '-01');
+  const all = trAll(), month = all.filter(r => r.d.slice(0, 7) === ym), by = new Map();
+  for (const r of month) { if (!by.has(r.d)) by.set(r.d, []); by.get(r.d).push(r); }
+  const q0 = (UI.trq || '').trim(), res = h('div'), cal = h('div'), sq = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca (nota, categoria, conto, importo)…', value: UI.trq || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra le transazioni' });
+  const fillRes = () => { const toks = normT(UI.trq || '').split(' ').filter(Boolean); if (!toks.length) { res.replaceChildren(); return; }
+    const L = all.filter(r => { const s2 = normT([r.note, r.cat, r.sub, r.acc, r.to, TR_LAB[r.k], String(r.amt).replace('.', ','), r.d, fmtDate(r.d)].join(' ')); return toks.every(x => s2.includes(x)); });
+    const tot = L.reduce((t, r) => t + trSigned(r), 0);
+    res.replaceChildren(h('section', { class: 'card' }, h('h2', null, pl(L.length, 'risultato', 'risultati')), L.length ? h('p', { class: 'muted' }, 'Totale: ' + eur(tot, true) + (L.length > 80 ? ' · mostro i primi 80' : '')) : h('p', { class: 'muted' }, 'Niente trovato: prova con meno parole.'), L.slice(0, 80).map(r => trItem(r, true)))); };
+  sq.addEventListener('input', () => { UI.trq = sq.value; cal.hidden = !!sq.value.trim(); fillRes(); });
+  el.append(sq, res); fillRes(); cal.hidden = !!q0;
+  const [y, m] = [+ym.slice(0, 4), +ym.slice(5, 7)], dim = new Date(y, m, 0).getDate(), off = (new Date(y, m - 1, 1).getDay() + 6) % 7;
+  cal.append(h('div', { class: 'tr-nav' }, btn('‹', () => { UI.trm = trShiftMonth(ym, -1); UI.trd = null; render(); }, 'sm'), h('b', null, trMonthName(ym)), h('span', { class: 'row', style: 'gap:6px;margin:0' }, ym !== today0.slice(0, 7) ? btn('Oggi', () => { UI.trm = today0.slice(0, 7); UI.trd = today0; render(); }, 'sm') : null, btn('›', () => { UI.trm = trShiftMonth(ym, 1); UI.trd = null; render(); }, 'sm'))));
+  const grid = h('div', { class: 'tr-cal' }); ['L', 'M', 'M', 'G', 'V', 'S', 'D'].forEach(x => grid.append(h('div', { class: 'tr-wd' }, x)));
+  for (let i = 0; i < off; i++) grid.append(h('div', { class: 'tr-day off' }));
+  for (let d = 1; d <= dim; d++) {
+    const ds = ym + '-' + String(d).padStart(2, '0'), L = by.get(ds) || [], sp = L.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0), has = k => L.some(r => r.k === k);
+    grid.append(h('button', { type: 'button', class: 'tr-day' + (ds === today0 ? ' today' : '') + (ds === sel ? ' sel' : ''), 'aria-label': trDayName(ds) + (L.length ? ', ' + pl(L.length, 'voce', 'voci') : ''), onclick: () => { UI.trd = ds; render(); } }, String(d), h('span', { class: 'tr-dots' }, has('spesa') ? h('i', { class: 'tr-d-s' }) : null, has('entrata') ? h('i', { class: 'tr-d-e' }) : null, has('trasf') ? h('i', { class: 'tr-d-t' }) : null), sp > 0 ? h('small', null, nf0.format(sp)) : null));
+  }
+  cal.append(h('section', { class: 'card' }, grid));
+  const e = month.filter(r => r.k === 'entrata').reduce((t, r) => t + r.amt, 0), s0 = month.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0);
+  const catRows = k => { const mp = new Map(); for (const r of month) if (r.k === k) mp.set(r.cat || 'Senza categoria', (mp.get(r.cat || 'Senza categoria') || 0) + r.amt); return [...mp.entries()].sort((a, b) => b[1] - a[1]).map(([c, v]) => [c, v]); };
+  cal.append(tiles([{ l: 'Guadagni del mese', v: eur(e), s: pl(month.filter(r => r.k === 'entrata').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: e, rows: catRows('entrata'), rowsTitle: 'Da dove arrivano', say: 'Tutti i soldi entrati in questo mese, compresi quelli dello storico.' }) },
+    { l: 'Spese del mese', v: eur(s0), s: pl(month.filter(r => r.k === 'spesa').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: s0, rows: catRows('spesa'), rowsTitle: 'Dove sono andati', say: 'Tutto quello che hai speso in questo mese. I trasferimenti tra i tuoi conti non contano.' }) },
+    { l: 'Saldo del mese', v: seur(e - s0), s: e - s0 >= 0 ? 'hai messo da parte' : 'hai speso più di quanto hai guadagnato', x: () => ({ kind: trMonthName(ym), num: e - s0, fmt: seur, say: 'Guadagni meno spese del mese: se è positivo, sei in avanzo.' }) }]));
+  const L = by.get(sel) || [];
+  cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.'), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
+  el.append(cal); return el;
+}
+/* ---------- statistiche ---------- */
+function trStats() {
+  const el = h('div'), now = today(), ym = UI.trm || now.slice(0, 7), P = UI.trp || 'mese', inclH = UI.trh !== false, ex = (S.settings.trEx = S.settings.trEx || []);
+  let from, to, title;
+  if (P === 'giorno') { from = to = UI.trd || now; title = fmtDate(from); }
+  else if (P === 'mese') { from = ym + '-01'; to = ym + '-' + String(new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate()).padStart(2, '0'); title = trCap(trMonthName(ym)); }
+  else if (P === 'anno') { const yy = UI.try || ym.slice(0, 4); from = yy + '-01-01'; to = yy + '-12-31'; title = yy; }
+  else if (P === 'tutto') { const A = trAll(); from = A.length ? A[A.length - 1].d : now; to = now; title = 'Tutto lo storico'; }
+  else { from = UI.trf || ym + '-01'; to = UI.trt || now; title = fmtDate(from) + ' → ' + fmtDate(to); }
+  const step = n => { if (P === 'giorno') { const d = new Date((UI.trd || now) + 'T00:00:00'); d.setDate(d.getDate() + n); UI.trd = trYmd(d); UI.trm = UI.trd.slice(0, 7); } else if (P === 'mese') UI.trm = trShiftMonth(ym, n); else if (P === 'anno') UI.try = String(+(UI.try || ym.slice(0, 4)) + n); render(); };
+  el.append(h('div', { class: 'chips' }, [['giorno', 'Giorno'], ['mese', 'Mese'], ['anno', 'Anno'], ['pers', 'Periodo'], ['tutto', 'Tutto']].map(([k, l]) => h('button', { type: 'button', class: 'chip', 'aria-pressed': P === k ? 'true' : 'false', onclick: () => { UI.trp = k; render(); } }, l))));
+  if (P === 'pers') el.append(h('div', { class: 'tr-per' }, h('label', { class: 'fld' }, h('span', null, 'Dal'), h('input', { type: 'date', value: from, onchange: e => { UI.trf = e.target.value; render(); } })), h('label', { class: 'fld' }, h('span', null, 'Al'), h('input', { type: 'date', value: to, onchange: e => { UI.trt = e.target.value; render(); } }))));
+  else if (P !== 'tutto') el.append(h('div', { class: 'tr-nav' }, btn('‹', () => step(-1), 'sm'), h('b', null, title), btn('›', () => step(1), 'sm')));
+  const rows = trAll().filter(r => r.d >= from && r.d <= to && r.k !== 'trasf' && (inclH || r.own) && !ex.includes(r.cat || 'Senza categoria'));
+  const e = rows.filter(r => r.k === 'entrata').reduce((t, r) => t + r.amt, 0), s0 = rows.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0), days = Math.max(1, Math.round((new Date(to + 'T00:00:00') - new Date(from + 'T00:00:00')) / 864e5) + 1);
+  el.append(h('label', { class: 'chk tr-inc' }, h('input', { type: 'checkbox', checked: inclH, onchange: ev => { UI.trh = ev.target.checked; render(); } }), h('span', null, 'Includi lo storico importato')));
+  if (ex.length) el.append(h('div', { class: 'chips' }, h('span', { class: 'muted', style: 'align-self:center' }, 'Escluse dai totali:'), ex.map(c => h('button', { type: 'button', class: 'chip', title: 'Tocca per rimetterla', onclick: () => { S.settings.trEx = ex.filter(x => x !== c); done(); } }, c + ' ✕'))));
+  el.append(tiles([{ l: 'Guadagni', v: eur(e), s: title, x: () => ({ kind: title, num: e, say: 'Tutti i soldi entrati nel periodo.' }) }, { l: 'Spese', v: eur(s0), s: 'media ' + eur(s0 / days) + ' al giorno', x: () => ({ kind: title, num: s0, say: 'Tutto quello che hai speso nel periodo. I trasferimenti tra i tuoi conti non contano.', how: 'Media al giorno = spese ÷ ' + pl(days, 'giorno', 'giorni') + '.' }) }, { l: 'Saldo', v: seur(e - s0), s: e - s0 >= 0 ? 'in avanzo' : 'in disavanzo', x: () => ({ kind: title, num: e - s0, fmt: seur, say: 'Guadagni meno spese.' }) }]));
+  const byMonth = (to.slice(0, 7) !== from.slice(0, 7)) && days > 62, bk = new Map();
+  for (const r of rows) { const k = byMonth ? r.d.slice(0, 7) : r.d, o = bk.get(k) || { e: 0, s: 0 }; if (r.k === 'entrata') o.e += r.amt; else o.s += r.amt; bk.set(k, o); }
+  const keys = []; if (byMonth) { for (let m0 = from.slice(0, 7); m0 <= to.slice(0, 7); m0 = trShiftMonth(m0, 1)) keys.push(m0); } else { for (let d = new Date(from + 'T00:00:00'), n = 0; trYmd(d) <= to && n < 400; d.setDate(d.getDate() + 1), n++) keys.push(trYmd(d)); }
+  if (keys.length > 1) el.append(h('section', { class: 'card' }, h('h2', null, 'Guadagni e spese'), h('p', { class: 'muted gs' }, 'Verde i guadagni, rosso le spese: ' + (byMonth ? 'un gruppo per mese' : 'un gruppo per giorno') + '. Tocca un gruppo per i dettagli.'), trBars(keys, bk, byMonth)));
+  const K = UI.trk || 'spesa', cm = new Map(), tot = K === 'spesa' ? s0 : e;
+  for (const r of rows) if (r.k === K) cm.set(r.cat || 'Senza categoria', (cm.get(r.cat || 'Senza categoria') || 0) + r.amt);
+  const cats = [...cm.entries()].sort((a, b) => b[1] - a[1]), mx = cats.length ? cats[0][1] : 1;
+  const sec = h('section', { class: 'card' }, h('h2', null, K === 'spesa' ? 'Dove vanno i soldi' : 'Da dove arrivano'), h('div', { class: 'chips' }, [['spesa', 'Spese'], ['entrata', 'Guadagni']].map(([k, l]) => h('button', { type: 'button', class: 'chip', 'aria-pressed': K === k ? 'true' : 'false', onclick: () => { UI.trk = k; render(); } }, l))));
+  const qi = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca una categoria…', autocomplete: 'off', 'aria-label': 'Cerca una categoria' }), list = h('div', { class: 'tr-cats' });
+  const fillC = () => { const toks = normT(qi.value).split(' ').filter(Boolean), L = toks.length ? cats.filter(([c]) => toks.every(x => normT(c).includes(x))) : cats;
+    list.replaceChildren(...L.map(([c, v]) => h('button', { type: 'button', class: 'tr-cat', onclick: () => trCatTalk(K, c, rows, v, tot, title) }, h('span', { class: 'tr-cn' }, c), h('span', { class: 'tr-cb' }, h('i', { style: 'width:' + Math.max(2, v / mx * 100) + '%' })), h('span', { class: 'tr-cv' }, eur(v), h('small', null, tot > 0 ? Math.round(v / tot * 100) + '%' : ''))))); if (!L.length) list.append(h('p', { class: 'muted' }, cats.length ? 'Nessuna categoria corrisponde.' : 'Niente in questo periodo.')); };
+  qi.addEventListener('input', fillC); fillC(); if (cats.length > 8) sec.append(qi); sec.append(list); el.append(sec);
+  return el;
+}
+function trBars(keys, bk, byMonth) {          // due barre (guadagni verdi, spese rosse) per ogni giorno o mese
+  const W = 340, H = 150, pad = 18, mx = Math.max(1, ...keys.map(k => Math.max((bk.get(k) || { e: 0 }).e, (bk.get(k) || { s: 0 }).s))), bw = (W - 8) / keys.length, svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'tr-chart', role: 'img', 'aria-label': 'Guadagni e spese nel periodo' });
+  const every = keys.length > 24 ? Math.ceil(keys.length / 12) : 1;
+  keys.forEach((k, i) => { const o = bk.get(k) || { e: 0, s: 0 }, x = 4 + i * bw, he = o.e / mx * (H - pad - 4), hs = o.s / mx * (H - pad - 4), g = s('g', { class: 'tr-g', tabindex: '0', role: 'button', 'aria-label': (byMonth ? trCap(trMonthName(k)) : trDayName(k)) + ': guadagni ' + eur(o.e) + ', spese ' + eur(o.s) });
+    g.append(s('rect', { x: x + 0.5, y: 0, width: Math.max(bw - 1, 1), height: H - pad, fill: 'transparent' }), s('rect', { x: x + 1, y: H - pad - he, width: Math.max(bw / 2 - 1.5, 1), height: Math.max(he, o.e > 0 ? 1 : 0), class: 'tr-be', rx: 1 }), s('rect', { x: x + bw / 2, y: H - pad - hs, width: Math.max(bw / 2 - 1.5, 1), height: Math.max(hs, o.s > 0 ? 1 : 0), class: 'tr-bs', rx: 1 }));
+    if (i % every === 0) g.append(s('text', { x: x + bw / 2, y: H - 4, 'text-anchor': 'middle', 'font-size': 9, fill: 'currentColor', opacity: .6 }, byMonth ? new Date(k + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }) : k.slice(8, 10)));
+    const go = () => talk({ kind: byMonth ? trCap(trMonthName(k)) : trDayName(k), title: 'Guadagni e spese', value: seur(o.e - o.s), say: 'Guadagni ' + eur(o.e, true) + ' · spese ' + eur(o.s, true) + '.', tip: byMonth ? 'Per vedere le singole voci apri il Calendario su questo mese.' : null, acts: byMonth ? [['Apri il mese', () => { UI.trv = 'cal'; UI.trm = k; UI.trd = null; render(); window.scrollTo(0, 0); }]] : [['Apri il giorno', () => { UI.trv = 'cal'; UI.trm = k.slice(0, 7); UI.trd = k; render(); window.scrollTo(0, 0); }]] });
+    g.addEventListener('click', go); g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } }); svg.append(g); });
+  return h('div', { class: 'tr-chartw' }, svg);
+}
+function trCatTalk(K, cat, rows, v, tot, title) {
+  const R = rows.filter(r => r.k === K && (r.cat || 'Senza categoria') === cat), sm = new Map(), nm = new Map();
+  for (const r of R) { sm.set(r.sub || 'Senza sotto-categoria', (sm.get(r.sub || 'Senza sotto-categoria') || 0) + r.amt); if (r.note) nm.set(r.note, (nm.get(r.note) || 0) + r.amt); }
+  const subs = [...sm.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10), notes = [...nm.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  talk({ kind: title, title: cat, num: v, value: eur(v), say: (tot > 0 ? Math.round(v / tot * 100) + '% del totale' : '') + ' · ' + pl(R.length, 'voce', 'voci') + (R.length ? ' · media ' + eur(v / R.length, true) : '') + '.', rows: subs.length > 1 || (subs[0] && subs[0][0] !== 'Senza sotto-categoria') ? subs : null, rowsTitle: 'Sotto-categorie',
+    box: notes.length ? ['Dove di più', notes.map(([n, a]) => n + ' ' + eur(a)).join(' · ')] : null, tip: 'Una spesa grossa e unica (per esempio un\'auto) falsa le medie: puoi escluderla dai totali e rimetterla quando vuoi.',
+    acts: [['Escludi dai totali', () => { const ex = (S.settings.trEx = S.settings.trEx || []); if (!ex.includes(cat)) ex.push(cat); done(); }, ''], ['Vedi nel calendario', () => { UI.trv = 'cal'; UI.trq = cat; render(); window.scrollTo(0, 0); }, '']] });
+}
+          // le altre viste sono nel menu a sinistra
 function tabsBar() { return h('nav', { class: 'tabs', role: 'tablist' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), TABS.filter(([k]) => MAIN_TABS.includes(k)).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': UI.tab === k ? 'true' : 'false', onclick: () => { UI.tab = k; if (k !== 'conti') UI.acc = null; UI.planId = null; if (k === 'analisi') UI.sub = null; UI.fondo = null; render(); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
-const SHORT = { grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
+const ICONS = { transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { panoramica: tabPanoramica, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
 function tabPanoramica() {
