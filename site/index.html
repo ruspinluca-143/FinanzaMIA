@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tb0hGYwWIWl65PJkcdBpSEqpUnWWQiPkDseJRuxftO0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Yf2Tmxo9TemLToL5fOocOmY72v7vXfJuT6EvWhOTVp8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4073,6 +4073,7 @@ function openMenu() {
     item('Chiudi tutte le sezioni', ['M6 9l6 6 6-6'], () => foldAll(true), 'per vedere solo i titoli'),
     item('Apri tutte le sezioni', ['M6 15l6-6 6 6'], () => foldAll(false)),
     h('div', { class: 'dr-sec' }, 'Altre viste'),
+    item('Plusvalenze e minusvalenze', ICONS.plusvalenze, go('plusvalenze'), 'vendite: guadagni e perdite realizzati'),
     item('Grafici', ICONS.grafici, go('grafici')),
     item('Grandi fondi (cosa comprano i grandi)', ICONS.grandi, go('grandi')),
     item('Strumenti (i tuoi titoli)', ICONS.strumenti, go('strumenti')),
@@ -4088,9 +4089,9 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['panoramica', 'Home'], ['investimenti', 'Investimenti'], ['altro', 'Altro'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const TABS = [['plusvalenze', 'Plusvalenze'], ['panoramica', 'Home'], ['investimenti', 'Investimenti'], ['altro', 'Altro'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Allocazione'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Consigli'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 const MAIN_TABS = ['panoramica', 'investimenti', 'transazioni', 'altro'];
-const TAB_GROUP = k => k === 'panoramica' ? 'panoramica' : ['investimenti', 'conti', 'pac'].includes(k) ? 'investimenti' : k === 'transazioni' ? 'transazioni' : 'altro';          // a quale delle 4 schede della barra appartiene ogni vista
+const TAB_GROUP = k => k === 'panoramica' ? 'panoramica' : ['investimenti', 'conti', 'pac', 'plusvalenze'].includes(k) ? 'investimenti' : k === 'transazioni' ? 'transazioni' : 'altro';          // a quale delle 4 schede della barra appartiene ogni vista
 /* ============ TRANSAZIONI: spese, guadagni e trasferimenti (calendario, inserimento guidato, statistiche). Le operazioni nuove muovono la liquidita' dei conti; lo storico importato (S.trh) e' solo andamento e non tocca i saldi ============ */
 const TR_DEF = { spesa: { 'Cibo': ['Colazione', 'Pranzo', 'Cena', 'Aperitivo', 'Caffè'], 'Spesa': [], 'Trasporti': ['Autobus', 'Treno', 'Aereo', 'Taxi', 'Autostrada'], 'Rifornimento': [], 'Casa': ['Affitto', 'Bollette'], 'Telefonia': [], 'Salute': [], 'Bellezza': [], 'Shopping': [], 'Divertimento': [], 'Regalo': [], 'Vacanza': [], 'Assicurazione': [], 'Servizio/Canone': [], 'Altro': [] }, entrata: { 'Stipendio': [], 'Bonus': [], 'Vendita': [], 'Rimborso': [], 'Altro': [] } };
 const TR_KIND = [['spesa', 'Spesa', 'Ho speso dei soldi'], ['entrata', 'Guadagno', 'Mi sono entrati dei soldi'], ['trasf', 'Trasferimento', 'Sposto soldi tra due miei conti']];
@@ -4423,12 +4424,12 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v7 (temi Revolut in Aspetto, piu logo)';
+const APP_VER = '12/11/2026 · v8 (plusvalenze e minusvalenze)';
 function tabsBar() { const mt = mainTabs(); return h('nav', { class: 'tabs', role: 'tablist', style: 'grid-template-columns:repeat(' + mt.length + ',1fr)' }, h('span', { class: 'thumb', 'aria-hidden': 'true' }), mt.map(k => [k, (TABS.find(t => t[0] === k) || [k, k])[1]]).map(([k, l]) => h('button', { class: 'tab', role: 'tab', 'aria-selected': (LAYOUT() === 'classico' ? UI.tab === k : TAB_GROUP(UI.tab) === k) ? 'true' : 'false', onclick: () => { UI.tab = k; UI.acc = null; UI.planId = null; UI.sub = null; UI.fondo = null; render(); window.scrollTo(0, 0); } }, h('span', { class: 'ti' }, tabIcon(k)), h('span', { class: 'lf' }, l), h('span', { class: 'ls' }, SHORT[k] || l)))); }
-const ICONS = { investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
+const ICONS = { plusvalenze: ['M3 17l6-6 4 4 8-8', 'M15 7h6v6'], investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { panoramica: tabPanoramica, investimenti: tabInvestimenti, altro: tabAltro, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
+function content() { return { plusvalenze: tabPlusvalenze, panoramica: tabPanoramica, investimenti: tabInvestimenti, altro: tabAltro, conti: tabConti, strumenti: tabStrumenti, allocazione: tabAllocazione, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
 /* ============ LAYOUT STILE REVOLUT: Home a riquadri, scheda Investimenti (conti a fisarmonica), scheda Altro ============ */
@@ -4563,6 +4564,7 @@ function tabInvestimenti() {
   };
   q.addEventListener('input', () => { UI.rvQ = q.value; draw(); }); draw();
   el.append(h('div', { class: 'cq-row' }, q), list);
+  { const E = pvEntries().out, tot = E.reduce((x, r) => x + r.pnl, 0); el.append(rvCard(rvHead('Guadagni e perdite realizzati', 'Apri', rvGo('plusvalenze')), rvRow(rvSvg(RV_ICO.trend), 'Plusvalenze e minusvalenze', E.length ? pl(E.length, 'operazione chiusa', 'operazioni chiuse') + ' · quello che hai venduto' : 'ancora nessuna vendita registrata', E.length ? gl(tot, seur(tot)) : '›', '', rvGo('plusvalenze')))); }
   const t = today(), ord = OPS().slice().reverse().slice(0, 5), rec = [];
   for (const pp of PL()) { const d = occurrences(pp.start, freqMonths(pp.freq), pp.day, pp.since || pp.start, addMonthsStr(t, 14), pp.end).find(x => x >= t); if (d) rec.push([pp, d]); }
   rec.sort((x, y) => x[1] < y[1] ? -1 : 1);
@@ -4570,9 +4572,61 @@ function tabInvestimenti() {
   if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvGo('conti')), ord.map(x => rvRow(rvSvg(RV_ICO.move), (OP_LABEL[x.kind] || x.kind) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x)))));
   return el;
 }
+/* ============ PLUSVALENZE E MINUSVALENZE REALIZZATE: quello che hai venduto (e non hai piu'), con il guadagno o la perdita di ogni operazione ============ */
+function pvEntries() {
+  const out = [], unk = [];
+  for (const o of OPS()) {
+    if (o.kind === 'vendita') {
+      const net = (o.gross || 0) - (o.fee || 0);
+      if (o.realized != null) out.push({ d: o.date, name: o.instName || '—', acc: accName(o.accId), pnl: o.realized, cost: net - o.realized, proceeds: net, o, how: 'Venduto' });
+      else unk.push(o);
+    } else if (o.kind === 'guadagno' || o.kind === 'perdita') out.push({ d: o.date, name: o.instName || accName(o.accId), acc: accName(o.accId), pnl: (o.kind === 'guadagno' ? 1 : -1) * (o.amount || 0), cost: null, proceeds: null, o, how: o.kind === 'guadagno' ? 'Guadagno registrato' : 'Perdita registrata' });
+  }
+  return { out, unk };
+}
+const PV_PER = [['tutto', 'Sempre'], ['anno', 'Quest\'anno'], ['scorso', 'Anno scorso'], ['12m', '12 mesi']];
+function pvInRange(d, per) {
+  const y = +today().slice(0, 4);
+  return per === 'anno' ? d.slice(0, 4) === String(y) : per === 'scorso' ? d.slice(0, 4) === String(y - 1) : per === '12m' ? d >= addMonthsStr(today(), -12) : true;
+}
+function talkPvGroup(g) {
+  talk({ kind: 'Plusvalenze e minusvalenze', title: g.name, value: gl(g.pnl, seur(g.pnl)), num: g.pnl, say: (g.pnl >= 0 ? 'Con questo titolo hai guadagnato in tutto ' : 'Con questo titolo hai perso in tutto ') + eur(Math.abs(g.pnl)) + ' in ' + pl(g.items.length, 'operazione', 'operazioni') + (g.cost > 0 ? ' (' + spct(g.pnlK / g.cost) + ' sul costo di ' + eur(g.cost) + ').' : '.'), how: 'Per ogni vendita: incasso meno commissioni, meno il costo di carico delle quote vendute. Sono le cifre che contano per le tasse (Analisi → Tasse).', rows: g.items.slice().sort((x, y) => x.d < y.d ? 1 : -1).map(x => [fmtDate(x.d) + ' · ' + x.how, x.pnl, x.acc + (x.cost > 0 ? ' · ' + spct(x.pnl / x.cost) : ''), () => talkOp(x.o)]), rowsTitle: 'Le operazioni (tocca per i dettagli)', signed: true });
+}
+function tabPlusvalenze() {
+  const el = h('div', { class: 'rv-pv' }), { out, unk } = pvEntries();
+  const per = UI.pvPer || 'tutto', kind = UI.pvKind || 'tutte', grp = UI.pvGrp || 'op';
+  const inR = out.filter(x => pvInRange(x.d, per)), plus = inR.filter(x => x.pnl > 0).reduce((t, x) => t + x.pnl, 0), minus = inR.filter(x => x.pnl < 0).reduce((t, x) => t + x.pnl, 0), tot = plus + minus;
+  const chips = (list, cur, key) => h('div', { class: 'row', style: 'gap:6px;margin:6px 0' }, list.map(([k, l]) => btn(l, () => { UI[key] = k; render(); }, 'sm' + (cur === k ? ' pri' : ''))));
+  el.append(h('section', { class: 'rv-hero' }, h('div', { class: 'rv-lbl' }, 'Guadagni e perdite realizzati'), h('div', { class: 'rv-tot' }, gl(tot, seur(tot))),
+    h('div', { class: 'hero-pills' }, h('span', { class: 'pill up' }, '▲ ' + eur(plus) + ' guadagnati'), h('span', { class: 'pill dn' }, '▼ ' + eur(Math.abs(minus)) + ' persi')),
+    h('p', { class: 'muted' }, pl(inR.length, 'operazione chiusa', 'operazioni chiuse') + ' · quello che hai venduto e non hai più')));
+  el.append(chips(PV_PER, per, 'pvPer'), chips([['tutte', 'Tutte'], ['guadagni', 'Dove ho guadagnato'], ['perdite', 'Dove ho perso']], kind, 'pvKind'), chips([['op', 'Per operazione'], ['titolo', 'Per titolo']], grp, 'pvGrp'));
+  const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca un titolo, un conto o una data', 'aria-label': 'Cerca tra le operazioni chiuse', autocomplete: 'off', enterkeyhint: 'search', value: UI.pvQ || '' }), list = h('div');
+  const draw = () => {
+    const toks = normT(q.value).split(' ').filter(Boolean);
+    let L = inR.filter(x => kind === 'guadagni' ? x.pnl > 0 : kind === 'perdite' ? x.pnl < 0 : true).filter(x => { const hay = normT(x.name + ' ' + x.acc + ' ' + x.d + ' ' + fmtDate(x.d) + ' ' + x.how); return toks.every(t => hay.includes(t)); });
+    const card = h('section', { class: 'card rv' });
+    if (grp === 'titolo') {
+      const m = new Map(); for (const x of L) { const g = m.get(x.name) || { name: x.name, pnl: 0, pnlK: 0, cost: 0, items: [] }; g.pnl += x.pnl; if (x.cost > 0) { g.pnlK += x.pnl; g.cost += x.cost; } g.items.push(x); m.set(x.name, g); }
+      const G = [...m.values()].sort((a, b) => b.pnl - a.pnl);
+      card.append(...G.map(g => rvRow(rvLogo(g.name, ''), g.name, pl(g.items.length, 'operazione', 'operazioni') + ' · ultima ' + fmtDate(g.items.reduce((d, x) => x.d > d ? x.d : d, '')), gl(g.pnl, seur(g.pnl)), g.cost > 0 ? spct(g.pnlK / g.cost) : '', () => talkPvGroup(g))));
+      if (!G.length) card.append(h('p', { class: 'muted' }, 'Nessun risultato.'));
+    } else {
+      L = L.slice().sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
+      card.append(...L.slice(0, 300).map(x => rvRow(rvLogo(x.name, ''), x.name, fmtDate(x.d) + ' · ' + x.acc + (x.o.qty ? ' · ' + nfq.format(x.o.qty) + ' quote' : ''), gl(x.pnl, seur(x.pnl)), x.cost > 0 ? spct(x.pnl / x.cost) + ' sul costo' : x.how, () => talkOp(x.o))));
+      if (!L.length) card.append(h('p', { class: 'muted' }, out.length ? 'Nessuna operazione corrisponde ai filtri.' : 'Ancora nessuna vendita registrata. Con «+ Operazione → Vendita» (o «Guadagno / Perdita» per il trading, l\'oro e i CFD) la trovi qui, con quanto hai guadagnato o perso.'));
+    }
+    list.replaceChildren(card);
+  };
+  q.addEventListener('input', () => { UI.pvQ = q.value; draw(); }); draw();
+  el.append(h('div', { class: 'cq-row' }, q), list);
+  if (unk.length) el.append(h('p', { class: 'muted' }, pl(unk.length, 'vendita non è', 'vendite non sono') + ' nell\'elenco perché non conosco il costo di carico del titolo: senza quel dato non si può calcolare il guadagno. Lo inserisci da «Modifica posizione», oppure dimmelo e lo sistemo.'));
+  el.append(h('p', { class: 'muted' }, 'Il risultato di ogni vendita è l\'incasso (meno le commissioni) meno il costo delle quote vendute; la percentuale è sul costo. Sono contate le operazioni registrate nell\'app, comprese «Guadagno» e «Perdita» dei conti di trading (oro XAUUSD, CFD). Le imposte stimate sono in Analisi → Tasse.'));
+  return el;
+}
 function tabAltro() {
   const el = h('div', { class: 'rv-menu' }), D = DEMO;
-  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Consigli', 'analisi del giorno, idee e titoli', rvGo('consigli')], ['analisi', 'Analisi', 'tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['grafici', 'Grafici', 'andamento e confronti nel tempo', rvGo('grafici')], ['strumenti', 'Strumenti', 'i tuoi titoli, uno per uno', rvGo('strumenti')], ['allocazione', 'Allocazione', 'come sei diviso per classe, area e valuta', rvGo('allocazione')], ['grandi', 'Grandi fondi', 'che cosa comprano i grandi investitori', rvGo('grandi')], ['mercati', 'Mercati', 'notizie, tassi e dati di mercato', rvGo('mercati')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
+  const ITEMS = [['plusvalenze', 'Plusvalenze e minusvalenze', 'quello che hai venduto: dove hai guadagnato e dove hai perso', rvGo('plusvalenze')], ['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Consigli', 'analisi del giorno, idee e titoli', rvGo('consigli')], ['analisi', 'Analisi', 'tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['grafici', 'Grafici', 'andamento e confronti nel tempo', rvGo('grafici')], ['strumenti', 'Strumenti', 'i tuoi titoli, uno per uno', rvGo('strumenti')], ['allocazione', 'Allocazione', 'come sei diviso per classe, area e valuta', rvGo('allocazione')], ['grandi', 'Grandi fondi', 'che cosa comprano i grandi investitori', rvGo('grandi')], ['mercati', 'Mercati', 'notizie, tassi e dati di mercato', rvGo('mercati')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
   const more = [!D ? ['Aggiorna i prezzi', 'prezzi di oggi di titoli, ETF e crypto', () => { ONLINE ? pricesOnline() : pickPrices(); }, ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4']] : null, !D ? ['Da screenshot', 'leggi un\'operazione da una foto con l\'AI', () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza. Vuoi andarci?')) rvGo('dati')(); }, ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z']] : null, !D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean);
   const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' });
   const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), hit = t => toks.every(w => normT(t).includes(w));
