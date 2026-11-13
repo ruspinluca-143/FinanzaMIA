@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qEcs0Nm76Ibwii0IEtU21xQ2nERMllMOCO4x3s7gJNI='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BTO9qX4EB9Tau5JNdtcwxYe6tH1/H40Jc96msFUpZfs='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2567,12 +2567,36 @@ function splitBlocks(text) {          // un file puo' contenere piu' conti: ogni
   const lines = String(text).replace(/^﻿/, '').split(/\r?\n/), starts = []; lines.forEach((l, i) => { if (/^#\s*Finanze\b/i.test(l)) starts.push(i); });
   return starts.map((s, k) => { const t = lines.slice(s, k + 1 < starts.length ? starts[k + 1] : lines.length).join('\n'); return { text: t, fin: parseMeta(t) }; });
 }
+function applyFixFile(text, meta) {          // file "correzioni": Conto;Titolo;Codice;Quantità;Costo totale;Prezzo;Valuta;Classe;Area. Titolo "@liquidita" = imposta la liquidità (valore nella colonna Quantità). Cambia SOLO le righe scritte; con azzera=si riparte da oggi (giorno 1): grafici, storico prezzi e versato si azzerano
+  const R = { pos: 0, cash: 0, created: [], miss: [], reset: false };
+  const rows = csvParse(String(text), ';'), cl = v => String(v == null ? '' : v).trim(), num = v => parseNum(cl(v), ',');
+  for (const r of rows.slice(1)) {
+    const an = cl(r[0]), tn = cl(r[1]); if (!an || !tn) continue;
+    const a = S.accounts.find(x => x.name.toLowerCase() === an.toLowerCase()); if (!a) { R.miss.push(an); continue; }
+    if (tn === '@liquidita') { const v = num(r[3]); if (fin(v)) { a.cash = v; a.upd = today(); R.cash++; } continue; }
+    const qty = num(r[3]), cost = num(r[4]), pr = num(r[5]); if (!fin(qty) || qty <= 0) { R.miss.push(an + ' · ' + tn); continue; }
+    let i = findInst(tn, cl(r[2]));
+    if (!i) i = ensureInst(tn, cl(r[2]), cl(r[6]), fin(pr) && pr > 0 ? pr : null, today(), R.created); else if (fin(pr) && pr > 0) setPrice(i, pr);
+    if (cl(r[7]) && (!i.cls || i.cls === 'Non classificato')) i.cls = cl(r[7]); if (cl(r[8]) && (!i.area || i.area === 'n.d.')) i.area = cl(r[8]);
+    const p = a.positions.find(x => x.instId === i.id);
+    if (p) { p.qty = qty; if (fin(cost) && cost > 0) p.cost = cost; } else a.positions.push({ id: uid(), instId: i.id, qty, cost: fin(cost) && cost > 0 ? cost : 0 });
+    a.upd = today(); R.pos++;
+  }
+  if (/^(si|sì|yes|1)$/i.test(meta.azzera || '')) {          // giorno 1
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(meta.data || '') ? meta.data : today();
+    S.snapshots = []; for (const i of S.instruments) i.hist = i.price > 0 ? [{ d: today(), p: i.price }] : [];
+    for (const a of S.accounts) if (a.perf && !a.dep) a.flows = [{ id: uid(), date: d, type: 'partenza', amount: +Math.max(0, accValue(a)).toFixed(2), note: 'Giorno 1: da qui si riparte' }];
+    takeSnapshot(); R.reset = true;
+  }
+  return R;
+}
 function autoImport(items) {          // tutti i file sono "Finanze": nessuna finestra per file, un solo riepilogo con "Annulla"
   const before = JSON.stringify(S), out = [];
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
     if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.replaced ? ' · ' + pl(r.replaced, 'PAC singolo assorbito', 'PAC singoli assorbiti') : '') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
     if (it.fin.meta.storico) { const r = applyStoricoFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'transazione dello storico caricata', 'transazioni dello storico caricate') + ' (non toccano i saldi)' + (r.bad ? ' · ' + pl(r.bad, 'riga scartata', 'righe scartate') : '') }); continue; }          // file \ const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
+    if (it.fin.meta.correzioni) { const r = applyFixFile(it.fin.clean, it.fin.meta); out.push({ it, refs: r.pos + r.cash, skip: pl(r.pos, 'posizione corretta', 'posizioni corrette') + ' · ' + pl(r.cash, 'liquidità impostata', 'liquidità impostate') + (r.created.length ? ' · nuovi strumenti: ' + r.created.join(', ') : '') + (r.reset ? ' · GIORNO 1: grafici e storico ripartono da oggi' : '') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "correzioni": ritocca solo le righe scritte (e, se vuoi, riparte da oggi)
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
     for (const [k, v] of Object.entries(m)) { const x = /^cambio_([a-z]{3})$/.exec(k); if (x) { const r = parseNum(v, ','); if (fin(r) && r > 0) S.fx[x[1].toUpperCase()] = r; } }          // "cambio_usd=0,8964": quanti euro vale 1 dollaro alla data del file
@@ -4498,7 +4522,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v20 (quantità e prezzo obbligatori)';
+const APP_VER = '13/11/2026 · v21 (giorno 1 e correzioni)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
