@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Qv1APjA//Q3ZBpK0o3oS58PbHgQLFtI3lZFDmhgsdI8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VlWX729wbZUnxx8IZAH5vJtzmyMqpIPsvMnDP7ikbEE='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -983,13 +983,26 @@ async function autoPoint(force) {
     autoLast = core; return true;
   } catch (e) { return false; } finally { autoBusy = false; }
 }
-async function autoRestore(id) {
-  const text = await idbDo('readonly', st => st.get('auto:' + id)); if (!text) return 'Questo salvataggio non c\'è più.';
+const DAY_MAX = 30;
+async function dayList() { try { return (await idbDo('readonly', st => st.get('day-idx'))) || []; } catch (e) { return []; } }
+async function dayPoint() {          // una copia cifrata al giorno (le ultime 30 giornate): si fa la prima volta che l'app e' aperta in quella giornata, quindi fotografa com'eri a fine giornata precedente
+  if (!S || !KEY || DEMO || LOCKED || LOC.off || autoBusy) return false;
+  const d = today();
+  try {
+    const idx = await dayList(); if (idx.some(x => x.id === d)) return false;
+    const text = await seal(); await idbDo('readwrite', st => st.put(text, 'day:' + d)); idx.push({ id: d, n: S.accounts.length, tot: totalValue() }); idx.sort((a, b) => a.id < b.id ? 1 : -1);
+    const drop = idx.splice(DAY_MAX); await idbDo('readwrite', st => st.put(idx, 'day-idx'));
+    for (const x of drop) { try { await idbDo('readwrite', st => st.delete('day:' + x.id)); } catch (e) { /* niente */ } }
+    return true;
+  } catch (e) { return false; }
+}
+async function autoRestore(id, pfx) {
+  const text = await idbDo('readonly', st => st.get((pfx || 'auto:') + id)); if (!text) return 'Questo salvataggio non c\'è più.';
   let D; try { const f = JSON.parse(text), header = { app: f.app, v: f.v, kdf: f.kdf, iter: f.iter, salt: f.salt }; D = JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv), additionalData: enc.encode(JSON.stringify(header)) }, KEY, unb64(f.ct)))); } catch (e) { return 'Non riesco ad aprire questo salvataggio (forse è stato fatto con un\'altra passphrase).'; }
   migrate(D); await autoPoint(true);          // prima di tornare indietro si salva com'e' adesso: si puo' sempre tornare avanti
   S = D; UI.acc = null; UI.planId = null; touch(); render(); setStatus('Ripristinato il salvataggio automatico'); return '';
 }
-setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (ACC_DAY !== today()) { ACC_DAY = today(); const a1 = accrueInterest(), a2 = trAutoDue(); if (a1 || a2) render(); } if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
+setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (ACC_DAY !== today()) { ACC_DAY = today(); const a1 = accrueInterest(), a2 = trAutoDue(); if (a1 || a2) render(); } dayPoint(); if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
 async function seal() {
   S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
@@ -3918,7 +3931,7 @@ function intLine(a) {          // nella pagina del conto: quanto ha fruttato fin
   return h('p', { class: 'muted' }, 'Interesse ' + nfp.format(a.intRate) + '% annuo' + (a.intTax ? ' (al netto del ' + nfp.format(a.intTax) + '%)' : '') + ', calcolato ogni giorno sulla liquidità: finora ' + eur(a.intTot || 0, true) + ', questo mese ' + eur(m, true) + ', circa ' + eur(perDay, true) + ' al giorno.');
 }
 function syncLayout() {          // una volta sola: chi usava lo "stile Revolut" scuro tiene il suo aspetto, ora scelto in Aspetto
-  if (S && !LOCKED && ACC_DAY !== today()) { ACC_DAY = today(); accrueInterest(); trAutoDue(); }
+  if (S && !LOCKED && ACC_DAY !== today()) { ACC_DAY = today(); accrueInterest(); trAutoDue(); dayPoint(); }
   if (!S || LOCKED || !S.settings || S.settings.rvMig) return;
   S.settings.rvMig = 1;
   if (LAYOUT() !== 'classico') { const id = { nero: 'rv-nero', grafite: 'rv-grafite' }[RV_TONE()] || 'rv-scuro'; S.settings.theme = id; try { applyTheme(id); } catch (x) { /* tema di base */ } touch(); }
@@ -4485,7 +4498,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v18 (foto sui titoli)';
+const APP_VER = '12/11/2026 · v19 (copia giornaliera)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5200,11 +5213,14 @@ function buildSummary(o) {
 
 function autoCard() {
   if (DEMO || LOC.off) return null;
-  const list = h('div', { id: 'autoList' }), sec = h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Salvataggi automatici'), btn('Salva un punto adesso', async () => { await autoPoint(true); list.fill(); setStatus('Punto di ripristino salvato'); }, 'pri sm')),
-    h('p', { class: 'muted' }, 'Ogni minuto, mentre l\'app è aperta e qualcosa è cambiato, tengo una copia cifrata su questo dispositivo (le ultime ' + AUTO_MAX + '). Se sbagli qualcosa, torni a uno di questi punti: prima di tornare indietro salvo anche com\'è adesso.'), list);
+  const dayl = h('div', { id: 'dayList' }), list = h('div', { id: 'autoList' }), sec = h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Salvataggi automatici'), btn('Salva un punto adesso', async () => { await autoPoint(true); list.fill(); setStatus('Punto di ripristino salvato'); }, 'pri sm')),
+    h('p', { class: 'muted' }, 'Ogni minuto, mentre l\'app è aperta e qualcosa è cambiato, tengo una copia cifrata su questo dispositivo (le ultime ' + AUTO_MAX + '). Se sbagli qualcosa, torni a uno di questi punti: prima di tornare indietro salvo anche com\'è adesso.'), list,
+    h('h3', null, 'Una copia al giorno'), h('p', { class: 'muted' }, 'La prima volta che apri l\'app ogni giorno tengo una copia cifrata di com\'eri alla fine del giorno prima: restano le ultime ' + DAY_MAX + ' giornate, così puoi tornare indietro anche di settimane. Restano su questo dispositivo: ogni tanto salva anche una copia in un file (menu a sinistra).'), dayl);
   list.fill = async () => { const idx = await autoList(), when = id => new Date(id).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     list.replaceChildren(idx.length ? table([{ t: 'Quando' }, { t: 'Conti', n: 1 }, { t: 'Totale', n: 1 }, { t: '' }], idx.map(x => [when(x.id), String(x.n), eur(x.tot), btn('Torna a questo', async () => { if (!confirm('Torno ai dati di ' + when(x.id) + '? Le modifiche fatte dopo si perdono, ma salvo prima com\'è adesso: potrai tornare avanti.')) return; const m = await autoRestore(x.id); if (m) alert(m); }, 'sm')]), '') : h('p', { class: 'muted' }, 'Ancora nessun salvataggio automatico: il primo arriva entro un minuto da una modifica.')); };
-  list.fill(); return sec;
+  dayl.fill = async () => { const idx = await dayList(), when = id => new Date(id + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' });
+    dayl.replaceChildren(idx.length ? table([{ t: 'Giorno' }, { t: 'Conti', n: 1 }, { t: 'Totale', n: 1 }, { t: '' }], idx.map(x => [when(x.id), String(x.n), eur(x.tot), btn('Torna a questo', async () => { if (!confirm('Torno ai dati di ' + when(x.id) + '? Le modifiche fatte dopo si perdono, ma salvo prima com\'è adesso: potrai tornare avanti.')) return; const m = await autoRestore(x.id, 'day:'); if (m) alert(m); }, 'sm')]), '') : h('p', { class: 'muted' }, 'Ancora nessuna copia giornaliera: la prima arriva alla prossima apertura dell\'app.')); };
+  list.fill(); dayl.fill(); return sec;
 }function themeCard() {
   const cur = (S && S.settings && S.settings.theme) || (() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return ''; } })() || 'cobalt';
   const pick = id => { if (S && S.settings) S.settings.theme = id; applyTheme(id); touch(); render(); };
