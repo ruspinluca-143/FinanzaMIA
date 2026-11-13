@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VlWX729wbZUnxx8IZAH5vJtzmyMqpIPsvMnDP7ikbEE='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qEcs0Nm76Ibwii0IEtU21xQ2nERMllMOCO4x3s7gJNI='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4498,7 +4498,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v19 (copia giornaliera)';
+const APP_VER = '13/11/2026 · v20 (quantità e prezzo obbligatori)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5745,16 +5745,15 @@ function opWizard(pre, after) {
     else if (cur === 'quanto') {
       const c = st.c, nm = c ? c.name : st.nuovo ? st.nuovo.name : '', pr = priceNow(), here = c && acc() ? (acc().positions.find(p => p.instId === c.id) || null) : null;
       w.push(h('div', { class: 'wz-chip' }, h('b', null, nm), h('span', { class: 'wz-s' }, c ? (c.st === 'auto' ? '⟳ prezzo di oggi ' : c.st === 'stima' ? '≈ prezzo stimato ' : '✎ ultimo prezzo ') + nf2.format(c.price) + ' ' + c.ccy : 'prezzo ' + nf2.format(pr) + ' ' + ccyOf()), here ? h('span', { class: 'wz-s' }, 'In questo conto ne hai ' + nfq.format(here.qty)) : null));
-      const tabs = h('div', { class: 'seg3 wz-tabs', role: 'group' }, [['qty', 'Quante quote'], ['eur', 'Quanti euro']].map(([k, l]) => h('button', { type: 'button', class: 'seg-b', 'aria-pressed': st.mode === k ? 'true' : 'false', onclick: () => { st.mode = k; draw(); } }, l)));
-      tabs.style.gridTemplateColumns = '1fr 1fr';
-      const prev = h('div', { class: 'opsum' }); const refresh = () => { const q = qtyNow(), p = priceNow(); prev.textContent = q > 0 && p > 0 ? nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' = ' + eur(q * p * fx(), true) + (st.fee ? ' + ' + eur(st.fee, true) + ' di commissioni' : '') : 'Scrivi ' + (st.mode === 'qty' ? 'quante quote' : 'quanti euro') + '.'; nx.disabled = !(qtyNow() > 0 && priceNow() > 0); };
-      const main = numInput(st.mode === 'qty' ? st.qty : st.eur, st.mode === 'qty' ? 'Quante quote' : 'Quanti euro', v => { if (st.mode === 'qty') st.qty = v; else st.eur = v; refresh(); });
-      w.push(tabs, main);
-      if (st.kind === 'vendita' && here) w.push(btn('Tutte (' + nfq.format(here.qty) + ')', () => { st.mode = 'qty'; st.qty = here.qty; draw(); }, 'sm'));
-      const pLine = h('div', { class: 'wz-price' });
-      if (st.editPrice || !(pr > 0)) { pLine.append(h('label', { class: 'fld' }, h('span', null, 'Prezzo di una quota (' + ccyOf() + ')' + (c && c.price > 0 ? ' · oggi ' + nf2.format(c.price) : '')), numInput(st.price, 'es. ' + (c ? nf2.format(c.price) : '110'), v => { st.price = v; refresh(); }))); }
-      else pLine.append(h('span', { class: 'muted' }, 'Prezzo ' + nf2.format(pr) + ' ' + ccyOf() + (c && c.st === 'auto' ? ' (di oggi, automatico)' : ''), ' · '), h('a', { href: '#', onclick: e => { e.preventDefault(); st.editPrice = true; draw(); } }, 'ho pagato un altro prezzo'));
-      w.push(pLine, h('details', { class: 'wz-more' }, h('summary', null, 'Commissioni (facoltative)'), numInput(st.fee, 'Commissioni in €', v => { st.fee = v; refresh(); })), prev);
+      st.mode = 'qty';          // sempre quantità + prezzo: cosi' le quote dell'app restano uguali a quelle vere
+      const prev = h('div', { class: 'opsum' }); const refresh = () => { const q = st.qty, p = st.price; prev.textContent = q > 0 && p > 0 ? nfq.format(q) + ' × ' + nf2.format(p) + ' ' + ccyOf() + ' = ' + eur(q * p * fx(), true) + (st.fee ? ' + ' + eur(st.fee, true) + ' di commissioni' : '') : 'Scrivi la quantità e il prezzo a cui l\'hai ' + (st.kind === 'vendita' ? 'venduta' : 'comprata') + ' (tutti e due).'; nx.disabled = !(st.qty > 0 && st.price > 0); };
+      const main = numInput(st.qty, st.kind === 'vendita' ? 'Quantità venduta (quote)' : 'Quantità comprata (quote)', v => { st.qty = v; refresh(); });
+      w.push(h('label', { class: 'fld' }, h('span', null, st.kind === 'vendita' ? 'Quantità venduta (obbligatoria)' : 'Quantità comprata (obbligatoria)'), main));
+      if (st.kind === 'vendita' && here) w.push(btn('Tutte (' + nfq.format(here.qty) + ')', () => { st.qty = here.qty; draw(); }, 'sm'));
+      const pIn = numInput(st.price, 'Prezzo di una quota in ' + ccyOf(), v => { st.price = v; refresh(); });
+      w.push(h('label', { class: 'fld' }, h('span', null, 'Prezzo a cui l\'hai ' + (st.kind === 'vendita' ? 'venduta' : 'comprata') + ' (' + ccyOf() + ', obbligatorio)' + (c && c.price > 0 ? ' · oggi ' + nf2.format(c.price) : '')), pIn));
+      if (c && c.price > 0) w.push(btn('Usa il prezzo di oggi (' + nf2.format(c.price) + ')', () => { st.price = c.price; draw(); }, 'sm'));
+      w.push(h('details', { class: 'wz-more' }, h('summary', null, 'Commissioni (facoltative)'), numInput(st.fee, 'Commissioni in €', v => { st.fee = v; refresh(); })), prev);
       var nx = h('button', { type: 'button', class: 'btn pri big', onclick: () => go(nextOf()) }, 'Avanti'); w.push(h('div', { class: 'wz-nav' }, btn('← Indietro', back), nx)); refresh(); setTimeout(() => main.focus(), 60); return w;
     }
     else if (cur === 'dove') {
@@ -5811,9 +5810,9 @@ function opWizard(pre, after) {
   }
   if (pre.kind && OP_FLOW[pre.kind]) {          // l'operazione puo' arrivare gia' compilata in parte (da un titolo, da una frase): si parte dal primo dato che manca
     st.kind = pre.kind; if (pre.accId) { st.accId = pre.accId; skipAcc = true; } if (pre.toId) st.toId = pre.toId; if (pre.c) st.c = pre.c; if (pre.price > 0) st.price = pre.price;
-    if (pre.qty > 0) { st.qty = pre.qty; st.mode = 'qty'; } else if (pre.eur > 0) { st.eur = pre.eur; if (st.kind === 'acquisto' || st.kind === 'vendita') st.mode = 'eur'; }
+    if (pre.qty > 0) { st.qty = pre.qty; st.mode = 'qty'; } else if (pre.eur > 0 && st.kind !== 'acquisto' && st.kind !== 'vendita') st.eur = pre.eur;
     if (pre.date) st.date = pre.date; if (pre.note) st.note = pre.note;
-    const have = { conto: !!st.accId, verso: !!st.toId, strumento: !!(st.c || st.nuovo), quanto: qtyNow() > 0 && priceNow() > 0, importo: st.eur > 0 };
+    const have = { conto: !!st.accId, verso: !!st.toId, strumento: !!(st.c || st.nuovo), quanto: st.qty > 0 && st.price > 0, importo: st.eur > 0 };
     let first = flow().slice(1).find(k => !have[k] && k !== 'riepilogo') || 'riepilogo'; if (first === 'riepilogo' && shortBy() > 0) first = 'pagamento';
     hist.push('kind'); cur = first;
   }
@@ -5886,8 +5885,8 @@ function editOperationAdv(pre, after) {
   function pick(c) {
     I.q.value = c.name; sug.hidden = true;
     if (c.id) { I.instId.value = c.id; ext = null; } else { I.instId.value = ''; ext = c; I.newName.value = ''; }
-    if (c.price > 0) I.price.value = Math.round(c.price * 1e6) / 1e6;          // prezzo di oggi gia' scritto: lo cambi solo se hai pagato diverso
-    sync(); setTimeout(() => (num(I.qty) ? I.amount : I.qty).focus(), 30);
+    I.price.value = '';          // il prezzo lo scrivi tu (quello a cui hai comprato/venduto): quello di oggi resta solo come suggerimento
+    sync(); setTimeout(() => I.qty.focus(), 30);
   }
   function instSay(i, x) {          // la riga "parlante" sotto lo strumento
     const c = i ? cands().find(z => z.id === i.id) : x; if (!c) return newMode() ? [h('span', { class: 'st-man' }, '✎ Strumento nuovo senza prezzo automatico: scrivi tu prezzo e valuta.')] : [];
@@ -5903,7 +5902,7 @@ function editOperationAdv(pre, after) {
     acc: [h('div', null, fld(accLbl, I.accId)), 'all'], to: [h('div', null, fld('A quale conto', I.toId)), ['trasferimento']],
     inst: [h('div', null, h('label', { class: 'fld' }, h('span', null, 'Strumento'), h('div', { class: 'cbx' }, I.q, sug)), instInfo), ['acquisto', 'vendita']], nuovo: [h('div', { class: 'g2' }, fld('Nome dello strumento nuovo', I.newName), fld('Valuta', I.newCcy)), ['acquisto']],
     qp: [h('div', { class: 'g2' }, fld('Quantità', I.qty), fld('Prezzo di una quota', I.price)), ['acquisto', 'vendita']],
-    amt: [h('div', null, fld(amtLbl, I.amount)), 'all'], fee: [h('div', null, fld('Commissioni (€, facoltative)', I.fee)), ['acquisto', 'vendita']],
+    amt: [h('div', null, fld(amtLbl, I.amount)), ['trasferimento', 'guadagno', 'perdita', 'versamento', 'prelievo']], fee: [h('div', null, fld('Commissioni (€, facoltative)', I.fee)), ['acquisto', 'vendita']],
     cash: [h('label', { class: 'chk' }, I.fromCash, h('span', null, 'Aggiorna anche la liquidità del conto', h('small', null, ' — sì se paghi (o incassi) con i soldi che sono nel conto'))), ['acquisto', 'vendita']], short: [shortBox, ['acquisto']],
     dn: [h('div', { class: 'g2' }, fld('Data', I.date), fld('Nota', I.note)), 'all'] };
   const kinds = h('div', { class: 'kinds', role: 'group', 'aria-label': 'Che cosa è successo' }, OP_UI.map(([k, l, , ico]) => h('button', { type: 'button', class: 'kind', 'data-k': k, onclick: () => { kind = k; sync(); } }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, ico.map(d => s('path', { d }))), h('span', null, l))));
@@ -5929,6 +5928,7 @@ function editOperationAdv(pre, after) {
   frm.addEventListener('submit', e => {
     e.preventDefault();
     const o = { accId: I.accId.value, toId: I.toId.value, kind, date: I.date.value || today(), instId: I.instId.value, newName: I.instId.value ? '' : ext ? ext.name : (I.newName.value.trim() || I.q.value.trim()), newCcy: ext ? ext.ccy : (I.newCcy.value.trim() || 'EUR'), qty: num(I.qty), price: num(I.price), fee: num(I.fee), amount: num(I.amount), fromCash: I.fromCash.checked, note: I.note.value.trim() };
+    if ((kind === 'acquisto' || kind === 'vendita') && !(o.qty > 0 && o.price > 0)) { err.textContent = 'Scrivi la quantità e il prezzo a cui l\'hai ' + (kind === 'vendita' ? 'venduta' : 'comprata') + ': servono tutti e due, così le quote restano uguali a quelle vere.'; return; }
     const how = SHORT && !shortBox.hidden ? howSel.value : '';
     if (how === 'no') o.fromCash = false;          // la liquidita' l'hai gia' sistemata tu: non la tocco
     if (pendCode && !I.instId.value && !ext && !I.newName.value.trim()) { err.textContent = 'Scrivi il nome dello strumento (l\'ISIN ' + pendCode + ' resta salvato come codice).'; return; }
