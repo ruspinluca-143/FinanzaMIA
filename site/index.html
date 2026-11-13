@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ddvmyK+/GkOttqw9+HfUUwLRHh+lMes7+80T/+nDk0s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Qv1APjA//Q3ZBpK0o3oS58PbHgQLFtI3lZFDmhgsdI8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -649,6 +649,7 @@ body{background:var(--bg)}
 .rv-split{margin:34px 4px 6px;padding-top:14px;border-top:1px solid var(--grid);color:var(--muted);font-size:13px;font-weight:600}
 .swipe-nb{will-change:transform}
 .rv-ic.lg{background:#fff;padding:5px}.rv-ic img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
+.rv-ic{position:relative}.rv-addph{cursor:pointer}.rv-plus{position:absolute;right:-3px;bottom:-3px;width:17px;height:17px;border-radius:50%;background:var(--s1);color:#fff;font-style:normal;font-size:13px;font-weight:700;display:grid;place-items:center;line-height:1;border:2px solid var(--card)}
 .rv-dog{--gc:#f5a623}.rv-cash{--gc:#3fcf8e}
 .rv-hero{padding:6px 4px 2px;margin:10px 0 6px;text-align:center}.rv-hero .hero-pills{justify-content:center}.rv-hero .rv-lbl{margin:0 auto}
 .rv-hero .rv-big-ic{width:60px;height:60px;margin:0 auto 6px}.rv-hero .rv-big-ic svg{width:28px;height:28px}
@@ -2070,7 +2071,7 @@ function talkPos(a, p) {
     say: (pnl == null ? 'Oggi vale ' + eur(v) + '.' : 'L\'hai pagata ' + eur(p.cost) + ' e oggi vale ' + eur(v) + ': sei ' + (pnl >= 0 ? 'in guadagno di ' : 'in perdita di ') + eur(Math.abs(pnl)) + ' (' + spct(pnl / p.cost) + ').') + (tot > 0 ? ' Pesa ' + ilPct(v / tot) + ' di tutto il patrimonio.' : ''),
     how: (HIDE ? '' : nfq.format(p.qty) + ' × ' + nf2.format(i.price) + ' ' + i.ccy + (i.ccy !== 'EUR' ? ' × cambio' : '') + ' = ' + eur(v) + ' · ') + 'prezzo del ' + fmtDate(i.priceDate) + (i.code ? ' · codice ' + i.code : ''),
     rows: mix.length > 1 ? mix.map(([c, w]) => [c, v * w, pct(w)]) : null, rowsTitle: 'Che cosa contiene',
-    tip: pnl != null && pnl < 0 ? 'Una perdita "sulla carta" diventa vera solo se vendi. Chiediti se il motivo per cui l\'hai comprata vale ancora.' : 'Se vendi, sul guadagno paghi il 26% di tasse (12,5% sui titoli di Stato).', acts: [['Compra ancora', () => opWizard({ kind: 'acquisto', accId: a.id, c: candOf(i), _wz: 1 })], ['Vendi', () => opWizard({ kind: 'vendita', accId: a.id, c: candOf(i), _wz: 1 })], ['Scheda del titolo', () => talkInstrument(i)]] });
+    tip: pnl != null && pnl < 0 ? 'Una perdita "sulla carta" diventa vera solo se vendi. Chiediti se il motivo per cui l\'hai comprata vale ancora.' : 'Se vendi, sul guadagno paghi il 26% di tasse (12,5% sui titoli di Stato).', acts: [['Compra ancora', () => opWizard({ kind: 'acquisto', accId: a.id, c: candOf(i), _wz: 1 })], ['Vendi', () => opWizard({ kind: 'vendita', accId: a.id, c: candOf(i), _wz: 1 })], ['Scheda del titolo', () => talkInstrument(i)], [customLogo(i) ? 'Cambia la foto' : 'Aggiungi una foto', () => pickLogo(i)]].concat(customLogo(i) ? [['Togli la foto', () => { delete S.logos[i.id]; touch(); closeTalks(); render(); }, 'danger']] : []) });
 }
 const rowActs = (...b) => h('span', { class: 'acts' }, b);
 
@@ -4484,7 +4485,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v17 (spese ricorrenti: il conto scende il giorno)';
+const APP_VER = '12/11/2026 · v18 (foto sui titoli)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -4596,7 +4597,30 @@ function rvAccBadge(a) {          // il cerchietto del conto: cane per i conti d
   if (!hasLogo && (/contant|\bcash\b|portafoglio/i.test(n) || a.type === 'contanti')) return h('span', { class: 'rv-ic rv-cash' }, rvSvg(RV_BILL, 22));
   const ic = rvLogo(n, '', accIco(a)); return h('span', { class: 'rv-ic' + (ic.tagName === 'IMG' ? ' lg' : '') }, ic);
 }
+const customLogo = i => (S && S.logos && i && S.logos[i.id]) || '';
+function applyLogoFile(inst, file) {          // la foto scelta diventa il cerchietto del titolo: ritagliata quadrata e rimpicciolita (96 px), salvata insieme ai tuoi dati
+  return new Promise(res => {
+    const fr = new FileReader(); fr.onerror = () => res('Non riesco a leggere la foto.');
+    fr.onload = () => { const im = new Image(); im.onerror = () => res('Questo formato di foto non si apre qui: prova con un\'altra foto o uno screenshot.');
+      im.onload = () => { const c = document.createElement('canvas'); c.width = c.height = 96; const x = c.getContext('2d'), s = Math.min(im.width, im.height); x.fillStyle = '#fff'; x.fillRect(0, 0, 96, 96); x.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 96, 96);
+        (S.logos = S.logos || {})[inst.id] = c.toDataURL('image/jpeg', 0.86); touch(); res(''); };
+      im.src = fr.result; };
+    fr.readAsDataURL(file);
+  });
+}
+function pickLogo(inst) {          // apre la scelta della foto (libreria o fotocamera) per questo titolo
+  const inp = h('input', { type: 'file', accept: 'image/*', style: 'display:none' });
+  inp.addEventListener('change', async () => { const f = inp.files[0]; inp.remove(); if (!f) return; const m = await applyLogoFile(inst, f); if (m) { alert(m); return; } closeTalks(); render(); toastMsg('Foto aggiunta a ' + inst.name, 3500); });
+  document.body.append(inp); inp.click();
+}
+function rvPosIcon(i) {          // cerchietto di un titolo: la tua foto, il logo che conosco, oppure l'iniziale con un + per aggiungere la foto
+  if (customLogo(i)) return h('img', { src: customLogo(i), alt: '', width: 36, height: 36 });
+  const k = logoKey(String(i.name || '') + ' ' + String(i.code || '')); if (k && LOGO_DATA[k]) return h('img', { src: LOGO_DATA[k], alt: '', width: 36, height: 36 });
+  const s = h('span', { class: 'rv-ic rv-addph', role: 'button', 'aria-label': 'Aggiungi una foto a ' + i.name }, h('span', { style: 'font-weight:600;font-size:15px' }, String(i.name || '?').trim().charAt(0).toUpperCase()), h('i', { class: 'rv-plus' }, '+'));
+  s.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); pickLogo(i); }); return s;
+}
 function rvLogo(name, code, fb) {          // il cerchietto con il simbolo dell'azienda; se non lo conosco, la sua iniziale (o l'icona di riserva)
+  const ci = S && S.logos && S.instruments ? S.instruments.find(x => x.name === name) : null; if (ci && S.logos[ci.id]) return h('img', { src: S.logos[ci.id], alt: '', width: 36, height: 36 });
   const k = logoKey(String(name || '') + ' ' + String(code || ''));
   if (k && LOGO_DATA[k]) return h('img', { src: LOGO_DATA[k], alt: '', width: 36, height: 36 });
   return fb || h('span', { style: 'font-weight:600;font-size:15px' }, String(name || '?').trim().charAt(0).toUpperCase());
@@ -4716,7 +4740,7 @@ function tabInvestimenti() {
       h('summary', null, rvAccBadge(a), h('span', { class: 'rv-nm' }, h('b', null, a.name), h('small', null, (TYPES[a.type] || {}).label || '')), h('span', { class: 'rv-v' }, eur(accValue(a)), pf && fin(pf.pnlPct) ? h('small', null, gl(pf.pnl, spct(pf.pnlPct))) : null)),
       h('div', { class: 'rv-body' },
         accCash(a) > 0.005 && pos.length ? rvRow(rvEuro(), 'Liquidità', 'saldo disponibile', eur(accCash(a)), '', openAcc(a), 'rv-cash') : null,
-        shown.map(x => { const v = posValue(x.p); return rvRow(rvLogo(x.i.name, x.i.code), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }),
+        shown.map(x => { const v = posValue(x.p); return rvRow(rvPosIcon(x.i), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }),
         h('div', { class: 'actbar', style: 'margin-top:8px' }, btn('Apri il conto', openAcc(a), 'sm'), btn('+ Operazione', () => editOperation({ accId: a.id }), 'sm pri'))));
   };
   const draw = () => {
@@ -5078,7 +5102,7 @@ function viewAccount(id) {
   if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / Perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
-  if (LAYOUT() !== 'classico' && !fermo) { const pr = a.positions.map(p => ({ p, i: inst(p.instId) })).filter(x => x.i).sort((x, y) => posValue(y.p) - posValue(x.p)); el.append(rvCard(rvHead('Posizioni', '+ Posizione', () => editPosition(a)), accCash(a) > 0.005 ? rvRow(rvEuro(), 'Liquidità', a.cashCcy !== 'EUR' ? a.cashCcy : 'saldo disponibile', eur(accCash(a)), '', () => editAccount(a), 'rv-cash') : null, pr.map(x => { const v = posValue(x.p); return rvRow(rvLogo(x.i.name, x.i.code), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }))); }
+  if (LAYOUT() !== 'classico' && !fermo) { const pr = a.positions.map(p => ({ p, i: inst(p.instId) })).filter(x => x.i).sort((x, y) => posValue(y.p) - posValue(x.p)); el.append(rvCard(rvHead('Posizioni', '+ Posizione', () => editPosition(a)), accCash(a) > 0.005 ? rvRow(rvEuro(), 'Liquidità', a.cashCcy !== 'EUR' ? a.cashCcy : 'saldo disponibile', eur(accCash(a)), '', () => editAccount(a), 'rv-cash') : null, pr.map(x => { const v = posValue(x.p); return rvRow(rvPosIcon(x.i), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }))); }
   accCharts(a).forEach(c => c && el.append(c));          // grafici del conto: andamento, composizione, entrate e uscite, stima futura
   if (a.type === 'pensione' && !a.positions.length) el.append(h('div', { class: 'warn' }, 'Fondo a quote (es. Fondo Cometa): crea uno strumento con prezzo = valore quota del tuo comparto, poi qui una posizione con quantità = numero di quote. I versamenti (tuoi, del datore, TFR) vanno nei movimenti come "Versamento". Per la composizione del comparto usa la classe con le percentuali, es. "Azioni 60, Obbligazioni 40".'));
   const prow = a.positions.map(p => { const i = inst(p.instId), v = posValue(p), pnl = p.cost > 0 ? v - p.cost : null; return [i ? h('a', { href: '#', onclick: e => { e.preventDefault(); talkPos(a, p); } }, i.name) : '(strumento eliminato)', HIDE ? '••••' : nfq.format(p.qty), i ? nf2.format(i.price) + ' ' + i.ccy + (isAuto(i) ? (i.autoSrc === 'stima' ? ' ≈' : ' ⟳') : '') : '—', eur(v), p.cost > 0 ? eur(p.cost) : '—', pnl == null ? '—' : gl(pnl, seur(pnl)), pnl == null ? '—' : spct(pnl / p.cost), rowActs(btn('Modifica', () => editPosition(a, p), 'sm'), btn('Elimina', () => delPosition(a, p), 'sm danger'))]; });
