@@ -1,285 +1,127 @@
 {
-    "app":  "finanze-analisi",
-    "versione":  1,
-    "generato":  "2026-11-12T09:30:00+01:00",
-    "data":  "2026-11-12",
-    "titolo":  "Wall Street rimbalza sull\u0027onda dell\u0027IA, ma Nvidia crolla a mercati chiusi: restano tassi alti e nervosismo",
-    "sintesi":  "Mercoledì Wall Street ha chiuso in forte rialzo (S\u0026P 500 +1,3%, Nasdaq 100 +2,3%) grazie ai conti di CoreWeave e all\u0027entusiasmo per l\u0027IA, annullando il calo del giorno prima. A mercati chiusi però Nvidia è crollata dopo la notizia (WSJ) che il consiglio valuta di sostituire il CEO Jensen Huang, quindi oggi si parte con futures e tecnologia incerti. Sullo sfondo restano rendimenti USA vicini al 5% e una Fed che valuta altri rialzi: meglio calma, piani regolari e diversificazione, senza inseguire le oscillazioni di un giorno.",
-    "umore":  {
-                  "valore":  -1,
-                  "etichetta":  "Cauto"
-              },
-    "classi":  [
-                   {
-                       "classe":  "Azioni",
-                       "giudizio":  0,
-                       "etichetta":  "Neutrale, molto volatile",
-                       "perche":  "Mercoledì l\u0027S\u0026P 500 ha chiuso a circa 7.619 punti (+1,3%), il Nasdaq Composite a circa 25.466 (+1,6%) e il Dow a circa 52.486 (+0,5%); CoreWeave è salita di quasi il 25% e Micron di circa l\u002711% (Handelsblatt). Dopo la chiusura Nvidia è però scesa forte sulle notizie riguardanti il CEO (CNBC, Bloomberg), e un titolo così pesante negli indici può trascinare tutto il settore. Giudizio invariato a 0: il rimbalzo è netto ma fragile. Caso contrario: utili solidi e domanda per l\u0027IA (si parla di una quotazione di Anthropic molto richiesta) possono sostenere i listini anche con tassi alti.",
-                       "mossa":  "Mantieni i piani regolari su ETF molto diversificati e evita di concentrarti sulla tecnologia in questi giorni.",
-                       "fonti":  [
-                                     0,
-                                     1,
-                                     2,
-                                     7
-                                 ]
-                   },
-                   {
-                       "classe":  "Obbligazioni",
-                       "giudizio":  1,
-                       "etichetta":  "Rendimenti alti, a rate",
-                       "perche":  "I rendimenti USA di martedì erano: 2 anni 4,73%, 10 anni 4,98%, 30 anni 5,35% (da 4,56% e 4,88% a 2 e 10 anni). Il governatore Waller vede probabile un rialzo a dicembre e Goolsbee ha definito il dato sull\u0027inflazione \u0027quasi inquietante\u0027 (CNBC): chi compra ora incassa cedole elevate. Giudizio invariato. Caso contrario: MarketWatch nota che anche il calo del petrolio non basta più a far scendere i rendimenti, quindi i prezzi dei titoli esistenti possono ancora calare; i grandi investitori sono molto corti sui titoli di Stato USA.",
-                       "mossa":  "Aggiungi a rate, con scadenze medie, senza esagerare con le scadenze lunghe.",
-                       "fonti":  [
-                                     0,
-                                     3,
-                                     9
-                                 ]
-                   },
-                   {
-                       "classe":  "Crypto",
-                       "giudizio":  -1,
-                       "etichetta":  "Prudenza",
-                       "perche":  "La capitalizzazione totale è circa 2.481 miliardi di dollari (-2,3% in 24 ore), l\u0027indice paura/avidità è a 29 (Paura) e il bitcoin è intorno a 73.500 dollari, vicino alla media a 200 giorni (CoinDesk). Il dollaro forte (indice vicino a 103) pesa sulle crypto. Giudizio invariato. Caso contrario: il bitcoin ha reagito poco all\u0027inflazione e le vendite sugli ETF rallentano; il rimbalzo dell\u0027IA può contagiare gli asset rischiosi. Ma i tassi alti restano un freno.",
-                       "mossa":  "Non rincorrere né ribassi né rimbalzi; eventualmente solo piccole quote e a rate.",
-                       "fonti":  [
-                                     6
-                                 ]
-                   },
-                   {
-                       "classe":  "Materie prime",
-                       "giudizio":  0,
-                       "etichetta":  "Neutrale",
-                       "perche":  "Il petrolio WTI ha chiuso a 86,47 dollari a New York (ANSA) e il Brent a circa 92,6 (Investing.com), dopo essere sceso sotto 90 per la prima volta da agosto; pesano le tensioni nello stretto di Hormuz e le trattative incerte tra USA e Iran. L\u0027oro è poco sopra i 4.000 dollari, frenato dal dollaro forte e dai tassi alti (CoinDesk). Giudizio invariato. Caso contrario: un\u0027escalation in Medio Oriente può far risalire il petrolio, mentre la tensione politica sostiene l\u0027oro; nei futures i grandi investitori sono molto lunghi sull\u0027oro (dati al 3/11), quindi le inversioni possono essere rapide.",
-                       "mossa":  "Una piccola quota in oro resta una protezione, non una previsione; non inseguire il petrolio.",
-                       "fonti":  [
-                                     4,
-                                     5,
-                                     6
-                                 ]
-                   },
-                   {
-                       "classe":  "Liquidità",
-                       "giudizio":  0,
-                       "etichetta":  "Cuscinetto utile",
-                       "perche":  "Con i rendimenti a 2 anni USA intorno al 4,7% e rialzi in vista, la liquidità remunerata dà tranquillità mentre i listini oscillano. Giudizio invariato. Caso contrario: con prezzi in aumento troppa liquidità perde potere d\u0027acquisto e si rischia di restare fuori dopo i rimbalzi.",
-                       "mossa":  "Tieni il cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
-                       "fonti":  [
-                                     0,
-                                     9
-                                 ]
-                   }
-               ],
-    "temi":  [
-                 {
-                     "titolo":  "Rimbalzo IA dopo i conti di CoreWeave",
-                     "giudizio":  1,
-                     "perche":  "CoreWeave ha riportato ricavi trimestrali di 3,66 miliardi di dollari e alzato le previsioni annue a 13-13,3 miliardi; il titolo è salito di quasi il 25% e ha trascinato Micron, Sandisk e Marvell (CNBC, Handelsblatt, CoinDesk). La perdita netta però si è ampliata a 709 milioni: i dubbi sull\u0027indebitamento del settore non sono spariti.",
-                     "fonti":  [
-                                   8,
-                                   2,
-                                   6
-                               ]
-                 },
-                 {
-                     "titolo":  "Nvidia e il possibile addio di Jensen Huang",
-                     "giudizio":  -2,
-                     "perche":  "Dopo la chiusura il WSJ ha scritto che Nvidia si prepara a sostituire Huang dopo la vicenda con una dirigente; il titolo è crollato e a Washington si parla di stretta sull\u0027export di chip verso la Cina (CNBC, Bloomberg, FT). Essendo tra i titoli più pesanti degli indici, può dare nervosismo a tutta la tecnologia.",
-                     "fonti":  [
-                                   1,
-                                   7
-                               ]
-                 },
-                 {
-                     "titolo":  "Fed verso il rialzo di dicembre",
-                     "giudizio":  -1,
-                     "perche":  "Waller considera probabile un rialzo a dicembre e non esclude 0,50 punti; Goolsbee giudica i dati sull\u0027inflazione \u0027quasi inquietanti\u0027. La decisione è il 9 dicembre.",
-                     "fonti":  [
-                                   0,
-                                   9
-                               ]
-                 },
-                 {
-                     "titolo":  "Petrolio tra Hormuz e diplomazia",
-                     "giudizio":  0,
-                     "perche":  "Il Brent è risalito dell\u00271,3% a circa 92,6 dollari dopo i minimi da agosto: attacchi a navi nello stretto di Hormuz e smentite iraniane sui negoziati sostengono i prezzi, mentre le scorte USA in aumento li frenano (Investing.com, ANSA).",
-                     "fonti":  [
-                                   4,
-                                   5
-                               ]
-                 },
-                 {
-                     "titolo":  "La quotazione di Anthropic",
-                     "giudizio":  0,
-                     "perche":  "Secondo Handelsblatt e FT le banche valuterebbero una quotazione intorno a 1.500 miliardi di dollari con forte domanda: alimenta l\u0027entusiasmo per l\u0027IA, ma valutazioni così alte aumentano il rischio di bolla.",
-                     "fonti":  [
-                                   2,
-                                   11
-                               ]
-                 },
-                 {
-                     "titolo":  "Mese difficile per gli hedge fund",
-                     "giudizio":  -1,
-                     "perche":  "The Economist racconta un mese complicato per i grandi gestori, segno di un mercato dominato da forti oscillazioni.",
-                     "fonti":  [
-                                   10
-                               ]
-                 }
-             ],
-    "attenzione":  [
-                       {
-                           "titolo":  "Effetto Nvidia sulla tecnologia",
-                           "perche":  "Il calo dopo la chiusura può riaprire le tensioni sul settore IA proprio nel giorno dopo il rimbalzo."
-                       },
-                       {
-                           "titolo":  "Tassi alti più a lungo",
-                           "perche":  "Rendimenti USA vicini al 5% e possibili rialzi Fed mettono sotto pressione azioni e obbligazioni già in circolazione."
-                       },
-                       {
-                           "titolo":  "Medio Oriente e Hormuz",
-                           "perche":  "Attacchi alle navi e negoziati incerti possono muovere in fretta petrolio e inflazione."
-                       },
-                       {
-                           "titolo":  "Dollaro forte",
-                           "perche":  "L\u0027indice del dollaro vicino a 103 pesa su oro, crypto e mercati emergenti."
-                       }
-                   ],
-    "idee":  [
-                 {
-                     "classe":  "Azioni",
-                     "isin":  "IE00B4L5Y983",
-                     "perche":  "ETF azionario mondiale a basso costo e ad accumulo: diversificazione ampia su migliaia di titoli."
-                 },
-                 {
-                     "classe":  "Azioni",
-                     "isin":  "IE00BK5BQT80",
-                     "perche":  "ETF su azioni di tutto il mondo, anche emergenti, ad accumulo: un\u0027alternativa semplice e diversificata."
-                 },
-                 {
-                     "classe":  "Obbligazioni",
-                     "isin":  "LU1437018598",
-                     "perche":  "Titoli di Stato dell\u0027area euro a costo basso, ad accumulo: scadenze medie."
-                 },
-                 {
-                     "classe":  "Obbligazioni",
-                     "isin":  "LU1437024729",
-                     "perche":  "Obbligazioni governative e societarie mondiali in un unico ETF, ad accumulo."
-                 },
-                 {
-                     "classe":  "Liquidità",
-                     "isin":  "FR0010510800",
-                     "perche":  "ETF monetario in euro legato ai tassi a brevissimo termine, utile come cuscinetto."
-                 },
-                 {
-                     "classe":  "Materie prime",
-                     "isin":  "IE00B4ND3602",
-                     "perche":  "ETC sull\u0027oro fisico, come protezione in una piccola quota del patrimonio."
-                 }
-             ],
-    "indicatori":  [
-                       {
-                           "nome":  "S\u0026P 500 (chiusura 11/11)",
-                           "valore":  "circa 7.619 (+1,3%)",
-                           "nota":  "Handelsblatt; Nasdaq 100 +2,3%"
-                       },
-                       {
-                           "nome":  "Rendimento USA 10 anni",
-                           "valore":  "4,98%",
-                           "nota":  "dato del 10/11, in salita da 4,88%"
-                       },
-                       {
-                           "nome":  "Petrolio WTI / Brent",
-                           "valore":  "86,47 / circa 92,6 dollari",
-                           "nota":  "ANSA e Investing.com, chiusura 11/11"
-                       },
-                       {
-                           "nome":  "Bitcoin",
-                           "valore":  "circa 73.500 dollari",
-                           "nota":  "CoinDesk, vicino alla media a 200 giorni"
-                       },
-                       {
-                           "nome":  "Paura/avidità crypto",
-                           "valore":  "29 (Paura)",
-                           "nota":  "era 32 il giorno prima"
-                       },
-                       {
-                           "nome":  "Prossima Fed",
-                           "valore":  "9 dicembre",
-                           "nota":  "BCE il 17 dicembre"
-                       }
-                   ],
-    "fonti":  [
-                  {
-                      "testata":  "CNBC",
-                      "titolo":  "Fed\u0027s Goolsbee calls inflation report \u0027borderline disturbing\u0027 as central bank weighs more hikes",
-                      "url":  "https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "CNBC",
-                      "titolo":  "Nvidia prepares to oust Jensen Huang, WSJ reports — stock sinks",
-                      "url":  "https://www.cnbc.com/2026/11/11/nvidia-jensen-huang-affair-employee.html",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "Handelsblatt",
-                      "titolo":  "Wall Street: KI-Euphorie ist zurück – Tech-Aktien schließen deutlich im Plus",
-                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dow-jones-sp-500-nasdaq-ki-euphorie-ist-zurueck-tech-aktien-schliessen-deutlich-im-plus/100269138.html",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "MarketWatch",
-                      "titolo":  "Falling oil prices are no longer enough to bring down borrowing costs in the world\u0027s most important bond market",
-                      "url":  "https://www.marketwatch.com/story/falling-oil-prices-are-no-longer-enough-to-bring-down-borrowing-costs-in-the-worlds-most-important-bond-market-3176d25a",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "Investing.com",
-                      "titolo":  "Oil prices rise amid mixed messaging on Iran peace efforts, Hormuz ship attacks",
-                      "url":  "https://www.investing.com/news/commodities-news/oil-prices-rise-from-2mth-low-with-focus-on-usiran-peace-inventories-5017522",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "ANSA",
-                      "titolo":  "Il petrolio chiude in leggero rialzo a New York, a 86,47 dollari",
-                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/11/il-petrolio-chiude-in-leggero-rialzo-a-new-york-a-8647-dollari_639b1fe6-1784-4048-a1c9-173afc170031.html",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "CoinDesk",
-                      "titolo":  "Live news: Bitcoin remains under pressure as CoreWeave, Nvidia lead AI rebound",
-                      "url":  "https://www.coindesk.com/tech/2026/11/11/live-news-coreweave-jumps-14-as-earnings-fuel-rebound-across-battered-ai-stocks",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "Bloomberg",
-                      "titolo":  "Nvidia Tumbles as Investors Consider Future Without CEO Huang",
-                      "url":  "https://www.bloomberg.com/news/articles/2026-11-11/nvidia-tumbles-as-investors-consider-future-without-ceo-huang",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "CNBC",
-                      "titolo":  "CoreWeave soars more than 24% for best day since April 2025 after strong Q3 report",
-                      "url":  "https://www.cnbc.com/2026/11/11/coreweave-crwv-outlook-earnings-ai.html",
-                      "data":  "2026-11-11"
-                  },
-                  {
-                      "testata":  "CNBC",
-                      "titolo":  "Fed Governor Waller sees December hike likely, opens door to possible half-point increase",
-                      "url":  "https://www.cnbc.com/2026/11/10/fed-governor-waller-sees-december-hike-likely.html",
-                      "data":  "2026-11-10"
-                  },
-                  {
-                      "testata":  "The Economist",
-                      "titolo":  "Lessons from a miserable month for hedge funds",
-                      "url":  "https://www.economist.com/finance-and-economics/2026/11/10/lessons-from-a-miserable-month-for-hedge-funds",
-                      "data":  "2026-11-10"
-                  },
-                  {
-                      "testata":  "Financial Times",
-                      "titolo":  "Anthropic\u0027s IPO is too important to fail",
-                      "url":  "https://www.ft.com/content/26fd23df-830e-481b-a3bc-19bcab48c5f6",
-                      "data":  "2026-11-11"
-                  }
-              ],
-    "limiti":  "Gli articoli di FT, WSJ, Bloomberg, Economist e Il Sole 24 Ore sono a pagamento o non accessibili: ho usato solo titoli, fonte e link dai feed. Non ho trovato dati di chiusura di oggi per Borsa di Milano e spread BTP-Bund; WSJ non aggiornato; ricerche web senza risultati sul 12/11. Tassi USA e posizioni sui futures sono dati del 10/11 e del 3/11. Quotazione di Anthropic e vicenda Nvidia riportate da testate, non verificate in modo indipendente."
+  "app": "finanze-analisi",
+  "versione": 1,
+  "generato": "2026-11-13T08:50:00+01:00",
+  "data": "2026-11-13",
+  "titolo": "Nvidia perde il suo CEO e Wall Street cede lo 0,4%, ma i rendimenti USA schizzano sopra il 5%: il vero nodo sono i tassi",
+  "sintesi": "Giovedì Wall Street ha chiuso in lieve calo (S&P 500 -0,4%) perché Nvidia ha perso circa il 5% dopo le dimissioni del CEO Jensen Huang; l'indice ha però retto meglio del previsto. Più importante per chi investe a lungo: i rendimenti dei titoli di Stato USA hanno fatto il balzo più forte dal 2022 (10 anni a 5,10%) con la Fed che valuta un rialzo a dicembre, e il petrolio è risalito dopo le parole di Trump sull'Iran. È un momento in cui servono calma, piani regolari e diversificazione, senza inseguire i titoli del giorno.",
+  "umore": { "valore": -1, "etichetta": "Cauto" },
+  "classi": [
+    {
+      "classe": "Azioni",
+      "giudizio": 0,
+      "etichetta": "Neutrale, volatile",
+      "perche": "Giovedì l'S&P 500 ha chiuso a circa 7.592 punti (-0,4%), il Nasdaq Composite a circa 25.366 (-0,4%) e il Dow a circa 52.297 (-0,4%); Nvidia è arrivata a perdere fino al 13% in corsa per poi chiudere intorno a -5%, mentre Broadcom e AMD sono salite di circa il 5% e Cisco ha alzato le attese sui ricavi legati all'IA (Handelsblatt, CNBC). Il calo è stato più contenuto di quello della settimana scorsa, ma i tassi in forte rialzo e la dipendenza degli indici da pochi titoli tecnologici lasciano il quadro fragile. Giudizio invariato a 0. Caso contrario: gli utili di molte aziende restano solidi e il resto del mercato ha dimostrato di poter reggere senza Nvidia.",
+      "mossa": "Mantieni i piani regolari su ETF molto diversificati e non concentrarti sulla tecnologia o su singoli titoli.",
+      "fonti": [0, 1, 5, 12]
+    },
+    {
+      "classe": "Obbligazioni",
+      "giudizio": 1,
+      "etichetta": "Cedole alte, con cautela",
+      "perche": "I rendimenti USA sono saliti a 4,86% a 2 anni, 5,10% a 10 anni e 5,43% a 30 anni (da 4,73% e 4,98% a 2 e 10 anni di mercoledì); MarketWatch parla del balzo più forte dal 2022, perché cresce l'attesa di più rialzi della Fed. Chi compra ora incassa cedole elevate, ma i prezzi dei titoli già in circolazione scendono quando i rendimenti salgono, e i mutui USA sono saliti tanto che le vendite di case sono ai minimi dal 2010 (FT). Giudizio invariato, con più prudenza sulle scadenze lunghe. Caso contrario: se i tassi continuano a salire, chi compra oggi può vedere ancora perdite temporanee; i grandi investitori sono già molto corti sui titoli di Stato USA, quindi un rimbalzo improvviso resta possibile.",
+      "mossa": "Aggiungi a rate e con scadenze medie, senza puntare sulle scadenze più lunghe.",
+      "fonti": [2, 10, 11]
+    },
+    {
+      "classe": "Crypto",
+      "giudizio": -1,
+      "etichetta": "Prudenza",
+      "perche": "La capitalizzazione totale è circa 2.410 miliardi di dollari (-5,7% in 24 ore) e l'indice paura/avidità è a 28 (Paura); le stablecoin sono in calo del 4,9% in 30 giorni, segno di capitali che escono dal settore. Rendimenti in rialzo e dollaro forte sono un freno per gli asset rischiosi. Giudizio invariato. Caso contrario: dopo cali così rapidi i rimbalzi tecnici sono frequenti e il settore continua a ricevere infrastrutture dalla finanza tradizionale (DTCC punta a portare anche Solana nella tokenizzazione nel 2027).",
+      "mossa": "Non rincorrere né ribassi né rimbalzi; eventualmente solo piccole quote e a rate.",
+      "fonti": [6]
+    },
+    {
+      "classe": "Materie prime",
+      "giudizio": 0,
+      "etichetta": "Neutrale",
+      "perche": "Il petrolio è risalito: Brent a 95,82 dollari (+3,3%) e WTI a 88,74 (+2,6%) dopo le parole di Trump secondo cui un accordo con l'Iran non serve, ma a novembre restano in calo del 20% e del 16% (CNBC). Gli analisti avvertono che il mercato potrebbe essersi spinto troppo avanti nello scontare la fine delle tensioni. Nei futures i grandi investitori sono molto lunghi sull'oro (dati al 3/11), quindi le inversioni possono essere rapide. Giudizio invariato. Caso contrario: forniture abbondanti dal Medio Oriente limitano i prezzi a breve, mentre l'oro può beneficiare dell'incertezza politica.",
+      "mossa": "Una piccola quota in oro resta una protezione, non una previsione; non inseguire il petrolio.",
+      "fonti": [3]
+    },
+    {
+      "classe": "Liquidità",
+      "giudizio": 0,
+      "etichetta": "Cuscinetto utile",
+      "perche": "Con i rendimenti a 2 anni USA a 4,86% e altri rialzi in vista, la liquidità remunerata dà tranquillità mentre i listini oscillano. Giudizio invariato. Caso contrario: con prezzi alti troppa liquidità perde potere d'acquisto e si rischia di restare fuori dopo i rimbalzi.",
+      "mossa": "Tieni il cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
+      "fonti": [2]
+    }
+  ],
+  "temi": [
+    {
+      "titolo": "Nvidia senza Jensen Huang",
+      "giudizio": -1,
+      "perche": "Huang si è dimesso dopo le notizie sulla sua vita privata e su legami con la Cina; guida ad interim la CFO Colette Kress. Il titolo ha chiuso intorno a -5% e il FT discute quanto valga un CEO per un'azienda così grande. Rischio per i fornitori e clienti legati all'IA (Nebius -16%, CoreWeave -6%), ma altri chip (Broadcom, AMD) sono saliti.",
+      "fonti": [0, 1, 5, 8]
+    },
+    {
+      "titolo": "Rendimenti USA ai massimi, balzo più forte dal 2022",
+      "giudizio": -1,
+      "perche": "Il 10 anni è a 5,10% e il 30 anni a 5,43%: il mercato scommette su altri rialzi della Fed dopo un'inflazione di ottobre giudicata 'quasi inquietante' da un membro della Fed. Rendimenti alti pesano su azioni care e mutui.",
+      "fonti": [2, 4, 10]
+    },
+    {
+      "titolo": "Petrolio di nuovo in rialzo",
+      "giudizio": 0,
+      "perche": "Trump dice che con l'Iran non serve un accordo; Brent a 95,82 dollari. Resta un mese di forte calo, ma le tensioni su Hormuz mantengono il rischio di nuove salite.",
+      "fonti": [3]
+    },
+    {
+      "titolo": "Mercato immobiliare USA in difficoltà",
+      "giudizio": -1,
+      "perche": "Le vendite di case USA sono ai minimi dal 2010 perché i tassi sui mutui sono saliti: un effetto concreto dei tassi alti sull'economia reale.",
+      "fonti": [11]
+    },
+    {
+      "titolo": "Conti sull'IA: Cisco e Cerebras",
+      "giudizio": 1,
+      "perche": "Cisco ha battuto le attese e prevede che i ricavi legati all'infrastruttura IA raddoppino quest'anno; Cerebras è salita del 18% dopo conti e un accordo con Microsoft. La domanda di IA resta forte, anche senza Nvidia al centro.",
+      "fonti": [12]
+    },
+    {
+      "titolo": "Italia: manovra e banche",
+      "giudizio": 0,
+      "perche": "Il ministro Giorgetti dice che sulla manovra 'i giochi non sono fatti' ma che le coperture sono state trovate; resta lo scontro sulle misure che riguardano le banche.",
+      "fonti": [9]
+    }
+  ],
+  "attenzione": [
+    { "titolo": "Fed a dicembre", "perche": "Un rialzo (forse anche più ampio) il 9 dicembre è sempre più atteso: nuovi dati sull'inflazione possono muovere molto azioni e obbligazioni." },
+    { "titolo": "Effetto a catena sull'IA", "perche": "Nvidia pesa molto negli indici: ulteriori notizie sul suo vertice o sul legame con la Cina possono trascinare tutto il settore." },
+    { "titolo": "Medio Oriente e Hormuz", "perche": "Senza un accordo con l'Iran il petrolio può risalire e alimentare l'inflazione." },
+    { "titolo": "Titoli di Stato più cari da finanziare", "perche": "Con rendimenti oltre il 5% il costo del debito sale per Stati e imprese; le tensioni possono estendersi anche ai titoli italiani." }
+  ],
+  "idee": [
+    { "classe": "Azioni", "isin": "IE00B4L5Y983", "perche": "ETF sul mondo sviluppato, a costo basso: una base diversificata da accumulare a rate." },
+    { "classe": "Azioni", "isin": "IE00BK5BQT80", "perche": "ETF sull'intero mondo, a costo basso, adatto a un piano regolare senza puntare su un singolo tema." },
+    { "classe": "Obbligazioni", "isin": "LU1437018598", "perche": "Obbligazioni dell'area euro: cedole interessanti, da comprare a rate con cautela." },
+    { "classe": "Obbligazioni", "isin": "LU1437024729", "perche": "Obbligazioni di Stati europei a scadenza intermedia, più prudenti delle scadenze lunghe." },
+    { "classe": "Liquidità", "isin": "FR0010510800", "perche": "ETF monetario: segue i tassi a breve, utile come cuscinetto." },
+    { "classe": "Materie prime", "isin": "IE00B4ND3602", "perche": "Oro fisico: piccola quota come protezione, non come previsione." }
+  ],
+  "indicatori": [
+    { "nome": "S&P 500 (chiusura 12/11)", "valore": "circa 7.592 (-0,4%)", "nota": "Handelsblatt" },
+    { "nome": "Rendimento USA 10 anni", "valore": "5,10%", "nota": "era 4,98% il giorno prima" },
+    { "nome": "Rendimento USA 2 anni", "valore": "4,86%", "nota": "era 4,73%" },
+    { "nome": "Petrolio WTI / Brent", "valore": "88,74 / 95,82 dollari", "nota": "CNBC, +2,6% / +3,3%" },
+    { "nome": "Paura/avidità crypto", "valore": "28 (Paura)", "nota": "capitalizzazione totale circa 2.410 miliardi di dollari" },
+    { "nome": "Prossima Fed", "valore": "9 dicembre", "nota": "BCE il 17 dicembre" }
+  ],
+  "fonti": [
+    { "testata": "CNBC", "titolo": "Nvidia stock closes down over 4% after CEO Jensen Huang announces resignation", "url": "https://www.cnbc.com/2026/11/12/nvidia-nvda-jensen-huang-second-affair.html", "data": "2026-11-12" },
+    { "testata": "Handelsblatt", "titolo": "Wall Street schließt im Minus – Nvidia-Turbulenzen belasten", "url": "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dow-jones-sp-500-nasdaq-wall-street-schliesst-im-minus-nvidia-turbulenzen-belasten/100269457.html", "data": "2026-11-12" },
+    { "testata": "MarketWatch", "titolo": "Bond yields just saw their biggest surge since 2022 as expectations grow for more Fed rate hikes", "url": "https://www.marketwatch.com/story/bond-yields-just-saw-their-biggest-surge-since-2022-as-expectations-grow-for-more-fed-rate-hikes-d0a4f195?mod=mw_rss_topstories", "data": "2026-11-12" },
+    { "testata": "CNBC", "titolo": "Oil prices rise after Trump says no Iran deal needed: 'We've got their Strait'", "url": "https://www.cnbc.com/2026/11/12/oil-prices-jump-after-trump-says-no-iran-deal-needed-weve-got-their-strait.html", "data": "2026-11-12" },
+    { "testata": "CNBC", "titolo": "Fed's Goolsbee calls inflation report 'borderline disturbing' as central bank weighs more hikes", "url": "https://www.cnbc.com/2026/11/11/goolsbee-october-inflation-fed-rates-disturbing-distressing.html", "data": "2026-11-11" },
+    { "testata": "Financial Times", "titolo": "Nvidia sends a painful message on how to value a CEO", "url": "https://www.ft.com/content/610fc69e-51ae-4f7a-8e48-c2ce42860ff4?syn-25a6b1a6=1", "data": "2026-11-12" },
+    { "testata": "CoinDesk", "titolo": "DTCC adds Solana to Wall Street tokenization plans, targeting 2027 rollout", "url": "https://www.coindesk.com/business/2026/11/12/dtcc-adds-solana-to-wall-street-tokenization-plans-targeting-2027-rollout", "data": "2026-11-12" },
+    { "testata": "The Economist", "titolo": "Where to find the anti-AI trade", "url": "https://www.economist.com/finance-and-economics/2026/11/12/where-to-find-the-anti-ai-trade", "data": "2026-11-12" },
+    { "testata": "Il Sole 24 Ore", "titolo": "Nvidia, Jensen Huang si è dimesso, al suo posto ad interim la cfo Kress", "url": "https://www.ilsole24ore.com/art/jensen-huang-si-e-dimesso-effetto-immediato-ceo-nvidia-AJJtxDEC", "data": "2026-11-12" },
+    { "testata": "ANSA", "titolo": "Giorgetti apre sulla manovra: 'I giochi non sono fatti ma trovate le coperture'", "url": "https://www.ansa.it/sito/notizie/economia/2026/11/12/giorgetti-apre-sulla-manovra-i-giochi-non-sono-fatti-ma-trovate-le-coperture_ba7f7462-173e-4722-85ec-2383cb73ecfd.html", "data": "2026-11-12" },
+    { "testata": "MarketWatch", "titolo": "The bond market now has an even bigger fear than AI fallout", "url": "https://www.marketwatch.com/story/the-bond-market-now-has-an-even-bigger-fear-than-the-ai-fallout-b6401b54?mod=mw_rss_topstories", "data": "2026-11-12" },
+    { "testata": "Financial Times", "titolo": "US home sales fall to lowest level since 2010 as mortgage rates soar", "url": "https://www.ft.com/content/1e08661e-1db0-4ff7-8236-77254bb05790?syn-25a6b1a6=1", "data": "2026-11-12" },
+    { "testata": "CNBC", "titolo": "Cisco beats on earnings, says AI infrastructure revenue will double this fiscal year", "url": "https://www.cnbc.com/2026/11/12/cisco-csco-q1-2027-earnings.html", "data": "2026-11-12" }
+  ],
+  "limiti": "Ho letto in dettaglio solo i resoconti di Handelsblatt e CNBC sul petrolio; per le altre testate (FT, MarketWatch, Il Sole 24 Ore, ANSA, Economist, CoinDesk) ho usato titoli, fonte e link dal feed di oggi. Wall Street Journal non aggiornato, Barron's, Reuters, Milano Finanza e le altre testate italiane non raggiungibili o a pagamento; chiusura della Borsa di Milano e spread BTP-Bund di oggi non trovati. Niente dati VIX."
 }
