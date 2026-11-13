@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Unmn2ooBaT+palMEH76p/NOBHtjNQDYLKvpU9yyrHm8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CsQuAygwrdiHUcjfphePnGkgN8RbstXgrjqpFIDNfaw='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4373,7 +4373,7 @@ function trItem(r, showDate) {          // una riga: che cosa, categoria e conto
   const head = r.note || r.cat || TR_LAB[r.k], line = r.k === 'trasf' ? r.acc + ' → ' + r.to : [r.cat, r.sub].filter(Boolean).join(' › ') + (r.acc ? ' · ' + r.acc : '');
   const amt = r.k === 'trasf' ? eur(r.amt, true) : (r.k === 'entrata' ? '+' : '−') + eur(r.amt, true);
   return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, head), h('span', { class: 'muted' }, (showDate ? fmtDate(r.d) + ' · ' : '') + line + (r.own ? '' : ' · storico'))),
-    h('div', { class: 'tr-am ' + (r.k === 'entrata' ? 'in' : r.k === 'spesa' ? 'out' : 'tf') }, amt, r.own ? btn('Elimina', () => trDelete(r), 'sm danger') : null));
+    h('div', { class: 'tr-am ' + (r.k === 'entrata' ? 'in' : r.k === 'spesa' ? 'out' : 'tf') }, amt, r.own ? [btn('Modifica', () => trEditDate(r.rec), 'sm'), btn('Elimina', () => trDelete(r), 'sm danger')] : null));
 }
 function trCal() {
   const el = h('div'), today0 = today(), ym = UI.trm || today0.slice(0, 7), sel = UI.trd && UI.trd.slice(0, 7) === ym ? UI.trd : (ym === today0.slice(0, 7) ? today0 : ym + '-01');
@@ -4475,7 +4475,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v15 (scorrimento fluido, ordine conti e gruppi)';
+const APP_VER = '12/11/2026 · v16 (modifica data operazioni)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -4939,11 +4939,28 @@ function panelDialog(title, build) {          // una finestra con un pezzo di sc
   PAC_UI = () => { if (!dlg.isConnected) { PAC_UI = null; return; } draw(); };
   dlg.append(body); dlg.addEventListener('close', () => { PAC_UI = null; dlg.remove(); }); draw(); document.body.append(dlg); dlg.showModal();
 }
+function setOpDate(o, date) {          // cambia la data di un'operazione: si spostano anche i movimenti (versamenti/prelievi) che ha creato; saldi e quote non cambiano
+  o.date = date; const u = o.undo || {}, mv = (ac, fid) => { const fl = ac && ac.flows.find(f => f.id === fid); if (fl) fl.date = date; };
+  if (u.flowId) mv(S.accounts.find(x => x.id === o.accId), u.flowId); for (const [aid, fid] of (u.flowIds || [])) mv(S.accounts.find(x => x.id === aid), fid);
+  for (const r of TRX()) if (r.opId === o.id) r.date = date; TR_MEMO = null;
+}
+function editOpMeta(o) {
+  form('Modifica operazione', [{ key: 'date', label: 'Data', type: 'date', req: true }, { key: 'note', label: 'Nota' }], { date: o.date, note: o.note || '' }, v => {
+    if (!v.date) return 'Scegli la data.'; o.note = v.note; setOpDate(o, v.date); done();
+  });
+}
+function trEditDate(rec) {          // spesa, guadagno o trasferimento della scheda Spese: cambia data e nota
+  form('Modifica transazione', [{ key: 'date', label: 'Data', type: 'date', req: true }, { key: 'note', label: 'Nota' }], { date: rec.date, note: rec.note || '' }, v => {
+    if (!v.date) return 'Scegli la data.'; rec.note = v.note; rec.date = v.date;
+    const a = S.accounts.find(x => x.id === rec.accId), fl = rec.u && rec.u.flowId && a ? a.flows.find(x => x.id === rec.u.flowId) : null; if (fl) fl.date = v.date;
+    const o = rec.opId ? OPS().find(x => x.id === rec.opId) : null; if (o) setOpDate(o, v.date); TR_MEMO = null; done();
+  });
+}
 function talkOp(x) {
   const k = opLab(x), amt = x.gross != null ? x.gross : x.amount, rows = [];
   talk({ kind: 'Operazione del ' + fmtDate(x.date), title: k + (x.instName ? ' · ' + x.instName : x.toId ? ' · ' + accName(x.accId) + ' → ' + accName(x.toId) : ''), value: eur(amt, true), num: amt,
     say: (x.accId ? 'Registrata su ' + accName(x.accId) + (x.toId ? ', verso ' + accName(x.toId) : '') + '. ' : '') + (x.qty ? nfq.format(x.qty) + ' unità' + (x.price ? ' a ' + nf2.format(x.price) + ' ' + (x.ccy || '') : '') + '. ' : '') + (x.realized != null ? (x.realized >= 0 ? 'Guadagno realizzato ' : 'Perdita realizzata ') + eur(Math.abs(x.realized)) + '. ' : ''),
-    how: 'Il guadagno realizzato conta per le tasse: lo trovi in Analisi → Tasse.', tip: 'Se hai sbagliato un numero puoi annullare l\'operazione: i conti tornano com\'erano prima.', acts: [['Annulla questa operazione', () => undoOp(x), 'danger']] });
+    how: 'Il guadagno realizzato conta per le tasse: lo trovi in Analisi → Tasse.', tip: 'Se hai sbagliato la data o la nota, usa «Modifica data e nota». Se hai sbagliato un numero puoi annullare l\'operazione e rifarla: i conti tornano com\'erano prima.', acts: [['Modifica data e nota', () => editOpMeta(x), 'pri'], ['Annulla questa operazione', () => undoOp(x), 'danger']] });
 }
 function opsCard() {          // in fondo ai conti: le ultime operazioni registrate, di tutti i conti, con filtro per conto
   const all = OPS().slice().reverse(), accF = UI.opsAcc || '', lim = UI.opsAll ? 300 : 12;
