@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BTO9qX4EB9Tau5JNdtcwxYe6tH1/H40Jc96msFUpZfs='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aOth8d4rEnL0zHbSrIa6234ES4VTvmQZrhMcZ4xl0nA='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1933,10 +1933,17 @@ function editPosition(a, p) {
   form(isNew ? 'Nuova posizione in ' + a.name : 'Modifica posizione', [
     { key: 'instId', label: 'Strumento', type: 'select', options: S.instruments.map(i => [i.id, i.name + ' (' + i.ccy + ')']) },
     { key: 'qty', label: 'Quantità (per fondi a quote: numero di quote)', type: 'number', req: true },
-    { key: 'cost', label: 'Costo di carico totale in € (facoltativo)', type: 'number', hint: 'Quanto hai speso in tutto per questa posizione, commissioni incluse: serve per vedere dove guadagni e dove perdi.' }
+    { key: 'cost', label: 'Costo di carico totale in € (facoltativo)', type: 'number', hint: 'Quanto hai speso in tutto per questa posizione, commissioni incluse: serve per vedere dove guadagni e dove perdi.' },
+    { key: 'pct', label: 'Oppure: rendimento % di oggi (facoltativo)', type: 'number', hint: 'Se non ricordi il costo, scrivi il rendimento che vedi nell\'app della banca (per esempio -16,91 o 12,5): ricavo io il costo dal valore di oggi. Se lo scrivi, vale più del costo sopra.' }
   ], v, o => {
     if (!(o.qty >= 0)) return 'Inserisci una quantità valida.';
     const d = { instId: o.instId, qty: o.qty, cost: o.cost > 0 ? o.cost : 0 };
+    if (typeof o.pct === 'number' && isFinite(o.pct)) {          // costo = valore di oggi / (1 + rendimento)
+      if (o.pct <= -100) return 'Il rendimento deve essere maggiore di -100%.';
+      const ii = inst(o.instId), val = ii ? o.qty * ii.price * (fxRate(ii.ccy) ?? 1) : 0;
+      if (!(val > 0)) return 'Per usare il rendimento serve un prezzo di oggi: aggiornalo prima nello strumento.';
+      d.cost = +(val / (1 + o.pct / 100)).toFixed(2);
+    }
     if (isNew) a.positions.push({ id: uid(), ...d }); else Object.assign(p, d); done();
   });
 }
@@ -2574,9 +2581,10 @@ function applyFixFile(text, meta) {          // file "correzioni": Conto;Titolo;
     const an = cl(r[0]), tn = cl(r[1]); if (!an || !tn) continue;
     const a = S.accounts.find(x => x.name.toLowerCase() === an.toLowerCase()); if (!a) { R.miss.push(an); continue; }
     if (tn === '@liquidita') { const v = num(r[3]); if (fin(v)) { a.cash = v; a.upd = today(); R.cash++; } continue; }
-    const qty = num(r[3]), cost = num(r[4]), pr = num(r[5]); if (!fin(qty) || qty <= 0) { R.miss.push(an + ' · ' + tn); continue; }
+    const qty = num(r[3]), pr = num(r[5]), costTxt = cl(r[4]), isPct = /%$/.test(costTxt); let cost = isPct ? NaN : num(r[4]); if (!fin(qty) || qty <= 0) { R.miss.push(an + ' · ' + tn); continue; }
     let i = findInst(tn, cl(r[2]));
     if (!i) i = ensureInst(tn, cl(r[2]), cl(r[6]), fin(pr) && pr > 0 ? pr : null, today(), R.created); else if (fin(pr) && pr > 0) setPrice(i, pr);
+    if (isPct) { const pc = parseNum(costTxt.replace('%', ''), ','), val = qty * i.price * (fxRate(i.ccy) ?? 1); if (fin(pc) && pc > -100 && val > 0) cost = +(val / (1 + pc / 100)).toFixed(2); }          // costo scritto come "-16,91%": il costo si ricava dal valore di oggi
     if (cl(r[7]) && (!i.cls || i.cls === 'Non classificato')) i.cls = cl(r[7]); if (cl(r[8]) && (!i.area || i.area === 'n.d.')) i.area = cl(r[8]);
     const p = a.positions.find(x => x.instId === i.id);
     if (p) { p.qty = qty; if (fin(cost) && cost > 0) p.cost = cost; } else a.positions.push({ id: uid(), instId: i.id, qty, cost: fin(cost) && cost > 0 ? cost : 0 });
@@ -4522,7 +4530,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v21 (giorno 1 e correzioni)';
+const APP_VER = '13/11/2026 · v22 (rendimento % al posto del costo)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
