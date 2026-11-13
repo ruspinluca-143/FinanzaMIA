@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CsQuAygwrdiHUcjfphePnGkgN8RbstXgrjqpFIDNfaw='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ddvmyK+/GkOttqw9+HfUUwLRHh+lMes7+80T/+nDk0s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -763,7 +763,7 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-day{font:inherit;font-size:14px;border:0;background:var(--btn);color:var(--ink);border-radius:10px;min-height:48px;padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer}
 .tr-day.off{visibility:hidden;pointer-events:none}.tr-day.today{box-shadow:inset 0 0 0 1.5px var(--s1)}
 .tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
-.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
+.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-plan{opacity:.8;border-style:dashed}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
 .tr-day.sel .tr-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.7)}
 .tr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--grid)}.tr-item:first-of-type{border-top:0}
 .tr-it{display:flex;flex-direction:column;gap:1px;min-width:0}.tr-it b{font-size:15px;overflow:hidden;text-overflow:ellipsis}.tr-it .muted{font-size:12px}
@@ -988,7 +988,7 @@ async function autoRestore(id) {
   migrate(D); await autoPoint(true);          // prima di tornare indietro si salva com'e' adesso: si puo' sempre tornare avanti
   S = D; UI.acc = null; UI.planId = null; touch(); render(); setStatus('Ripristinato il salvataggio automatico'); return '';
 }
-setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (ACC_DAY !== today()) { ACC_DAY = today(); if (accrueInterest()) render(); } if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
+setInterval(() => { if (!S || !KEY || DEMO || LOCKED) return; if (ACC_DAY !== today()) { ACC_DAY = today(); const a1 = accrueInterest(), a2 = trAutoDue(); if (a1 || a2) render(); } if (DIRTY) save(false); autoPoint(false).then(ok => { if (ok && UI.tab === 'dati') { const e = document.getElementById('autoList'); if (e && e.fill) e.fill(); } }); }, 60000);          // ogni minuto: se c'e' qualcosa di non salvato lo si salva, e si tiene un punto di ripristino
 async function seal() {
   S.savedAt = new Date().toISOString();          // dentro la parte cifrata: serve a capire quale delle due copie (dispositivo o file) e' la piu' recente
   const iv = crypto.getRandomValues(new Uint8Array(12)), header = hdr();
@@ -3917,7 +3917,7 @@ function intLine(a) {          // nella pagina del conto: quanto ha fruttato fin
   return h('p', { class: 'muted' }, 'Interesse ' + nfp.format(a.intRate) + '% annuo' + (a.intTax ? ' (al netto del ' + nfp.format(a.intTax) + '%)' : '') + ', calcolato ogni giorno sulla liquidità: finora ' + eur(a.intTot || 0, true) + ', questo mese ' + eur(m, true) + ', circa ' + eur(perDay, true) + ' al giorno.');
 }
 function syncLayout() {          // una volta sola: chi usava lo "stile Revolut" scuro tiene il suo aspetto, ora scelto in Aspetto
-  if (S && !LOCKED && ACC_DAY !== today()) { ACC_DAY = today(); accrueInterest(); }
+  if (S && !LOCKED && ACC_DAY !== today()) { ACC_DAY = today(); accrueInterest(); trAutoDue(); }
   if (!S || LOCKED || !S.settings || S.settings.rvMig) return;
   S.settings.rvMig = 1;
   if (LAYOUT() !== 'classico') { const id = { nero: 'rv-nero', grafite: 'rv-grafite' }[RV_TONE()] || 'rv-scuro'; S.settings.theme = id; try { applyTheme(id); } catch (x) { /* tema di base */ } touch(); }
@@ -4274,7 +4274,10 @@ function trWizard(pre, after) {          // inserimento guidato: che cosa, quant
     inp.addEventListener('input', () => { st.note = inp.value; fill(); }); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('dialog.wz .wz-nav .pri:not([disabled])'); if (b) b.click(); } });
     fill(); sum();
     return { q: 'Vuoi aggiungere una nota?', nextLabel: 'Salva', focus: '.wz-search', err: st.err, body: [sumEl, inp, sug, h('p', { class: 'muted' }, 'I suggerimenti vengono da quello che hai già scritto.'), h('div', { class: 'tr-rep' }, h('h4', { class: 'wz-gh' }, 'Si ripete?'), h('div', { class: 'tr-chips' }, [['', 'No'], ['mensile', 'Ogni mese'], ['annuale', 'Ogni anno'], ['rate', 'A rate']].map(([k, l]) => h('button', { type: 'button', class: 'tr-chip sm' + (st.rep === k ? ' sel' : ''), onclick: () => { st.rep = k; api.redraw(); } }, l))), st.rep === 'rate' ? h('label', { class: 'fld' }, h('span', null, 'Quante rate in tutto (questa compresa)'), wzNum(st.rate, 'es. 12', v => { st.rate = v; })) : null)],
-      onNext: async a2 => { st.err = ''; const r = trApply({ kind: st.kind, date: st.date, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, note: st.note.trim() }); if (r) { st.err = r; a2.redraw(); return false; } if (st.rep) trAddRec(st); a2.shut(); trAllDone(before, TR_LAB[st.kind] + ' salvata: ' + money(st.amt) + (st.rep ? ' · si ripete' : '')); if (after) after(); return false; } };
+      onNext: async a2 => { st.err = ''; const future = !!st.rep && st.date > today(); let r = null;
+        if (future) { const a0 = S.accounts.find(x => x.id === st.accId); r = !a0 ? 'Scegli il conto.' : !(st.amt > 0) ? 'Scrivi l\'importo.' : a0.dep ? 'Un conto deposito non si muove da qui: usa "Modifica conto".' : st.kind === 'trasf' && !st.toId ? 'Scegli il conto di arrivo.' : null; }          // una spesa che si ripete e cade piu' avanti: si segna ora ma il conto scende solo quel giorno
+        else r = trApply({ kind: st.kind, date: st.date, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, note: st.note.trim() });
+        if (r) { st.err = r; a2.redraw(); return false; } if (st.rep) trAddRec(st); a2.shut(); trAllDone(before, future ? TR_LAB[st.kind] + ' programmata: ' + money(st.amt) + ', il conto scende il ' + fmtDate(st.date) : TR_LAB[st.kind] + ' salvata: ' + money(st.amt) + (st.rep ? ' · si ripete' : '')); if (after) after(); return false; } };
   };
   const steps = () => st.kind === 'trasf' ? [sKind, sAmt, sFrom, sTo, sNote] : [sKind, sAmt, sCat, sAcc, sNote];
   return wzRun({ steps });
@@ -4286,9 +4289,14 @@ const trOcc = r => occurrences(r.start, freqMonths(r.freq), r.day, r.start, addM
 function trDueAll() { const t = today(), out = []; for (const r of TRR()) { const dn = new Set(r.done || []); trOcc(r).forEach((d, i) => { if (d >= (r.since || r.start) && d <= t && !dn.has(d)) out.push({ r, d, k: i + 1 }); }); } return out.sort((a, b) => a.d < b.d ? -1 : 1); }
 function trAddRec(st) {
   const fr = st.rep === 'annuale' ? 'annuale' : 'mensile', step = freqMonths(fr), day = +st.date.slice(8, 10) || 1, occ = occurrences(st.date, step, day, st.date, addMonthsStr(today(), 400), ''), n = st.rep === 'rate' ? Math.max(2, Math.round(st.rate || 12)) : 0;
-  TRR().push({ id: uid(), name: (st.note || st.cat || TR_LAB[st.kind]).trim(), kind: st.kind, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, freq: fr, day, start: st.date, since: occ[1] || addMonthsStr(st.date, step), end: n ? (occ[n - 1] || '') : '', total: n, done: [] });
+  TRR().push({ id: uid(), name: (st.note || st.cat || TR_LAB[st.kind]).trim(), kind: st.kind, accId: st.accId, toId: st.toId, amount: st.amt, cat: st.cat, sub: st.sub, freq: fr, day, start: st.date, since: st.date > today() ? st.date : (occ[1] || addMonthsStr(st.date, step)), end: n ? (occ[n - 1] || '') : '', total: n, done: [] });
 }
 const trRecNote = (r, k) => r.name + (r.total ? ' (' + k + '/' + r.total + ')' : '');
+function trAutoDue() {          // spese ricorrenti: il giorno della scadenza si registrano da sole e solo allora il conto scende (a meno che qualcosa non vada: allora restano da confermare)
+  if (!S || DEMO || LOCKED) return false; const due = trDueAll(); if (!due.length) return false; let n = 0, last = '';
+  for (const { r, d, k } of due) { const m = trApply({ kind: r.kind, date: d, accId: r.accId, toId: r.toId, amount: r.amount, cat: r.cat, sub: r.sub, note: trRecNote(r, k) }); if (m) continue; (r.done = r.done || []).push(d); n++; last = trRecNote(r, k) + ' ' + eur(r.amount, true); }
+  if (n) { touch(); toastMsg(n === 1 ? 'Registrata la spesa ricorrente: ' + last : n + ' spese ricorrenti registrate sul conto', 7000); } return n > 0;
+}
 function trConfirmDue(auto) {
   const due = trDueAll(); if (!due.length) { if (!auto) alert('Nessuna spesa ricorrente da confermare.'); return; }
   const dlg = h('dialog', { class: 'wide duedlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); render(); }, head = h('p', { class: 'muted' }), list = h('div', { class: 'duelist' });
@@ -4311,9 +4319,9 @@ function trRec() {
   const sq = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca una spesa ricorrente…', autocomplete: 'off', 'aria-label': 'Cerca una spesa ricorrente' }), box = h('div');
   const fill = () => { const toks = normT(sq.value).split(' ').filter(Boolean), L = TRR().filter(r => toks.every(x => normT([r.name, r.cat, accName(r.accId)].join(' ')).includes(x)));
     box.replaceChildren(...L.map(r => { const nx = trOcc(r).find(d => d > today() || !(r.done || []).includes(d)), k = trOcc(r).indexOf(nx) + 1; return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, r.name + (r.total ? ' · rate ' + r.total : '')), h('span', { class: 'muted' }, freqLabel(r.freq) + ' · ' + eur(r.amount, true) + ' · ' + accName(r.accId) + (nx ? ' · prossima ' + fmtDate(nx) + (r.total ? ' (' + k + '/' + r.total + ')' : '') : ' · finita'))), h('div', { class: 'tr-am' }, btn('Elimina', () => { if (confirm('Elimino questa spesa ricorrente? Quelle già registrate restano.')) { S.trr = TRR().filter(x => x !== r); done(); } }, 'sm danger'))); }));
-    if (!L.length) box.append(h('p', { class: 'muted' }, TRR().length ? 'Nessuna corrisponde.' : 'Ancora nessuna. Quando registri una spesa, alla fine scegli «Si ripete?» (ogni mese, ogni anno o a rate): poi ti chiedo io se è stata pagata.')); };
+    if (!L.length) box.append(h('p', { class: 'muted' }, TRR().length ? 'Nessuna corrisponde.' : 'Ancora nessuna. Quando registri una spesa, alla fine scegli «Si ripete?» (ogni mese, ogni anno o a rate): poi il conto scende da solo il giorno della scadenza.')); };
   sq.addEventListener('input', fill); fill();
-  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Spese ricorrenti e rate'), btn('+ Nuova', () => trWizard({ date: today(), askRep: true }), 'pri sm')), h('p', { class: 'muted gs' }, 'Abbonamenti, affitto, assicurazioni, rate: il giorno della scadenza ti chiedo «è stato pagato?» e, se dici sì, lo registro.'), TRR().length > 6 ? sq : null, box));
+  el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Spese ricorrenti e rate'), btn('+ Nuova', () => trWizard({ date: today(), askRep: true }), 'pri sm')), h('p', { class: 'muted gs' }, 'Abbonamenti, affitto, assicurazioni, rate: la spesa si segna nel calendario prima della scadenza, ma il conto scende solo il giorno in cui va pagata: quel giorno la registro da sola (se hai sbagliato la elimini dalla scheda Spese).'), TRR().length > 6 ? sq : null, box));
   return el;
 }
 /* ---------- budget: una percentuale del guadagno per ogni categoria, contro quanto spendi davvero ---------- */
@@ -4377,7 +4385,8 @@ function trItem(r, showDate) {          // una riga: che cosa, categoria e conto
 }
 function trCal() {
   const el = h('div'), today0 = today(), ym = UI.trm || today0.slice(0, 7), sel = UI.trd && UI.trd.slice(0, 7) === ym ? UI.trd : (ym === today0.slice(0, 7) ? today0 : ym + '-01');
-  const all = trAll(), month = all.filter(r => r.d.slice(0, 7) === ym), by = new Map();
+  const all = trAll(), month = all.filter(r => r.d.slice(0, 7) === ym), by = new Map(), planned = new Map(); let plannedSum = 0;
+  for (const r of TRR()) trOcc(r).forEach((d, i) => { if (d.slice(0, 7) === ym && d > today0 && d >= (r.since || r.start) && !(r.done || []).includes(d)) { if (!planned.has(d)) planned.set(d, []); planned.get(d).push({ r, k: i + 1 }); if (r.kind === 'spesa') plannedSum += r.amount; } });
   for (const r of month) { if (!by.has(r.d)) by.set(r.d, []); by.get(r.d).push(r); }
   const q0 = (UI.trq || '').trim(), res = h('div'), cal = h('div'), sq = h('input', { type: 'search', class: 'ops-q tr-s', placeholder: 'Cerca (nota, categoria, conto, importo)…', value: UI.trq || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra le transazioni' });
   const fillRes = () => { const toks = normT(UI.trq || '').split(' ').filter(Boolean); if (!toks.length) { res.replaceChildren(); return; }
@@ -4392,16 +4401,16 @@ function trCal() {
   for (let i = 0; i < off; i++) grid.append(h('div', { class: 'tr-day off' }));
   for (let d = 1; d <= dim; d++) {
     const ds = ym + '-' + String(d).padStart(2, '0'), L = by.get(ds) || [], sp = L.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0), has = k => L.some(r => r.k === k);
-    grid.append(h('button', { type: 'button', class: 'tr-day' + (ds === today0 ? ' today' : '') + (ds === sel ? ' sel' : ''), 'aria-label': trDayName(ds) + (L.length ? ', ' + pl(L.length, 'voce', 'voci') : ''), onclick: () => { UI.trd = ds; render(); } }, String(d), h('span', { class: 'tr-dots' }, has('spesa') ? h('i', { class: 'tr-d-s' }) : null, has('entrata') ? h('i', { class: 'tr-d-e' }) : null, has('trasf') ? h('i', { class: 'tr-d-t' }) : null), sp > 0 ? h('small', null, nf0.format(sp)) : null));
+    grid.append(h('button', { type: 'button', class: 'tr-day' + (ds === today0 ? ' today' : '') + (ds === sel ? ' sel' : ''), 'aria-label': trDayName(ds) + (L.length ? ', ' + pl(L.length, 'voce', 'voci') : ''), onclick: () => { UI.trd = ds; render(); } }, String(d), h('span', { class: 'tr-dots' }, has('spesa') ? h('i', { class: 'tr-d-s' }) : null, has('entrata') ? h('i', { class: 'tr-d-e' }) : null, has('trasf') ? h('i', { class: 'tr-d-t' }) : null, planned.has(ds) ? h('i', { class: 'tr-d-p' }) : null), sp > 0 ? h('small', null, nf0.format(sp)) : null));
   }
   cal.append(h('section', { class: 'card' }, grid));
   const e = month.filter(r => r.k === 'entrata').reduce((t, r) => t + r.amt, 0), s0 = month.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0);
   const catRows = k => { const mp = new Map(); for (const r of month) if (r.k === k) mp.set(r.cat || 'Senza categoria', (mp.get(r.cat || 'Senza categoria') || 0) + r.amt); return [...mp.entries()].sort((a, b) => b[1] - a[1]).map(([c, v]) => [c, v]); };
   cal.append(tiles([{ l: 'Guadagni del mese', v: eur(e), s: pl(month.filter(r => r.k === 'entrata').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: e, rows: catRows('entrata'), rowsTitle: 'Da dove arrivano', say: 'Tutti i soldi entrati in questo mese, compresi quelli dello storico.' }) },
-    { l: 'Spese del mese', v: eur(s0), s: pl(month.filter(r => r.k === 'spesa').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: s0, rows: catRows('spesa'), rowsTitle: 'Dove sono andati', say: 'Tutto quello che hai speso in questo mese. I trasferimenti tra i tuoi conti non contano.' }) },
+    { l: 'Spese del mese', v: eur(s0), s: pl(month.filter(r => r.k === 'spesa').length, 'voce', 'voci') + (plannedSum > 0 ? ' · +' + eur(plannedSum) + ' programmate' : ''), x: () => ({ kind: trMonthName(ym), num: s0, rows: catRows('spesa'), rowsTitle: 'Dove sono andati', say: 'Tutto quello che hai speso in questo mese. I trasferimenti tra i tuoi conti non contano.' }) },
     { l: 'Saldo del mese', v: seur(e - s0), s: e - s0 >= 0 ? 'hai messo da parte' : 'hai speso più di quanto hai guadagnato', x: () => ({ kind: trMonthName(ym), num: e - s0, fmt: seur, say: 'Guadagni meno spese del mese: se è positivo, sei in avanzo.' }) }]));
   const L = by.get(sel) || [];
-  cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.'), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
+  cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : (planned.has(sel) ? null : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.')), (planned.get(sel) || []).map(({ r, k }) => h('div', { class: 'tr-item tr-plan' }, h('div', { class: 'tr-it' }, h('b', null, trRecNote(r, k)), h('span', { class: 'muted' }, 'Programmata · ' + accName(r.accId) + ' · il conto scende questo giorno')), h('div', { class: 'tr-am ' + (r.kind === 'entrata' ? 'in' : r.kind === 'spesa' ? 'out' : 'tf') }, (r.kind === 'entrata' ? '+' : r.kind === 'spesa' ? '−' : '') + eur(r.amount, true)))), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
   el.append(cal); return el;
 }
 /* ---------- statistiche ---------- */
@@ -4475,7 +4484,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '12/11/2026 · v16 (modifica data operazioni)';
+const APP_VER = '12/11/2026 · v17 (spese ricorrenti: il conto scende il giorno)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
