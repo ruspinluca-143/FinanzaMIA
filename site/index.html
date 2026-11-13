@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aOth8d4rEnL0zHbSrIa6234ES4VTvmQZrhMcZ4xl0nA='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EHtQKFud22glr4ojV/me1oR61C1/3oy/JQ8R1K4G6Is='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1438,6 +1438,10 @@ function xirr(flows) {            // flussi: {t: ms, a: importo}, versamenti neg
   return (lo + hi) / 2;
 }
 const costBase = f => f.type === 'partenza' && (f.costo || /^Costo di carico/i.test(f.note || ''));          // partenza = prezzo pagato per i titoli: non sappiamo QUANDO li hai comprati
+function syncPartenza(a) {          // il "versato" di partenza del giorno 1 segue i costi di carico: corretto un costo (o un rendimento %), la percentuale del conto si aggiorna
+  const f = a.flows.find(x => x.auto); if (!f) return;
+  f.amount = +Math.max(0, (f.cash0 || 0) + a.positions.filter(p => p.g1).reduce((t, p) => t + (p.c0 > 0 ? p.c0 : (p.v0 > 0 ? p.v0 : 0)), 0)).toFixed(2);          // c0 = costo del giorno 1 (solo le tue correzioni lo cambiano; gli acquisti futuri hanno i loro movimenti e non lo toccano)
+}
 function perfOf(accs) {
   const value = accs.reduce((t, a) => t + accValue(a), 0), contrib = accs.reduce((t, a) => t + netContrib(a), 0);
   const has = accs.some(a => a.flows.length), pnl = has ? value - contrib : null, pnlPct = has && contrib > 0 ? pnl / contrib : null;
@@ -1944,7 +1948,7 @@ function editPosition(a, p) {
       if (!(val > 0)) return 'Per usare il rendimento serve un prezzo di oggi: aggiornalo prima nello strumento.';
       d.cost = +(val / (1 + o.pct / 100)).toFixed(2);
     }
-    if (isNew) a.positions.push({ id: uid(), ...d }); else Object.assign(p, d); done();
+    if (isNew) a.positions.push({ id: uid(), ...d }); else { Object.assign(p, d); if (p.g1) { p.c0 = d.cost > 0 ? d.cost : 0; if (!(p.c0 > 0) && !(p.v0 > 0)) p.v0 = +posValue(p).toFixed(2); } } syncPartenza(a); done();
   });
 }
 function delPosition(a, p) { if (confirm('Eliminare questa posizione?')) { a.positions = a.positions.filter(x => x !== p); done(); } }
@@ -2587,15 +2591,16 @@ function applyFixFile(text, meta) {          // file "correzioni": Conto;Titolo;
     if (isPct) { const pc = parseNum(costTxt.replace('%', ''), ','), val = qty * i.price * (fxRate(i.ccy) ?? 1); if (fin(pc) && pc > -100 && val > 0) cost = +(val / (1 + pc / 100)).toFixed(2); }          // costo scritto come "-16,91%": il costo si ricava dal valore di oggi
     if (cl(r[7]) && (!i.cls || i.cls === 'Non classificato')) i.cls = cl(r[7]); if (cl(r[8]) && (!i.area || i.area === 'n.d.')) i.area = cl(r[8]);
     const p = a.positions.find(x => x.instId === i.id);
-    if (p) { p.qty = qty; if (fin(cost) && cost > 0) p.cost = cost; } else a.positions.push({ id: uid(), instId: i.id, qty, cost: fin(cost) && cost > 0 ? cost : 0 });
+    if (p) { p.qty = qty; if (fin(cost) && cost > 0) { p.cost = cost; if (p.g1) p.c0 = cost; } } else a.positions.push({ id: uid(), instId: i.id, qty, cost: fin(cost) && cost > 0 ? cost : 0 });
     a.upd = today(); R.pos++;
   }
   if (/^(si|sì|yes|1)$/i.test(meta.azzera || '')) {          // giorno 1
     const d = /^\d{4}-\d{2}-\d{2}$/.test(meta.data || '') ? meta.data : today();
     S.snapshots = []; for (const i of S.instruments) i.hist = i.price > 0 ? [{ d: today(), p: i.price }] : [];
-    for (const a of S.accounts) if (a.perf && !a.dep) a.flows = [{ id: uid(), date: d, type: 'partenza', amount: +Math.max(0, accValue(a)).toFixed(2), note: 'Giorno 1: da qui si riparte' }];
+    for (const a of S.accounts) if (a.perf && !a.dep) { for (const p of a.positions) { p.g1 = true; p.c0 = p.cost > 0 ? p.cost : 0; p.v0 = p.cost > 0 ? 0 : +posValue(p).toFixed(2); } a.flows = [{ id: uid(), date: d, type: 'partenza', auto: true, cash0: +Math.max(0, accCash(a)).toFixed(2), amount: 0, note: 'Giorno 1: costo di carico (o valore di oggi se il costo manca) più liquidità' }]; syncPartenza(a); }
     takeSnapshot(); R.reset = true;
   }
+  for (const a of S.accounts) syncPartenza(a);
   return R;
 }
 function autoImport(items) {          // tutti i file sono "Finanze": nessuna finestra per file, un solo riepilogo con "Annulla"
@@ -4530,7 +4535,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v22 (rendimento % al posto del costo)';
+const APP_VER = '13/11/2026 · v23 (percentuali effettive dal giorno 1)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
