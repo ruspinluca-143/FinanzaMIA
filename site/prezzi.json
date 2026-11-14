@@ -1,7 +1,7 @@
 {
   "app": "finanze-prezzi",
   "versione": 1,
-  "generato": "2026-11-14T12:19:45+00:00",
+  "generato": "2026-11-14T13:52:23+00:00",
   "cambi": {"USD": 0.907359, "JPY": 0.005682, "GBP": 1.198653, "CHF": 1.081912, "AUD": 0.614553, "CAD": 0.63589},
   "prezzi": [
     {"nome":"iShares Core MSCI World UCITS ETF USD (Acc)","id":"IE00B4L5Y983","prezzo":130.46,"valuta":"EUR","data":"2026-11-13","ter":0.2,"bench":"MSCI TRN WORLD INDEX","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -28,11 +28,11 @@
     {"nome":"Apple","id":"aapl","prezzo":356.27,"valuta":"USD","data":"2026-11-13","fonte":"stockanalysis"},
     {"nome":"Alumis Inc","id":"alms","prezzo":5.6,"valuta":"USD","data":"2026-11-13","fonte":"stockanalysis"},
     {"nome":"Accenture","id":"acn","prezzo":250.49,"valuta":"USD","data":"2026-11-13","fonte":"stockanalysis"},
-    {"nome":"Bitcoin","id":"bitcoin","prezzo":60870,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
-    {"nome":"XRP","id":"ripple","prezzo":0.901374,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
-    {"nome":"Ether","id":"ethereum","prezzo":1728.36,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
-    {"nome":"Solana","id":"solana","prezzo":68.66,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
-    {"nome":"Cardano","id":"cardano","prezzo":0.147917,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"Bitcoin","id":"bitcoin","prezzo":60583,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"XRP","id":"ripple","prezzo":0.903645,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"Ether","id":"ethereum","prezzo":1715.86,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"Solana","id":"solana","prezzo":68.56,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"Cardano","id":"cardano","prezzo":0.14615,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
     {"nome":"Cosmos","id":"cosmos","prezzo":1.22,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
     {"nome":"iShares Core MSCI Europe UCITS ETF EUR (Acc)","id":"IE00B4K48X80","prezzo":108.24,"valuta":"EUR","data":"2026-11-13","ter":0.12,"bench":"MSCI DAILY NET TR E","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"WisdomTree Physical Gold EUR Daily Hedged","id":"JE00B8DFY052","prezzo":20.18,"valuta":"EUR","data":"2026-11-13","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -58,7 +58,7 @@
     {"nome":"BTP Valore ott 2031","id":"IT0005735201","prezzo":101.15,"valuta":"EUR","data":"2026-11-13","fonte":"borsa_italiana"},
     {"nome":"T-Bond USA 4,75% nov 2053","id":"US912810TV08","prezzo":89.2,"valuta":"USD","data":"2026-11-13","fonte":"borsa_italiana"},
     {"nome":"Innodata Inc.","id":"inod","prezzo":35.46,"valuta":"USD","data":"2026-11-13","fonte":"stockanalysis"},
-    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.906759,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
+    {"nome":"USD Coin (USDC)","id":"usd-coin","prezzo":0.906858,"valuta":"EUR","data":"2026-11-14","fonte":"coingecko"},
     {"nome":"Xtrackers MSCI Korea UCITS ETF (riferimento)","id":"LU0292100046","prezzo":163.34,"valuta":"EUR","data":"2026-11-13","ter":0.45,"bench":"MSCI KOREA 20/35 CUS","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"Xtrackers MSCI World Value UCITS ETF (riferimento)","id":"IE00BL25JM42","prezzo":72.35,"valuta":"EUR","data":"2026-11-13","ter":0.25,"bench":"DB EQUITY VALUE FACT","div":"CAPITALIZED","fonte":"borsa_italiana"},
     {"nome":"Amundi Core Stoxx Europe 600 UCITS ETF Acc (riferimento)","id":"LU0908500753","prezzo":328.1,"valuta":"EUR","data":"2026-11-13","ter":0.1,"bench":"Stoxx Europe 600 NTR","div":"CAPITALIZED","fonte":"borsa_italiana"},
@@ -83,6 +83,6 @@
     {"nome":"Invesco EQQQ NASDAQ-100 UCITS ETF Acc","id":"IE00BFZXGZ54","prezzo":432.15,"valuta":"EUR","data":"2026-11-13","fonte":"onvista"},
     {"nome":"iShares NASDAQ 100 UCITS ETF EUR Hedged (Acc)","id":"IE00BYVQ9F29","prezzo":16.052,"valuta":"EUR","data":"2026-11-13","fonte":"onvista"},
     {"nome":"Amundi Nasdaq-100 UCITS ETF Acc","id":"LU1681038243","prezzo":289.25,"valuta":"EUR","data":"2026-11-13","fonte":"onvista"},
-    {"nome":"Leonardo SpA","id":"IT0003856405","prezzo":55.4,"valuta":"USD","data":"2026-11-13","fonte":"onvista"}
+    {"nome":"Leonardo SpA","id":"IT0003856405","prezzo":50.48,"valuta":"EUR","data":"2026-11-14","fonte":"onvista"}
   ]
 }
