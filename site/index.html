@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-29dqhT7dP2cydkmkFFlBC7pFJRgRlHYEdITi7fRrKeQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kVxEx7sJbYB+KJjg6mTz7I3hyt/I/D7wsVtMIB4trSc='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -764,7 +764,9 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-day{font:inherit;font-size:14px;border:0;background:var(--btn);color:var(--ink);border-radius:10px;min-height:48px;padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer}
 .tr-day.off{visibility:hidden;pointer-events:none}.tr-day.today{box-shadow:inset 0 0 0 1.5px var(--s1)}
 .tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
-.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.tr-pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--s1);margin-right:6px}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
+.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.op-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.03em;line-height:13px;padding:0 5px;border-radius:99px;vertical-align:1px;white-space:nowrap}.op-tag.t-g{color:var(--gain,#30d158);background:color-mix(in srgb,var(--gain,#30d158) 15%,transparent)}.op-tag.t-r{color:var(--loss,#ff6b6b);background:color-mix(in srgb,var(--loss,#ff6b6b) 15%,transparent)}.op-tag.t-b{color:#4c8dff;background:rgba(76,141,255,.15)}.op-tag.t-n{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
+.px-stamp{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:12px;color:var(--muted);background:none;border:0;padding:4px 2px;margin:0 0 4px;cursor:pointer;text-align:left}.px-stamp b{font-weight:600;color:var(--ink)}.px-stamp.old b{color:#ff9f0a}.px-stamp.busy{opacity:.55;pointer-events:none}
+.tr-pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--s1);margin-right:6px}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
 .tr-day.sel .tr-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.7)}
 .tr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--grid)}.tr-item:first-of-type{border-top:0}
 .tr-it{display:flex;flex-direction:column;gap:1px;min-width:0}.tr-it b{font-size:15px;overflow:hidden;text-overflow:ellipsis}.tr-it .muted{font-size:12px}
@@ -1906,6 +1908,19 @@ async function pricesOnline() {          // un tocco: scarica e applica tutto qu
   } catch (e) { toastMsg('Non riesco a scaricare i prezzi: ' + (e.message || e)); }
 }
 let LASTPX = 0;
+const PX_LS = 'finanze-px';
+function pxWhen(iso) {          // "oggi 09:44", "ieri 18:30", "14 nov 09:44"
+  const d = new Date(iso); if (isNaN(d)) return '';
+  const hm = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }), n = daysSince(trYmd(d));
+  return n === 0 ? 'oggi ' + hm : n === 1 ? 'ieri ' + hm : d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) + ' ' + hm;
+}
+function pxStamp() {          // in cima a Investimenti: quando sono stati aggiornati i prezzi; un tocco li riaggiorna
+  let o = {}; try { o = JSON.parse(localStorage.getItem(PX_LS) || '{}'); } catch { /* niente */ }
+  const when = o.gen ? pxWhen(o.gen) : '', old = !o.gen || (Date.now() - new Date(o.gen).getTime()) > 26 * 3600000;
+  const b = h('button', { type: 'button', class: 'px-stamp' + (old ? ' old' : ''), title: o.chk ? 'Controllato su questo dispositivo: ' + pxWhen(o.chk) : 'Tocca per aggiornare i prezzi', 'aria-label': 'Ultimo aggiornamento prezzi, tocca per aggiornare' }, '⟳ Prezzi aggiornati ', h('b', null, when || 'mai'), h('span', null, ' · tocca per aggiornare'));
+  b.onclick = async () => { b.classList.add('busy'); await pricesOnline(); render(); };
+  return b;
+}
 async function checkOnlinePrices(force) {          // i prezzi si applicano DA SOLI all'apertura e ogni volta che torni sull'app; solo le variazioni sospette (oltre il 25%) aspettano il tuo controllo
   if (!ONLINE || !S || DEMO || !KEY) return;
   if (!force && Date.now() - LASTPX < 10 * 60000) return; LASTPX = Date.now();
@@ -1914,6 +1929,7 @@ async function checkOnlinePrices(force) {          // i prezzi si applicano DA S
 function autoApplyPrices(text) {          // applica i prezzi buoni; restituisce quanti ne ha applicati
   try {          // cambi ufficiali della BCE (euro per 1 unita'), solo per le valute che usi
     const f = JSON.parse(text), used = new Set([...S.instruments.map(i => i.ccy), ...S.accounts.map(a => a.cashCcy)]);
+    if (f && f.generato) { try { localStorage.setItem(PX_LS, JSON.stringify({ gen: f.generato, chk: new Date().toISOString() })); } catch { /* niente */ } }          // quando e' stato fatto il file dei prezzi e quando questo dispositivo l'ha controllato (solo su questo dispositivo, non nei dati)
     if (f && f.cambi && typeof f.cambi === 'object') for (const [c, r] of Object.entries(f.cambi)) if (/^[A-Z]{3}$/.test(c) && used.has(c) && typeof r === 'number' && r > 0 && r < 1000) S.fx[c] = r;
     if (f && Array.isArray(f.prezzi)) { S.refPrices = S.refPrices || {}; for (const e of f.prezzi) if (e && typeof e.id === 'string' && typeof e.prezzo === 'number' && e.prezzo > 0 && /^[A-Za-z]{3}$/.test(e.valuta || '')) S.refPrices[e.id.toLowerCase()] = { p: e.prezzo, c: e.valuta, d: e.data || '', n: e.nome || '' }; }          // prezzi dei riferimenti (anche di titoli che non possiedi)
   } catch { /* il controllo vero lo fa planPrices */ }
@@ -4470,7 +4486,7 @@ function tabTransazioni() {
 function trItem(r, showDate) {          // una riga: che cosa, categoria e conto, importo (e Elimina se e' una transazione tua)
   const head = r.note || r.cat || TR_LAB[r.k], line = r.k === 'trasf' ? r.acc + ' → ' + r.to : [r.cat, r.sub].filter(Boolean).join(' › ') + (r.acc ? ' · ' + r.acc : '');
   const amt = r.k === 'trasf' ? eur(r.amt, true) : (r.k === 'entrata' ? '+' : '−') + eur(r.amt, true);
-  return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, head), h('span', { class: 'muted' }, (showDate ? fmtDate(r.d) + ' · ' : '') + line + (r.own ? '' : ' · storico'))),
+  return h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, head), h('span', { class: 'muted' }, opTag(r.k), ' ', (showDate ? fmtDate(r.d) + ' · ' : '') + line + (r.own ? '' : ' · storico'))),
     h('div', { class: 'tr-am ' + (r.k === 'entrata' ? 'in' : r.k === 'spesa' ? 'out' : 'tf') }, amt, r.own ? [btn('Modifica', () => trEditDate(r.rec), 'sm'), btn('Elimina', () => trDelete(r), 'sm danger')] : null));
 }
 function trCal() {
@@ -4574,7 +4590,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v28 (conti cani: il saldo e solo di DOGsitterini)';
+const APP_VER = '13/11/2026 · v29 (ora prezzi, etichette operazioni, PAC non ancora)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -4716,7 +4732,9 @@ function rvLogo(name, code, fb) {          // il cerchietto con il simbolo dell'
 }
 const RV_ICO = { plus: MICO.op, move: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], down: ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14'], dots: ['M5 12h.01', 'M12 12h.01', 'M19 12h.01'], bank: ['M3 10l9-6 9 6', 'M5 10v8', 'M9.5 10v8', 'M14.5 10v8', 'M19 10v8', 'M3 20h18'], trend: ['M3 17l6-6 4 4 8-8', 'M15 7h6v6'], cal: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], repeat: MICO.pac };
 const rvSvg = (d, n) => s('svg', { viewBox: '0 0 24 24', width: n || 20, height: n || 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, d.map(x => s('path', { d: x })));
-const rvRow = (ico, name, sub, val, subv, fn, cls) => h('button', { type: 'button', class: 'rv-row ' + (cls || ''), onclick: fn }, (ico && ico.classList && ico.classList.contains('rv-ic') ? ico : h('span', { class: 'rv-ic' + (ico && ico.tagName === 'IMG' ? ' lg' : '') }, ico)), h('span', { class: 'rv-nm' }, h('b', null, name), sub ? h('small', null, sub) : null), h('span', { class: 'rv-v' }, val, subv ? h('small', null, subv) : null));
+const OP_TAG = { guadagno: ['guadagno', 'g'], perdita: ['perdita', 'r'], acquisto: ['acquisto', 'b'], vendita: ['vendita', 'g'], trasferimento: ['trasferimento', 'n'], versamento: ['versamento', 'g'], prelievo: ['prelievo', 'r'], spesa: ['spesa', 'r'], entrata: ['guadagno', 'g'], trasf: ['trasferimento', 'n'] };
+const opTag = k => { const t = OP_TAG[k]; return t ? h('span', { class: 'op-tag t-' + t[1] }, t[0]) : null; };          // etichetta minuscola: guadagno verde, spesa rossa, trasferimento grigio...
+const rvRow = (ico, name, sub, val, subv, fn, cls, tag) => h('button', { type: 'button', class: 'rv-row ' + (cls || ''), onclick: fn }, (ico && ico.classList && ico.classList.contains('rv-ic') ? ico : h('span', { class: 'rv-ic' + (ico && ico.tagName === 'IMG' ? ' lg' : '') }, ico)), h('span', { class: 'rv-nm' }, h('b', null, name), sub || tag ? h('small', null, tag ? opTag(tag) : null, tag && sub ? ' ' : null, sub) : null), h('span', { class: 'rv-v' }, val, subv ? h('small', null, subv) : null));
 const rvHead = (t, more, fn) => h('div', { class: 'rv-h' }, h('span', null, t), more ? h('button', { type: 'button', class: 'rv-more', onclick: fn }, more + ' ›') : null);
 const rvActs = list => h('div', { class: 'rv-act' }, list.map(([l, d, fn]) => h('button', { type: 'button', onclick: fn }, h('span', { class: 'c' }, rvSvg(d, 22)), l)));
 const rvGo = (tab, extra) => () => { closeTalks(); Object.assign(UI, { tab, acc: null, planId: null, sub: null, fondo: null }, extra || {}); render(); window.scrollTo(0, 0); };
@@ -4724,22 +4742,22 @@ const rvCard = (...kids) => h('section', { class: 'card rv' }, ...kids);
 function rvAllOps() {          // finestra con tutte le ultime operazioni (operazioni sui conti, spese e guadagni), con ricerca
   panelDialog('Tutte le operazioni', () => {
     const E = [];
-    OPS().forEach((o, k) => E.push({ d: o.date, k, ic: rvLogo(o.instName || '', '', rvSvg(RV_ICO.move)), t: (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), s: fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), v: eur(o.gross != null ? o.gross : o.amount, true), f: () => talkOp(o) }));
-    trAll().filter(r => r.own && r.k !== 'trasf').forEach((r, k) => E.push({ d: r.d, k: 1e6 + k, ic: rvSvg(RV_ICO.move), t: (r.cat || TR_LAB[r.k]) + (r.note ? ' · ' + r.note : ''), s: fmtDate(r.d) + ' · ' + r.acc, v: (r.k === 'spesa' ? '−' : '+') + eur(r.amt, true), f: () => { const d = document.querySelector('dialog.panel'); if (d) d.close(); rvGo('transazioni')(); } }));
+    OPS().forEach((o, k) => E.push({ d: o.date, k, ic: rvLogo(o.instName || '', '', rvSvg(RV_ICO.move)), t: (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), s: fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), v: eur(o.gross != null ? o.gross : o.amount, true), g: o.kind, f: () => talkOp(o) }));
+    trAll().filter(r => r.own && r.k !== 'trasf').forEach((r, k) => E.push({ d: r.d, k: 1e6 + k, ic: rvSvg(RV_ICO.move), t: (r.cat || TR_LAB[r.k]) + (r.note ? ' · ' + r.note : ''), s: fmtDate(r.d) + ' · ' + r.acc, v: (r.k === 'spesa' ? '−' : '+') + eur(r.amt, true), g: r.k, f: () => { const d = document.querySelector('dialog.panel'); if (d) d.close(); rvGo('transazioni')(); } }));
     E.sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : b.k - a.k);
     const box = h('div'), cnt = h('p', { class: 'muted' }), q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca: titolo, conto, data o importo', style: 'width:100%;max-width:none', 'aria-label': 'Cerca tra le operazioni', autocomplete: 'off', enterkeyhint: 'search' });
     const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), L = toks.length ? E.filter(x => { const hay = normT(x.t + ' ' + x.s + ' ' + x.v); return toks.every(w => hay.includes(w)); }) : E;
       cnt.textContent = toks.length ? pl(L.length, 'operazione trovata', 'operazioni trovate') : pl(E.length, 'operazione', 'operazioni');
-      box.replaceChildren(...(L.length ? L.slice(0, 400).map(x => rvRow(x.ic, x.t, x.s, x.v, '', x.f)) : [h('p', { class: 'muted' }, 'Nessuna operazione registrata o corrispondente.')])); };
+      box.replaceChildren(...(L.length ? L.slice(0, 400).map(x => rvRow(x.ic, x.t, x.s, x.v, '', x.f, '', x.g)) : [h('p', { class: 'muted' }, 'Nessuna operazione registrata o corrispondente.')])); };
     q.addEventListener('input', draw); draw();
     return h('div', null, q, cnt, box);
   });
 }
 function rvLast() {          // l'ultima cosa registrata: un'operazione sui conti oppure una spesa/guadagno
   const o = OPS()[OPS().length - 1], t = trAll().find(r => r.own);
-  if (t && (!o || t.d > o.date)) return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (t.cat || TR_LAB[t.k]) + (t.note ? ' · ' + t.note : ''), fmtDate(t.d) + ' · ' + t.acc + (t.to ? ' → ' + t.to : ''), (t.k === 'spesa' ? '−' : t.k === 'entrata' ? '+' : '') + eur(t.amt, true), '', rvGo('transazioni')));
+  if (t && (!o || t.d > o.date)) return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (t.cat || TR_LAB[t.k]) + (t.note ? ' · ' + t.note : ''), fmtDate(t.d) + ' · ' + t.acc + (t.to ? ' → ' + t.to : ''), (t.k === 'spesa' ? '−' : t.k === 'entrata' ? '+' : '') + eur(t.amt, true), '', rvGo('transazioni'), '', t.k));
   if (!o) return null;
-  return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), eur(o.gross != null ? o.gross : o.amount, true), '', () => talkOp(o)));
+  return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), eur(o.gross != null ? o.gross : o.amount, true), '', () => talkOp(o), '', o.kind));
 }
 function rvGroupTalk(g, tot) {
   talk({ kind: 'Come sono divisi i tuoi soldi', title: g.l, value: eur(g.tot), num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)',
@@ -4816,6 +4834,7 @@ function rvHome(el, total) { [['ultima', rvLast()], ['patrimonio', rvPatr(total)
 function tabInvestimenti() {
   if (!S.accounts.length) return tabPanoramica();
   const el = h('div', { class: 'rv-inv' }), G = groupAccs().filter(g => g.accs.length), inv = G.find(g => g.k === 'investiti'), pa = (inv ? inv.accs : []).filter(a => a.perf), p = perfOf(pa);
+  el.append(pxStamp());
   el.append(h('section', { class: 'rv-hero' }, h('div', { class: 'rv-lbl' }, 'Investito'), h('div', { class: 'rv-tot' }, eur(inv ? inv.tot : 0)),
     h('div', { class: 'hero-pills' }, p.pnl != null ? h('span', { class: 'pill ' + (p.pnl >= 0 ? 'up' : 'dn') }, (p.pnl >= 0 ? '▲ ' : '▼ ') + seur(p.pnl).replace(/^[+\-−]/, '') + (fin(p.pnlPct) ? ' · ' + spct(p.pnlPct) : '')) : null, heroDelta()), heroChart(),
     rvActs([['Operazione', RV_ICO.plus, () => editOperation({})], ['Preleva', RV_ICO.down, () => editOperation({ kind: 'prelievo' })], ['Conti', RV_ICO.bank, rvGo('conti')], ['Altro', RV_ICO.dots, openMenu]])));
@@ -4844,7 +4863,7 @@ function tabInvestimenti() {
   for (const pp of PL()) { const d = occurrences(pp.start, freqMonths(pp.freq), pp.day, pp.since || pp.start, addMonthsStr(t, 14), pp.end).find(x => x >= t); if (d) rec.push([pp, d]); }
   rec.sort((x, y) => x[1] < y[1] ? -1 : 1);
   if (rec.length) el.append(rvCard(rvHead('Ordini ricorrenti', 'Gestisci', () => pacManager()), rec.slice(0, 6).map(([pp, d]) => rvRow(rvSvg(RV_ICO.repeat), pp.label || 'Acquisto ricorrente', freqLabel(pp.freq) + ' · prossimo ' + fmtDate(d), '−' + eur(pp.amount, true), '', () => openPlan(pp)))));
-  if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvAllOps), ord.map(x => rvRow(rvSvg(RV_ICO.move), (opLab(x)) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x)))));
+  if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvAllOps), ord.map(x => rvRow(rvSvg(RV_ICO.move), (opLab(x)) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x), '', x.kind))));
   secTag(el); applyOrder('inv', el);
   return el;
 }
@@ -5094,7 +5113,7 @@ function opsCard() {          // in fondo ai conti: le ultime operazioni registr
   const draw = () => {          // si ridisegna solo la tabella, cosi' la tastiera resta aperta mentre scrivi
     const toks = normT(UI.opsQ || '').split(' ').filter(Boolean), list = toks.length ? byAcc.filter(x => { const s2 = hay(x); return toks.every(t => s2.includes(t)); }) : byAcc, lim2 = toks.length || UI.opsAll ? 300 : 12;
     cnt.textContent = toks.length ? pl(list.length, 'operazione trovata', 'operazioni trovate') : '';
-    wrap.replaceChildren(table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim2).map(x => [fmtDate(x.date), lnk(opLab(x), () => talkOp(x)), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), toks.length ? 'Nessuna operazione corrisponde: prova con meno parole.' : 'Nessuna operazione per questo conto.'));
+    wrap.replaceChildren(table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim2).map(x => [fmtDate(x.date), h('span', null, opTag(x.kind), ' ', lnk(opLab(x), () => talkOp(x))), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), toks.length ? 'Nessuna operazione corrisponde: prova con meno parole.' : 'Nessuna operazione per questo conto.'));
     if (!toks.length && list.length > 12) wrap.append(btn(UI.opsAll ? 'Mostra solo le ultime 12' : 'Mostra tutte (' + list.length + ')', () => { UI.opsAll = !UI.opsAll; render(); }, 'sm'));
   };
   const q = h('input', { type: 'search', class: 'wz-search ops-q', placeholder: 'Cerca: conto, titolo, tipo, data o importo (es. trade republic, 188, trasferimento)', value: UI.opsQ || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra le operazioni' });
@@ -5203,7 +5222,7 @@ function viewAccount(id) {
   const mineOps = OPS().filter(x => x.accId === a.id || x.toId === a.id).slice().reverse();
   if (mineOps.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Operazioni registrate'),
     table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Importo', n: 1 }, { t: '' }],
-      mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), opLab(x), x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
+      mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), h('span', null, opTag(x.kind), ' ', opLab(x)), x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
     h('p', { class: 'muted' }, 'Si può annullare soltanto l\'ultima operazione del conto: serve se hai sbagliato un numero.')));
   const last = a.imports && a.imports[a.imports.length - 1];
   if (!fermo) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
@@ -6038,7 +6057,7 @@ function occurrences(start, step, day, from, to, end) {          // le date (AAA
 const planNext = (p, n) => occurrences(p.start, freqMonths(p.freq), p.day, today(), addMonthsStr(today(), 130), p.end).slice(0, n || 1);
 function planDueAll() {          // scadute o di oggi e non ancora registrate ne' saltate
   const t = today(), out = [];
-  for (const p of PL()) { const dn = new Set(p.done || []); for (const d of occurrences(p.start, freqMonths(p.freq), p.day, p.since || p.start, t, p.end)) if (!dn.has(d)) out.push({ p, d }); }
+  for (const p of PL()) { const dn = new Set(p.done || []); for (const d of occurrences(p.start, freqMonths(p.freq), p.day, p.since || p.start, t, p.end)) if (!dn.has(d) && !(p.later && p.later[d] === t)) out.push({ p, d }); }          // p.later[d] = giorno in cui hai risposto "non ancora": oggi non si richiede, domani si
   return out.sort((a, b) => a.d < b.d ? -1 : 1);
 }
 /* ---- acquisti programmati: l'app prepara la modifica e chiede "e' stato preso davvero?" (Si' = la registra, No = la salta) ---- */
@@ -6095,7 +6114,7 @@ let DUE_ASKED = false;
 function confirmDue(auto) {
   const due = planDueAll(); if (!due.length) { if (!auto) alert('Nessun acquisto programmato da confermare.'); return; }
   const dlg = h('dialog', { class: 'wide duedlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); render(); }, head = h('p', { class: 'muted' }), list = h('div', { class: 'duelist' });
-  const left = () => { const n = list.querySelectorAll('.due:not(.ok):not(.no)').length; head.textContent = n ? 'Ho preparato ' + pl(n, 'modifica', 'modifiche') + '. Controlla l\'importo e dimmi se l\'acquisto è stato preso davvero: Sì lo registro, No lo salto.' : 'Fatto: niente altro da confermare.'; };
+  const left = () => { const n = list.querySelectorAll('.due:not(.ok):not(.no)').length; head.textContent = n ? 'Ho preparato ' + pl(n, 'modifica', 'modifiche') + '. Controlla l\'importo e dimmi se l\'acquisto è stato preso davvero: Sì lo registro; «Non ancora» te lo richiedo domani (utile per gli acquisti che partono la sera); «Salta» lo cancello.' : 'Fatto: niente altro da confermare.'; };
   const upds = [], refreshAll = () => upds.forEach(f => f());
   const row = ({ p: p0, d }) => {
     const cur = () => PL().find(x => x.id === p0.id) || p0;          // sempre il PAC dei dati di adesso (se i dati online sono stati ricaricati mentre la finestra era aperta, non si lavora su una copia vecchia)
@@ -6108,7 +6127,8 @@ function confirmDue(auto) {
       h('label', { class: 'due-amt' }, h('span', null, 'Importo (€)'), amt), msg,
       h('div', { class: 'due-acts' },
         btn('Sì, è stato preso', () => { if (isDone()) { msg.textContent = 'Questo acquisto risulta già registrato.'; el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Già registrato: ' + p.label + ' del ' + fmtDate(d))); left(); return; } const pr = upd(); if (pr.err) { msg.textContent = pr.err; return; } const m = applyProposal(pr); if (m) { msg.textContent = m; return; } const q = cur(); (q.done = q.done || []).push(d); saveFast(); el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Registrato: ' + pr.text)); left(); refreshAll(); }, 'pri'),
-        btn('No, non è stato preso', () => { const q = cur(); if (!(q.done || []).includes(d)) { (q.done = q.done || []).push(d); (q.skipped = q.skipped || []).push(d); } saveFast(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + p.label + ' del ' + fmtDate(d))); left(); }),
+        btn('Non ancora: chiedimelo domani', () => { const q = cur(); (q.later = q.later || {})[d] = today(); (q.notYet = q.notYet || []).push({ d, asked: today() }); saveFast(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '⏳ Non ancora preso: te lo richiedo domani (' + p.label + ' del ' + fmtDate(d) + ')')); left(); }),
+        btn('Salta questo acquisto', () => { const q = cur(); if (!(q.done || []).includes(d)) { (q.done = q.done || []).push(d); (q.skipped = q.skipped || []).push(d); } saveFast(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + p.label + ' del ' + fmtDate(d))); left(); }),
         btn('Correggi a mano…', () => { shut(); registerDue(cur(), d); }, 'sm')));
     upd(); return el;
   };
