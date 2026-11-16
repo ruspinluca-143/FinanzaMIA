@@ -1,0 +1,28 @@
+name: Promemoria spese
+on:
+  schedule:
+    - cron: '28 19 * * *'
+    - cron: '28 20 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: spese
+  cancel-in-progress: false
+jobs:
+  spese:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Manda il promemoria delle spese (solo se in Italia sono le 21:10-23:00 e non e' gia' partito oggi)
+        shell: pwsh
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: ./notifica.ps1 -Sito ./site -Momento spese
+      - name: Ricorda che oggi e' partito (cosi' non arriva due volte)
+        run: |
+          git config user.name "prezzi-bot"
+          git config user.email "prezzi-bot@users.noreply.github.com"
+          git add -A site/stato-notifiche.json
+          git diff --cached --quiet || git commit -m "Promemoria spese mandato $(date -u '+%Y-%m-%d %H:%M') UTC"
+          for i in 1 2 3 4; do git pull --rebase -X theirs origin main && git push && exit 0; sleep $((i*15)); done; exit 1

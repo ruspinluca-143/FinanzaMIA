@@ -29,6 +29,22 @@ $stFile = Join-Path $Sito 'stato-notifiche.json'; $st = @{}
 if (Test-Path $stFile) { try { $o = Get-Content $stFile -Raw | ConvertFrom-Json; foreach ($p in $o.PSObject.Properties) { $st[$p.Name] = [string]$p.Value } } catch { } }
 if (-not $SoloProva -and $st[$Momento] -eq $oggi) { "Il recap della $Momento e' gia' stato mandato oggi."; return }
 
+# promemoria delle spese, ogni sera alle 21:30 (ora italiana): il flusso "spese.yml" parte alle 19:28 e alle 20:28 UTC e qui si controlla che in Italia siano passate le 21:10 (e non le 23:00): una volta sola al giorno
+if ($Momento -eq 'spese') {
+  $r0 = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($ora, $(if ($IsLinux -or $IsMacOS) { 'Europe/Rome' } else { 'W. Europe Standard Time' }))
+  $min0 = $r0.Hour * 60 + $r0.Minute
+  if (-not $SoloProva -and ($min0 -lt 21 * 60 + 10 -or $min0 -ge 23 * 60)) { "Non e' l'ora del promemoria spese (ora italiana " + $r0.ToString('HH:mm') + ')'; return }
+  $sito0 = if ($env:GITHUB_REPOSITORY) { 'https://' + ($env:GITHUB_REPOSITORY -split '/')[0] + '.github.io/' + ($env:GITHUB_REPOSITORY -split '/')[1] + '/' } else { '' }
+  $m0 = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = 'Hai segnato le spese di oggi?'; message = "Sono le 21:30: apri la scheda Spese e segna quello che manca (anche i contanti). Con ""come le altre volte"" basta un tocco."; tags = @('moneybag'); priority = 3 }
+  if ($sito0) { $m0['click'] = $sito0 + '#transazioni'; $m0['actions'] = @([ordered]@{ action = 'view'; label = 'Apri Spese'; url = ($sito0 + '#transazioni') }) }
+  $j0 = ToJson $m0
+  if ($SoloProva) { $j0; return }
+  $null = Invoke-RestMethod -Uri 'https://ntfy.sh/' -Method Post -Body ([Text.Encoding]::UTF8.GetBytes($j0)) -ContentType 'application/json; charset=utf-8' -TimeoutSec 30
+  $st['spese'] = $oggi
+  $out0 = '{' + (($st.Keys | Sort-Object | ForEach-Object { (JStr $_) + ':' + (JStr $st[$_]) }) -join ',') + '}'
+  [IO.File]::WriteAllText($stFile, $out0, (New-Object Text.UTF8Encoding($false)))
+  'Promemoria spese mandato.'; return
+}
 $m = Get-Content (Join-Path $Sito 'mercati.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $I = $m.indicatori; $righe = New-Object Collections.Generic.List[string]
 if ($I.tassi_usa) { $t = $I.tassi_usa; $righe.Add('Tassi USA: 10 anni ' + (Fmt $t.y10) + '%, 2 anni ' + (Fmt $t.y2) + '% (differenza ' + (Fmt $t.spread_2_10) + ').') }
@@ -68,6 +84,9 @@ if ($promemoria) {
   if (@(1, 4, 7, 10) -contains $roma.Month) { $t += ' Tocca anche ai conti trimestrali: mandami gli estratti di fine trimestre.' }
   $righe.Insert(0, $t)
 }
+# ogni lunedi' mattina: aggiorna i conti
+$lunedi = ($Momento -eq 'mattina' -and $roma.DayOfWeek -eq 'Monday')
+if ($lunedi) { $righe.Insert(0, 'Oggi è lunedì: apri l''app e aggiorna i saldi dei conti (Home, «Cosa devo fare oggi?», Aggiorna saldi).') }
 # promemoria trimestrale (gennaio, aprile, luglio, ottobre, dal 5 al 9, una volta sola): i documenti di Fineco, Directa e Fondo Cometa
 $trim = (@(1, 4, 7, 10) -contains $roma.Month -and $roma.Day -ge 5 -and $roma.Day -le 9 -and $st['trimestre'] -ne $mese)
 if ($trim) { $righe.Insert(0, 'Promemoria trimestrale: scarica i documenti di Fineco, Directa e Fondo Cometa e mandameli per aggiornare l''app.') }
@@ -77,8 +96,7 @@ $oggiPac = $false
 if (Test-Path $pf) { try { $pc = Get-Content $pf -Raw | ConvertFrom-Json; $dow = if ([int]$roma.DayOfWeek -eq 0) { 7 } else { [int]$roma.DayOfWeek }; $oggiPac = (@($pc.giorni) -contains $roma.Day) -or (@($pc.settimanale) -contains $dow) -or ($pc.trimestrale -and (@($pc.trimestrale.mesi) -contains $roma.Month) -and $roma.Day -eq [int]$pc.trimestrale.giorno) } catch { } }
 if ($oggiPac -and $Momento -eq 'sera') { $righe.Insert(0, 'Oggi ci sono acquisti programmati (PAC): quando sono stati eseguiti apri l''app, ti chiede di confermarli con Si o No.') }
 # la sera: promemoria delle spese di oggi (le transazioni sono cifrate nell'app: non so se le hai gia' segnate, quindi lo chiedo ogni sera)
-$spese = ($Momento -eq 'sera')
-if ($spese) { $righe.Insert(0, 'Hai segnato le spese di oggi? Apri la scheda Spese: con "come le altre volte" basta un tocco.') }
+$spese = $false          # il promemoria delle spese ha ora un messaggio suo, alle 21:30 (Momento 'spese')
 
 # articoli: 1-2 di ricerca (professori, banche centrali), 1 dagli Stati Uniti, 1 dall'Europa; i piu' recenti, con la fonte
 function Pick($fonti, $re, $n) {
@@ -99,9 +117,9 @@ $testo += "`n`nSpunti dalle fonti, non consigli personalizzati."
 
 $sito = if ($env:GITHUB_REPOSITORY) { 'https://' + ($env:GITHUB_REPOSITORY -split '/')[0] + '.github.io/' + ($env:GITHUB_REPOSITORY -split '/')[1] + '/' } else { '' }
 $azioni = @(); foreach ($s in ($sel | Select-Object -First 3)) { $azioni += [ordered]@{ action = 'view'; label = $s.tag; url = $s.a.link } }
-$titolo = if ($promemoria) { 'Promemoria del mese e recap della ' + $Momento } elseif ($trim) { 'Promemoria trimestrale e recap della ' + $Momento } elseif ($forti.Count) { 'Movimenti forti - recap della ' + $Momento } else { 'Recap della ' + $Momento + ' - mercati e articoli' }
-$msg = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = $titolo; message = $testo; tags = @($(if ($forti.Count) { 'warning' } elseif ($promemoria -or $trim) { 'calendar' } else { 'chart_with_upwards_trend' })) }
-if ($forti.Count -or $promemoria -or $trim) { $msg['priority'] = 4 }
+$titolo = if ($lunedi) { 'Lunedì: aggiorna i conti - recap della mattina' } elseif ($promemoria) { 'Promemoria del mese e recap della ' + $Momento } elseif ($trim) { 'Promemoria trimestrale e recap della ' + $Momento } elseif ($forti.Count) { 'Movimenti forti - recap della ' + $Momento } else { 'Recap della ' + $Momento + ' - mercati e articoli' }
+$msg = [ordered]@{ topic = $(if ($Argomento) { $Argomento } else { 'prova' }); title = $titolo; message = $testo; tags = @($(if ($forti.Count) { 'warning' } elseif ($promemoria -or $trim -or $lunedi) { 'calendar' } else { 'chart_with_upwards_trend' })) }
+if ($forti.Count -or $promemoria -or $trim -or $lunedi) { $msg['priority'] = 4 }
 if ($sito) { $msg['click'] = $sito + $(if ($oggiPac) { '#pac' } elseif ($spese) { '#transazioni' } else { '' }) }          # nei giorni dei PAC la notifica apre la scheda PAC
 if ($azioni.Count) { $msg['actions'] = $azioni }
 $json = ToJson $msg
