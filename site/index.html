@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mx4s24ZbG1hyF/mj1i5BcA4f3Mv0zUZV/nIXYUqJ2D4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-29dqhT7dP2cydkmkFFlBC7pFJRgRlHYEdITi7fRrKeQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1374,8 +1374,9 @@ function recoverTrx(D) {          // rimette in S le transazioni di D che mancan
       const op = (D.ops || []).find(o => o.id === q.opId), to = S.accounts.find(x => x.id === q.toId); if (!op || !to) { skip++; continue; }
       if (!OPS().some(o => o.id === op.id)) { const m = applyOp({ accId: op.accId, toId: op.toId, kind: 'trasferimento', date: op.date, amount: op.amount, note: op.note || '' }); if (m) { skip++; continue; } rec.opId = OPS()[OPS().length - 1].id; }          // se il trasferimento c'e' gia' tra le operazioni, si ricollega soltanto
     } else if (q.u) {
-      a.cash = (a.cash || 0) + (q.u.dCash || 0); a.upd = today();
-      if (q.u.flowId) { const da = (D.accounts || []).find(x => x.id === q.accId), f = da && (da.flows || []).find(z => z.id === q.u.flowId); if (f && !a.flows.some(z => z.id === f.id)) a.flows.push(JSON.parse(JSON.stringify(f))); }
+      if (dogsLinkOf(a)) { rec.u = { dCash: 0 }; }          // conto di DOGsitterini: il saldo non si tocca (lo riallinea DOGsitterini)
+      else { a.cash = (a.cash || 0) + (q.u.dCash || 0); a.upd = today(); }
+      if (q.u.flowId && !dogsLinkOf(a)) { const da = (D.accounts || []).find(x => x.id === q.accId), f = da && (da.flows || []).find(z => z.id === q.u.flowId); if (f && !a.flows.some(z => z.id === f.id)) a.flows.push(JSON.parse(JSON.stringify(f))); }
     }
     TRX().push(rec); n++;
   }
@@ -1405,7 +1406,7 @@ async function histOpen() {
       const D = await clDecrypt(x.dati, CL.code), have = new Set(TRX().map(q => q.id)), mis = (D.trx || []).filter(q => !have.has(q.id) && S.accounts.some(a => a.id === q.accId));
       if (!mis.length) { alert('In questa versione non ci sono spese che adesso mancano.'); return; }
       if (!confirm('Nella versione del ' + clHm(v.salvato) + ' ci sono ' + pl(mis.length, 'movimento', 'movimenti') + ' (spese, entrate o trasferimenti) che adesso non vedo. Li rimetto e aggiorno i saldi dei conti? Il resto non cambia.')) return;
-      const r = recoverTrx(D); shut(); touch(); render(); setStatus('Recuperati ' + pl(r.n, 'movimento', 'movimenti') + (r.skip ? ' · ' + r.skip + ' non recuperabili' : ''));
+      const r = recoverTrx(D); shut(); touch(); render(); DOGS_AT = 0; dogsSync(false); setStatus('Recuperati ' + pl(r.n, 'movimento', 'movimenti') + (r.skip ? ' · ' + r.skip + ' non recuperabili' : ''));
     } catch (e) { alert('Non riesco: ' + (e.message || e)); } finally { b.disabled = false; b.textContent = t0; }
   };
   dlg.append(h('h3', null, 'Versioni precedenti online'), h('p', { class: 'muted' }, 'Una copia all\'ora mentre lavori, le ultime 60. Toccane una per vedere che cosa contiene e, se vuoi, rimetterla. Con «Recupera le spese» riprendi solo le spese che mancano.'),
@@ -4282,8 +4283,8 @@ function trApply(t) {          // registra una transazione e muove la liquidita'
     const m = applyOp({ accId: a.id, toId: t.toId, kind: 'trasferimento', date: t.date, amount: t.amount, note: t.note || ('Trasferimento ' + a.name + ' → ' + accName(t.toId)) }); if (m) return m;
     rec.toId = t.toId; rec.opId = OPS()[OPS().length - 1].id;
   } else {
-    const cfx = fxRate(a.cashCcy) ?? 1, u = { dCash: (t.kind === 'entrata' ? 1 : -1) * t.amount / cfx };
-    if (a.perf) { const f = { id: uid(), date: t.date, type: t.kind === 'entrata' ? 'versamento' : 'prelievo', amount: t.amount, note: t.note || t.cat || 'Movimento' }; a.flows.push(f); u.flowId = f.id; }          // un conto d'investimento: l'entrata e' un versamento e la spesa un prelievo (cosi' il rendimento resta giusto)
+    const cfx = fxRate(a.cashCcy) ?? 1, linked = !!dogsLinkOf(a), u = { dCash: linked ? 0 : (t.kind === 'entrata' ? 1 : -1) * t.amount / cfx };          // conto collegato a DOGsitterini: il saldo lo decide DOGsitterini, qui la spesa si segna (calendario e statistiche) ma il saldo non si muove
+    if (a.perf && !linked) { const f = { id: uid(), date: t.date, type: t.kind === 'entrata' ? 'versamento' : 'prelievo', amount: t.amount, note: t.note || t.cat || 'Movimento' }; a.flows.push(f); u.flowId = f.id; }          // un conto d'investimento: l'entrata e' un versamento e la spesa un prelievo (cosi' il rendimento resta giusto)
     a.cash = (a.cash || 0) + u.dCash; a.upd = today(); rec.u = u;
   }
   TRX().push(rec); return '';
@@ -4573,7 +4574,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v27 (spese: niente piu perdite tra dispositivi, recupero, ricorrenti)';
+const APP_VER = '13/11/2026 · v28 (conti cani: il saldo e solo di DOGsitterini)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
