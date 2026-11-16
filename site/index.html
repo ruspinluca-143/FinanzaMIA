@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kVxEx7sJbYB+KJjg6mTz7I3hyt/I/D7wsVtMIB4trSc='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SqqNe90jzPuW6pkit0RQJ0QPCq7vBTeBmRmkiHADhVo='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -764,7 +764,8 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-day{font:inherit;font-size:14px;border:0;background:var(--btn);color:var(--ink);border-radius:10px;min-height:48px;padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer}
 .tr-day.off{visibility:hidden;pointer-events:none}.tr-day.today{box-shadow:inset 0 0 0 1.5px var(--s1)}
 .tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
-.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.op-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.03em;line-height:13px;padding:0 5px;border-radius:99px;vertical-align:1px;white-space:nowrap}.op-tag.t-g{color:var(--gain,#30d158);background:color-mix(in srgb,var(--gain,#30d158) 15%,transparent)}.op-tag.t-r{color:var(--loss,#ff6b6b);background:color-mix(in srgb,var(--loss,#ff6b6b) 15%,transparent)}.op-tag.t-b{color:#4c8dff;background:rgba(76,141,255,.15)}.op-tag.t-n{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
+.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.mdelta em{font-style:normal;font-size:10px;color:var(--muted);margin-left:2px}
+.op-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.03em;line-height:13px;padding:0 5px;border-radius:99px;vertical-align:1px;white-space:nowrap}.op-tag.t-g{color:var(--gain,#30d158);background:color-mix(in srgb,var(--gain,#30d158) 15%,transparent)}.op-tag.t-r{color:var(--loss,#ff6b6b);background:color-mix(in srgb,var(--loss,#ff6b6b) 15%,transparent)}.op-tag.t-b{color:#4c8dff;background:rgba(76,141,255,.15)}.op-tag.t-n{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
 .px-stamp{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:12px;color:var(--muted);background:none;border:0;padding:4px 2px;margin:0 0 4px;cursor:pointer;text-align:left}.px-stamp b{font-weight:600;color:var(--ink)}.px-stamp.old b{color:#ff9f0a}.px-stamp.busy{opacity:.55;pointer-events:none}
 .tr-pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--s1);margin-right:6px}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
 .tr-day.sel .tr-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.7)}
@@ -4294,7 +4295,7 @@ function trApply(t) {          // registra una transazione e muove la liquidita'
   const a = S.accounts.find(x => x.id === t.accId); if (!a) return 'Scegli il conto.';
   if (!(t.amount > 0)) return 'Scrivi l\'importo.'; if (!t.date) return 'Scegli la data.';
   if (a.dep) return 'Un conto deposito non si muove da qui: usa "Modifica conto".';
-  const rec = { id: uid(), date: t.date, kind: t.kind, accId: a.id, amount: t.amount, cat: t.cat || '', sub: t.sub || '', note: t.note || '' };
+  const rec = { id: uid(), date: t.date, kind: t.kind, accId: a.id, amount: t.amount, cat: t.cat || (t.kind !== 'trasf' && isDogAcc(a) ? 'Dog Sitting' : ''), sub: t.sub || '', note: t.note || '' };
   if (t.kind === 'trasf') {
     const m = applyOp({ accId: a.id, toId: t.toId, kind: 'trasferimento', date: t.date, amount: t.amount, note: t.note || ('Trasferimento ' + a.name + ' → ' + accName(t.toId)) }); if (m) return m;
     rec.toId = t.toId; rec.opId = OPS()[OPS().length - 1].id;
@@ -4590,7 +4591,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v29 (ora prezzi, etichette operazioni, PAC non ancora)';
+const APP_VER = '13/11/2026 · v31 (Dog Sitting come spesa, % dal mese scorso sui soldi fermi)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -4742,7 +4743,7 @@ const rvCard = (...kids) => h('section', { class: 'card rv' }, ...kids);
 function rvAllOps() {          // finestra con tutte le ultime operazioni (operazioni sui conti, spese e guadagni), con ricerca
   panelDialog('Tutte le operazioni', () => {
     const E = [];
-    OPS().forEach((o, k) => E.push({ d: o.date, k, ic: rvLogo(o.instName || '', '', rvSvg(RV_ICO.move)), t: (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), s: fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), v: eur(o.gross != null ? o.gross : o.amount, true), g: o.kind, f: () => talkOp(o) }));
+    OPS().forEach((o, k) => E.push({ d: o.date, k, ic: rvLogo(o.instName || '', '', rvSvg(RV_ICO.move)), t: (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), s: fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), v: eur(o.gross != null ? o.gross : o.amount, true), g: opKind(o), f: () => talkOp(o) }));
     trAll().filter(r => r.own && r.k !== 'trasf').forEach((r, k) => E.push({ d: r.d, k: 1e6 + k, ic: rvSvg(RV_ICO.move), t: (r.cat || TR_LAB[r.k]) + (r.note ? ' · ' + r.note : ''), s: fmtDate(r.d) + ' · ' + r.acc, v: (r.k === 'spesa' ? '−' : '+') + eur(r.amt, true), g: r.k, f: () => { const d = document.querySelector('dialog.panel'); if (d) d.close(); rvGo('transazioni')(); } }));
     E.sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : b.k - a.k);
     const box = h('div'), cnt = h('p', { class: 'muted' }), q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca: titolo, conto, data o importo', style: 'width:100%;max-width:none', 'aria-label': 'Cerca tra le operazioni', autocomplete: 'off', enterkeyhint: 'search' });
@@ -4757,7 +4758,7 @@ function rvLast() {          // l'ultima cosa registrata: un'operazione sui cont
   const o = OPS()[OPS().length - 1], t = trAll().find(r => r.own);
   if (t && (!o || t.d > o.date)) return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (t.cat || TR_LAB[t.k]) + (t.note ? ' · ' + t.note : ''), fmtDate(t.d) + ' · ' + t.acc + (t.to ? ' → ' + t.to : ''), (t.k === 'spesa' ? '−' : t.k === 'entrata' ? '+' : '') + eur(t.amt, true), '', rvGo('transazioni'), '', t.k));
   if (!o) return null;
-  return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), eur(o.gross != null ? o.gross : o.amount, true), '', () => talkOp(o), '', o.kind));
+  return rvCard(rvHead('Ultima operazione', 'Tutte', rvAllOps), rvRow(rvSvg(RV_ICO.move), (opLab(o)) + (o.instName ? ' · ' + o.instName : ''), fmtDate(o.date) + ' · ' + accName(o.accId) + (o.toId ? ' → ' + accName(o.toId) : ''), eur(o.gross != null ? o.gross : o.amount, true), '', () => talkOp(o), '', opKind(o)));
 }
 function rvGroupTalk(g, tot) {
   talk({ kind: 'Come sono divisi i tuoi soldi', title: g.l, value: eur(g.tot), num: g.tot, say: g.d + (tot > 0 ? ' Quota sul patrimonio: ' + pct(g.tot / tot) + '.' : ''), rows: g.accs.map(a => [a.name, accValue(a), a.box || (TYPES[a.type] || {}).label || '', openAcc(a)]), rowsTitle: 'Conto per conto (tocca per aprirlo)',
@@ -4797,11 +4798,20 @@ function rvProssimi() {          // acquisti programmati e spese ricorrenti dei 
   if (!L.length) return null; L.sort((x, y) => x.d < y.d ? -1 : 1);
   return rvCard(rvHead('Prossimi pagamenti', 'Spese', rvGo('transazioni')), L.slice(0, 4).map(x => rvRow(rvSvg(RV_ICO.cal), x.n, fmtDate(x.d), x.a ? (x.a > 0 ? '+' : '−') + eur(Math.abs(x.a), true) : '', '', x.f)));
 }
+function monthDelta(a) {          // soldi fermi: quanto e' cambiato il saldo rispetto alla fine del mese scorso (se non c'e' ancora, dal primo giorno registrato)
+  if (!S || !S.snapshots) return null;
+  const t = today(), prevEnd = trYmd(new Date(+t.slice(0, 4), +t.slice(5, 7) - 1, 0));
+  const L = S.snapshots.filter(s => s.accs && s.accs[a.id] != null && s.date < t).sort((p, q) => p.date < q.date ? -1 : 1); if (!L.length) return null;
+  const exact = L.filter(s => s.date <= prevEnd).pop(), ref = exact || L[0], base = ref.accs[a.id], cur = accValue(a);
+  if (!fin(base) || Math.abs(base) < 0.005) return null;
+  const d = cur - base; return { d, pct: d / Math.abs(base), label: exact ? 'dal mese scorso' : 'dal ' + fmtDate(ref.date), ref: ref.date };
+}
+function monthPill(a) { const m = monthDelta(a); return m ? h('span', { class: 'mdelta', title: 'Saldo di ' + fmtDate(m.ref) + ' → oggi' }, gl(m.d, spct(m.pct)), h('em', null, ' ' + m.label)) : null; }
 function rvAccHead(a) {          // testa della pagina di un conto: logo, nome, valore e pulsanti rotondi
   const pf = perfOf([a]), fermo = accGroup(a) === 'fermi' && !a.positions.length, b = rvAccBadge(a); b.classList.add('rv-big-ic');
   return h('div', null, h('div', { class: 'rv-back' }, btn('‹ Tutti i conti', () => { UI.acc = null; render(); window.scrollTo(0, 0); }, 'sm')),
     h('section', { class: 'rv-hero' }, b, h('div', { class: 'rv-lbl' }, a.name), h('div', { class: 'rv-tot' }, eur(accValue(a))),
-      a.perf && pf.pnl != null ? h('div', { class: 'hero-pills' }, h('span', { class: 'pill ' + (pf.pnl >= 0 ? 'up' : 'dn') }, (pf.pnl >= 0 ? '▲ ' : '▼ ') + seur(pf.pnl).replace(/^[+\-−]/, '') + (fin(pf.pnlPct) ? ' · ' + spct(pf.pnlPct) : ''))) : null,
+      a.perf && pf.pnl != null ? h('div', { class: 'hero-pills' }, h('span', { class: 'pill ' + (pf.pnl >= 0 ? 'up' : 'dn') }, (pf.pnl >= 0 ? '▲ ' : '▼ ') + seur(pf.pnl).replace(/^[+\-−]/, '') + (fin(pf.pnlPct) ? ' · ' + spct(pf.pnlPct) : ''))) : (!a.perf && !a.positions.length && monthPill(a) ? h('div', { class: 'hero-pills' }, monthPill(a)) : null),
       rvActs([['Operazione', RV_ICO.plus, () => editOperation({ accId: a.id })], ['Modifica', ['M4 20h4L19 9l-4-4L4 16z'], () => editAccount(a)], !fermo ? ['Importa', MICO.imp, () => pickCsv(a)] : null, ['Elimina', ['M5 7h14', 'M10 11v6', 'M14 11v6', 'M6 7l1 13h10l1-13', 'M9 7V4h6v3'], () => delAccount(a)]].filter(Boolean))));
 }
 function rvConti() {          // la scheda Conti con lo stesso aspetto della Home: totale al centro, pulsanti rotondi e conti in elenco con il loro logo
@@ -4815,7 +4825,7 @@ function rvConti() {          // la scheda Conti con lo stesso aspetto della Hom
     const toks = normT(q.value).split(' ').filter(Boolean), out = [];
     for (const g of G) {
       const rows = g.accs.filter(a => { const hay = normT(a.name + ' ' + ((TYPES[a.type] || {}).label || '') + ' ' + (a.box || '') + ' ' + g.l + ' ' + (a.note || '')); return toks.every(t => hay.includes(t)); }).map(a => {
-        const pf = a.perf ? perfOf([a]) : null, row = rvRow(rvAccBadge(a), a.name, ((TYPES[a.type] || {}).label || '') + (a.box ? ' · ' + a.box : ''), eur(accValue(a)), pf && fin(pf.pnlPct) ? gl(pf.pnl, spct(pf.pnlPct)) : '', () => { UI.acc = a.id; render(); window.scrollTo(0, 0); }, 'g-' + g.k);
+        const pf = a.perf ? perfOf([a]) : null, row = rvRow(rvAccBadge(a), a.name, ((TYPES[a.type] || {}).label || '') + (a.box ? ' · ' + a.box : ''), eur(accValue(a)), pf && fin(pf.pnlPct) ? gl(pf.pnl, spct(pf.pnlPct)) : (!a.perf && !a.positions.length ? monthPill(a) : ''), () => { UI.acc = a.id; render(); window.scrollTo(0, 0); }, 'g-' + g.k);
         row.dataset.sec = a.id; return UI.reorder ? h('div', { class: 'rv-ordr' }, row, btn('◀', () => moveAcc(a, -1), 'sm'), btn('▶', () => moveAcc(a, 1), 'sm')) : row; });
       if (rows.length) out.push(h('div', { 'data-sec': 'g:' + g.k }, h('div', { class: 'rv-sec' }, g.l + ' · ' + eur(g.tot)), h('section', { class: 'card rv', 'data-reorder': 'acc' }, ...rows)));
     }
@@ -4863,7 +4873,7 @@ function tabInvestimenti() {
   for (const pp of PL()) { const d = occurrences(pp.start, freqMonths(pp.freq), pp.day, pp.since || pp.start, addMonthsStr(t, 14), pp.end).find(x => x >= t); if (d) rec.push([pp, d]); }
   rec.sort((x, y) => x[1] < y[1] ? -1 : 1);
   if (rec.length) el.append(rvCard(rvHead('Ordini ricorrenti', 'Gestisci', () => pacManager()), rec.slice(0, 6).map(([pp, d]) => rvRow(rvSvg(RV_ICO.repeat), pp.label || 'Acquisto ricorrente', freqLabel(pp.freq) + ' · prossimo ' + fmtDate(d), '−' + eur(pp.amount, true), '', () => openPlan(pp)))));
-  if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvAllOps), ord.map(x => rvRow(rvSvg(RV_ICO.move), (opLab(x)) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x), '', x.kind))));
+  if (ord.length) el.append(rvCard(rvHead('Ultimi ordini', 'Tutti', rvAllOps), ord.map(x => rvRow(rvSvg(RV_ICO.move), (opLab(x)) + (x.instName ? ' · ' + x.instName : ''), fmtDate(x.date) + ' · ' + accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), eur(x.gross != null ? x.gross : x.amount, true), '', () => talkOp(x), '', opKind(x)))));
   secTag(el); applyOrder('inv', el);
   return el;
 }
@@ -4872,7 +4882,7 @@ const isDogAcc = a => !!a && (/cani|\bdog/i.test(a.name || '') || /cani/i.test(a
 function pvEntries() {
   const out = [], unk = [], dog = [];
   for (const o of OPS()) {
-    if (isDogAcc(S.accounts.find(x => x.id === o.accId))) { if (o.kind === 'guadagno' || o.kind === 'perdita' || o.kind === 'vendita') dog.push({ d: o.date, name: o.instName || accName(o.accId), acc: accName(o.accId), pnl: o.kind === 'vendita' ? (o.realized != null ? o.realized : (o.gross || 0) - (o.fee || 0)) : (o.kind === 'guadagno' ? 1 : -1) * (o.amount || 0), o, how: 'Dog sitting' }); continue; }
+    if (isDogAcc(S.accounts.find(x => x.id === o.accId))) { if (o.kind === 'guadagno' || o.kind === 'perdita' || o.kind === 'vendita') dog.push({ d: o.date, name: o.instName || accName(o.accId), acc: accName(o.accId), pnl: o.kind === 'vendita' ? (o.realized != null ? o.realized : (o.gross || 0) - (o.fee || 0)) : (o.kind === 'guadagno' ? 1 : -1) * (o.amount || 0), o, how: 'Dog Sitting' }); continue; }
     if (o.kind === 'vendita') {
       const net = (o.gross || 0) - (o.fee || 0);
       if (o.realized != null) out.push({ d: o.date, name: o.instName || '—', acc: accName(o.accId), pnl: o.realized, cost: net - o.realized, proceeds: net, o, how: 'Venduto' });
@@ -4918,7 +4928,7 @@ function tabPlusvalenze() {
   q.addEventListener('input', () => { UI.pvQ = q.value; draw(); }); draw();
   el.append(h('div', { class: 'cq-row' }, q), list);
   { const D = dog.filter(x => pvInRange(x.d, per)).sort((a, b) => a.d < b.d ? 1 : -1), dt = D.reduce((x, r) => x + r.pnl, 0);
-    if (D.length) el.append(h('div', { class: 'rv-sec' }, 'Guadagni da dog sitting · ' + seur(dt)), h('section', { class: 'card rv' }, rvHead('Non sono plusvalenze', null), ...D.slice(0, 100).map(x => rvRow(rvSvg(RV_DOG, 22), 'Dog sitting', fmtDate(x.d) + ' · ' + x.acc, gl(x.pnl, seur(x.pnl)), '', () => talkOp(x.o), 'rv-dog')))); }
+    if (D.length) el.append(h('div', { class: 'rv-sec' }, 'Guadagni da dog sitting · ' + seur(dt)), h('section', { class: 'card rv' }, rvHead('Non sono plusvalenze', null), ...D.slice(0, 100).map(x => rvRow(rvSvg(RV_DOG, 22), 'Dog Sitting', fmtDate(x.d) + ' · ' + x.acc, gl(x.pnl, seur(x.pnl)), '', () => talkOp(x.o), 'rv-dog')))); }
   if (unk.length) el.append(h('p', { class: 'muted' }, pl(unk.length, 'vendita non è', 'vendite non sono') + ' nell\'elenco perché non conosco il costo di carico del titolo: senza quel dato non si può calcolare il guadagno. Lo inserisci da «Modifica posizione», oppure dimmelo e lo sistemo.'));
   el.append(h('p', { class: 'muted' }, 'Il risultato di ogni vendita è l\'incasso (meno le commissioni) meno il costo delle quote vendute; la percentuale è sul costo. Sono contate le operazioni registrate nell\'app, comprese «Guadagno» e «Perdita» dei conti di trading (oro XAUUSD, CFD). Le imposte stimate sono in Analisi → Tasse.'));
   return el;
@@ -5113,7 +5123,7 @@ function opsCard() {          // in fondo ai conti: le ultime operazioni registr
   const draw = () => {          // si ridisegna solo la tabella, cosi' la tastiera resta aperta mentre scrivi
     const toks = normT(UI.opsQ || '').split(' ').filter(Boolean), list = toks.length ? byAcc.filter(x => { const s2 = hay(x); return toks.every(t => s2.includes(t)); }) : byAcc, lim2 = toks.length || UI.opsAll ? 300 : 12;
     cnt.textContent = toks.length ? pl(list.length, 'operazione trovata', 'operazioni trovate') : '';
-    wrap.replaceChildren(table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim2).map(x => [fmtDate(x.date), h('span', null, opTag(x.kind), ' ', lnk(opLab(x), () => talkOp(x))), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), toks.length ? 'Nessuna operazione corrisponde: prova con meno parole.' : 'Nessuna operazione per questo conto.'));
+    wrap.replaceChildren(table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Conto' }, { t: 'Strumento' }, { t: 'Importo', n: 1 }], list.slice(0, lim2).map(x => [fmtDate(x.date), h('span', null, opTag(opKind(x)), ' ', lnk(opLab(x), () => talkOp(x))), accName(x.accId) + (x.toId ? ' → ' + accName(x.toId) : ''), x.instName || '—', eur(x.gross != null ? x.gross : x.amount, true)]), toks.length ? 'Nessuna operazione corrisponde: prova con meno parole.' : 'Nessuna operazione per questo conto.'));
     if (!toks.length && list.length > 12) wrap.append(btn(UI.opsAll ? 'Mostra solo le ultime 12' : 'Mostra tutte (' + list.length + ')', () => { UI.opsAll = !UI.opsAll; render(); }, 'sm'));
   };
   const q = h('input', { type: 'search', class: 'wz-search ops-q', placeholder: 'Cerca: conto, titolo, tipo, data o importo (es. trade republic, 188, trasferimento)', value: UI.opsQ || '', autocomplete: 'off', enterkeyhint: 'search', 'aria-label': 'Cerca tra le operazioni' });
@@ -5222,7 +5232,7 @@ function viewAccount(id) {
   const mineOps = OPS().filter(x => x.accId === a.id || x.toId === a.id).slice().reverse();
   if (mineOps.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Operazioni registrate'),
     table([{ t: 'Data' }, { t: 'Che cosa' }, { t: 'Strumento' }, { t: 'Quantità', n: 1 }, { t: 'Prezzo', n: 1 }, { t: 'Importo', n: 1 }, { t: '' }],
-      mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), h('span', null, opTag(x.kind), ' ', opLab(x)), x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
+      mineOps.slice(0, 40).map((x, k) => [fmtDate(x.date), h('span', null, opTag(opKind(x)), ' ', opLab(x)), x.instName || (x.toId ? (x.accId === a.id ? '→ ' + accName(x.toId) : '← ' + accName(x.accId)) : '—'), x.qty ? (HIDE ? '••••' : nfq.format(x.qty)) : '—', x.price ? nf2.format(x.price) + ' ' + x.ccy : '—', eur(x.gross != null ? x.gross : x.amount, true) + (x.realized != null ? ' · ' + (x.realized >= 0 ? 'guadagno ' : 'perdita ') + eur(Math.abs(x.realized)) : ''), rowActs(btn(k === 0 ? 'Annulla' : 'Elimina', () => undoOp(x), 'sm danger'))])),
     h('p', { class: 'muted' }, 'Si può annullare soltanto l\'ultima operazione del conto: serve se hai sbagliato un numero.')));
   const last = a.imports && a.imports[a.imports.length - 1];
   if (!fermo) el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Importa da file'), btn('Scegli un file CSV…', () => pickCsv(a), 'pri')),
@@ -5383,7 +5393,8 @@ function tabDati() {
 /* ============ operazioni: acquisti, vendite, versamenti e prelievi registrati in un attimo ============ */
 const OPS = () => S.ops || (S.ops = []);
 const OP_KINDS = [['acquisto', 'Acquisto'], ['vendita', 'Vendita'], ['trasferimento', 'Trasferimento da un conto a un altro (es. dalla banca al broker)'], ['versamento', 'Versamento (soldi tuoi che entrano nel conto da fuori)'], ['prelievo', 'Prelievo (soldi tuoi che escono dal conto verso fuori)']];
-const opLab = o => { if ((o.kind === 'guadagno' || o.kind === 'perdita') && isDogAcc(S.accounts.find(a => a.id === o.accId))) return o.kind === 'guadagno' ? 'Dog sitting' : 'Spesa dog sitting'; return OP_LABEL[o.kind] || o.kind; };          // sui conti dei cani un guadagno e' dog sitting, non una plusvalenza
+const opKind = o => (o.kind === 'perdita' && isDogAcc(S.accounts.find(a => a.id === o.accId))) ? 'spesa' : o.kind;          // sui conti dei cani una perdita e' una SPESA (etichetta rossa), mai una minusvalenza
+const opLab = o => { if ((o.kind === 'guadagno' || o.kind === 'perdita') && isDogAcc(S.accounts.find(a => a.id === o.accId))) return 'Dog Sitting'; return OP_LABEL[o.kind] || o.kind; };          // sui conti dei cani un guadagno e' dog sitting, non una plusvalenza
 const OP_LABEL = { guadagno: 'Plusvalenza', perdita: 'Minusvalenza', acquisto: 'Acquisto', vendita: 'Vendita', trasferimento: 'Trasferimento', versamento: 'Versamento', prelievo: 'Prelievo' };
 const accName = id => (S.accounts.find(a => a.id === id) || {}).name || '—';
 function applyOp(o) {          // aggiorna posizione (quantita' e costo medio), liquidita' e movimenti; ricorda come tornare indietro. Restituisce un messaggio solo se qualcosa non va
