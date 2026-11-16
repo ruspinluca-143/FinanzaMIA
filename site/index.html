@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mte/5ygeuGq7mapFVMzyOPkFkRDo9rhS3/1fkrYtALc='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mx4s24ZbG1hyF/mj1i5BcA4f3Mv0zUZV/nIXYUqJ2D4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -764,7 +764,7 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-day{font:inherit;font-size:14px;border:0;background:var(--btn);color:var(--ink);border-radius:10px;min-height:48px;padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer}
 .tr-day.off{visibility:hidden;pointer-events:none}.tr-day.today{box-shadow:inset 0 0 0 1.5px var(--s1)}
 .tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
-.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-plan{opacity:.8;border-style:dashed}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
+.tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.tr-pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--s1);margin-right:6px}.tr-d-s{background:var(--loss,#ff453a)}.tr-d-e{background:var(--gain,#30d158)}.tr-d-t{background:#0a84ff}
 .tr-day.sel .tr-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.7)}
 .tr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--grid)}.tr-item:first-of-type{border-top:0}
 .tr-it{display:flex;flex-direction:column;gap:1px;min-width:0}.tr-it b{font-size:15px;overflow:hidden;text-overflow:ellipsis}.tr-it .muted{font-size:12px}
@@ -1133,8 +1133,10 @@ const CLOUD_ON = () => !!(CLOUD_URL && CLOUD_KEY);
 const CL_ITER = 600000;          // PBKDF2 per la chiave della copia online (derivata dal codice)
 const CL_LS = 'finanze-online';          // sul dispositivo: { code, ver, pending }
 const CL = { code: '', ver: 0, pending: false, key: null, salt: null, ready: false, busy: false, again: false, attaching: false, timer: null, retry: null, state: '', err: '', at: '' };
-try { const o = JSON.parse(localStorage.getItem(CL_LS) || '{}'); CL.code = o.code || ''; CL.ver = +o.ver || 0; CL.pending = !!o.pending; } catch { /* senza memoria locale il codice si richiede a ogni apertura */ }
-const clStore = () => { try { localStorage.setItem(CL_LS, JSON.stringify({ code: CL.code, ver: CL.ver, pending: CL.pending })); } catch { /* niente */ } };
+try { const o = JSON.parse(localStorage.getItem(CL_LS) || '{}'); CL.code = o.code || ''; CL.ver = +o.ver || 0; CL.pending = !!o.pending; CL.base = o.base || ''; } catch { /* senza memoria locale il codice si richiede a ogni apertura */ }
+const clStore = () => { try { localStorage.setItem(CL_LS, JSON.stringify({ code: CL.code, ver: CL.ver, pending: CL.pending, base: CL.base || '' })); } catch { /* niente */ } };
+const clHash = D => { const s = clCore(D); let x = 5381; for (let i = 0; i < s.length; i++) x = ((x << 5) + x + s.charCodeAt(i)) | 0; return x + ':' + s.length; };          // impronta dei dati "veri" (senza prezzi e snapshot): serve a capire se questo dispositivo ha davvero modifiche sue
+const clRecs = D => ((D.trx || []).length + (D.ops || []).length + (D.trh || []).length + (D.journal || []).length + (D.plans || []).reduce((t, p) => t + (p.done || []).length, 0));
 async function cloudRpc(fn, body, keepalive) {
   const hd = { apikey: CLOUD_KEY, 'Content-Type': 'application/json' }; if (CLOUD_KEY.startsWith('eyJ')) hd.Authorization = 'Bearer ' + CLOUD_KEY;
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
@@ -1162,6 +1164,7 @@ async function clNewKey() { CL.salt = crypto.getRandomValues(new Uint8Array(16))
 async function clAdopt(D) {          // i dati online diventano quelli di questo dispositivo (archivio senza passphrase, come sempre)
   const inside = !!S;
   if (!KEY) { SALT = crypto.getRandomValues(new Uint8Array(16)); ITER = 1000000; KEY = await deriveKey(NOPASS, SALT, ITER); NOPW = true; }
+  document.querySelectorAll('dialog.duedlg[open]').forEach(x => x.close());          // arrivano dati nuovi: la finestra "da confermare" si riapre da sola con quelli giusti (non resta una copia vecchia)
   S = D; VERIFY = await makeVerify(); DEMO = false; LOC.off = false; DIRTY = false; UNSAVED = false;
   await save(false); UNSAVED = false; DIRTY = false;          // anche se questo browser non li tenesse, i dati sono online
   if (inside && !LOCKED) render(); else if (!inside) enter();
@@ -1190,10 +1193,10 @@ async function clPush(final) {
   if (CL.busy) { CL.again = true; return; }
   CL.busy = true;
   try {
-    const text = await clSeal();
+    const hNow = clHash(S), text = await clSeal();
     const r = await cloudRpc('finanze_scrivi', { p_codice: CL.code, p_dati: text, p_versione: CL.ver }, final && text.length < 60000);
     if (r && r.ok) {
-      CL.ver = +r.versione; CL.pending = false; CL.wiped = false; CL.at = r.quando || new Date().toISOString(); CL.state = 'ok'; clStore();
+      CL.ver = +r.versione; CL.pending = false; CL.wiped = false; CL.at = r.quando || new Date().toISOString(); CL.state = 'ok'; CL.base = hNow; clStore();
       if (UNSAVED) { UNSAVED = false; DIRTY = false; refreshUnsaved(); }          // il browser non teneva i dati, ma online sono al sicuro
       clNote();
     } else if (r && r.err === 'conflitto') await clMerge(await cloudRpc('finanze_leggi', { p_codice: CL.code }));
@@ -1208,7 +1211,8 @@ function clChoose(D, r) {          // due versioni diverse dei dati: si sceglie 
   const nL = S ? S.accounts.length : 0, nR = D.accounts.length;
   if (!nR && nL) return 'local'; if (!nL) return CL.wiped ? 'local' : 'remote';          // archivio vuoto: vince quello online, tranne se l'hai appena svuotato tu
   if (clCore(S) === clCore(D)) return 'remote';          // se cambiano solo prezzi, snapshot e simili (cose che l'app aggiorna da sola) non si disturba nessuno: vince quella online, i prezzi si riscaricano
-  const pick = CL.pending ? 'local' : nR >= nL ? 'remote' : 'local';          // nessuna domanda: se hai modifiche non ancora online vincono le tue, altrimenti i dati online (o quelli con piu' conti)
+  if (CL.base && clHash(S) === CL.base) { try { setStatus('Dati online più recenti: caricati'); } catch (e) { } return 'remote'; }          // questo dispositivo ha cambiato solo prezzi e fotografie (le fa l'app da sola ad ogni apertura): non e' una modifica tua, vincono i dati online. Prima vinceva sempre "il locale" e una copia vecchia cancellava le spese inserite su un altro dispositivo
+  const rL = clRecs(S), rR = clRecs(D), pick = rL !== rR ? (rL > rR ? 'local' : 'remote') : (CL.pending ? 'local' : nR >= nL ? 'remote' : 'local');          // modifiche vere su entrambi: si tiene la versione con piu' movimenti registrati (spese, operazioni, storico), mai a caso
   try { setStatus(pick === 'local' ? 'Dati diversi online e qui: tengo le modifiche di questo dispositivo' : 'Dati diversi online e qui: tengo quelli online'); } catch (e) { }
   return pick;
 }
@@ -1217,10 +1221,11 @@ async function clMerge(r) {          // r = risposta di finanze_leggi: si decide
   const v = +r.versione || 0;
   if (!r.dati) { if (!CL.key) await clNewKey(); CL.ready = true; CL.ver = v; clStore(); if (S) clSoon(0); return; }          // online non c'e' ancora nulla: si caricano i dati di qui
   const D = await clOpen(r.dati, CL.code); CL.ready = true; CL.at = r.quando;
-  if (v === CL.ver && S) { if (CL.pending) clSoon(0); else { CL.state = 'ok'; clNote(); } return; }          // online nessuno ha cambiato nulla
+  if (v === CL.ver && S) { if (CL.pending) clSoon(0); else { CL.state = 'ok'; if (!CL.base) { CL.base = clHash(S); clStore(); } clNote(); } return; }          // online nessuno ha cambiato nulla
   const pick = S && (CL.pending || CL.ver === 0) ? clChoose(D, r) : 'remote';          // modifiche qui non ancora online, oppure primo collegamento di un dispositivo che ha gia' dei dati
   CL.ver = v;
-  if (pick === 'remote') { CL.pending = false; clStore(); await clAdopt(D); CL.state = 'ok'; setStatus('Dati online caricati (salvati il ' + clHm(r.quando) + ')'); }
+  if (pick === 'remote') { if (S && CL.pending && CL.base && clHash(S) !== CL.base) { try { download(await seal()); } catch { /* si continua */ } }          // modifiche vere di questo dispositivo che stanno per essere sostituite: prima ne esce una copia nei Download
+    CL.pending = false; CL.base = clHash(D); clStore(); await clAdopt(D); CL.state = 'ok'; setStatus('Dati online caricati (salvati il ' + clHm(r.quando) + ')'); }
   else { clStore(); clSoon(0); }
 }
 async function clAttach(silent) {          // collega questo dispositivo ai dati online
@@ -1308,6 +1313,9 @@ function wipeAll() {          // per ripartire da zero: svuota l'archivio qui e 
   }, null, 'Cancella tutto');
 }
 window.addEventListener('online', () => { if (CL.pending || (CL.code && !CL.ready)) clPush(); });
+const flushLocal = () => { if (S && !DEMO && KEY && DIRTY) { clearTimeout(saveTimer); save(false); } };          // uscendo dall'app (anche in fretta) la modifica in attesa parte subito, senza aspettare il mezzo secondo
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushLocal(); });
+window.addEventListener('pagehide', flushLocal);
 document.addEventListener('visibilitychange', () => { if (!CLOUD_ON() || !S || DEMO) return; if (document.hidden) { if (CL.pending && CL.ready) { clearTimeout(CL.timer); clPush(true); } } else clCheck(); });
 window.addEventListener('pagehide', () => { if (CLOUD_ON() && S && CL.pending && CL.ready && !CL.busy) clPush(true); });
 
@@ -1356,6 +1364,23 @@ async function clDecrypt(text, code) {          // apre una copia online senza t
   const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(f.iv), additionalData: enc.encode(JSON.stringify(header)) }, key, unb64(f.ct));
   const D = JSON.parse(dec.decode(pt)); migrate(D); return D;
 }
+function recoverTrx(D) {          // rimette in S le transazioni di D che mancano (per id): il saldo del conto si aggiorna come alla registrazione; i ricorrenti non si ripetono (si uniscono le date gia' fatte)
+  let n = 0, skip = 0; const have = new Set(TRX().map(q => q.id));
+  for (const r0 of (D.trr || [])) { const mine = (S.trr || []).find(x => x.id === r0.id); if (mine) mine.done = [...new Set([...(mine.done || []), ...(r0.done || [])])]; }
+  for (const q of (D.trx || [])) {
+    if (have.has(q.id)) continue; const a = S.accounts.find(x => x.id === q.accId); if (!a) { skip++; continue; }
+    const rec = JSON.parse(JSON.stringify(q));
+    if (q.kind === 'trasf') {
+      const op = (D.ops || []).find(o => o.id === q.opId), to = S.accounts.find(x => x.id === q.toId); if (!op || !to) { skip++; continue; }
+      if (!OPS().some(o => o.id === op.id)) { const m = applyOp({ accId: op.accId, toId: op.toId, kind: 'trasferimento', date: op.date, amount: op.amount, note: op.note || '' }); if (m) { skip++; continue; } rec.opId = OPS()[OPS().length - 1].id; }          // se il trasferimento c'e' gia' tra le operazioni, si ricollega soltanto
+    } else if (q.u) {
+      a.cash = (a.cash || 0) + (q.u.dCash || 0); a.upd = today();
+      if (q.u.flowId) { const da = (D.accounts || []).find(x => x.id === q.accId), f = da && (da.flows || []).find(z => z.id === q.u.flowId); if (f && !a.flows.some(z => z.id === f.id)) a.flows.push(JSON.parse(JSON.stringify(f))); }
+    }
+    TRX().push(rec); n++;
+  }
+  TR_MEMO = null; return { n, skip };
+}
 const sumOf = D => { const keep = S; S = D; try { return { n: D.accounts.length, tot: totalValue() }; } finally { S = keep; } };
 async function histOpen() {
   if (!(CLOUD_ON() && CL.code)) { alert('Serve il salvataggio online attivo su questo dispositivo.'); return; }
@@ -1373,8 +1398,18 @@ async function histOpen() {
       S = D; CL.wiped = true; shut(); UI.tab = 'panoramica'; UI.acc = null; touch(); render(); setStatus('Ripristinata la versione del ' + clHm(v.salvato));
     } catch (e) { b.disabled = false; b.textContent = 'Guarda e ripristina'; alert('Non riesco ad aprirla: ' + (e.message || e)); }
   };
-  dlg.append(h('h3', null, 'Versioni precedenti online'), h('p', { class: 'muted' }, 'Una copia all\'ora mentre lavori, le ultime 60. Toccane una per vedere che cosa contiene e, se vuoi, rimetterla.'),
-    list.length ? table([{ t: 'Salvata il' }, { t: 'Versione', n: 1 }, { t: '' }], list.map(v => { const b = btn('Guarda e ripristina', () => look(v, b), 'sm'); return [clHm(v.salvato), String(v.versione), b]; })) : h('p', null, 'Ancora nessuna copia: la prima si fa dopo un\'ora di modifiche.'),
+  const rec = async (v, b) => {          // riprende da una versione vecchia SOLO le spese/entrate/trasferimenti che adesso mancano, senza toccare il resto
+    b.disabled = true; const t0 = b.textContent; b.textContent = 'Apro…';
+    try {
+      const x = await cloudRpc('finanze_storico_leggi', { p_codice: CL.code, p_n: v.n }); if (!x || !x.ok || !x.dati) throw new Error('versione non trovata');
+      const D = await clDecrypt(x.dati, CL.code), have = new Set(TRX().map(q => q.id)), mis = (D.trx || []).filter(q => !have.has(q.id) && S.accounts.some(a => a.id === q.accId));
+      if (!mis.length) { alert('In questa versione non ci sono spese che adesso mancano.'); return; }
+      if (!confirm('Nella versione del ' + clHm(v.salvato) + ' ci sono ' + pl(mis.length, 'movimento', 'movimenti') + ' (spese, entrate o trasferimenti) che adesso non vedo. Li rimetto e aggiorno i saldi dei conti? Il resto non cambia.')) return;
+      const r = recoverTrx(D); shut(); touch(); render(); setStatus('Recuperati ' + pl(r.n, 'movimento', 'movimenti') + (r.skip ? ' · ' + r.skip + ' non recuperabili' : ''));
+    } catch (e) { alert('Non riesco: ' + (e.message || e)); } finally { b.disabled = false; b.textContent = t0; }
+  };
+  dlg.append(h('h3', null, 'Versioni precedenti online'), h('p', { class: 'muted' }, 'Una copia all\'ora mentre lavori, le ultime 60. Toccane una per vedere che cosa contiene e, se vuoi, rimetterla. Con «Recupera le spese» riprendi solo le spese che mancano.'),
+    list.length ? table([{ t: 'Salvata il' }, { t: 'Versione', n: 1 }, { t: '' }, { t: '' }], list.map(v => { const b = btn('Guarda e ripristina', () => look(v, b), 'sm'), b2 = btn('Recupera le spese', () => rec(v, b2), 'sm pri'); return [clHm(v.salvato), String(v.versione), b2, b]; })) : h('p', null, 'Ancora nessuna copia: la prima si fa dopo un\'ora di modifiche.'),
     h('div', { class: 'dlgacts' }, btn('Chiudi', shut, 'pri')));
   dlg.addEventListener('close', () => dlg.remove()); document.body.append(dlg); dlg.showModal();
 }
@@ -4464,7 +4499,7 @@ function trCal() {
     { l: 'Spese del mese', v: eur(s0), s: pl(month.filter(r => r.k === 'spesa').length, 'voce', 'voci') + (plannedSum > 0 ? ' · +' + eur(plannedSum) + ' programmate' : ''), x: () => ({ kind: trMonthName(ym), num: s0, rows: catRows('spesa'), rowsTitle: 'Dove sono andati', say: 'Tutto quello che hai speso in questo mese. I trasferimenti tra i tuoi conti non contano.' }) },
     { l: 'Saldo del mese', v: seur(e - s0), s: e - s0 >= 0 ? 'hai messo da parte' : 'hai speso più di quanto hai guadagnato', x: () => ({ kind: trMonthName(ym), num: e - s0, fmt: seur, say: 'Guadagni meno spese del mese: se è positivo, sei in avanzo.' }) }]));
   const L = by.get(sel) || [];
-  cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : (planned.has(sel) ? null : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.')), (planned.get(sel) || []).map(({ r, k }) => h('div', { class: 'tr-item tr-plan' }, h('div', { class: 'tr-it' }, h('b', null, trRecNote(r, k)), h('span', { class: 'muted' }, 'Programmata · ' + accName(r.accId) + ' · il conto scende questo giorno')), h('div', { class: 'tr-am ' + (r.kind === 'entrata' ? 'in' : r.kind === 'spesa' ? 'out' : 'tf') }, (r.kind === 'entrata' ? '+' : r.kind === 'spesa' ? '−' : '') + eur(r.amount, true)))), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
+  cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : (planned.has(sel) ? null : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.')), (planned.get(sel) || []).map(({ r, k }) => h('div', { class: 'tr-item tr-plan' }, h('div', { class: 'tr-it' }, h('b', null, trRecNote(r, k)), h('span', { class: 'muted' }, h('span', { class: 'tr-pill' }, 'Programmata'), accName(r.accId) + ' · il conto scende questo giorno')), h('div', { class: 'tr-am ' + (r.kind === 'entrata' ? 'in' : r.kind === 'spesa' ? 'out' : 'tf') }, (r.kind === 'entrata' ? '+' : r.kind === 'spesa' ? '−' : '') + eur(r.amount, true)))), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
   el.append(cal); return el;
 }
 /* ---------- statistiche ---------- */
@@ -4538,7 +4573,7 @@ const LAYOUT = () => (S && S.settings && S.settings.layout) || 'revolut';       
 const RV_TONE = () => (S && S.settings && S.settings.rvTone) || 'scuro';          // tonalita' dello stile Revolut: nero, scuro (predefinita) o grafite (un po' piu' chiara)
 const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'analisi'];
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
-const APP_VER = '13/11/2026 · v25 (altri loghi ETF)';
+const APP_VER = '13/11/2026 · v27 (spese: niente piu perdite tra dispositivi, recupero, ricorrenti)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -6007,7 +6042,20 @@ function planDueAll() {          // scadute o di oggi e non ancora registrate ne
 }
 /* ---- acquisti programmati: l'app prepara la modifica e chiede "e' stato preso davvero?" (Si' = la registra, No = la salta) ---- */
 const priceOn = (i, d) => { const x = (i.hist || []).filter(z => z.d <= d && z.p > 0).sort((a, b) => a.d < b.d ? 1 : -1)[0]; return x ? x.p : i.price; };
-function planProposal(p, d, amt) {          // un PAC puo' avere piu' strumenti (p.parts): un solo spostamento di soldi e tanti acquisti
+function planProposal(p, d, amt) {          // il trasferimento (o il versamento) copre SOLO quello che manca: se sul conto c'e' gia' la liquidita', non si sposta niente
+  const r = planProposalRaw(p, d, amt); if (r.err || !r.ops || p.kind !== 'acquisto') return r;
+  const out = []; let note = '';
+  for (const o of r.ops) {
+    const toAcc = o.kind === 'trasferimento' ? o.toId : (o.kind === 'versamento' && o.fromCash ? o.accId : '');
+    if (!toAcc) { out.push(o); continue; }
+    const X = S.accounts.find(a => a.id === toAcc), cash = X ? Math.max(0, accCash(X)) : 0, need = o.amount, miss = Math.max(0, Math.ceil((need - cash) * 100 - 1e-6) / 100);
+    if (miss <= 0.004) { note = ' (con la liquidità del conto: ' + eur(cash, true) + ' disponibili, nessun trasferimento)'; continue; }
+    out.push(Object.assign({}, o, { amount: miss })); const src = o.kind === 'trasferimento' ? accName(o.accId) : 'fuori';
+    note = cash > 0.004 ? ' (usa ' + eur(cash, true) + ' di liquidità e ne sposto ' + eur(miss, true) + ' da ' + src + ')' : ' (' + (o.kind === 'trasferimento' ? 'i soldi partono da ' + src : 'soldi che arrivano da fuori') + ')';
+  }
+  return { ops: out, text: r.text.replace(/ \((i soldi partono da .*|soldi che arrivano da fuori|con la liquidità del conto)\)$/, '') + note };
+}
+function planProposalRaw(p, d, amt) {          // un PAC puo' avere piu' strumenti (p.parts): un solo spostamento di soldi e tanti acquisti
   if (!(p.parts && p.parts.length)) return planProposalOne(p, d, amt);
   const k = amt > 0 ? amt / p.amount : 1, subs = p.parts.map(x => planProposalOne(Object.assign({}, p, { parts: null, instId: x.instId || '', instName: x.instName || '', instCode: x.instCode || '', instCcy: x.instCcy || '', instCls: x.instCls || '', amount: x.amount }), d, x.amount * k));
   const bad = subs.find(s => s.err); if (bad) return { err: bad.err };
@@ -6047,16 +6095,20 @@ function confirmDue(auto) {
   const due = planDueAll(); if (!due.length) { if (!auto) alert('Nessun acquisto programmato da confermare.'); return; }
   const dlg = h('dialog', { class: 'wide duedlg' }), shut = () => { if (dlg.open) dlg.close(); dlg.remove(); render(); }, head = h('p', { class: 'muted' }), list = h('div', { class: 'duelist' });
   const left = () => { const n = list.querySelectorAll('.due:not(.ok):not(.no)').length; head.textContent = n ? 'Ho preparato ' + pl(n, 'modifica', 'modifiche') + '. Controlla l\'importo e dimmi se l\'acquisto è stato preso davvero: Sì lo registro, No lo salto.' : 'Fatto: niente altro da confermare.'; };
-  const row = ({ p, d }) => {
-    const amt = h('input', { type: 'number', step: 'any', inputmode: 'decimal', value: p.amount, 'aria-label': 'Importo in euro' }), info = h('div', { class: 'due-what' }), msg = h('div', { class: 'err' });
-    const upd = () => { const pr = planProposal(p, d, parseFloat(amt.value)); info.textContent = pr.err ? '⚠ ' + pr.err : pr.text; return pr; };
-    amt.addEventListener('input', upd);
+  const upds = [], refreshAll = () => upds.forEach(f => f());
+  const row = ({ p: p0, d }) => {
+    const cur = () => PL().find(x => x.id === p0.id) || p0;          // sempre il PAC dei dati di adesso (se i dati online sono stati ricaricati mentre la finestra era aperta, non si lavora su una copia vecchia)
+    const p = p0, amt = h('input', { type: 'number', step: 'any', inputmode: 'decimal', value: p.amount, 'aria-label': 'Importo in euro' }), info = h('div', { class: 'due-what' }), msg = h('div', { class: 'err' });
+    const isDone = () => (cur().done || []).includes(d);
+    const upd = () => { if (isDone()) { info.textContent = 'Già registrato'; return { err: 'Già registrato.' }; } const pr = planProposal(cur(), d, parseFloat(amt.value)); info.textContent = pr.err ? '⚠ ' + pr.err : pr.text; return pr; };
+    amt.addEventListener('input', upd); upds.push(() => { if (el.isConnected && !el.classList.contains('ok') && !el.classList.contains('no')) upd(); });
+    const saveFast = () => { touch(); clearTimeout(saveTimer); save(false); clSoon(0); };          // salva SUBITO (non dopo mezzo secondo): se esci dall'app in fretta la conferma non si perde
     const el = h('div', { class: 'due' }, h('div', { class: 'due-h' }, h('b', null, p.label), h('span', { class: 'muted' }, fmtDate(d) + ' · ' + accName(p.accId))), info,
       h('label', { class: 'due-amt' }, h('span', null, 'Importo (€)'), amt), msg,
       h('div', { class: 'due-acts' },
-        btn('Sì, è stato preso', () => { const pr = upd(); if (pr.err) { msg.textContent = pr.err; return; } const m = applyProposal(pr); if (m) { msg.textContent = m; return; } (p.done = p.done || []).push(d); touch(); el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Registrato: ' + pr.text)); left(); }, 'pri'),
-        btn('No, non è stato preso', () => { (p.done = p.done || []).push(d); (p.skipped = p.skipped || []).push(d); touch(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + p.label + ' del ' + fmtDate(d))); left(); }),
-        btn('Correggi a mano…', () => { shut(); registerDue(p, d); }, 'sm')));
+        btn('Sì, è stato preso', () => { if (isDone()) { msg.textContent = 'Questo acquisto risulta già registrato.'; el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Già registrato: ' + p.label + ' del ' + fmtDate(d))); left(); return; } const pr = upd(); if (pr.err) { msg.textContent = pr.err; return; } const m = applyProposal(pr); if (m) { msg.textContent = m; return; } const q = cur(); (q.done = q.done || []).push(d); saveFast(); el.classList.add('ok'); el.replaceChildren(h('div', { class: 'due-done' }, '✓ Registrato: ' + pr.text)); left(); refreshAll(); }, 'pri'),
+        btn('No, non è stato preso', () => { const q = cur(); if (!(q.done || []).includes(d)) { (q.done = q.done || []).push(d); (q.skipped = q.skipped || []).push(d); } saveFast(); el.classList.add('no'); el.replaceChildren(h('div', { class: 'due-done' }, '✗ Saltato: ' + p.label + ' del ' + fmtDate(d))); left(); }),
+        btn('Correggi a mano…', () => { shut(); registerDue(cur(), d); }, 'sm')));
     upd(); return el;
   };
   due.forEach(x => list.append(row(x))); left();
