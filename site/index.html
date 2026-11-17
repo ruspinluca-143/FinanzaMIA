@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-IauElaEJljmROOJDd+zqz2qhIp5W8jS7uN5KNWQF5P4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hSl7rUmTiiovmrSBjrjTxdIb6apBbsMZz3LFHxNwA/I='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4822,7 +4822,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v44 (doppioni uniti: Chiedi AI, Budget, Plusvalenze)';
+const APP_VER = '13/11/2026 · v45 (Altro in due blocchi: sezioni e strumenti)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5207,15 +5207,16 @@ function tabPlusvalenze() {
 }
 function tabAltro() {
   const el = h('div', { class: 'rv-menu' }), D = DEMO;
-  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, plusvalenze, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
-  const more = [!D ? ['Aggiorna i prezzi', 'prezzi di oggi di titoli, ETF e crypto', () => { ONLINE ? pricesOnline() : pickPrices(); }, ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4']] : null, !D ? ['Da screenshot', 'leggi un\'operazione da una foto con l\'AI', () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza. Vuoi andarci?')) rvGo('dati')(); }, ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z']] : null, !D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean);
-  const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' });
+  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, plusvalenze, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')]];
+  const tech = [['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')], ...[!D ? ['Aggiorna i prezzi', 'prezzi di oggi di titoli, ETF e crypto', () => { ONLINE ? pricesOnline() : pickPrices(); }, ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4']] : null, !D ? ['Da screenshot', 'leggi un\'operazione da una foto con l\'AI', () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza. Vuoi andarci?')) rvGo('dati')(); }, ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z']] : null, !D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean)];
+  const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' }), box2 = h('section', { class: 'card rv' });
   const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), hit = t => toks.every(w => normT(t).includes(w));
-    const rows = [...ITEMS.filter(i => hit(i[1] + ' ' + i[2])).map(i => rvRow(rvSvg(ICONS[i[0]] || ICONS.altro), i[1], i[2], '›', '', i[3])), ...more.filter(i => hit(i[0] + ' ' + i[1])).map(i => rvRow(rvSvg(i[3]), i[0], i[1], '›', '', i[2]))];
-    box.replaceChildren(...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nessuna sezione corrisponde.')]));
+    const rows = ITEMS.filter(i => hit(i[1] + ' ' + i[2])).map(i => rvRow(rvSvg(ICONS[i[0]] || ICONS.altro), i[1], i[2], '›', '', i[3])), rows2 = tech.filter(i => hit(i[0] + ' ' + i[1])).map(i => i.length === 4 && typeof i[2] === 'function' ? rvRow(rvSvg(i[3]), i[0], i[1], '›', '', i[2]) : rvRow(rvSvg(ICONS[i[0]] || ICONS.altro), i[1], i[2], '›', '', i[3]));
+    box.replaceChildren(...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nessuna sezione corrisponde.')])); box.hidden = !rows.length; box2.replaceChildren(...rows2); box2.hidden = !rows2.length; sec1.hidden = !rows.length; sec2.hidden = !rows2.length;
     [...box.children].forEach(r => { const b = r.querySelector && r.querySelector('b'); if (b) r.dataset.sec = 'a:' + normT(b.textContent).replace(/\s+/g, '-'); }); applyOrder('altro', box); };
+  const sec1 = h('div', { class: 'rv-sec' }, 'Le tue sezioni'), sec2 = h('div', { class: 'rv-sec' }, 'Strumenti e impostazioni');
   q.addEventListener('input', draw); draw();
-  el.append(h('div', { class: 'rv-sec' }, 'Tutte le altre sezioni'), h('div', { class: 'cq-row' }, q), box);
+  el.append(h('div', { class: 'cq-row' }, q), sec1, box, sec2, box2);
   return el;
 }
 function tabPanoramica() {
