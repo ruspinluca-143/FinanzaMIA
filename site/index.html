@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-eCm3j1e52BpnOR5Cws1BvINaI0atQan9Uf7ehMC1mPQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-NojlIN2rvFw/ODG3zTDYT1rayX6EzYWIl/03Sxgte/I='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1252,13 +1252,13 @@ async function clLogin(why) {          // chiede il codice; la prima volta in as
   catch (e) { CL.state = 'offline'; CL.err = String(e.message || e); clNote(); if (!S) alert('Il salvataggio online non risponde (' + CL.err + '). Controlla la connessione e premi di nuovo Entra.'); return; }
   const isNew = !(st && st.pronto);
   const fields = isNew ? [
-    { key: 'c1', label: 'Scegli il tuo codice', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'c2', hint: 'Almeno 8 caratteri. Te lo chiedo solo quando apri l\'app su un telefono o un browser nuovo. Salvalo nell\'app Password: senza codice i dati online non si aprono.' },
+    { key: 'c1', label: 'Scegli il tuo codice', type: 'password', req: true, ac: 'new-password', gen: suggestPass, mirror: 'c2', hint: 'Almeno 12 caratteri, meglio una frase lunga (usa Suggerisci). Te lo chiedo solo quando apri l\'app su un telefono o un browser nuovo. Salvalo nell\'app Password: senza codice i dati online non si aprono.' },
     { key: 'c2', label: 'Ripeti il codice', type: 'password', req: true, ac: 'new-password' }]
     : [{ key: 'c1', label: 'Il tuo codice', type: 'password', req: true, ac: 'current-password', hint: (why ? why + ' ' : '') + 'Lo stesso che hai scelto la prima volta (il telefono può proporlo da solo).' }];
   form(isNew ? 'Salvataggio online: scegli un codice' : 'Scrivi il tuo codice', fields, {}, async o => {
     const c = o.c1;
     if (isNew) {
-      if (c.length < 8) return 'Servono almeno 8 caratteri.'; if (c !== o.c2) return 'I due codici non coincidono.';
+      { const w = codeWeak(c); if (w) return w; } if (c !== o.c2) return 'I due codici non coincidono.';
       const r = await cloudRpc('finanze_crea', { p_codice: c });
       if (!r || !r.ok) return r && r.err === 'esiste' ? 'Nel frattempo un codice è già stato scelto: chiudi e premi di nuovo Entra.' : 'Non sono riuscito a salvarlo online.';
       CL.code = c; CL.ver = 0; await clNewKey(); CL.ready = true; clStore();
@@ -1355,7 +1355,34 @@ function codeAsk(msg) {          // riserva: il codice del salvataggio online
 }
 async function fidGate() { if (!FID.id || !FID_OK()) return true; if (await fidAsk()) return true; return CL.code ? codeAsk() : false; }
 function fidOff() { if (!confirm('Tolgo Face ID da questo dispositivo? L\'app tornerà ad aprirsi con un tocco su Entra.')) return; FID.id = ''; fidSave(); render(); }
-function fidCard() {
+/* ============ controllo sicurezza: una lista chiara di cosa protegge i tuoi dati e cosa manca ============ */
+const WEAK_CODES = ['password', 'password1', 'qwertyuiop', 'qwerty123', '123456789', '1234567890', '12345678', 'finanze', 'finanze123', 'iloveyou', 'abcdefgh', 'abcd1234', 'ciaociao', 'juventus', 'milan1899', 'inter1908'];
+function codeWeak(c) {          // un codice nuovo per il salvataggio online: abbastanza lungo e non banale (e' la sola difesa della copia online)
+  c = String(c || ''); const low = c.toLowerCase();
+  if (c.length < 12) return 'Servono almeno 12 caratteri (meglio una frase lunga: usa "Suggerisci").';
+  if (/^\d+$/.test(c)) return 'Solo numeri è troppo facile da indovinare: aggiungi lettere o usa "Suggerisci".';
+  if (new Set(low).size <= 4) return 'Troppi caratteri uguali: scegli un codice più vario.';
+  if (WEAK_CODES.some(w => low.includes(w))) return 'Contiene una parola troppo comune: scegli un altro codice.';
+  return '';
+}
+function securityItems() {
+  const online = CLOUD_ON() && CL.code, fid = !!FID.id, al = (S.settings || {}).autolock, bd = backupDays();
+  return [
+    { k: online ? 'ok' : 'bad', t: 'Salvataggio online', s: online ? 'attivo e cifrato con il tuo codice' : 'spento su questo dispositivo', say: 'I dati partono online già cifrati nel tuo dispositivo: chi li ruba dal server vede solo testo illeggibile. Senza il salvataggio online, se il telefono si rompe o il browser cancella i dati, perdi tutto.', act: online ? null : ['Attivalo', () => clLogin()] },
+    { k: fid ? 'ok' : 'warn', t: 'Face ID / impronta', s: fid ? 'attivo su questo dispositivo' : 'non attivo: chi prende il telefono sbloccato apre l\'app', say: 'È la serratura sulla porta: impedisce a chi prende in mano il telefono sbloccato di vedere i tuoi conti.', act: fid ? null : ['Attivalo', () => fidEnable()] },
+    { k: al > 0 && al <= 15 ? 'ok' : al > 0 ? 'warn' : 'bad', t: 'Blocco automatico', s: al > 0 ? 'dopo ' + al + ' minuti senza usare l\'app' : 'spento', say: 'L\'app si richiude da sola dopo un po\' che non la usi. Più il tempo è breve, meno rischi se la lasci aperta. Si cambia in Sicurezza e archivio, qui sotto.', act: ['Vai alle impostazioni', () => { closeTalks(); const e = [...document.querySelectorAll('label.fld span')].find(s => /Blocco automatico/.test(s.textContent)); if (e) e.scrollIntoView({ block: 'center' }); }] },
+    { k: bd < 30 ? 'ok' : online ? 'warn' : 'bad', t: 'Copia di sicurezza su file', s: bd < 30 ? 'fatta ' + (bd === 0 ? 'oggi' : bd + ' giorni fa') : 'da ' + bd + ' giorni' + (online ? ' (ma hai la copia online)' : ''), say: 'Un file tuo, fuori da qualsiasi servizio: l\'ultima difesa se il servizio online sparisse. Fanne una ogni mese.', act: bd < 30 ? null : ['Scarica una copia', () => (typeof navigator.canShare === 'function' ? shareCopy() : downloadCopy())] },
+    { k: NOPW ? 'warn' : 'ok', t: 'Passphrase dell\'archivio', s: NOPW ? 'nessuna: l\'archivio si apre da solo su questo dispositivo' : 'impostata', say: NOPW ? 'Senza passphrase l\'archivio sul dispositivo è cifrato con una frase nota: lo protegge il telefono (e Face ID, se attivo), non la cifratura. Va bene su un telefono tuo e bloccato; non su un computer condiviso.' : 'L\'archivio sul dispositivo si apre solo con la tua passphrase.', act: null },
+    { k: location.protocol === 'https:' ? 'ok' : 'warn', t: 'Collegamento sicuro', s: location.protocol === 'https:' ? 'https: la pagina arriva cifrata' : 'pagina aperta da file: va bene sul tuo PC', say: 'L\'app permette connessioni solo verso i servizi che usa (salvataggio online, prezzi, DOGsitterini) e non carica mai codice da altri siti.', act: null }
+  ];
+}
+function securityCard() {
+  if (DEMO || !S) return null; const L = securityItems(), bad = L.filter(x => x.k === 'bad').length, warn = L.filter(x => x.k === 'warn').length;
+  const el = h('section', { class: 'card' }, h('h2', null, 'Controllo sicurezza'), h('p', { class: 'muted' }, bad ? pl(bad, 'cosa importante manca', 'cose importanti mancano') + (warn ? ' e ' + pl(warn, 'è da migliorare', 'sono da migliorare') : '') + '. Tocca una riga per capire.' : warn ? 'Tutto l\'essenziale c\'è; ' + pl(warn, 'punto è da migliorare', 'punti sono da migliorare') + '.' : 'Tutto a posto.'));
+  for (const x of L) el.append(h('div', { class: 'tr-item tapme', role: 'button', tabindex: '0', onclick: e => { if (e.target.closest('button')) return; tapFx(e.currentTarget); talk({ kind: 'Sicurezza', title: x.t, value: x.k === 'ok' ? 'a posto' : x.k === 'warn' ? 'da migliorare' : 'manca', say: x.say + ' Ora: ' + x.s + '.', acts: x.act ? [x.act] : [] }); } },
+    h('span', { class: 'art-chip' + (x.k === 'ok' ? '' : ' bad'), style: x.k === 'ok' ? '' : x.k === 'warn' ? 'opacity:.85' : '' }, x.k === 'ok' ? '✓' : x.k === 'warn' ? '!' : '✕'), h('div', { class: 'tr-it' }, h('b', null, x.t), h('span', { class: 'muted' }, x.s)), x.act ? btn(x.act[0], x.act[1], 'sm') : null));
+  return el;
+}function fidCard() {
   if (DEMO) return null;
   const on = !!FID.id;
   return h('section', { class: 'card' }, h('h2', null, 'Face ID / impronta'),
@@ -4773,7 +4800,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v42 (calendario Cani da DOGsitterini)';
+const APP_VER = '13/11/2026 · v43 (controllo sicurezza e codici online piu forti)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5600,7 +5627,7 @@ function tabDati() {
     chk('amounts', 'Includi gli importi in euro (di base solo percentuali)'), chk('accNames', 'Includi i nomi dei conti (di base "Conto 1", "Conto 2"…)'), chk('instNames', 'Includi i nomi degli strumenti (servono per un\'analisi utile)'),
     h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
     h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
-  el.append(cloudCard() || '', fidCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
+  el.append(securityCard() || '', cloudCard() || '', fidCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
     h('ul', null, h('li', null, CLOUD_ON() ? 'Una sola connessione verso fuori: il salvataggio online (Supabase), che riceve soltanto la copia cifrata con il tuo codice. La policy del browser (CSP) vieta qualsiasi altro invio.' : 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
       DEMO ? null : h('li', null, 'Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) + (backupDays() ? ' (' + pl(backupDays(), 'giorno', 'giorni') + ' fa)' : ' (oggi)') : 'mai') + '. Se il browser cancellasse i dati del sito, quella copia è l\'unica cosa che ti salva.')),
     DEMO ? null : h('div', { class: 'row' },
