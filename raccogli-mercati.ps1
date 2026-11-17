@@ -61,7 +61,12 @@ $feeds = @(
   @('Italia', 'ANSA - Economia', 'https://www.ansa.it/sito/notizie/economia/economia_rss.xml'),
   @('Banche centrali', 'Federal Reserve', 'https://www.federalreserve.gov/feeds/press_all.xml'),
   @('Banche centrali', 'BCE', 'https://www.ecb.europa.eu/rss/press.html'),
-  @('Crypto', 'CoinDesk', 'https://www.coindesk.com/arc/outboundfeeds/rss')
+  @('Crypto', 'CoinDesk', 'https://www.coindesk.com/arc/outboundfeeds/rss'),
+  @('Video (YouTube, solo titoli)', 'YouTube - Graham Stephan', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ', 21),
+  @('Video (YouTube, solo titoli)', 'YouTube - Meet Kevin', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCUvvj5lwue7PspotMDjk5UA', 21),
+  @('Video (YouTube, solo titoli)', 'YouTube - Joseph Carlson', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCbta0n8i6Rljh0obO7HzG9A', 21),
+  @('Video (YouTube, solo titoli)', 'YouTube - The Plain Bagel', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCFCEuCsyWP0YkP3CZ3Mr01Q', 21),
+  @('Video (YouTube, solo titoli)', 'YouTube - Ben Felix', 'https://www.youtube.com/feeds/videos.xml?channel_id=UCDXTQ8nWmx_EhZ2v-kp7QxA', 21)
 )
 function Read-Feed($url, $days = 10) {          # $days: quanto vecchia puo' essere la notizia piu' recente (i blog di ricerca escono di rado)
   $x = (Get-Text $url).Trim()
