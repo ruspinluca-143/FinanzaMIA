@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-smPCXgLsrpk9dzqx3Rt1V3vh82XnJ+JiK81rQtV4pd8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-eCm3j1e52BpnOR5Cws1BvINaI0atQan9Uf7ehMC1mPQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4617,9 +4617,9 @@ function applyStoricoFile(text) {          // Data;Tipo;Conto;A conto;Categoria;
 /* ---------- la scheda ---------- */
 function tabTransazioni() {
   const v = UI.trv || 'cal', el = h('div');
-  el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['sta', 'Statistiche'], ['bud', 'Budget'], ['rec', 'Ricorrenti']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
+  el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['dog', 'Cani'], ['sta', 'Statistiche'], ['bud', 'Budget'], ['rec', 'Ricorrenti']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
   { const dd = trDueAll(); if (dd.length && v !== 'rec') el.append(h('div', { class: 'banner' }, h('span', null, pl(dd.length, 'spesa ricorrente da confermare', 'spese ricorrenti da confermare')), btn('Conferma', () => trConfirmDue(), 'pri sm'))); }
-  el.append(v === 'sta' ? trStats() : v === 'bud' ? trBudget() : v === 'rec' ? trRec() : trCal());
+  el.append(v === 'sta' ? trStats() : v === 'bud' ? trBudget() : v === 'rec' ? trRec() : v === 'dog' ? trDog() : trCal());
   return el;
 }
 function trItem(r, showDate) {          // una riga: che cosa, categoria e conto, importo (e Elimina se e' una transazione tua)
@@ -4658,7 +4658,49 @@ function trCal() {
   cal.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, trDayName(sel)), btn('+ Aggiungi', () => trWizard({ date: sel }), 'pri sm')), L.length ? L.map(r => trItem(r)) : (planned.has(sel) ? null : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.')), (planned.get(sel) || []).map(({ r, k }) => h('div', { class: 'tr-item tr-plan' }, txIcon(trrRow(r)), h('div', { class: 'tr-it' }, h('b', null, trRecNote(r, k)), h('span', { class: 'muted' }, h('span', { class: 'tr-pill' }, 'Programmata'), accName(r.accId) + ' · il conto scende questo giorno')), h('div', { class: 'tr-am ' + (r.kind === 'entrata' ? 'in' : r.kind === 'spesa' ? 'out' : 'tf') }, (r.kind === 'entrata' ? '+' : r.kind === 'spesa' ? '−' : '') + eur(r.amount, true)))), (TRH().length || TRX().length) ? null : h('p', { class: 'muted' }, 'Per caricare il tuo storico: Importa file → storico-transazioni.csv.')));
   el.append(cal); return el;
 }
-/* ---------- statistiche ---------- */
+/* ---------- calendario dei cani: i movimenti di DOGsitterini, SOLO lettura (non toccano i conti di Finanze) ---------- */
+const DOGS_MOV = {};
+const dogsOk = x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x.data || '')) && isFinite(+x.importo) && (x.tipo === 'entrata' || x.tipo === 'spesa');
+async function dogsMovLoad(ym, force) {
+  const c = dogsCfg(), cur = DOGS_MOV[ym]; if (!dogsReady() || (cur && (cur.busy || (!force && cur.rows && Date.now() - cur.at < 5 * 60000)))) return;
+  DOGS_MOV[ym] = { busy: true, at: Date.now(), rows: cur && cur.rows };
+  let res = { at: Date.now() };
+  try {
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 12000); let r;
+    try { r = await fetch(DOGS_HOST + '/api/siri-departure?azione=movimenti&mese=' + encodeURIComponent(ym), { headers: { 'x-finanze-secret': c.secret }, cache: 'no-store', signal: ac.signal }); } finally { clearTimeout(to); }
+    if (r.status === 401) res.err = 'Il segreto non è giusto: ricontrollalo in Dati e sicurezza.';
+    else if (r.status === 400 || r.status === 404) res.err = 'DOGsitterini non ha ancora la funzione "movimenti": va aggiunta con il file dogsitterini-movimenti.js (vedi PARTI-DA-QUI).';
+    else if (!r.ok) res.err = 'DOGsitterini ha risposto con errore ' + r.status + '.';
+    else { const j = await r.json(); res.rows = (Array.isArray(j.movimenti) ? j.movimenti : []).filter(dogsOk).map(x => ({ d: x.data, k: x.tipo, amt: +x.importo, cat: String(x.categoria || '').slice(0, 40), note: String(x.nota || '').slice(0, 120), acc: String(x.conto || '').slice(0, 40) })); res.datiAl = j.datiAl || ''; }
+  } catch (e) { res.err = e && e.name === 'AbortError' ? 'DOGsitterini non risponde (tempo scaduto).' : 'Non riesco a collegarmi a DOGsitterini (rete?).'; }
+  DOGS_MOV[ym] = res; if (S && !LOCKED && UI.tab === 'transazioni' && UI.trv === 'dog' && (UI.trm || today().slice(0, 7)) === ym) render();
+}
+function trDog() {
+  const el = h('div'), today0 = today(), ym = UI.trm || today0.slice(0, 7), c = DOGS_MOV[ym];
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Calendario dei cani'), h('p', { class: 'muted' }, 'Entrate e spese che registri in DOGsitterini (affitto, cibo, cani…), mese per mese. Finanze le legge soltanto: non le copia nei tuoi conti e non cambia nessun saldo.')));
+  if (!dogsReady()) { el.append(h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Per vederlo serve il collegamento a DOGsitterini (il segreto e un conto da collegare).'), btn('Vai a Dati e sicurezza', () => { UI.tab = 'dati'; render(); window.scrollTo(0, 0); }, 'pri'))); return el; }
+  if (!c || (!c.rows && !c.err)) dogsMovLoad(ym);
+  el.append(h('div', { class: 'tr-nav' }, btn('‹', () => { UI.trm = trShiftMonth(ym, -1); UI.trd = null; render(); }, 'sm'), h('b', null, trMonthName(ym)), h('span', { class: 'row', style: 'gap:6px;margin:0' }, ym !== today0.slice(0, 7) ? btn('Oggi', () => { UI.trm = today0.slice(0, 7); render(); }, 'sm') : null, btn('↻', () => dogsMovLoad(ym, true), 'sm'), btn('›', () => { UI.trm = trShiftMonth(ym, 1); UI.trd = null; render(); }, 'sm'))));
+  if (c && c.err) { el.append(h('section', { class: 'card' }, h('p', { class: 'err' }, c.err))); return el; }
+  if (!c || !c.rows) { el.append(h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Chiedo i movimenti a DOGsitterini…'))); return el; }
+  const rows = c.rows.filter(r => r.d.slice(0, 7) === ym), by = new Map(); for (const r of rows) { if (!by.has(r.d)) by.set(r.d, []); by.get(r.d).push(r); }
+  const sel = UI.trd && UI.trd.slice(0, 7) === ym ? UI.trd : (ym === today0.slice(0, 7) ? today0 : ym + '-01');
+  const [y, m] = [+ym.slice(0, 4), +ym.slice(5, 7)], dim = new Date(y, m, 0).getDate(), off = (new Date(y, m - 1, 1).getDay() + 6) % 7, grid = h('div', { class: 'tr-cal' });
+  ['L', 'M', 'M', 'G', 'V', 'S', 'D'].forEach(x => grid.append(h('div', { class: 'tr-wd' }, x)));
+  for (let i = 0; i < off; i++) grid.append(h('div', { class: 'tr-day off' }));
+  for (let d = 1; d <= dim; d++) { const ds = ym + '-' + String(d).padStart(2, '0'), L = by.get(ds) || [], sp = L.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0), has = k => L.some(r => r.k === k);
+    grid.append(h('button', { type: 'button', class: 'tr-day' + (ds === today0 ? ' today' : '') + (ds === sel ? ' sel' : ''), 'aria-label': trDayName(ds) + (L.length ? ', ' + pl(L.length, 'voce', 'voci') : ''), onclick: () => { UI.trd = ds; render(); } }, String(d), h('span', { class: 'tr-dots' }, has('spesa') ? h('i', { class: 'tr-d-s' }) : null, has('entrata') ? h('i', { class: 'tr-d-e' }) : null), sp > 0 ? h('small', null, nf0.format(sp)) : null)); }
+  el.append(h('section', { class: 'card' }, grid));
+  const e = rows.filter(r => r.k === 'entrata').reduce((t, r) => t + r.amt, 0), s0 = rows.filter(r => r.k === 'spesa').reduce((t, r) => t + r.amt, 0);
+  const catRows = k => { const mp = new Map(); for (const r of rows) if (r.k === k) mp.set(r.cat || 'Senza categoria', (mp.get(r.cat || 'Senza categoria') || 0) + r.amt); return [...mp.entries()].sort((a, b) => b[1] - a[1]); };
+  el.append(tiles([{ l: 'Entrate dei cani', v: eur(e), s: pl(rows.filter(r => r.k === 'entrata').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: e, rows: catRows('entrata'), rowsTitle: 'Da dove arrivano', say: 'Quello che DOGsitterini ha registrato come incassato in questo mese.' }) },
+    { l: 'Spese dei cani', v: eur(s0), s: pl(rows.filter(r => r.k === 'spesa').length, 'voce', 'voci'), x: () => ({ kind: trMonthName(ym), num: s0, rows: catRows('spesa'), rowsTitle: 'Affitto, cibo, bollette…', say: 'Le spese che paghi con DOGsitterini, divise per categoria (affitto compreso).' }) },
+    { l: 'Resta', v: seur(e - s0), s: e - s0 >= 0 ? 'il mese è in positivo' : 'le spese superano le entrate', x: () => ({ kind: trMonthName(ym), num: e - s0, fmt: seur, say: 'Entrate meno spese di DOGsitterini in questo mese.' }) }]));
+  const L = by.get(sel) || [];
+  el.append(h('section', { class: 'card' }, h('h2', null, trDayName(sel)), L.length ? L.map(r => h('div', { class: 'tr-item' }, h('div', { class: 'tr-it' }, h('b', null, r.note || r.cat || (r.k === 'entrata' ? 'Entrata' : 'Spesa')), h('span', { class: 'muted' }, [r.cat, r.acc].filter(Boolean).join(' · '))), h('div', { class: 'tr-am ' + (r.k === 'entrata' ? 'in' : 'out') }, (r.k === 'entrata' ? '+' : '−') + eur(r.amt, true)))) : h('p', { class: 'muted' }, 'Niente registrato in questo giorno.')));
+  if (c.datiAl) el.append(h('p', { class: 'muted' }, 'Dati di DOGsitterini salvati il ' + dogsTime(c.datiAl) + '.'));
+  return el;
+}/* ---------- statistiche ---------- */
 function trStats() {
   const el = h('div'), now = today(), ym = UI.trm || now.slice(0, 7), P = UI.trp || 'mese', inclH = UI.trh !== false, ex = (S.settings.trEx = S.settings.trEx || []);
   let from, to, title;
@@ -4731,7 +4773,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v41 (schede unite: Mercati e idee, Portafoglio, Grafici in Analisi)';
+const APP_VER = '13/11/2026 · v42 (calendario Cani da DOGsitterini)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
