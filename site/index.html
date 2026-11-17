@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-NojlIN2rvFw/ODG3zTDYT1rayX6EzYWIl/03Sxgte/I='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-IauElaEJljmROOJDd+zqz2qhIp5W8jS7uN5KNWQF5P4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3100,7 +3100,7 @@ function alerts() {
 const AN_SUBS = [['andamento', 'Andamento'], ['confronto', 'Confronto'], ['costi', 'Costi'], ['tasse', 'Tasse e dichiarazione'], ['rischio', 'Rischio'], ['obiettivo', 'Obiettivo'], ['esposizione', 'Esposizione'], ['sovrapposizioni', 'Sovrapposizioni'], ['affidabilita', 'Affidabilità'], ['rendimento', 'Rendimento vero'], ['cedole', 'Cedole'], ['vendi', 'Se vendo'], ['pagella', 'Pagella AI'], ['ribilancia', 'Nuovi soldi'], ['regole', 'Regole'], ['diario', 'Diario'], ['scenari', 'Scenari']];
 function tabAnalisi() {
   if (!S.accounts.length) return h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Aggiungi conti e posizioni per vedere le analisi.'));
-  const sub = UI.sub, fn = { andamento: anAndamento, confronto: anConfronto, costi: anCosti, tasse: anTasse, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, sovrapposizioni: anSovrapposizioni, affidabilita: anAffidabilita, rendimento: anRendimento, cedole: anCedole, vendi: anVendi, pagella: anPagella, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari, grafici: tabGrafici }[sub];
+  const sub = UI.sub, fn = { andamento: anAndamento, confronto: anConfronto, costi: anCosti, tasse: anTasse, rischio: anRischio, obiettivo: anObiettivo, esposizione: anEsposizione, sovrapposizioni: anSovrapposizioni, affidabilita: anAffidabilita, rendimento: anRendimento, cedole: anCedole, vendi: anVendi, pagella: anPagella, ribilancia: anRibilancia, regole: anRegole, diario: anDiario, scenari: tabScenari, grafici: tabGrafici, plusvalenze: tabPlusvalenze }[sub];
   if (!fn) return anHub();
   const grp = AN_GROUPS.find(g => g.items.some(x => x[0] === sub)), me = grp.items.find(x => x[0] === sub);
   return h('div', null, h('section', { class: 'card an-nav' }, h('div', { class: 'row' }, btn('← Analisi', () => { UI.sub = null; render(); window.scrollTo(0, 0); }), h('h2', { class: 'grow', style: 'margin:0' }, me[1])),
@@ -3111,7 +3111,7 @@ const AN_GROUPS = [
   { k: 'c0', l: 'Come sto andando', d: 'Quanto guadagni e come ti confronti', items: [['grafici', 'Grafici', 'Andamento, torte e confronti con tocco per leggere i numeri', ['M4 19l5-6 4 3 7-9', 'M4 5v14h16']], ['andamento', 'Andamento', 'Come è cambiato il valore giorno dopo giorno', ['M4 19l5-6 4 3 7-9', 'M15 7h5v5']], ['confronto', 'Confronto', 'Sei meglio di un semplice ETF mondo?', ['M5 19V9', 'M12 19V5', 'M19 19v-7']], ['rendimento', 'Rendimento vero', 'Da dove viene davvero il guadagno', ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M9 12l2 2 4-4']], ['pagella', 'Pagella AI', 'Le previsioni dell\'AI avevano ragione?', ['M6 4h12v16H6z', 'M9 9h6', 'M9 13h6', 'M9 17h3']]] },
   { k: 'c1', l: 'Rischi e obiettivi', d: 'Cosa può andare storto e dove vuoi arrivare', items: [['rischio', 'Rischio', 'Quanto puoi perdere nei momenti brutti', ['M12 3l9 16H3z', 'M12 10v4', 'M12 17h.01']], ['obiettivo', 'Obiettivo', 'Probabilità di arrivare alla cifra che vuoi', ['M12 21a9 9 0 100-18 9 9 0 000 18z', 'M12 16.5a4.5 4.5 0 100-9 4.5 4.5 0 000 9z', 'M12 12h.01']], ['scenari', 'Scenari', 'E se i mercati scendessero del 20%?', ['M3 17l5-5 4 3 8-9', 'M3 21h18']], ['regole', 'Regole', 'Cosa non rispetta le tue regole', ['M5 4h14v16H5z', 'M8 9l2 2 3-3', 'M8 16h8']]] },
   { k: 'c2', l: 'Dove sono i soldi', d: 'Come sei diviso e dove mettere i prossimi', items: [['esposizione', 'Esposizione', 'Per classe, area e valuta', ['M12 3a9 9 0 109 9h-9z', 'M12 3v9']], ['sovrapposizioni', 'Sovrapposizioni', 'Quanta America hai davvero, ETF compresi', ['M9 9a5 5 0 100 10 5 5 0 000-10z', 'M15 5a5 5 0 100 10 5 5 0 000-10z']], ['ribilancia', 'Nuovi soldi', 'Dove mettere i prossimi senza vendere', ['M12 5v14', 'M5 12h14']]] },
-  { k: 'c3', l: 'Costi, tasse e incassi', d: 'Quanto ti costa e quanto ti rende', items: [['costi', 'Costi', 'Quanto ti costano ogni anno ETF e fondi', ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z']], ['tasse', 'Tasse', 'Bollo, IVAFE, quadro RW', ['M6 3h12v18l-3-2-3 2-3-2-3 2z', 'M9 8h6', 'M9 12h6']], ['cedole', 'Cedole', 'Cosa incassi nei prossimi 12 mesi', ['M4 7h16', 'M4 12h16', 'M4 17h10']], ['vendi', 'Se vendo', 'Il netto dopo le tasse', ['M10 4H5v16h5', 'M15 8l4 4-4 4', 'M19 12H9']]] },
+  { k: 'c3', l: 'Costi, tasse e incassi', d: 'Quanto ti costa e quanto ti rende', items: [['plusvalenze', 'Plusvalenze', 'Cosa hai venduto: dove hai guadagnato e dove hai perso', ['M4 19l5-6 4 3 7-9', 'M15 7h5v5', 'M4 21h16']], ['costi', 'Costi', 'Quanto ti costano ogni anno ETF e fondi', ['M3 7h18v10H3z', 'M12 9.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z']], ['tasse', 'Tasse', 'Bollo, IVAFE, quadro RW', ['M6 3h12v18l-3-2-3 2-3-2-3 2z', 'M9 8h6', 'M9 12h6']], ['cedole', 'Cedole', 'Cosa incassi nei prossimi 12 mesi', ['M4 7h16', 'M4 12h16', 'M4 17h10']], ['vendi', 'Se vendo', 'Il netto dopo le tasse', ['M10 4H5v16h5', 'M15 8l4 4-4 4', 'M19 12H9']]] },
   { k: 'c4', l: 'Controlli', d: 'Quanto fidarti dei numeri', items: [['affidabilita', 'Affidabilità', 'Quanto sono sicuri i dati e il confronto col broker', ['M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z', 'M9 12l2 2 4-4']], ['diario', 'Diario', 'Le tue note e le decisioni prese', ['M6 4h12v16H6z', 'M9 8h6', 'M9 12h6']]] }
 ];
 function anHub() {
@@ -3654,6 +3654,26 @@ function dataContext() {          // cio' che si manda all'AI: totali e pesi, MA
   const g = (S.goals || []).map(o => ({ obiettivo: o.name || o.title || 'obiettivo' })), pm = PL().reduce((t, p) => t + planMonthly(p), 0), mv = todayMovers().slice(0, 5).map(r => ({ titolo: r.i.name, oggi_eur: Math.round(r.d) }));
   return { patrimonio_eur: Math.round(tot), versato_eur: Math.round(tp.contrib || 0), guadagno_eur: fin(tp.pnl) ? Math.round(tp.pnl) : null, guadagno_pct: fin(tp.pnlPct) ? Math.round(tp.pnlPct * 1000) / 10 : null, per_classe: cls, per_area: area, titoli_principali: pos, pac_al_mese_eur: Math.round(pm), obiettivi: g, cosa_ha_mosso_oggi: mv, oggi: today() };
 }
+function aiCopyCard() {          // riepilogo anonimo del portafoglio da copiare e incollare in un assistente AI
+  const el = h('div');
+  const O = UI.sum, ta = h('textarea', { rows: 14, 'aria-label': 'Riepilogo per l\'AI' }), regen = () => { ta.value = buildSummary(O); };
+  const chk = (key, label) => h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: O[key], onchange: e => { O[key] = e.target.checked; regen(); } }), h('span', null, label));
+  const qi = h('input', { type: 'text', value: O.q, placeholder: 'es. Il mio portafoglio è troppo concentrato?', style: 'width:100%', oninput: e => { O.q = e.target.value; regen(); } });
+  const cp = h('span', { class: 'muted' }, ''); regen();
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI (senza collegamenti)'), h('p', { class: 'muted' }, 'L\'app non si collega a nessuna AI. Prepara un riepilogo anonimizzato: leggilo, correggilo se vuoi, copialo e incollalo tu in una chat di un assistente AI qualsiasi.'),
+    chk('amounts', 'Includi gli importi in euro (di base solo percentuali)'), chk('accNames', 'Includi i nomi dei conti (di base "Conto 1", "Conto 2"…)'), chk('instNames', 'Includi i nomi degli strumenti (servono per un\'analisi utile)'),
+    h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
+    h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+  return el;
+}
+function aiMarketCard() {          // dati di mercato di oggi + riepilogo, da copiare
+  const el = h('div');
+  const cp = h('span', { class: 'muted' });
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Analisi con un assistente AI (facoltativa)'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat di un assistente AI qualsiasi e ti risponde con un\'analisi.'),
+    h('label', { class: 'fld' }, h('span', null, 'Cosa vuoi chiedergli'), h('select', { 'aria-label': 'Domanda per l\'assistente', onchange: e => { UI.claudeQ = e.target.value; } }, Object.entries(CLAUDE_Q).map(([k, v]) => h('option', { value: k, selected: (UI.claudeQ || 'oggi') === k }, v[0])))),
+    h('div', { class: 'row' }, btn('Copia il testo per l\'assistente', async () => { const txt = marketForClaude(UI.claudeQ || 'oggi'); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+  return el;
+}
 function tabChiedi() {
   const key = (S.settings || {}).aiKey, el = h('div'), ex = ['Quanto pesa l\'America nel mio patrimonio?', 'Sono troppo concentrato su un titolo?', 'Come sto andando rispetto a quanto ho versato?', 'Cosa ha fatto salire o scendere il mio patrimonio oggi?'];
   const box = h('textarea', { class: 'wz-ask', rows: 3, placeholder: 'Scrivi una domanda sui tuoi soldi', 'aria-label': 'La tua domanda', value: UI.chQ || '', oninput: e => { UI.chQ = e.target.value; } }, UI.chQ || '');
@@ -3665,6 +3685,7 @@ function tabChiedi() {
         try { const j = await aiAsk([{ text: JSON.stringify({ domanda: q, dati: dataContext() }) }], 'Sei un assistente prudente che parla a un piccolo investitore italiano. Rispondi alla domanda usando SOLO i dati ricevuti, in italiano semplice, senza inventare numeri. Se i dati non bastano, dillo. Non dare consigli personalizzati di acquisto o vendita. Rispondi SOLO con JSON: {"risposta":"2-5 frasi","numeri":[{"etichetta":"","valore":""}],"avvertenza":"una frase breve"}.'); UI.chA = { q, r: String(j.risposta || ''), n: asArr(j.numeri).slice(0, 6), a: String(j.avvertenza || '') }; }
         catch (e) { alert(String(e.message || e)); } UI.chBusy = false; render(); }, 'pri')] : btn('Vai a Dati e sicurezza', () => { UI.tab = 'dati'; render(); window.scrollTo(0, 0); }, 'pri')));
   if (ans) el.append(h('section', { class: 'card' }, h('h3', null, ans.q), h('p', null, ans.r), ans.n.length ? tiles(ans.n.map(x => ({ l: String(x.etichetta || ''), v: String(x.valore || '') }))) : null, ans.a ? h('p', { class: 'muted' }, ans.a) : null));
+  el.append(aiCopyCard()); if (DATA.mercati) el.append(aiMarketCard());          // le due vie 'copia e incolla' stanno qui, non piu' sparse
   return el;
 }
 function tabConsigliAnalisi() {
@@ -4110,10 +4131,6 @@ function tabMercati() {
   el.append(h('section', { class: 'card' }, h('h2', null, 'Titoli dalle fonti'), groups.map(gp => h('div', null, h('h4', null, gp), ok.filter(x => x.gruppo === gp).map(src => h('details', { class: 'src' }, h('summary', null, src.nome, h('small', null, ' · ' + src.voci.length + ' titoli')), h('ul', { class: 'news' }, src.voci.map(v => h('li', null, linkEl(v.link, v.titolo), v.data ? h('small', null, ' ' + fmtDate(v.data.slice(0, 10))) : null))))))),
     ko.length ? h('p', { class: 'muted' }, 'Non disponibili adesso: ' + ko.map(x => x.nome).join(', ') + '.') : null,
     h('p', { class: 'muted' }, 'Dalle testate l\'app mostra solo titolo e collegamento: gli articoli si leggono sui loro siti (alcuni sono a pagamento).')));
-  const cp = h('span', { class: 'muted' });
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Analisi con un assistente AI (facoltativa)'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat di un assistente AI qualsiasi e ti risponde con un\'analisi.'),
-    h('label', { class: 'fld' }, h('span', null, 'Cosa vuoi chiedergli'), h('select', { 'aria-label': 'Domanda per l\'assistente', onchange: e => { UI.claudeQ = e.target.value; } }, Object.entries(CLAUDE_Q).map(([k, v]) => h('option', { value: k, selected: (UI.claudeQ || 'oggi') === k }, v[0])))),
-    h('div', { class: 'row' }, btn('Copia il testo per l\'assistente', async () => { const txt = marketForClaude(UI.claudeQ || 'oggi'); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
   return el;
 }
 
@@ -4194,7 +4211,7 @@ function syncLayout() {          // una volta sola: chi usava lo "stile Revolut"
   if (LAYOUT() !== 'classico') { const id = { nero: 'rv-nero', grafite: 'rv-grafite' }[RV_TONE()] || 'rv-scuro'; S.settings.theme = id; try { applyTheme(id); } catch (x) { /* tema di base */ } touch(); }
 }
 function render() {
-  { const mv = { mercati: ['consigli', { csub: 'mercato' }], grandi: ['consigli', { csub: 'grandi' }], strumenti: ['allocazione', { asub: 'strumenti' }], grafici: ['analisi', { sub: 'grafici' }] }[UI.tab]; if (mv) { UI.tab = mv[0]; Object.assign(UI, mv[1]); } }          // le schede unite portano alla loro nuova casa
+  { const mv = { mercati: ['consigli', { csub: 'mercato' }], grandi: ['consigli', { csub: 'grandi' }], strumenti: ['allocazione', { asub: 'strumenti' }], grafici: ['analisi', { sub: 'grafici' }], plusvalenze: ['analisi', { sub: 'plusvalenze' }] }[UI.tab]; if (mv) { UI.tab = mv[0]; Object.assign(UI, mv[1]); } }          // le schede unite portano alla loro nuova casa
   endReorder(); syncLayout();
   const y = window.scrollY;
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
@@ -4602,6 +4619,11 @@ const trMonthsBack = n => { const c = today().slice(0, 7), out = []; for (let i 
 function trIncomeAuto() { const by = new Map(trMonthsBack(12).map(m => [m, 0])); for (const r of trAll()) if (r.k === 'entrata' && by.has(r.d.slice(0, 7))) by.set(r.d.slice(0, 7), by.get(r.d.slice(0, 7)) + r.amt); const v = [...by.values()].filter(x => x > 0).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : 0; }          // la mediana: un mese eccezionale non sposta la cifra
 const trIncome = () => TRB().income > 0 ? TRB().income : trIncomeAuto();
 const trPf = v => String(Math.round(v * 10) / 10).replace('.', ',');
+function trBudgetAll() {          // un solo Budget: le percentuali sul guadagno + le entrate e spese programmate che alimentano le previsioni (prima stavano in Piano)
+  const el = h('div'); el.append(trBudget());
+  const det = h('details', { class: 'more', ontoggle: () => { UI.pbOpen = det.open; } }, h('summary', null, 'Entrate e spese programmate (usate nelle previsioni)'), h('p', { class: 'muted' }, 'Stipendio, affitto, spese annuali e trimestrali: sono quelle che l\'app usa per prevedere come cresce il patrimonio.'), piBudget()); if (UI.pbOpen) det.open = true;
+  el.append(det); return el;
+}
 function trBudget() {
   const el = h('div'), B = TRB(), now = today().slice(0, 7), ym = UI.trm || now, inc = trIncome(), exc = (S.settings.trEx || []);
   const month = trAll().filter(r => r.k === 'spesa' && r.d.slice(0, 7) === ym), spent = new Map(); for (const r of month) spent.set(r.cat || 'Senza categoria', (spent.get(r.cat || 'Senza categoria') || 0) + r.amt);
@@ -4646,7 +4668,7 @@ function tabTransazioni() {
   const v = UI.trv || 'cal', el = h('div');
   el.append(h('div', { class: 'tr-top' }, h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Transazioni' }, [['cal', 'Calendario'], ['dog', 'Cani'], ['sta', 'Statistiche'], ['bud', 'Budget'], ['rec', 'Ricorrenti']].map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': v === k ? 'true' : 'false', onclick: () => { UI.trv = k; render(); window.scrollTo(0, 0); } }, l))), btn('+ Aggiungi', () => trWizard({ date: UI.trd || today() }), 'pri')));
   { const dd = trDueAll(); if (dd.length && v !== 'rec') el.append(h('div', { class: 'banner' }, h('span', null, pl(dd.length, 'spesa ricorrente da confermare', 'spese ricorrenti da confermare')), btn('Conferma', () => trConfirmDue(), 'pri sm'))); }
-  el.append(v === 'sta' ? trStats() : v === 'bud' ? trBudget() : v === 'rec' ? trRec() : v === 'dog' ? trDog() : trCal());
+  el.append(v === 'sta' ? trStats() : v === 'bud' ? trBudgetAll() : v === 'rec' ? trRec() : v === 'dog' ? trDog() : trCal());
   return el;
 }
 function trItem(r, showDate) {          // una riga: che cosa, categoria e conto, importo (e Elimina se e' una transazione tua)
@@ -4800,7 +4822,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v43 (controllo sicurezza e codici online piu forti)';
+const APP_VER = '13/11/2026 · v44 (doppioni uniti: Chiedi AI, Budget, Plusvalenze)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5185,7 +5207,7 @@ function tabPlusvalenze() {
 }
 function tabAltro() {
   const el = h('div', { class: 'rv-menu' }), D = DEMO;
-  const ITEMS = [['plusvalenze', 'Plusvalenze e minusvalenze', 'quello che hai venduto: dove hai guadagnato e dove hai perso', rvGo('plusvalenze')], ['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
+  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, plusvalenze, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')], ['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')]];
   const more = [!D ? ['Aggiorna i prezzi', 'prezzi di oggi di titoli, ETF e crypto', () => { ONLINE ? pricesOnline() : pickPrices(); }, ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4']] : null, !D ? ['Da screenshot', 'leggi un\'operazione da una foto con l\'AI', () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza. Vuoi andarci?')) rvGo('dati')(); }, ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z']] : null, !D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean);
   const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' });
   const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), hit = t => toks.every(w => normT(t).includes(w));
@@ -5619,14 +5641,7 @@ function tabDati() {
       { key: 'notes', label: 'Note e vincoli', type: 'textarea' }
     ], po, o => { Object.assign(S.policy, o); done(); })), ' ', btn('Divisione obiettivo…', () => targetForm(), 'sm'),
     h('p', null, po.horizon || po.maxLoss || po.target || po.notes ? 'Orizzonte: ' + (po.horizon || '—') + ' anni · Perdita massima: ' + (po.maxLoss ? po.maxLoss + '%' : '—') + ' · Obiettivo: ' + (po.target || '—') + (po.notes ? ' · ' + po.notes : '') : 'Non ancora definita.')));
-  const O = UI.sum, ta = h('textarea', { rows: 14, 'aria-label': 'Riepilogo per l\'AI' }), regen = () => { ta.value = buildSummary(O); };
-  const chk = (key, label) => h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: O[key], onchange: e => { O[key] = e.target.checked; regen(); } }), h('span', null, label));
-  const qi = h('input', { type: 'text', value: O.q, placeholder: 'es. Il mio portafoglio è troppo concentrato?', style: 'width:100%', oninput: e => { O.q = e.target.value; regen(); } });
-  const cp = h('span', { class: 'muted' }, ''); regen();
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI (senza collegamenti)'), h('p', { class: 'muted' }, 'L\'app non si collega a nessuna AI. Prepara un riepilogo anonimizzato: leggilo, correggilo se vuoi, copialo e incollalo tu in una chat di un assistente AI qualsiasi.'),
-    chk('amounts', 'Includi gli importi in euro (di base solo percentuali)'), chk('accNames', 'Includi i nomi dei conti (di base "Conto 1", "Conto 2"…)'), chk('instNames', 'Includi i nomi degli strumenti (servono per un\'analisi utile)'),
-    h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
-    h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI'), h('p', { class: 'muted' }, 'Il riepilogo anonimo da incollare in un assistente AI e le domande dirette ora stanno tutti in un posto solo: Mercati e idee → Chiedi all\'AI.'), btn('Apri Chiedi all\'AI', () => { UI.tab = 'consigli'; UI.csub = 'chiedi'; render(); window.scrollTo(0, 0); }, 'sm')));
   el.append(securityCard() || '', cloudCard() || '', fidCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
     h('ul', null, h('li', null, CLOUD_ON() ? 'Una sola connessione verso fuori: il salvataggio online (Supabase), che riceve soltanto la copia cifrata con il tuo codice. La policy del browser (CSP) vieta qualsiasi altro invio.' : 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
       DEMO ? null : h('li', null, 'Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) + (backupDays() ? ' (' + pl(backupDays(), 'giorno', 'giorni') + ' fa)' : ' (oggi)') : 'mai') + '. Se il browser cancellasse i dati del sito, quella copia è l\'unica cosa che ti salva.')),
@@ -7203,13 +7218,13 @@ function piPrevisioni() {
   return el;
 }
 
-const PI_SUBS = [['appuntamenti', 'Appuntamenti'], ['budget', 'Budget'], ['previsioni', 'Previsioni']];
+const PI_SUBS = [['appuntamenti', 'Appuntamenti'], ['previsioni', 'Previsioni']];
 function tabPiano() {
-  const sub = UI.psub || 'appuntamenti';
+  const sub = UI.psub === 'previsioni' ? 'previsioni' : 'appuntamenti';
   const seg = h('div', { class: 'seg3', role: 'group', 'aria-label': 'Piano' }, PI_SUBS.map(([k, l]) => h('button', { type: 'button', class: 'seg-b', 'aria-pressed': sub === k ? 'true' : 'false', onclick: () => { UI.psub = k; render(); } }, l)));
   const say = { appuntamenti: 'Acquisti e versamenti che fai a intervalli regolari: l\'app ti ricorda quando registrarli e li usa nelle previsioni.', budget: 'Entrate e spese di ogni mese: quanto ti resta da risparmiare o investire.', previsioni: 'Dove possono arrivare i tuoi soldi tra qualche mese o qualche anno, con le tue ipotesi.' }[sub] || '';
   return h('div', null, h('section', { class: 'card phead' }, h('div', { class: 'ph-top' }, h('div', { class: 'ph-t' }, h('h2', null, 'Piano'), h('p', { class: 'muted' }, say)), btn('+ Operazione', () => editOperation({}), 'pri big')), seg),
-    ({ appuntamenti: piAppuntamenti, budget: piBudget, previsioni: piPrevisioni }[sub] || piAppuntamenti)());
+    ({ appuntamenti: piAppuntamenti, previsioni: piPrevisioni }[sub] || piAppuntamenti)());
 }
 
 /* ============ dati dimostrativi ============ */
