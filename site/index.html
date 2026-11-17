@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hCMh4QQ71TJZaTCo9cirqMhfv0B6SLYcq9AZ1Xkgpeo='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+BOdcvs/Z/8Xu2uRCMNt8lmQaaCGpPfNs3DicK6ZxeA='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -76,7 +76,7 @@ dialog.talk>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0
 .grp-bar,.ac-bar{height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 8%,transparent);overflow:hidden;margin-top:8px}
 .grp-bar i,.ac-bar i{display:block;height:100%;width:var(--w);border-radius:6px;background:linear-gradient(90deg,var(--gc),color-mix(in srgb,var(--gc) 55%,#fff));animation:grow 1s var(--ease) .2s both}
 .acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.acard{position:relative;text-align:left;background:var(--card);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px);border:1px solid var(--ring);border-radius:20px;padding:16px 16px 12px;box-shadow:var(--sh);cursor:pointer;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);animation:rise .55s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 80ms);-webkit-tap-highlight-color:transparent}
+.acard{position:relative;text-align:left;background:var(--card);border:1px solid var(--ring);border-radius:20px;padding:16px 16px 12px;box-shadow:var(--sh);cursor:pointer;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);animation:rise .55s var(--ease) both;animation-delay:calc(var(--i,0)*45ms + 80ms);-webkit-tap-highlight-color:transparent}
 .acard::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--gc);opacity:.85}
 .acard:hover{transform:translateY(-3px);box-shadow:var(--sh-h)}
 .acard:focus-visible{outline:2px solid var(--gc);outline-offset:2px}
@@ -291,7 +291,7 @@ p{margin:6px 0}
 .tab{position:relative;z-index:1;font:inherit;font-size:14px;font-weight:500;color:var(--ink2);background:none;border:0;border-radius:10px;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:color .25s}
 .tab:hover{color:var(--ink)}
 .tab[aria-selected=true]{color:var(--ink)}
-.card{background:var(--card);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px);border:1px solid var(--ring);border-radius:var(--r);padding:20px;margin:14px 0;box-shadow:var(--sh)}
+.card{background:var(--card);border:1px solid var(--ring);border-radius:var(--r);padding:20px;margin:14px 0;box-shadow:var(--sh)}
 .hero{position:relative;overflow:hidden;padding:26px 28px;background:linear-gradient(135deg,color-mix(in srgb,var(--s1) 13%,transparent),color-mix(in srgb,#bf5af2 10%,transparent)),var(--card)}
 .hero>*{position:relative;z-index:1}
 .hero .spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:58%;z-index:0;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%);mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%)}
@@ -304,7 +304,7 @@ p{margin:6px 0}
 .pillnote{color:var(--muted);font-size:13px;margin-left:6px}
 .hero .sub{margin-top:10px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:14px 0}
-.tile{background:var(--card);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px);border:1px solid var(--ring);border-radius:18px;padding:16px 18px;box-shadow:var(--sh);transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+.tile{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:16px 18px;box-shadow:var(--sh);transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
 .tile:hover{transform:translateY(-3px);box-shadow:var(--sh-h)}
 .tile .val{font-size:28px;font-weight:650;letter-spacing:-.03em;margin:4px 0;font-variant-numeric:tabular-nums}
 .tile .sub,.hero .sub{color:var(--muted);font-size:13px}
@@ -502,7 +502,7 @@ dialog[open]{animation:sheet .45s var(--ease)}
 .mapgrid{grid-template-columns:1fr}
 .dlgacts{flex-wrap:wrap}
 }
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+html .view *,html .wrap.enter *{animation-duration:.16s!important;animation-delay:0s!important}html .view .ping{animation-duration:2.4s!important}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;text-decoration:underline dotted;cursor:pointer}
 .goal{padding:10px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.spark2{width:100%;height:64px;display:block}.talk-acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .cls{padding:12px 0;border-top:1px solid var(--line,#ddd);cursor:pointer}.cls-s{font-size:14px;margin-top:4px}.ad-pos{color:var(--gain)}.ad-neg{color:var(--loss)}.dv{position:relative;height:10px;border-radius:6px;background:rgba(127,127,127,.18);margin:8px 0}.dv:after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:rgba(127,127,127,.55)}.dv-b{position:absolute;top:0;bottom:0;border-radius:6px}.jud{font-weight:600;font-size:14px}.mood{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:6px 0}.mood-t{font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.04em}.tema{padding:10px 0;border-top:1px solid var(--line,#ddd)}.srcs{font-size:13px}.att{padding-left:18px}.att li{margin:8px 0}.fonti{padding-left:18px}.fonti li{margin:6px 0}.mn{padding:10px 0;border-top:1px solid var(--line,#ddd)}.ideas{margin-top:6px}.idea{padding:6px 10px;margin:6px 0;border-radius:14px;background:rgba(127,127,127,.09)}.wz-part{padding:8px 0;border-top:1px solid var(--line,#ddd)}.plan-h{margin:14px 0 4px}.qa-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.qa{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid color-mix(in srgb,var(--s1) 30%,transparent);background:color-mix(in srgb,var(--card) 72%,transparent);color:var(--s1);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .15s,background .15s,box-shadow .15s}.qa:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--s1) 12%,var(--card));box-shadow:0 4px 14px color-mix(in srgb,var(--s1) 18%,transparent)}.qa:active{transform:scale(.97)}.qa svg{width:17px;height:17px;flex:none}
@@ -4007,9 +4007,9 @@ function tabMercati() {
     ko.length ? h('p', { class: 'muted' }, 'Non disponibili adesso: ' + ko.map(x => x.nome).join(', ') + '.') : null,
     h('p', { class: 'muted' }, 'Dalle testate l\'app mostra solo titolo e collegamento: gli articoli si leggono sui loro siti (alcuni sono a pagamento).')));
   const cp = h('span', { class: 'muted' });
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi a Claude'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat con Claude e ti risponde con un\'analisi.'),
-    h('label', { class: 'fld' }, h('span', null, 'Cosa vuoi chiedergli'), h('select', { 'aria-label': 'Domanda per Claude', onchange: e => { UI.claudeQ = e.target.value; } }, Object.entries(CLAUDE_Q).map(([k, v]) => h('option', { value: k, selected: (UI.claudeQ || 'oggi') === k }, v[0])))),
-    h('div', { class: 'row' }, btn('Copia il testo per Claude', async () => { const txt = marketForClaude(UI.claudeQ || 'oggi'); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Analisi con un assistente AI (facoltativa)'), h('p', { class: 'muted' }, 'Prepara un testo con questi dati e il riepilogo anonimizzato del tuo portafoglio (senza importi né nomi dei conti): lo incolli tu in una chat di un assistente AI qualsiasi e ti risponde con un\'analisi.'),
+    h('label', { class: 'fld' }, h('span', null, 'Cosa vuoi chiedergli'), h('select', { 'aria-label': 'Domanda per l\'assistente', onchange: e => { UI.claudeQ = e.target.value; } }, Object.entries(CLAUDE_Q).map(([k, v]) => h('option', { value: k, selected: (UI.claudeQ || 'oggi') === k }, v[0])))),
+    h('div', { class: 'row' }, btn('Copia il testo per l\'assistente', async () => { const txt = marketForClaude(UI.claudeQ || 'oggi'); try { await navigator.clipboard.writeText(txt); } catch { const ta = h('textarea', { value: txt }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } cp.textContent = 'Copiato. Da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
   return el;
 }
 
@@ -4027,7 +4027,7 @@ function runNumbers() {
   for (const el of $app.querySelectorAll('[data-num]')) {
     const to = parseFloat(el.dataset.num), key = el.dataset.key, from = NUMS.has(key) ? NUMS.get(key) : 0;
     NUMS.set(key, to);
-    if (HIDE || REDUCED || !isFinite(to) || from === to) continue;
+    if (true || HIDE || REDUCED || !isFinite(to) || from === to) continue;          // niente conteggio animato dei numeri: l'app deve essere veloce
     const t0 = performance.now(), dur = Math.min(1500, 600 + Math.abs(to - from) / (Math.abs(to) || 1) * 900), final = el.textContent;
     let stop = false; el.textContent = eur(from);
     const tick = now => { if (stop) return; const k = Math.min(1, (now - t0) / dur); el.textContent = k < 1 ? eur(from + (to - from) * (1 - Math.pow(1 - k, 4))) : final; if (k < 1) requestAnimationFrame(tick); };
@@ -4653,7 +4653,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v38 (articoli per te: 20 migliori su decine)';
+const APP_VER = '13/11/2026 · v39 (piu veloce: niente sfocature e animazioni lunghe)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5350,7 +5350,7 @@ function askLink() {          // "Chiedi di collegarli": un piccolo file con i t
   if (!todo.length) { alert('Tutti i tuoi titoli hanno già un prezzo automatico o una stima: non c\'è niente da collegare.'); return; }
   const csv = '﻿nome;codice;valuta;classe\r\n' + todo.map(i => [i.name, i.code || '', i.ccy, String(i.cls || '').split(/[,;]/)[0].replace(/\s+\d.*$/, '')].map(x => String(x).replace(/;/g, ',')).join(';')).join('\r\n') + '\r\n';
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), a = h('a', { href: url, download: 'richiesta-strumenti.csv' }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 3000);
-  alert('Ho scaricato richiesta-strumenti.csv (' + pl(todo.length, 'titolo', 'titoli') + ': ' + todo.slice(0, 4).map(i => i.name).join(', ') + (todo.length > 4 ? '…' : '') + '). Contiene solo nomi e codici, nessun importo.\n\nOra dillo a Claude ("ho scaricato la richiesta") oppure, sul PC, esegui collega-strumenti.ps1: cerca ogni titolo e lo aggiunge ai prezzi automatici.');
+  alert('Ho scaricato richiesta-strumenti.csv (' + pl(todo.length, 'titolo', 'titoli') + ': ' + todo.slice(0, 4).map(i => i.name).join(', ') + (todo.length > 4 ? '…' : '') + '). Contiene solo nomi e codici, nessun importo.\n\nSul PC esegui collega-strumenti.ps1: cerca ogni titolo e lo aggiunge ai prezzi automatici.');
 }
 function tabStrumenti() {
   const rows = S.instruments.map(i => { const old = daysSince(i.priceDate) > 14;
@@ -5472,7 +5472,7 @@ function tabDati() {
   const chk = (key, label) => h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: O[key], onchange: e => { O[key] = e.target.checked; regen(); } }), h('span', null, label));
   const qi = h('input', { type: 'text', value: O.q, placeholder: 'es. Il mio portafoglio è troppo concentrato?', style: 'width:100%', oninput: e => { O.q = e.target.value; regen(); } });
   const cp = h('span', { class: 'muted' }, ''); regen();
-  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI (senza collegamenti)'), h('p', { class: 'muted' }, 'L\'app non si collega a nessuna AI. Prepara un riepilogo anonimizzato: leggilo, correggilo se vuoi, copialo e incollalo tu in una chat con Claude.'),
+  el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI (senza collegamenti)'), h('p', { class: 'muted' }, 'L\'app non si collega a nessuna AI. Prepara un riepilogo anonimizzato: leggilo, correggilo se vuoi, copialo e incollalo tu in una chat di un assistente AI qualsiasi.'),
     chk('amounts', 'Includi gli importi in euro (di base solo percentuali)'), chk('accNames', 'Includi i nomi dei conti (di base "Conto 1", "Conto 2"…)'), chk('instNames', 'Includi i nomi degli strumenti (servono per un\'analisi utile)'),
     h('label', { class: 'fld' }, h('span', null, 'La tua domanda'), qi), ta,
     h('div', { class: 'row', style: 'margin-top:8px' }, btn('Copia il riepilogo', async () => { try { await navigator.clipboard.writeText(ta.value); } catch { ta.select(); document.execCommand('copy'); } cp.textContent = 'Copiato. Ricorda che da questo momento il testo è fuori dall\'app.'; }, 'pri'), cp)));
