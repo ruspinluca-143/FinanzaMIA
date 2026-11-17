@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zPXl/tF/joPWE+0KVvGei0is46FMJfaxMPzf4roiLyA='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qEE5l2RL8zFY7IUV2WOZEA1bZ9/O2KERoyj0oXhGoLY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4605,7 +4605,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v35 (tastiera numerica, % settimanale sui soldi fermi)';
+const APP_VER = '13/11/2026 · v36 (interessi dei risparmi cani non piu tolti come spesa)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5748,7 +5748,12 @@ async function dogsSync(manual) {
   for (const [id, val, label] of [[c.contAcc, cont, 'Contanti'], [c.revAcc, rev, 'Revolut']]) {
     if (!id) continue;
     if (val === null) { notes.push(label + ': DOGsitterini non ha un saldo iniziale, conto non toccato.'); continue; }          // mai trattare "senza saldo" come zero
-    const res = dogsAlign(S.accounts.find(x => x.id === id), val, label);
+    const ax = S.accounts.find(x => x.id === id); let tgt = val;
+    if (ax && ax.intRate > 0) {          // conto con interesse giornaliero (es. 2,5% sui risparmi cani): DOGsitterini non conosce gli interessi, quindi restano SOPRA il suo saldo e non vengono piu' tolti con una 'perdita'
+      const intTot = ax.intTot || 0; if (ax.dogsInt0 == null) ax.dogsInt0 = intTot - Math.min(intTot, Math.max(0, accCash(ax) - val));
+      tgt = val + Math.max(0, intTot - ax.dogsInt0);
+    }
+    const res = dogsAlign(ax, tgt, label);
     if (typeof res === 'string') notes.push(res); else if (res) changes.push(res);
   }
   const old = data.datiAl && (Date.now() - new Date(data.datiAl).getTime()) > DOGS_OLD_DAYS * 86400000;
