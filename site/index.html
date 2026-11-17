@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qEE5l2RL8zFY7IUV2WOZEA1bZ9/O2KERoyj0oXhGoLY='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-XBAj8CfzM9H83KYOH55iuhSqq8Gnt2BasrFhTvtBl+s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4605,7 +4605,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v36 (interessi dei risparmi cani non piu tolti come spesa)';
+const APP_VER = '13/11/2026 · v37 (percentuali nel patrimonio della Home)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -4814,7 +4814,7 @@ function rvGroupTalk(g, tot) {
 function rvPatr(total) {
   const G = groupAccs().filter(g => g.accs.length); if (!G.length) return null;
   const ic = { fermi: ACC_ICO.banca, investiti: RV_ICO.trend, pensione: ACC_ICO.pensione };
-  return rvCard(rvHead('Il tuo patrimonio', 'Vedi tutto', rvGo('investimenti')), G.map(g => rvRow(rvSvg(ic[g.k]), g.l, pl(g.accs.length, 'conto', 'conti') + (total > 0 ? ' · ' + pct(g.tot / total) : ''), eur(g.tot), g.k === 'fermi' ? fermiWeek(g) : '', () => rvGroupTalk(g, total), 'g-' + g.k)));
+  return rvCard(rvHead('Il tuo patrimonio', 'Vedi tutto', rvGo('investimenti')), G.map(g => rvRow(rvSvg(ic[g.k]), g.l, pl(g.accs.length, 'conto', 'conti') + (total > 0 ? ' · ' + pct(g.tot / total) : ''), eur(g.tot), g.k === 'fermi' ? fermiWeek(g) : groupGain(g), () => rvGroupTalk(g, total), 'g-' + g.k)));
 }
 function rvSpese() {
   const t = today(), ym = t.slice(0, 7), ex = S.settings.trEx || [], sp = r => r.k === 'spesa' && !ex.includes(r.cat);
@@ -4853,9 +4853,13 @@ function monthDelta(a) {          // soldi fermi: quanto e' cambiato il saldo in
   if (!fin(base) || Math.abs(base) < 0.005) return null;
   const d = cur - base; return { d, base, pct: d / Math.abs(base), label: exact ? 'in 7 giorni' : 'dal ' + fmtDate(ref.date), ref: ref.date };
 }
+function groupGain(g) {          // soldi investiti e fondo pensione: guadagno rispetto a quanto hai versato
+  const pa = g.accs.filter(a => a.perf); if (!pa.length) return '';
+  const p = perfOf(pa); return p.has && fin(p.pnlPct) ? h('span', { class: 'mdelta', title: 'Guadagno o perdita rispetto a quanto hai versato' }, gl(p.pnl, spct(p.pnlPct)), h('em', null, ' dal versato')) : '';
+}
 function fermiWeek(g) {          // il gruppo 'Soldi fermi': somma delle variazioni dei suoi conti in 7 giorni
-  let d = 0, b = 0, k = 0; for (const a of g.accs) { if (a.perf || a.positions.length) continue; const m = monthDelta(a); if (m) { d += m.d; b += m.base; k++; } }
-  return k && Math.abs(b) > 0.005 ? h('span', { class: 'mdelta', title: 'Variazione dei conti fermi rispetto a 7 giorni fa' }, gl(d, spct(d / Math.abs(b))), h('em', null, ' in 7 giorni')) : '';
+  let d = 0, b = 0, k = 0; for (const a of g.accs) { if (a.perf || a.positions.length) continue; const m = monthDelta(a); if (m) { d += m.d; b += Math.abs(m.base); k++; } }          // denominatore = somma dei saldi di partenza in valore assoluto (carte con debito e conti positivi non si annullano tra loro)
+  return k && b > 0.005 ? h('span', { class: 'mdelta', title: 'Variazione dei conti fermi rispetto a 7 giorni fa' }, gl(d, spct(d / b)), h('em', null, ' in 7 giorni')) : '';
 }
 function monthPill(a) { const m = monthDelta(a); return m ? h('span', { class: 'mdelta', title: 'Rispetto al saldo di ' + fmtDate(m.ref) }, gl(m.d, spct(m.pct)), h('em', null, ' ' + m.label)) : null; }
 function rvAccHead(a) {          // testa della pagina di un conto: logo, nome, valore e pulsanti rotondi
