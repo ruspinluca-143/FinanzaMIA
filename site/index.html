@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-XBAj8CfzM9H83KYOH55iuhSqq8Gnt2BasrFhTvtBl+s='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hCMh4QQ71TJZaTCo9cirqMhfv0B6SLYcq9AZ1Xkgpeo='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -766,6 +766,7 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-day.sel{background:var(--s1);color:#fff}.tr-day small{font-size:10px;color:var(--muted);line-height:1}.tr-day.sel small{color:#fff}
 .tr-dots{display:flex;gap:3px;height:6px}.tr-dots i{width:6px;height:6px;border-radius:50%;display:block}.tr-d-p{box-shadow:inset 0 0 0 1.5px var(--muted);background:transparent}.tr-item.tr-plan{border-top:0;margin-top:8px;padding:11px 14px;border-radius:14px;background:color-mix(in srgb,var(--s1) 10%,var(--btn));box-shadow:inset 3px 0 0 var(--s1)}.tr-item{flex-wrap:wrap}.tr-item .tr-it{flex:1 1 0}.tr-acts{flex-basis:100%;display:flex;justify-content:flex-end;gap:8px;margin-top:-2px}.tr-acts button{font-size:12px;min-height:30px;padding:3px 12px}.tr-ic{position:relative;flex:none;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--btn);color:var(--muted);cursor:pointer;overflow:visible}.tr-ic.img{background:#fff}.tr-ic img{width:36px;height:36px;border-radius:50%;object-fit:cover;display:block}.tr-ic .rv-plus{position:absolute;right:-3px;bottom:-3px;width:14px;height:14px;line-height:13px;font-size:11px;font-style:normal;text-align:center;border-radius:50%;background:var(--s1);color:#fff}
 .wz-numrow{display:flex;gap:8px;align-items:center}.wz-numrow .wz-num{flex:1;min-width:0}.wz-sign{flex:none;min-width:46px;font-size:18px}
+.art-list li{padding:9px 0;border-top:1px solid var(--grid);list-style:none}.art-list li:first-child{border-top:0}.art-list{padding-left:0}.art-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px;background:var(--muted)}.art-dot.t-pos{background:var(--gain,#30d158)}.art-dot.t-neg{background:var(--loss,#ff6b6b)}.art-why{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}.art-chip{font-size:11px;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--s1) 14%,transparent);color:var(--s1)}.art-chip.bad{background:color-mix(in srgb,var(--loss,#ff6b6b) 18%,transparent);color:var(--loss,#ff6b6b);font-weight:600}.art-warn{margin:8px 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--loss,#ff6b6b) 14%,transparent)}
 .mdelta em{font-style:normal;font-size:10px;color:var(--muted);margin-left:2px}
 .op-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.03em;line-height:13px;padding:0 5px;border-radius:99px;vertical-align:1px;white-space:nowrap}.op-tag.t-g{color:var(--gain,#30d158);background:color-mix(in srgb,var(--gain,#30d158) 15%,transparent)}.op-tag.t-r{color:var(--loss,#ff6b6b);background:color-mix(in srgb,var(--loss,#ff6b6b) 15%,transparent)}.op-tag.t-b{color:#4c8dff;background:rgba(76,141,255,.15)}.op-tag.t-n{color:var(--muted);background:color-mix(in srgb,var(--muted) 16%,transparent)}
 .px-stamp{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:12px;color:var(--muted);background:none;border:0;padding:4px 2px;margin:0 0 4px;cursor:pointer;text-align:left}.px-stamp b{font-weight:600;color:var(--ink)}.px-stamp.old b{color:#ff9f0a}.px-stamp.busy{opacity:.55;pointer-events:none}
@@ -1721,6 +1722,7 @@ function todoItems() {
   { const w = S.accounts.length && !DEMO ? lunKey() : ''; if (w) t.push({ t: 'È lunedì: aggiorna i conti', s: 'controlla i saldi di banche, contanti e carte', b: 'Aggiorna saldi', f: () => { try { localStorage.setItem(LUN_LS, w); } catch { /* niente */ } balancesWizard(); } }); }
   for (const { al, v } of priceAlertsHit()) t.push({ t: nm(v.n) + ' è ' + (al.dir === 'sotto' ? 'sceso sotto ' : 'salito sopra ') + nf2.format(al.px) + ' ' + v.ccy, s: 'ora ' + nf2.format(v.p) + ' ' + v.ccy + ' · avviso impostato da te', b: 'Apri', c: nm(v.n) + (al.dir === 'sotto' ? ' sotto ' : ' sopra ') + nf2.format(al.px), f: () => { UI.tab = 'consigli'; UI.csub = 'titoli'; render(); talkTitolo(v, heldIsins()); } });
   const old = S.instruments.filter(i => held.has(i.id) && daysSince(i.priceDate) > 14 && !/valore totale/i.test(i.name)); if (old.length) t.push({ t: pl(old.length, 'prezzo non aggiornato da più di 14 giorni', 'prezzi non aggiornati da più di 14 giorni'), s: old.slice(0, 3).map(i => i.name).join(', ') + (old.length > 3 ? '…' : ''), b: 'Controlla', f: () => { UI.tab = 'analisi'; UI.sub = 'affidabilita'; render(); } });
+  { let ar = null; try { ar = articlesForYou(20); } catch { /* niente */ } const w = ar ? ar.top.filter(x => x.mine.length && x.sell) : []; if (w.length) t.push({ t: pl(w.length, 'articolo consiglia di vendere', 'articoli consigliano di vendere') + ' un tuo titolo', s: w[0].mine.map(i => i.name.replace(/\s*\(.*?\)/, '')).join(', ') + ' · ' + w[0].fonte, b: 'Leggi', f: () => { UI.tab = 'mercati'; render(); window.scrollTo(0, 0); } }); }
   const due = planDueAll(); if (due.length) t.push({ t: pl(due.length, 'acquisto programmato da confermare', 'acquisti programmati da confermare'), s: 'è stato preso davvero?', b: 'Conferma', f: () => confirmDue() });
   { const dt = trDueAll(); if (dt.length) t.push({ t: pl(dt.length, 'spesa ricorrente da confermare', 'spese ricorrenti da confermare'), s: dt.slice(0, 3).map(x => x.r.name).join(', ') + (dt.length > 3 ? '…' : ''), b: 'Conferma', f: () => trConfirmDue() }); }
   const dueA = S.accounts.map(a => [a, accDue(a)]).filter(x => x[1] != null); if (dueA.length) t.push({ t: pl(dueA.length, 'conto da aggiornare', 'conti da aggiornare'), s: dueA.slice(0, 3).map(x => x[0].name).join(', ') + (dueA.length > 3 ? '…' : ''), b: 'Aggiorna', f: () => balancesWizard() });
@@ -3336,6 +3338,51 @@ function themes(m, n) {             // parole piu' ricorrenti nei titoli di oggi
   }
   return { heads, list: [...cnt.entries()].filter(([, c]) => c >= 3).sort((a, b) => b[1] - a[1]).slice(0, n || 10).map(([k, c]) => [disp.get(k), c]) };
 }
+/* ---- articoli per te: legge TUTTI i titoli delle fonti (decine), tiene i 20 piu' utili e li incrocia coi titoli che hai ---- */
+const NEG_RE = /\b(sell|downgrad\w*|underperform\w*|underweight|price target cut|cuts? (price )?target|lowers? (price )?target|plung\w*|tumbl\w*|slump\w*|sink\w*|crash\w*|plummet\w*|tank\w*|slid\w*|slide\w*|fall(s|ing)?|fell|drops?|dropped|warn\w*|probe|lawsuit|fraud|misses?|missed|recall|bankrupt\w*|layoffs?|vendere|vendi|declass\w*|taglia\w*|crolla\w*|scende|cala|ribass\w*|perde|multa|indagin\w*)\b/i;
+const SELL_RE = /\b(sell|sell rating|downgrad\w*|underperform\w*|underweight|reduce|vendere|vendi|declass\w*|taglia (il )?giudizio)\b/i;
+const POS_RE = /\b(buy rating|upgrad\w*|outperform\w*|overweight|beats?|surg\w*|jump\w*|soar\w*|rall(y|ies|ied)|record|raises? (price )?target|climb\w*|compra\w*|rialz\w*|balza\w*|vola|cresce\w*|gains?|rises?)\b/i;
+const MACRO_RE = /\b(fed|fomc|ecb|bce|rates?|tassi|inflation\w*|inflazione|tariffs?|dazi|oil|petrolio|dollar\w*|dollaro|gold|oro|chips?|semiconductor\w*|treasury|yields?|recession\w*|recessione|jobs|payrolls?|cpi|gdp|pil)\b/i;
+const ETF_THEMES = [[/semiconductor/i, 'semiconductor|chip'], [/\bgold\b|\boro\b/i, 'gold|oro'], [/brazil|brasile/i, 'brazil|brasile'], [/nasdaq/i, 'nasdaq'], [/s&p ?500/i, 'S&P 500']];
+function articleTerms() {          // per ogni tuo titolo: le parole con cui riconoscerlo (azioni, crypto, emittenti delle obbligazioni, temi degli ETF)
+  const out = [], seen = new Set(), val = new Map();
+  for (const a of S.accounts) for (const p of a.positions) { const i = inst(p.instId); if (!i) continue; const v = val.get(i.id) || { value: 0, cost: 0 }; v.value += posValue(p); v.cost += p.cost > 0 ? p.cost : 0; val.set(i.id, v); }
+  for (const t of holdingTerms()) { out.push({ i: t.i, terms: t.terms.map(x => ({ x, re: new RegExp('\\b' + x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', x === x.toUpperCase() && x.length <= 5 ? '' : 'i') })) }); seen.add(t.i.id); }
+  for (const [id, v] of val) {
+    if (seen.has(id) || !(v.value > 0)) continue; const i = inst(id); if (!i) continue; const terms = [];
+    const bm = /^Obbligazione\s+([A-Za-zÀ-ÿ'&.]+)/i.exec(i.name); if (bm && bm[1].length >= 3) terms.push(bm[1].replace(/'s$/i, ''));
+    for (const [re, rx] of ETF_THEMES) if (re.test(i.name)) terms.push(...rx.split('|'));
+    if (terms.length) out.push({ i, terms: terms.map(x => ({ x, re: new RegExp('\\b' + x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i') })) });
+  }
+  return { list: out, val };
+}
+function articlesForYou(n) {
+  const m = DATA.mercati; if (!m || !S) return null;
+  const { list: T, val } = articleTerms(), now = Date.now(), seenK = new Set(), all = [];
+  for (const f of m.fonti) { if (!f.ok) continue; for (const v of f.voci) {
+    if (!v.titolo || !v.link) continue;
+    const k = normT(v.titolo).split(' ').filter(w => w.length > 3).slice(0, 7).join(' '); if (seenK.has(k)) continue; seenK.add(k);
+    const neg = (v.titolo.match(new RegExp(NEG_RE.source, 'gi')) || []).length, pos = (v.titolo.match(new RegExp(POS_RE.source, 'gi')) || []).length, tone = neg > pos ? 'neg' : pos > neg ? 'pos' : 'neu', sell = SELL_RE.test(v.titolo);
+    const mine = []; for (const t of T) if (t.terms.some(q => q.re.test(v.titolo))) mine.push(t.i);
+    const age = v.data ? (now - new Date(v.data).getTime()) / 36e5 : 999, macro = MACRO_RE.test(v.titolo);
+    let score = (mine.length ? 100 : 0) + (mine.length && tone !== 'neu' ? 25 : 0) + (mine.length && sell ? 40 : 0) + (tone !== 'neu' ? 12 : 0) + (macro ? 14 : 0) + (f.gruppo && /ricerca/i.test(f.gruppo) ? 8 : 0) + (age < 24 ? 20 : age < 72 ? 10 : age < 168 ? 3 : -15);
+    if (mine.length) score += Math.min(30, Math.max(...mine.map(i => (val.get(i.id) || { value: 0 }).value)) / 400);          // piu' pesa il titolo nel tuo portafoglio, piu' conta
+    all.push({ titolo: v.titolo, link: v.link, fonte: f.nome, data: v.data || '', tone, sell, mine, macro, score });
+  } }
+  all.sort((a, b) => b.score - a.score);
+  return { letti: all.length, fonti: m.fonti.filter(f => f.ok).length, top: all.slice(0, n || 20), val };
+}
+function articlesCard() {
+  const r = articlesForYou(20); if (!r) return null;
+  const chip = (i, val) => { const v = val.get(i.id); return h('span', { class: 'art-chip' }, 'Hai ' + i.name.replace(/\s*\(.*?\)/, '') + (v && v.cost > 0 ? ' ' + spct(v.value / v.cost - 1) : '')); };
+  const warn = r.top.filter(x => x.mine.length && x.sell);
+  const el = h('section', { class: 'card art-card' }, h('h2', null, 'Gli articoli che contano per te'),
+    h('p', { class: 'muted' }, 'Ho letto ' + r.letti + ' titoli da ' + pl(r.fonti, 'fonte', 'fonti') + ' e tengo i 20 più utili: prima quelli sui titoli che hai, poi i temi che muovono i mercati (tassi, Fed, dollaro, oro, chip), poi i più recenti. Leggo solo i titoli, non gli articoli interi: il tono (verde/rosso) è una stima dalle parole, non un giudizio.'));
+  if (warn.length) el.append(h('div', { class: 'art-warn' }, h('b', null, '⚠ ' + pl(warn.length, 'articolo consiglia', 'articoli consigliano') + ' di vendere o declassare un titolo che hai: '), warn.slice(0, 3).map(x => x.mine.map(i => i.name.replace(/\s*\(.*?\)/, '')).join(', ')).join(' · ')));
+  el.append(h('ul', { class: 'news art-list' }, r.top.map(x => h('li', null, h('span', { class: 'art-dot t-' + x.tone, title: x.tone === 'neg' ? 'tono negativo' : x.tone === 'pos' ? 'tono positivo' : 'tono neutro' }), linkEl(x.link, x.titolo), h('small', null, ' · ' + x.fonte + (x.data ? ' · ' + fmtDate(x.data.slice(0, 10)) : '')), x.mine.length ? h('div', { class: 'art-why' }, x.sell ? h('span', { class: 'art-chip bad' }, 'consiglia di vendere') : null, x.mine.map(i => chip(i, r.val))) : x.macro ? h('div', { class: 'art-why' }, h('span', { class: 'art-chip' }, 'tema di mercato')) : null))));
+  el.append(h('p', { class: 'muted' }, 'Non è un consiglio di acquisto o vendita: se un articolo parla di un tuo titolo, aprilo e leggilo tu.'));
+  return el;
+}
 function briefingCard() {
   const mv = dayMovers().slice(0, 5), nw = holdingNews(5); if (!mv.length && !nw.length) return null;
   const el = h('section', { class: 'card' }, h('h2', null, 'Cosa è successo oggi'));
@@ -3943,6 +3990,7 @@ function tabMercati() {
   if (sc) tl.push({ l: 'Stablecoin', v: nfp.format(sc.totale_mld_usd) + ' mld $', s: (sc.var_7g_pct > 0 ? '+' : '') + nf2.format(sc.var_7g_pct) + '% in 7 giorni' });
   el.append(h('section', { class: 'card' }, h('div', { class: 'row' }, h('h2', { class: 'grow' }, 'Mercati oggi'), load), h('p', { class: 'muted' }, 'Aggiornato il ' + (m.generato || '').slice(0, 16).replace('T', ' ') + ' · ' + pl(ok.length, 'fonte letta', 'fonti lette') + (ko.length ? ' su ' + m.fonti.length : ''))));
   if (tl.length) el.append(tiles(tl));
+  { const art = articlesCard(); if (art) el.append(art); }          // i 20 articoli migliori, incrociati coi tuoi titoli
   if (DATA.storico) el.append(stVixCard(DATA.storico, true));
   const blc = bigLosersCard(); if (blc) el.append(blc);
   const notes = readMarket(m); if (notes.length) el.append(h('section', { class: 'card' }, h('h2', null, 'Come leggerli'), h('ul', { class: 'list' }, notes.map(x => h('li', null, h('span', null, x)))), h('p', { class: 'muted' }, 'È una lettura meccanica dei dati, non una previsione né un consiglio.')));
@@ -4605,7 +4653,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v37 (percentuali nel patrimonio della Home)';
+const APP_VER = '13/11/2026 · v38 (articoli per te: 20 migliori su decine)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
