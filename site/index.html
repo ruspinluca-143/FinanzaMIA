@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YFJk3WfZT3CwdlQ61DCeZeo6FwSqCWT3RU7OPrVDkfk='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UJHrATyxkHtERO7VkD7K1jgajHpGlBWJAdOSVuozFc4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -798,6 +798,34 @@ dialog{border-radius:min(var(--r),22px)}
 .tr-bb{height:10px;border-radius:5px;background:var(--btn);overflow:hidden;margin:8px 0 5px}.tr-bb i{display:block;height:100%;border-radius:5px;background:var(--gain,#30d158);transition:width .5s var(--ease)}.tr-bb i.warn{background:#ff9f0a}.tr-bb i.over{background:var(--loss,#ff453a)}
 .tr-bf{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}.tr-bf .over{color:var(--loss,#d93025);font-weight:600}
 .tr-rep{margin-top:14px}.tr-per{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.tr-inc{margin:2px 0 8px;font-size:14px}
+/* ---- compatto: pulsanti, riquadri e spazi piu' piccoli per vedere piu' cose (17/11/2026) ---- */
+html .btn.big{padding:6px 12px;font-size:13px}
+html .wz-opt{padding:7px 12px;border-radius:10px;gap:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;border-width:1px}
+html .wz-opt .wz-t{font-size:14px}html .wz-opt .wz-s{font-size:11.5px}
+html .wz-q{font-size:17px;margin:6px 0 8px}
+html .wz-chip{padding:7px 10px;border-radius:10px}
+html .wz-chips{gap:5px}
+html .tr-chip{padding:4px 10px;font-size:12px;min-height:0;line-height:1.25;border-radius:999px}
+html .tr-chip.sm{padding:3px 8px;font-size:11.5px}
+html .tr-chips{gap:5px}
+html .tr-kinds{gap:6px}
+html dialog{padding:12px 14px}
+html .card{padding:10px 12px;margin:8px 0;border-radius:14px}
+html .tile{padding:8px 10px;border-radius:14px}
+html .acard{padding:7px 8px;border-radius:14px}
+html .conti-head{padding:9px 11px;border-radius:14px}
+html .rv-row{padding:6px 0}
+html .subtab{padding:7px 10px;font-size:13px}
+html .tr-day{height:36px;min-height:36px;padding:3px 0 2px}html .wz-search{font-size:16px}body{zoom:var(--zm,1)}
+html h2{font-size:15px;margin-bottom:6px}
+html .cq{padding:7px 12px;font-size:16px}
+html .top{padding:8px 16px 6px}
+html .tabs{padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
+html .tabs button{padding:4px 0 3px;font-size:11px}
+html .tr-item{padding:6px 0}
+html .todo{padding:6px 0}
+html .rv-sec{margin:12px 4px 3px}
+html input[type=text],html input[type=number],html input[type=date],html input[type=search],html select,html textarea{padding:5px 10px}
 </style>
 </head>
 <body>
@@ -3300,6 +3328,7 @@ function anRegole() {
   el.append(h('section', { class: 'card' }, h('h2', null, 'Regole che ti sei dato'), h('p', { class: 'muted' }, 'Sono i limiti oltre i quali l\'app ti avvisa. Tocca una riga per capire cosa significa.'),
     table([{ t: 'Regola' }, { t: 'Soglia', n: 1 }], SOGLIE.map(([k, n, d]) => [h('span', { class: 'tapme', role: 'button', tabindex: '0', onclick: () => talk({ kind: 'Regola', title: n, value: (k === 'tol' ? '±' : '') + th(k) + (k === 'tol' ? ' punti' : '%'), say: d, tip: 'La cambi con "Cambia soglie": sono limiti di prudenza tuoi, non verità di mercato.' }) }, n), (k === 'tol' ? '±' : '') + th(k) + (k === 'tol' ? ' punti' : '%')])),
     h('div', { class: 'row' }, btn('Cambia soglie', () => form('Soglie delle regole', SOGLIE.map(([k, n, d]) => ({ key: k, label: n + (k === 'tol' ? ' (punti)' : ' (%)'), type: 'number', hint: d })), Object.fromEntries(SOGLIE.map(([k]) => [k, th(k)])), o => { for (const [k] of SOGLIE) S.policy[k] = o[k] > 0 ? o[k] : DEFAULTS[k]; done(); }), 'sm'), btn('Divisione obiettivo…', () => targetForm(), 'sm'))));
+  { const nAck = Object.keys(ACK()).length; if (nAck) el.append(h('section', { class: 'card' }, h('p', { class: 'muted' }, pl(nAck, 'avviso che hai confermato corretto è nascosto', 'avvisi che hai confermato corretti sono nascosti') + ' in tutta l\'app.'), btn('Rimetti tutti gli avvisi', () => { if (!confirm('Rimetto tutti gli avvisi che avevi chiuso?')) return; S.ack = {}; done(); }, 'sm'))); }
   { const raw = alertsRaw(), act = raw.filter(x => !alertAcked(x)), okd = raw.filter(alertAcked);
     el.append(h('section', { class: 'card' }, h('h2', null, 'Cosa non rispetta le regole adesso'), act.length ? h('ul', { class: 'list' }, act.map(x => { const g = alertGo(x); return h('li', null, h('span', null, x), h('span', { class: 'row', style: 'margin:0;gap:6px' }, btn(g[0], g[1], 'pri sm'), btn('È corretto così', () => alertAck(x), 'sm'))); })) : h('p', { class: 'muted' }, 'Tutto in regola con le soglie attuali.'), okd.length ? h('details', { class: 'more' }, h('summary', null, pl(okd.length, 'avviso confermato corretto', 'avvisi confermati corretti')), h('ul', { class: 'list' }, okd.map(x => h('li', null, h('span', { class: 'muted' }, x), btn('Rimetti l\'avviso', () => { delete ACK()['a:' + alertKey(x)]; done(); }, 'sm'))))) : null)); }
   return el;
@@ -3826,6 +3855,7 @@ function consigliSoldi() {
   sec.append(h('p', { class: 'muted' }, 'Parto dalla tua divisione (' + S.policy.target + ') e la aggiusto con l\'analisi di oggi. Non vendi nulla.'));
   if (!list.length) sec.append(h('p', null, 'Sei già a posto: non serve aggiungere.'));
   for (const r of list) { const g = jud(r.label), note = g == null ? '' : g < 0 ? ' · l\'analisi di oggi consiglia prudenza: meglio a rate' : g > 0 ? ' · l\'analisi di oggi è favorevole' : '';
+    if (/^(liquidit|monetari)/i.test(r.label)) { sec.append(h('div', { class: 'mn' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, eur(r.put) + ' da tenere in liquidità'), h('span', { class: 'muted' }, pct(r.curPct) + ' → ' + pct(r.after))), h('div', { class: 'muted', style: 'font-size:13px' }, 'Non serve comprare niente: sono soldi che restano fermi sul conto (o sul broker) come cuscinetto. Oggi ' + pct(r.curPct) + ', obiettivo ' + (r.tgt ? pct(r.tgt) : '—') + '.'), ideasFor(r.label).length ? h('details', { class: 'more' }, h('summary', null, 'Facoltativo: far rendere la liquidità che tieni sul broker'), h('p', { class: 'muted' }, 'Se parte della liquidità sta sul broker, un ETF monetario segue il tasso a un giorno: rischio molto basso, ma è un acquisto vero (non è più cash sul conto).'), ideasNode(r.label)) : null)); continue; }
     sec.append(h('div', { class: 'mn' }, h('div', { class: 'row', style: 'margin:0' }, h('b', { class: 'grow' }, eur(r.put) + ' in ' + r.label), h('span', { class: 'muted' }, pct(r.curPct) + ' → ' + pct(r.after))), h('div', { class: 'muted', style: 'font-size:13px' }, 'Oggi ' + pct(r.curPct) + ', obiettivo ' + (r.tgt ? pct(r.tgt) : '—') + note), ideasNode(r.label) || h('div', { class: 'muted' }, 'Scegli tu lo strumento (tra quelli che hai o uno nuovo).')));
   }
   return sec;
@@ -3926,20 +3956,23 @@ function anAffidabilita() {
   let vK = 0, vU = 0; const unk = [];
   for (const a of S.accounts) if (a.perf) for (const p of a.positions) { const v = posValue(p); if (costKnown(p)) vK += v; else { vU += v; unk.push([a.name, (inst(p.instId) || {}).name || '?', v]); } }
   const cov = vK + vU > 0 ? vK / (vK + vU) : 1, issues = [];
+  const goTab = (tab, ex) => () => { Object.assign(UI, { tab, acc: null, planId: null, sub: null, csub: null, asub: null }, ex || {}); render(); window.scrollTo(0, 0); };
   const stale = S.instruments.filter(i => S.accounts.some(a => a.positions.some(p => p.instId === i.id)) && (isAuto(i) ? daysSince(i.autoAt || i.priceDate) > 3 : daysSince(i.priceDate) > 7));
-  if (stale.length) issues.push(['Prezzi vecchi', stale.length + ' titoli con prezzo non aggiornato: ' + stale.slice(0, 5).map(i => i.name).join(', ') + (stale.length > 5 ? '…' : ''), 'warn']);
+  if (stale.length) issues.push({ k: 'af:prezzi', sig: stale.map(i => i.id).join(','), t: 'Prezzi vecchi', d: stale.length + ' titoli con prezzo non aggiornato: ' + stale.slice(0, 5).map(i => i.name).join(', ') + (stale.length > 5 ? '…' : ''), lv: 'warn', go: ['Aggiorna i prezzi', () => { if (ONLINE) pricesOnline(); else goTab('allocazione', { asub: 'strumenti' })(); }] });
   const lim = a => accGroup(a) === 'investiti' ? 20 : accGroup(a) === 'pensione' ? 100 : 45, old = S.accounts.filter(a => a.upd && daysSince(a.upd) > lim(a));
-  if (old.length) issues.push(['Conti non aggiornati', old.map(a => a.name + ' (' + daysSince(a.upd) + ' giorni)').join(', '), 'warn']);
-  const seen = new Map(), dup = []; for (const o of OPS()) { const k = [o.accId, o.date, o.kind, o.instId || '', Math.round((o.qty || o.amount || 0) * 1e6)].join('|'); if (seen.has(k)) dup.push(o); else seen.set(k, o); }
-  if (dup.length) issues.push(['Operazioni doppie?', dup.length + ' operazioni identiche (stesso conto, giorno, titolo e quantità): ' + dup.slice(0, 3).map(o => (o.instName || OP_LABEL[o.kind]) + ' del ' + fmtDate(o.date)).join(', ') + '. Eliminane una dalla scheda del conto.', 'bad']);
-  const neg = S.accounts.filter(a => (a.cash || 0) < -1); if (neg.length) issues.push(['Liquidità negativa', neg.map(a => a.name + ' (' + eur(a.cash, true) + ')').join(', ') + ': manca un versamento o un trasferimento.', 'bad']);
-  const nofx = [...new Set(S.instruments.map(i => i.ccy))].filter(c => c !== 'EUR' && fxRate(c) == null); if (nofx.length) issues.push(['Cambio mancante', nofx.join(', ') + ': i valori in questa valuta non sono sommati bene.', 'bad']);
-  const noflow = S.accounts.filter(a => a.perf && !a.flows.length && a.positions.length); if (noflow.length) issues.push(['Conti senza storia dei versamenti', noflow.map(a => a.name).join(', ') + ': il guadagno non si può calcolare.', 'warn']);
+  if (old.length) issues.push({ k: 'af:conti', sig: old.map(a => a.id).join(','), t: 'Conti non aggiornati', d: old.map(a => a.name + ' (' + daysSince(a.upd) + ' giorni)').join(', '), lv: 'warn', go: ['Aggiorna i saldi', () => balancesWizard()] });
+  const seen = new Map(), dupG = new Map(); for (const o of OPS()) { const k = [o.accId, o.date, o.kind, o.instId || '', Math.round((o.qty || o.amount || 0) * 1e6)].join('|'); if (seen.has(k)) { if (!dupG.has(k)) dupG.set(k, [seen.get(k)]); dupG.get(k).push(o); } else seen.set(k, o); }
+  for (const [k, L] of dupG) { const o = L[0]; issues.push({ k: 'af:dup:' + k, sig: String(L.length), t: 'Operazione doppia?', d: (o.instName || OP_LABEL[o.kind] || o.kind) + ' del ' + fmtDate(o.date) + ' su ' + accName(o.accId) + ': ' + L.length + ' volte identica (stesso conto, giorno, titolo e quantità). Tocca "Vedi" per aprirla e, se è un errore, annullarne una; se è giusto così, premi "È corretto così".', lv: 'bad', go: ['Vedi', () => talkOp(L[L.length - 1])] }); }
+  const neg = S.accounts.filter(a => (a.cash || 0) < -1); if (neg.length) issues.push({ k: 'af:neg', sig: neg.map(a => a.id + ':' + Math.round(a.cash)).join(','), t: 'Liquidità negativa', d: neg.map(a => a.name + ' (' + eur(a.cash, true) + ')').join(', ') + ': manca un versamento o un trasferimento.', lv: 'bad', go: ['Apri il conto', goTab('conti', { acc: neg[0].id })] });
+  const nofx = [...new Set(S.instruments.map(i => i.ccy))].filter(c => c !== 'EUR' && fxRate(c) == null); if (nofx.length) issues.push({ k: 'af:fx', sig: nofx.join(','), t: 'Cambio mancante', d: nofx.join(', ') + ': i valori in questa valuta non sono sommati bene.', lv: 'bad', go: ['Metti il cambio', goTab('dati')] });
+  const noflow = S.accounts.filter(a => a.perf && !a.flows.length && a.positions.length); if (noflow.length) issues.push({ k: 'af:flows', sig: noflow.map(a => a.id).join(','), t: 'Conti senza storia dei versamenti', d: noflow.map(a => a.name).join(', ') + ': il guadagno non si può calcolare.', lv: 'warn', go: ['Apri il conto', goTab('conti', { acc: noflow[0].id })] });
+  const okd = issues.filter(x => acked(x.k, x.sig)); for (const x of okd) issues.splice(issues.indexOf(x), 1);
   el.append(tiles([{ l: 'Guadagno calcolato su', v: pct(cov), s: 'del valore dei titoli (il resto non ha un costo di carico noto)', x: () => ({ say: 'Per calcolare il guadagno di un titolo servono il prezzo medio a cui l\'hai pagato e quello di oggi. Per ' + eur(vU) + ' di titoli (' + pct(1 - cov) + ') il costo non c\'è, e il loro guadagno vale zero: il guadagno totale è quindi più prudente della realtà.', rows: unk.sort((a, b) => b[2] - a[2]).slice(0, 8).map(([a, n, v]) => [n, v, a, null, eur(v)]), rowsTitle: 'Titoli senza costo noto' }) },
     { l: 'Cose da controllare', v: String(issues.length), s: issues.length ? 'vedi sotto' : 'tutto a posto' }, { l: 'Prezzi automatici', v: pct(S.instruments.filter(i => isAuto(i)).length / Math.max(1, S.instruments.length)), s: 'degli strumenti si aggiorna da solo' }]));
   el.append(h('section', { class: 'card' }, h('h2', null, 'Quanto posso fidarmi?'), h('div', { class: 'dv', 'aria-hidden': 'true', style: 'margin:10px 0' }, h('i', { class: 'dv-b', style: 'left:0;width:' + Math.round(cov * 100) + '%;background:' + (cov > .9 ? 'var(--gain)' : cov > .75 ? '#ff9f0a' : 'var(--loss)') })),
     h('p', { class: 'muted' }, 'Costo di carico noto per ' + pct(cov) + ' dei titoli dei conti d\'investimento.'),
-    issues.length ? h('ul', { class: 'list' }, issues.map(([t, d, k]) => h('li', null, h('span', null, h('b', { class: k === 'bad' ? 'ad-neg' : '' }, (k === 'bad' ? '✖ ' : '⚠ ') + t + ': '), d)))) : h('p', null, '✓ Nessun problema trovato: prezzi freschi, conti aggiornati, niente doppioni.'),
+    issues.length ? h('ul', { class: 'list' }, issues.map(x => h('li', null, h('span', null, h('b', { class: x.lv === 'bad' ? 'ad-neg' : '' }, (x.lv === 'bad' ? '✖ ' : '⚠ ') + x.t + ': '), x.d), h('span', { class: 'row', style: 'margin:0;gap:6px' }, btn(x.go[0], x.go[1], 'pri sm'), btn('È corretto così', () => ackSig(x.k, x.sig), 'sm'))))) : h('p', null, '✓ Nessun problema trovato: prezzi freschi, conti aggiornati, niente doppioni.'),
+    okd.length ? h('details', { class: 'more' }, h('summary', null, pl(okd.length, 'avviso confermato corretto', 'avvisi confermati corretti')), h('ul', { class: 'list' }, okd.map(x => h('li', null, h('span', { class: 'muted' }, x.t + ': ' + x.d), btn('Rimetti l\'avviso', () => { delete ACK()[x.k]; done(); }, 'sm'))))) : null,
     unk.length ? h('details', null, h('summary', { class: 'muted' }, 'Titoli di cui non conosco il costo (' + unk.length + ')'), h('ul', { class: 'list' }, unk.sort((a, b) => b[2] - a[2]).map(([a, n, v]) => h('li', null, h('span', null, n + ' · ' + a + ' · ' + eur(v)))))) : null));
   el.append(riconciliazioneCard());
   return el;
@@ -4281,7 +4314,25 @@ function foldInit() {
 function foldAll(closed) {          // dal menu: chiude o apre tutte le sezioni della scheda che stai guardando
   document.querySelectorAll('[data-fold]').forEach(sec => { const b = sec.querySelector('.fold-btn'); if (b && sec.classList.contains('fold') !== closed) b.click(); });
 }
-function afterRender() { const nav = $app.querySelector('.tabs'); if (nav) placeThumb(nav); runNumbers(); foldInit(); }
+/* ---- ogni avviso fisso nelle schede: un pulsante per andare a vedere e "e' corretto cosi'" per chiuderlo ---- */
+function warnGo(t) {
+  const to = (tab, ex) => () => { Object.assign(UI, { tab, acc: null, planId: null, sub: null, csub: null, asub: null }, ex || {}); render(); window.scrollTo(0, 0); };
+  if (/costo annuo|TER\b|Principali titoli dentro/i.test(t)) return ['Apri i titoli', to('allocazione', { asub: 'strumenti' })];
+  if (/liquidità finisce|acquisti programmati/i.test(t)) return ['Apri le previsioni', to('piano', { psub: 'previsioni' })];
+  if (/perdita massima/i.test(t)) return ['Apri le regole', to('analisi', { sub: 'regole' })];
+  if (/analisi ha .* giorni|dati di mercato hanno|classifiche non sono/i.test(t)) return ['Riscarica', () => loadOnlineData()];
+  if (/Da sistemare/.test(t)) return ['Apri i conti', to('conti')];
+  if (/stesse aziende americane/i.test(t)) return ['Vedi le sovrapposizioni', to('analisi', { sub: 'sovrapposizioni' })];
+  return null;
+}
+function warnAcks() {
+  for (const w of [...$app.querySelectorAll('.view .warn')]) {
+    if (w.closest('dialog') || w.dataset.wk) continue; const txt = (w.textContent || '').trim(); if (!txt || /cifratura del browser/i.test(txt)) continue;
+    const key = 'w:' + normT(txt.replace(/\d[\d.,]*/g, '#')).slice(0, 90); w.dataset.wk = key;
+    if (ACK()[key]) { w.remove(); continue; }
+    const go = warnGo(txt); w.append(h('div', { class: 'row warn-ack', style: 'margin:6px 0 0;gap:6px' }, go ? btn(go[0], go[1], 'sm pri') : null, btn('È corretto così', () => { ACK()[key] = { d: today() }; done(); }, 'sm')));
+  }
+}function afterRender() { const nav = $app.querySelector('.tabs'); if (nav) placeThumb(nav); runNumbers(); foldInit(); try { warnAcks(); } catch { /* niente */ } }
 window.addEventListener('resize', () => { const nav = $app.querySelector('.tabs'); if (nav) { LASTTHUMB = null; placeThumb(nav); } });
 /* iPhone: dopo la tastiera (ricerca, importi) Safari a volte lascia la barra in basso a meta' schermo; si rimette a posto da sola */
 (function () {
@@ -4314,9 +4365,14 @@ function syncLayout() {          // una volta sola: chi usava lo "stile Revolut"
   S.settings.rvMig = 1;
   if (LAYOUT() !== 'classico') { const id = { nero: 'rv-nero', grafite: 'rv-grafite' }[RV_TONE()] || 'rv-scuro'; S.settings.theme = id; try { applyTheme(id); } catch (x) { /* tema di base */ } touch(); }
 }
+/* ---- dimensione dell'app: tutto un po' piu' piccolo per vedere piu' cose (Piccola, Media, Normale) ---- */
+const SCALES = [['s', 'Piccola', 0.85], ['m', 'Media', 0.92], ['l', 'Normale', 1]];
+function scaleKey() { let k = null; try { k = S && S.settings && S.settings.scale; } catch { /* S non e' ancora pronto */ } if (!k) { try { k = localStorage.getItem('finanze-scale'); } catch { /* niente */ } } return SCALES.some(x => x[0] === k) ? k : 'm'; }
+function applyScale() { document.documentElement.style.setProperty('--zm', String(SCALES.find(x => x[0] === scaleKey())[2])); }
+applyScale();
 function render() {
   { const mv = { mercati: ['consigli', { csub: 'mercato' }], grandi: ['consigli', { csub: 'grandi' }], strumenti: ['allocazione', { asub: 'strumenti' }], grafici: ['analisi', { sub: 'grafici' }], plusvalenze: ['analisi', { sub: 'plusvalenze' }] }[UI.tab]; if (mv) { UI.tab = mv[0]; Object.assign(UI, mv[1]); } }          // le schede unite portano alla loro nuova casa
-  endReorder(); syncLayout();
+  applyScale(); endReorder(); syncLayout();
   const y = window.scrollY;
   if (!S) { LASTVIEW = ''; viewStart(); } else if (LOCKED) { LASTVIEW = ''; viewLock(); }
   else {
@@ -4927,7 +4983,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v46 (avvisi azionabili, zainetto fiscale, pagella, spese insolite)';
+const APP_VER = '13/11/2026 · v47 (piu compatta e avvisi chiudibili)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5718,7 +5774,7 @@ function autoCard() {
 function layoutCard() {
   const cur = LAYOUT(), pick = id => { S.settings.layout = id; UI.tab = 'dati'; touch(); render(); };
   const opt = (id, t, d) => h('button', { type: 'button', class: 'thm' + (cur === id ? ' on' : ''), 'aria-pressed': cur === id ? 'true' : 'false', onclick: () => pick(id) }, h('span', { class: 'thm-t' }, t + (cur === id ? ' · in uso' : '')), h('span', { class: 'thm-d' }, d));
-  return h('section', { class: 'card' }, h('h2', null, 'Disposizione'), h('p', { class: 'muted' }, 'Scegli come sono organizzate le schede: 4 schede (Home, Investimenti, Spese, Altro) oppure la disposizione classica con 6 schede. I colori si scelgono qui sotto in Aspetto. I dati sono gli stessi.'),
+  return h('section', { class: 'card' }, h('h2', null, 'Dimensione e disposizione'), h('p', { class: 'muted' }, 'Quanto grande è tutto: con «Piccola» vedi più cose nella schermata.'), h('div', { class: 'row' }, SCALES.map(([k, l]) => btn(l, () => { S.settings.scale = k; try { localStorage.setItem('finanze-scale', k); } catch { /* niente */ } touch(); render(); }, 'sm' + (scaleKey() === k ? ' pri' : '')))), h('h3', null, 'Disposizione'), h('p', { class: 'muted' }, 'Scegli come sono organizzate le schede: 4 schede (Home, Investimenti, Spese, Altro) oppure la disposizione classica con 6 schede. I colori si scelgono qui sotto in Aspetto. I dati sono gli stessi.'),
     h('div', { class: 'thm-grid' }, opt('revolut', '4 schede', 'Home a riquadri, Investimenti con i logo e i conti a fisarmonica, tutto il resto in Altro'), opt('classico', 'Classica (6 schede)', 'Panoramica, Conti, PAC, Spese, Consigli e Analisi nella barra')),
     h('p', { class: 'muted' }, 'Per spostare le sezioni (Home, Investimenti, Altro): tieni premuto su una sezione finché non si muove, poi trascinala su o giù e premi Fine. L\'ordine vale per ogni disposizione.'), h('div', { class: 'row' }, btn('Rimetti l\'ordine di fabbrica', () => { if (S.settings.order && Object.keys(S.settings.order).length && !confirm('Rimetto tutte le sezioni nell\'ordine di partenza?')) return; S.settings.order = {}; touch(); render(); }, 'sm')),
     h('p', { class: 'muted' }, 'Versione dell\'app: ' + APP_VER + '. Se qui non leggi questa data, il telefono sta usando una copia vecchia.'),
