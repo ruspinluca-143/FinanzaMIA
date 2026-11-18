@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-HHP1l+3JQyYtiN4p5auxHwdh+mGtN3m6wRfIBv3hXV0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-KhzFWdhjZ914ictreJSDvtY8dSYG00dUOhPvYDyFRMU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -640,7 +640,9 @@ body{background:var(--bg)}
 .jig>[data-sec]{animation:jig .26s ease-in-out infinite alternate;transform-origin:50% 50%;touch-action:none;cursor:grab}
 .jig>[data-sec]:nth-child(even){animation-delay:-.13s;animation-direction:alternate-reverse}
 .jig>[data-sec]>*{pointer-events:none}
-.jig>[data-sec].drag{animation:none;box-shadow:0 18px 50px rgba(0,0,0,.45);opacity:.97;margin:0!important;cursor:grabbing}
+.jig>[data-sec].drag{animation:none;position:relative;z-index:60;box-shadow:0 18px 50px rgba(0,0,0,.45);opacity:.97;cursor:grabbing;will-change:transform}
+.jig.dragging>[data-sec]{animation:none}
+[data-reorder]>[data-sec]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .jig-ph{border-radius:18px;background:color-mix(in srgb,var(--s1) 10%,transparent);border:1.5px dashed color-mix(in srgb,var(--s1) 55%,transparent)}
 @keyframes jig{from{transform:rotate(-.45deg)}to{transform:rotate(.45deg)}}
 .jig-bar{position:fixed;left:12px;right:12px;top:calc(8px + env(safe-area-inset-top));z-index:70;display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 14px;border-radius:16px;background:var(--card-s);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:14px;font-weight:600}
@@ -816,7 +818,7 @@ html .acard{padding:7px 8px;border-radius:14px}
 html .conti-head{padding:9px 11px;border-radius:14px}
 html .rv-row{padding:6px 0}
 html .subtab{padding:7px 10px;font-size:13px}
-html .tr-day{height:36px;min-height:36px;padding:3px 0 2px}html .wz-search{font-size:16px}body{zoom:var(--zm,1)}
+html .tr-day{height:auto;min-height:46px;padding:4px 0 4px;gap:1px;overflow:visible}html .tr-day small{font-size:10px;line-height:1.2}html .wz-search{font-size:16px}.view{zoom:var(--zm,1)}
 html h2{font-size:15px;margin-bottom:6px}
 html .cq{padding:7px 12px;font-size:16px}
 html .top{padding:8px 16px 6px}
@@ -5077,30 +5079,45 @@ function saveOrder() {
   if (REORDER.key === 'acc') { shown.forEach((id, i) => { const a = S.accounts.find(x => x.id === id); if (a) a.ord = i; }); touch(); return; }          // l'ordine dei conti dentro il gruppo (vale ovunque)
   SEC_ORDER()[REORDER.key] = shown.concat(old.filter(id => !shown.includes(id))); touch();
 }
-function dragSection(e, it) {
-  const box = it.parentElement, r0 = it.getBoundingClientRect(), cs = getComputedStyle(it), y0 = e.clientY; let y = y0, raf = 0;
-  const ph = h('div', { class: 'jig-ph' }); ph.style.height = r0.height + 'px'; ph.style.margin = cs.margin; it.after(ph);
-  it.classList.add('drag'); Object.assign(it.style, { position: 'fixed', left: r0.left + 'px', width: r0.width + 'px', top: r0.top + 'px', zIndex: 60 });
-  const place = () => {
-    it.style.top = (r0.top + y - y0) + 'px'; const c = r0.top + (y - y0) + r0.height / 2, sibs = [...box.children].filter(x => x.dataset && x.dataset.sec && x !== it);
-    const nxt = sibs.find(s => { const r = s.getBoundingClientRect(); return c < r.top + r.height / 2; });
-    if (nxt) { if (ph.nextSibling !== nxt) box.insertBefore(ph, nxt); } else if (sibs.length) { const last = sibs[sibs.length - 1]; if (last.nextSibling !== ph) last.after(ph); }
+let DRAGGING = false;
+document.addEventListener('touchmove', e => { if (DRAGGING) e.preventDefault(); }, { passive: false });          // mentre trascini una sezione la pagina non deve scorrere da sola (altrimenti il browser annulla il gesto e "si inceppa")
+function dragSection(y0, it) {
+  /* La sezione resta nel flusso della pagina e si muove solo con una traslazione (niente position:fixed: dentro un contenitore ridotto o animato finiva
+     fuori posto e "spariva"). Le altre sezioni, ferme (niente tremolio), scorrono via con una piccola animazione quando ci passi sopra. */
+  const box = it.parentElement, secs = () => [...box.children].filter(x => x.dataset && x.dataset.sec);
+  let y = y0, raf = 0, shift = 0, k = 1; DRAGGING = true;
+  box.classList.add('dragging'); it.classList.add('drag');
+  { const a = it.getBoundingClientRect().top; it.style.transform = 'translateY(100px)'; const b = it.getBoundingClientRect().top; it.style.transform = ''; if (Math.abs(b - a) > 20) k = (b - a) / 100; }          // di quanto si sposta davvero un tratto da 100px (la scala della pagina li riduce)
+  const grab = y0 - it.getBoundingClientRect().top;
+  const apply = () => { const r = it.getBoundingClientRect(), flow = r.top - shift; shift = (y - grab) - flow; it.style.transform = 'translate3d(0,' + (shift / k).toFixed(2) + 'px,0)'; return r.height; };
+  const flip = fn => { const sibs = secs().filter(x => x !== it), before = new Map(sibs.map(x => [x, x.getBoundingClientRect().top])); fn();
+    for (const x of sibs) { const d = before.get(x) - x.getBoundingClientRect().top; if (Math.abs(d) > 1 && x.animate && !REDUCED) x.animate([{ transform: 'translateY(' + (d / k).toFixed(1) + 'px)' }, { transform: 'none' }], { duration: 190, easing: 'cubic-bezier(.2,.8,.2,1)' }); } };
+  const step = () => {
+    if (y < 110) window.scrollBy(0, -16); else if (y > innerHeight - 130) window.scrollBy(0, 16);
+    const hh = apply(), c = y - grab + hh / 2, all = secs(), i = all.indexOf(it), prev = all[i - 1], next = all[i + 1];
+    let moved = false;
+    if (next) { const r = next.getBoundingClientRect(); if (c > r.top + r.height / 2) { flip(() => box.insertBefore(it, next.nextSibling)); moved = true; } }
+    if (!moved && prev) { const r = prev.getBoundingClientRect(); if (c < r.top + r.height / 2) { flip(() => box.insertBefore(it, prev)); moved = true; } }
+    if (moved) apply();
+    raf = requestAnimationFrame(step);
   };
-  const loop = () => { if (y < 100) window.scrollBy(0, -14); else if (y > innerHeight - 120) window.scrollBy(0, 14); place(); raf = requestAnimationFrame(loop); };
-  const mv = ev => { y = ev.clientY; ev.preventDefault(); }, up = () => { cancelAnimationFrame(raf); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-    it.classList.remove('drag'); it.removeAttribute('style'); ph.replaceWith(it); saveOrder(); };
-  window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up); loop();
+  const mv = ev => { y = ev.clientY; ev.preventDefault(); };
+  const up = () => { cancelAnimationFrame(raf); window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); DRAGGING = false;
+    const s = shift / k; it.style.transform = ''; it.classList.remove('drag'); box.classList.remove('dragging');
+    if (it.animate && !REDUCED && Math.abs(s) > 1) it.animate([{ transform: 'translateY(' + s.toFixed(1) + 'px)' }, { transform: 'none' }], { duration: 170, easing: 'cubic-bezier(.2,.8,.2,1)' });          // si posa dolcemente nel suo posto
+    saveOrder(); };
+  window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up); step();
 }
 (function () {
-  let timer = 0, tgt = null, sx = 0, sy = 0, block = 0;
+  let timer = 0, tgt = null, sx = 0, sy = 0, ly = 0, block = 0;
   document.addEventListener('pointerdown', e => {
     if (!S || LOCKED || document.querySelector('dialog[open]')) return;
     const it = e.target.closest && e.target.closest('[data-sec]'); if (!it || !it.parentElement || !it.parentElement.dataset.reorder) return;
-    if (REORDER.on) { if (it.parentElement === REORDER.box) { e.preventDefault(); dragSection(e, it); } return; }
-    if (e.pointerType === 'mouse' && e.button) return; tgt = it; sx = e.clientX; sy = e.clientY; clearTimeout(timer);
-    timer = setTimeout(() => { if (tgt) { startReorder(tgt.parentElement); block = Date.now() + 700; } tgt = null; }, 520);
+    if (REORDER.on) { if (it.parentElement === REORDER.box && !DRAGGING) { e.preventDefault(); dragSection(e.clientY, it); } return; }
+    if (e.pointerType === 'mouse' && e.button) return; tgt = it; sx = e.clientX; sy = ly = e.clientY; clearTimeout(timer);
+    timer = setTimeout(() => { if (tgt) { const t = tgt; startReorder(t.parentElement); block = Date.now() + 700; dragSection(ly, t); } tgt = null; }, 480);          // tenendo premuto la sezione si "stacca" e la stessa pressione la trascina: non serve rialzare il dito
   });
-  document.addEventListener('pointermove', e => { if (tgt && (Math.abs(e.clientX - sx) > 8 || Math.abs(e.clientY - sy) > 8)) { clearTimeout(timer); tgt = null; } }, { passive: true });
+  document.addEventListener('pointermove', e => { if (tgt) { ly = e.clientY; if (Math.abs(e.clientX - sx) > 8 || Math.abs(e.clientY - sy) > 8) { clearTimeout(timer); tgt = null; } } }, { passive: true });
   ['pointerup', 'pointercancel'].forEach(ev => document.addEventListener(ev, () => { clearTimeout(timer); tgt = null; }, { passive: true }));
   document.addEventListener('click', e => { if (REORDER.on && !e.target.closest('.jig-bar')) { e.preventDefault(); e.stopPropagation(); } else if (Date.now() < block) { e.preventDefault(); e.stopPropagation(); } }, true);
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('[data-sec]')) e.preventDefault(); });
