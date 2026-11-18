@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lWCvxzCQKJf6q7EDI8GjxglpOiNFg8EnZ5NtnmjDlz4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BYHh3TEtAKQi4guyYj6W+QAxj+Okd69upsDQEbsSPl0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -824,6 +824,7 @@ html .cq{padding:7px 12px;font-size:16px}
 html .top{padding:8px 16px 6px}
 html .tabs{padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
 html .tabs button{padding:4px 0 3px;font-size:11px}
+@media (min-width:701px){html .tabs{gap:4px;padding:5px}html .tabs button{padding:9px 20px;font-size:14px}}
 html .tr-item{padding:6px 0}
 html .todo{padding:6px 0}
 html .rv-sec{margin:12px 4px 3px}
@@ -1494,7 +1495,7 @@ const MY_HASH = (() => { const m = document.querySelector('meta[http-equiv="Cont
 let NEWVER = false, verAt = 0;
 async function checkNewVersion() {
   if (!ONLINE || NEWVER || !MY_HASH || Date.now() - verAt < 5 * 60000) return; verAt = Date.now();
-  try { const t = await (await fetch('./', { cache: 'no-store' })).text(), x = /script-src '([^']+)'/.exec(t); if (x && x[1] !== MY_HASH) { NEWVER = true; if (!LOCKED) render(); } } catch { /* senza rete: niente */ }
+  try { const t = await (await fetch('./?nc=' + Date.now(), { cache: 'no-store' })).text(), x = /script-src '([^']+)'/.exec(t); if (x && x[1] !== MY_HASH) { NEWVER = true; if (!LOCKED) render(); } } catch { /* senza rete: niente */ }
 }
 async function updateNow() { try { clearTimeout(saveTimer); if (S && !DEMO) { await save(false); if (CL.pending && CL.ready) await clPush(); } } finally { location.reload(); } }
 const newVerBar = () => NEWVER ? h('div', { class: 'banner' }, h('span', null, 'C\'è una versione nuova dell\'app.'), btn('Aggiorna adesso', updateNow, 'pri sm')) : null;
@@ -3610,7 +3611,8 @@ function oppScorecard() {
 /* ---- diario: le tue operazioni recenti senza motivo, e il verdetto sulle decisioni scadute ---- */
 function diaryTodo() {
   const J = JR(), have = new Set(J.map(j => j.opId).filter(Boolean)), lim = new Date(); lim.setDate(lim.getDate() - 60);
-  return OPS().filter(o => (o.kind === 'acquisto' || o.kind === 'vendita') && o.instId && o.date >= trYmd(lim) && !have.has(o.id) && !(ACK()['d:' + o.id]));
+  const inPac = o => o.kind === 'acquisto' && PL().some(p => (p.accId === o.accId && ((p.instId && p.instId === o.instId) || (p.parts || []).some(x => x.instId && x.instId === o.instId))) || (o.note && p.label && String(o.note).startsWith(p.label + ' del ')));          // gli acquisti che fanno parte di un PAC non vanno motivati ogni volta: il motivo e' il PAC
+  return OPS().filter(o => (o.kind === 'acquisto' || o.kind === 'vendita') && o.instId && o.date >= trYmd(lim) && !have.has(o.id) && !(ACK()['d:' + o.id]) && !inPac(o));
 }
 function diaryWrite(o) {
   const i = inst(o.instId), px = o.price > 0 ? o.price : (i ? i.price : null);
