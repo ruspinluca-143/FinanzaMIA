@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BYHh3TEtAKQi4guyYj6W+QAxj+Okd69upsDQEbsSPl0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-a6dtI1IgOks1vMOhIa9ICiwL6gHq85+OF6kXOdSKTsQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -821,7 +821,7 @@ html .subtab{padding:7px 10px;font-size:13px}
 html .tr-day{height:auto;min-height:46px;padding:4px 0 4px;gap:1px;overflow:visible}html .tr-day small{font-size:10px;line-height:1.2}html .wz-search{font-size:16px}.view{zoom:var(--zm,1)}
 html h2{font-size:15px;margin-bottom:6px}
 html .cq{padding:7px 12px;font-size:16px}
-html .top{padding:8px 16px 6px}
+html .top{padding:max(8px,env(safe-area-inset-top)) 16px 6px}
 html .tabs{padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
 html .tabs button{padding:4px 0 3px;font-size:11px}
 @media (min-width:701px){html .tabs{gap:4px;padding:5px}html .tabs button{padding:9px 20px;font-size:14px}}
@@ -1522,6 +1522,8 @@ document.addEventListener('visibilitychange', () => {
 const fxRate = c => (!c || c === 'EUR') ? 1 : (S.fx[c] > 0 ? S.fx[c] : null);
 const inst = id => S.instruments.find(i => i.id === id);
 const posValue = p => { const i = inst(p.instId); return i ? p.qty * i.price * (fxRate(i.ccy) ?? 1) : 0; };
+const isTrade = a => a.type === 'trading';          // MetaTrader: tutti i soldi sulla piattaforma sono sempre investiti facendo trading (buy e sell), quindi non c'e' mai liquidita'
+const cashClass = a => isTrade(a) ? 'Trading' : 'Liquidità';
 const accCash = a => a.dep ? depValue(a.dep) : (a.cash || 0) * (fxRate(a.cashCcy) ?? 1);      // conto deposito: capitale piu' interessi maturati
 const accValue = a => accCash(a) + a.positions.reduce((t, p) => t + posValue(p), 0);
 const totalValue = () => S.accounts.reduce((t, a) => t + accValue(a), 0);
@@ -1575,7 +1577,7 @@ function exposure(dim, noBox) {          // noBox: senza le casse separate (per 
   for (const a of S.accounts) {
     if (noBox && a.box) continue;
     const cash = accCash(a);
-    if (cash) add(dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : 'Liquidità', cash);
+    if (cash) add(dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : cashClass(a), cash);
     for (const p of a.positions) {
       const i = inst(p.instId); if (!i) continue; const v = posValue(p);
       if (dim === 'acc') add(a.name, v);
@@ -1632,7 +1634,7 @@ function runScenario() {
   const sh = UI.shock, cs = l => sh.cls[l.toLowerCase()] || 0, fs = c => (c && c !== 'EUR' ? sh.fx[c] : 0) || 0;
   const eff = (l, c) => (1 + cs(l)) * (1 + fs(c)) - 1;
   return S.accounts.map(a => {
-    const cash = accCash(a); let val = cash, d = cash * eff('Liquidità', a.cashCcy);
+    const cash = accCash(a); let val = cash, d = cash * eff(cashClass(a), a.cashCcy);
     for (const p of a.positions) { const i = inst(p.instId); if (!i) continue; const v = posValue(p); val += v; for (const [k, w] of parseMix(i.cls, 'Non classificato')) d += v * w * eff(k, i.ccy); }
     return { a, val, d };
   });
@@ -1706,7 +1708,7 @@ function editAccount(a) {
     { key: 'name', label: 'Nome del conto', req: true, ph: 'es. Fineco titoli' },
     { key: 'type', label: 'Tipo', type: 'select', options: Object.entries(TYPES).map(([k, t]) => [k, t.label]), ...(isNew ? { sync: i => { i.perf.checked = TYPES[i.type.value].perf; } } : {}) },
     { key: 'perf', label: 'Includi nel calcolo di guadagno e rendimento', type: 'check', hint: 'sì per broker, crypto, pensione, trading; no per conti correnti e carte' },
-    { key: 'cash', label: 'Liquidità nel conto', type: 'number', ...(a && dogsLinkOf(a) ? { hint: '🔗 Collegato a DOGsitterini: alla prossima apertura questo saldo torna uguale a quello di DOGsitterini.' } : {}) },
+    { key: 'cash', label: a && isTrade(a) ? 'Capitale sul conto di trading (tutto investito, nessuna liquidità)' : 'Liquidità nel conto', type: 'number', ...(a && dogsLinkOf(a) ? { hint: '🔗 Collegato a DOGsitterini: alla prossima apertura questo saldo torna uguale a quello di DOGsitterini.' } : {}) },
     { key: 'cashCcy', label: 'Valuta della liquidità', list: 'dl-ccy', ph: 'EUR' },
     { key: 'intR', label: 'Interesse annuo sulla liquidità (%)', type: 'number', hint: 'Per i conti di risparmio senza vincoli (es. Revolut risparmi cani, 2,5%): ogni giorno aggiungo alla liquidità l\'interesse di quel giorno sul saldo che hai. Lascia vuoto se non serve.' },
     { key: 'intT', label: 'Imposta sugli interessi (%)', type: 'number', hint: '0 se gli interessi ti arrivano già netti; 26 se vanno tassati.' },
@@ -2201,8 +2203,8 @@ function talkMix(dim, lab) {          // una fetta della ciambella: che cosa c'e
   const k = String(lab).toLowerCase(), m = new Map(), tot = totalValue();
   const add = (name, acc, v, go) => { if (!fin(v) || !v) return; const key = name + '|' + acc; const o = m.get(key) || [name, 0, acc, go]; o[1] += v; m.set(key, o); };
   for (const a of S.accounts) {
-    const cash = accCash(a), cl = dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : 'Liquidità';
-    if (cash && cl.toLowerCase() === k) add('Liquidità', a.name, cash, openAcc(a));
+    const cash = accCash(a), cl = dim === 'ccy' ? (a.cashCcy || 'EUR') : dim === 'acc' ? a.name : cashClass(a);
+    if (cash && cl.toLowerCase() === k) add(cashClass(a), a.name, cash, openAcc(a));
     for (const p of a.positions) {
       const i = inst(p.instId); if (!i) continue; const v = posValue(p), go = () => talkPos(a, p);
       if (dim === 'acc') { if (a.name.toLowerCase() === k) add(i.name, a.name, v, go); }
@@ -3123,7 +3125,7 @@ function alertsRaw() {
   }
   const ex = exposure('class'), cr = ex.filter(([l]) => /crypto/i.test(l)).reduce((t, x) => t + x[1], 0) / tot;
   if (cr * 100 > th('maxCrypto')) out.push('Le crypto valgono ' + ilPct(cr) + ': oltre la soglia del ' + th('maxCrypto') + '%.');
-  const cash = S.accounts.filter(a => ['broker', 'crypto', 'trading'].includes(a.type)).reduce((t, a) => t + accCash(a), 0) / tot;
+  const cash = S.accounts.filter(a => ['broker', 'crypto'].includes(a.type)).reduce((t, a) => t + accCash(a), 0) / tot;
   if (cash * 100 > th('maxCash')) out.push('Liquidità ferma nei conti d\'investimento: ' + pct(cash) + ' del patrimonio (soglia ' + th('maxCash') + '%).');
   if (S.policy.target && S.policy.target.trim()) { const cur = new Map(ex.map(([l, v]) => [l.toLowerCase(), v / tot])); for (const [k, w] of parseMix(S.policy.target, 'Non classificato')) { const d = ((cur.get(k.toLowerCase()) || 0) - w) * 100; if (Math.abs(d) > th('tol')) out.push('«' + k + '»: hai ' + pct(cur.get(k.toLowerCase()) || 0) + ' (' + eur((cur.get(k.toLowerCase()) || 0) * tot) + ') contro un obiettivo del ' + pct(w) + ' (' + eur(w * tot) + '): ' + (d > 0 ? '+' : '') + nfp.format(d) + ' punti (soglia ±' + th('tol') + ').'); } }
   const unc = ex.filter(([l]) => /non classificat/i.test(l)).reduce((t, x) => t + x[1], 0) / tot; if (unc > 0.1) out.push('Il ' + pct(unc) + ' del patrimonio è "Non classificato": completa le classi in Strumenti.');
@@ -3234,7 +3236,7 @@ function anCosti() {
   let ter = 0; const noTer = [], inv = ['broker', 'crypto', 'trading']; let bollo = 0, cash = 0, latent = 0, gainTot = 0; const bigTer = [];
   for (const a of S.accounts) {
     const isInv = inv.includes(a.type);
-    if (isInv) cash += accCash(a);
+    if (isInv && !isTrade(a)) cash += accCash(a);
     for (const p of a.positions) {
       const i = inst(p.instId); if (!i) continue; const v = posValue(p);
       if (isInv) bollo += v * 0.002;
@@ -5415,7 +5417,7 @@ function tabInvestimenti() {
     return h('details', { class: 'card rv-acc g-' + g.k, open: open ? '' : null, 'data-sec': a.id },
       h('summary', null, rvAccBadge(a), h('span', { class: 'rv-nm' }, h('b', null, a.name), h('small', null, (TYPES[a.type] || {}).label || '')), h('span', { class: 'rv-v' }, eur(accValue(a)), pf && fin(pf.pnlPct) ? h('small', null, gl(pf.pnl, spct(pf.pnlPct))) : null)),
       h('div', { class: 'rv-body' },
-        accCash(a) > 0.005 && pos.length ? rvRow(rvEuro(), 'Liquidità', 'saldo disponibile', eur(accCash(a)), '', openAcc(a), 'rv-cash') : null,
+        accCash(a) > 0.005 && pos.length ? rvRow(rvEuro(), isTrade(a) ? 'Capitale in trading' : 'Liquidità', isTrade(a) ? 'tutto investito, nessuna liquidità' : 'saldo disponibile', eur(accCash(a)), '', openAcc(a), 'rv-cash') : null,
         shown.map(x => { const v = posValue(x.p); return rvRow(rvPosIcon(x.i), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }),
         h('div', { class: 'actbar', style: 'margin-top:8px' }, btn('Apri il conto', openAcc(a), 'sm'), btn('+ Operazione', () => editOperation({ accId: a.id }), 'sm pri'))));
   };
@@ -5738,7 +5740,7 @@ function tabConti() {
   out.push(gCard('Andamento del conto', 'Come è cambiato il valore di questo conto. Scegli il periodo; tocca o sfiora un punto per leggere i numeri.', gChips(G_PERS.map(x => [x[0], x[1]]), per, v => { UI.gper = v; }, 'Periodo'),
     f1 && l1 && pts.length > 1 ? h('p', null, h('b', null, 'Nel periodo: ' + seur(l1.v - f1.v)), h('span', { class: 'muted' }, ' (dal ' + fmtDate(isoOf(f1.t)) + ')')) : null, gline([{ name: a.name, color: '#0a84ff', pts }], { fmt: eur }),
     vs.length >= snap.length && a.positions.length ? h('p', { class: 'muted' }, 'Ricostruito con le quantità di oggi sui prezzi storici: non conosce acquisti e vendite fatti prima.') : null));
-  const rows = a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p)] : null; }).filter(Boolean).concat(accCash(a) > 0 ? [['Liquidità', accCash(a)]] : []).filter(r => r[1] > 0).sort((x, y) => y[1] - x[1]);
+  const rows = a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p)] : null; }).filter(Boolean).concat(accCash(a) > 0 ? [[isTrade(a) ? 'Capitale in trading' : 'Liquidità', accCash(a)]] : []).filter(r => r[1] > 0).sort((x, y) => y[1] - x[1]);
   if (rows.length > 1) out.push(gCard('Di che cosa è fatto', 'Tocca una fetta o una voce per vedere quanto pesa.', donut(rows, 'Valore', false, lab => { const r = rows.find(x => x[0] === lab); if (r) talk({ kind: a.name, title: lab, value: eur(r[1]), num: r[1], say: 'Pesa ' + pct(r[1] / tot) + ' di questo conto.' }); })));
   const by = new Map(); for (const f of a.flows) { const k = f.date.slice(0, 7); by.set(k, (by.get(k) || 0) + f.amount * flowSign(f.type)); }
   if (by.size) { const items = []; for (let k = 11; k >= 0; k--) { const m = addMonthsStr(today().slice(0, 7) + '-01', -k).slice(0, 7), v = by.get(m) || 0; items.push({ l: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'short' }), v, tip: new Date(m + '-01T00:00:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) + ': ' + seur(v) }); }
@@ -5775,9 +5777,9 @@ function viewAccount(id) {
   el.append(...(LAYOUT() === 'classico' ? [h('div', null, btn('← Tutti i conti', () => { UI.acc = null; render(); })), h('h2', { class: 'acc-h' }, a.name), h('div', { class: 'acc-acts' }, btn('+ Operazione', () => editOperation({ accId: a.id }), 'pri'), btn('Modifica conto', () => editAccount(a)), btn('Elimina', () => delAccount(a), 'danger'))] : [rvAccHead(a)]),
     h('p', { class: 'muted' }, (TYPES[a.type] ? TYPES[a.type].label : a.type) + (a.perf ? ' · inclusa nella performance' : ' · non inclusa nella performance') + (a.upd ? ' · aggiornato il ' + fmtDate(a.upd) : '') + (a.note ? ' · ' + a.note : '') + (dogsLinkOf(a) ? ' · 🔗 collegato a DOGsitterini (saldo ' + dogsLinkOf(a) + '): non scriverlo a mano, viene riallineato a ogni apertura' : '')));
   if (a.intRate > 0 && !a.dep) el.append(intLine(a));
-  const accRows = () => [accCash(a) ? ['Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
+  const accRows = () => [accCash(a) ? [isTrade(a) ? 'Capitale in trading' : 'Liquidità', accCash(a), a.cashCcy !== 'EUR' ? a.cashCcy : ''] : null].concat(a.positions.map(p => { const i = inst(p.instId); return i ? [i.name, posValue(p), '', () => talkPos(a, p)] : null; })).filter(Boolean).sort((x, y) => y[1] - x[1]);
   const fermo = accGroup(a) === 'fermi' && !a.positions.length;
-  if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
+  if (fermo) el.append(tiles(fermoTiles(a))); else el.append(tiles([{ l: 'Valore', v: eur(accValue(a)), s: isTrade(a) ? 'tutto investito facendo trading: nessuna liquidità' : 'di cui liquidità ' + eur(accCash(a)) + (a.cashCcy !== 'EUR' ? ' (' + a.cashCcy + ')' : ''), x: () => ({ kind: a.name, num: accValue(a), rows: accRows(), rowsTitle: 'Da che cosa è fatto (tocca un titolo)', acts: !a.positions.length && !a.dep ? [['Aggiorna il valore totale…', () => setAccountTotal(a), 'pri']] : null }) },
     { l: 'Versato netto', v: a.perf ? eur(pf.contrib) : '—', x: () => ({ kind: a.name, rows: a.flows.slice().sort((x, y) => x.date < y.date ? 1 : -1).slice(0, 12).map(f => [fmtDate(f.date) + ' · ' + ((FLOW_TYPES.find(t => t[0] === f.type) || [0, f.type])[1].split(' (')[0]), f.amount * flowSign(f.type), f.note || '']), rowsTitle: 'Gli ultimi movimenti', signed: true }) },
     { l: 'Guadagno / Perdita', v: a.perf && pf.pnl != null ? gl(pf.pnl, seur(pf.pnl)) : '—', s: a.perf ? spct(pf.pnlPct) : '' }, { l: 'Rendimento annualizzato', v: a.perf && pf.xirr != null ? gl(pf.xirr, spct(pf.xirr)) : '—', s: a.perf && pf.xirr == null ? xirrWhy(pf) : '' }]));
   if (LAYOUT() !== 'classico' && !fermo) { const pr = a.positions.map(p => ({ p, i: inst(p.instId) })).filter(x => x.i).sort((x, y) => posValue(y.p) - posValue(x.p)); el.append(rvCard(rvHead('Posizioni', '+ Posizione', () => editPosition(a)), accCash(a) > 0.005 ? rvRow(rvEuro(), 'Liquidità', a.cashCcy !== 'EUR' ? a.cashCcy : 'saldo disponibile', eur(accCash(a)), '', () => editAccount(a), 'rv-cash') : null, pr.map(x => { const v = posValue(x.p); return rvRow(rvPosIcon(x.i), x.i.name, (x.p.qty ? nfq.format(x.p.qty) + ' · ' : '') + nf2.format(x.i.price) + ' ' + (x.i.ccy || ''), eur(v), x.p.cost > 0 ? gl(v - x.p.cost, spct((v - x.p.cost) / x.p.cost)) : '', () => talkPos(a, x.p)); }))); }
@@ -7632,13 +7634,13 @@ const LAB_CRISI = [          // ipotesi grossolane per classe (frazione): obblig
   { n: 'Covid-19', ob: -0.02, ma: 0, cr: -0.5, nota: 'Bitcoin perse circa metà in poche settimane.' },
   { n: 'Inflazione e rialzo dei tassi', ob: -0.17, ma: 0, cr: -0.65, nota: 'Il 2022 fece male anche alle obbligazioni, non solo alle azioni.' },
   { n: 'Lunedì nero 1987', ob: 0.02, ma: -0.05, cr: -0.5, nota: 'Le cripto non esistevano: ho usato un calo ipotetico del 50%.' }];
-const labCls = l => /crypto|cripto/i.test(l) ? 'cr' : /obblig/i.test(l) ? 'ob' : /oro|material|commod|prime/i.test(l) ? 'ma' : /liquid|cassa|cash|monet/i.test(l) ? 'li' : 'az';
+const labCls = l => /trading/i.test(l) ? 'tr' : /crypto|cripto/i.test(l) ? 'cr' : /obblig/i.test(l) ? 'ob' : /oro|material|commod|prime/i.test(l) ? 'ma' : /liquid|cassa|cash|monet/i.test(l) ? 'li' : 'az';
 function labCrisi() {
   const el = h('div'), D = DATA.storico, tot = totalValue(), ex = exposure('class', true);
   if (!D) { el.append(h('section', { class: 'card' }, h('h2', null, 'Crisi del passato'), h('p', { class: 'muted' }, ONLINE ? 'Lo storico del mercato non è ancora disponibile: riprova tra poco.' : 'Apri l\'app dal sito per vedere lo storico.'))); return el; }
-  const eps = stEpisodi(stSerie(D), 0.15), NAMES = { az: 'Azioni', ob: 'Obbligazioni', ma: 'Oro e materie prime', cr: 'Cripto', li: 'Liquidità' };
+  const eps = stEpisodi(stSerie(D), 0.15), NAMES = { az: 'Azioni', ob: 'Obbligazioni', ma: 'Oro e materie prime', cr: 'Cripto', li: 'Liquidità', tr: 'Trading (MetaTrader, buy e sell: nessuna perdita ipotizzata)' };
   const base = {}; for (const [l, v] of ex) base[labCls(l)] = (base[labCls(l)] || 0) + v; const sum = Object.values(base).reduce((a, b) => a + b, 0);
-  const res = LAB_CRISI.map(c => { const cand = eps.filter(e => stNome(e) === c.n).sort((a, b) => a.dd - b.dd)[0]; if (!cand) return null; const sh = { az: cand.dd, ob: c.ob, ma: c.ma, cr: c.cr, li: 0 }, per = Object.entries(base).map(([k, v]) => [NAMES[k], v * sh[k], k, v]), loss = per.reduce((t, x) => t + x[1], 0); return { c, e: cand, per, loss, p: sum > 0 ? loss / sum : 0 }; }).filter(Boolean).sort((a, b) => a.p - b.p);
+  const res = LAB_CRISI.map(c => { const cand = eps.filter(e => stNome(e) === c.n).sort((a, b) => a.dd - b.dd)[0]; if (!cand) return null; const sh = { az: cand.dd, ob: c.ob, ma: c.ma, cr: c.cr, li: 0, tr: 0 }, per = Object.entries(base).map(([k, v]) => [NAMES[k], v * sh[k], k, v]), loss = per.reduce((t, x) => t + x[1], 0); return { c, e: cand, per, loss, p: sum > 0 ? loss / sum : 0 }; }).filter(Boolean).sort((a, b) => a.p - b.p);
   const ml = parseFloat(String((S.policy || {}).maxLoss || '').replace(',', '.'));
   el.append(h('section', { class: 'card' }, h('h2', null, 'Crisi del passato sul tuo patrimonio'), h('p', { class: 'muted' }, 'Che cosa sarebbe successo ai tuoi ' + eur(sum) + ' (senza le casse separate) se si ripetesse una grande crisi. Per le azioni uso il calo vero dell\'S&P 500 di quel periodo; per obbligazioni, oro e cripto sono stime mie di massima: servono a farsi un\'idea, non sono precise.')));
   if (!res.length || !(sum > 0)) { el.append(h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Non ho abbastanza dati per fare il calcolo.'))); return el; }
