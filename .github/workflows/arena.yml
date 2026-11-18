@@ -1,0 +1,45 @@
+name: Arena degli investitori (soldi finti)
+on:
+  schedule:
+    - cron: '30 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      forza:
+        description: "Rifai analisti e giudice anche se oggi l'hanno gia' fatto"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: arena
+  cancel-in-progress: false
+jobs:
+  arena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Fai girare un giorno di simulazione (prezzi veri, soldi finti)
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          FORZA: ${{ inputs.forza }}
+        run: |
+          if [ "$FORZA" = "true" ]; then node ./arena.js ./site --forza; else node ./arena.js ./site; fi
+      - name: Salva la simulazione e pubblica il sito
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "arena-bot"
+          git config user.email "arena-bot@users.noreply.github.com"
+          git add site/arena.json site/arena-prezzi.json
+          if git diff --cached --quiet; then echo "Niente di nuovo da salvare."; exit 0; fi
+          git commit -m "Arena del $(date -u '+%Y-%m-%d')"
+          git checkout -- .
+          ok=0
+          for i in 1 2 3 4; do
+            if git pull --rebase -X theirs origin main && git push; then ok=1; break; fi
+            sleep $((i*20))
+          done
+          if [ "$ok" != 1 ]; then echo "Non sono riuscito a salvare l'arena su GitHub."; exit 1; fi
+          gh workflow run prezzi.yml --ref main

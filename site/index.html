@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UJHrATyxkHtERO7VkD7K1jgajHpGlBWJAdOSVuozFc4='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lFM5Vp6l5Sox/53k0j6BWU5gQOhNzWyvBI+0LnRkGlU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2976,7 +2976,8 @@ function normMercati(j) {           // un elenco con un solo elemento puo' arriv
 async function loadOnlineData() {          // dal sito: storico prezzi e dati di mercato (solo file dello stesso sito)
   if (!ONLINE) return;
   const get = async f => { try { const r = await fetch(f, { cache: 'no-store' }); return r.ok ? await r.text() : null; } catch { return null; } };
-  const [hh, mm, az, ct, an, gs, cl, sto] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json'), get('classifiche.json'), get('storico-mercato.json')]);
+  const [hh, mm, az, ct, an, gs, cl, sto, ar] = await Promise.all([get('storico-prezzi.csv'), get('mercati.json'), get('aziende.json'), get('catalogo.json'), get('analisi.json'), get('grandi-soldi.json'), get('classifiche.json'), get('storico-mercato.json'), get('arena.json')]);
+  if (ar) { try { const j = JSON.parse(ar); if (j && j.app === 'finanze-arena' && Array.isArray(j.soggetti) && j.soggetti.length) DATA.arena = j; } catch { /* file non valido: ignorato */ } }
   if (sto) { try { const j = JSON.parse(sto); if (j && j.app === 'finanze-storico' && j.vix && j.vix.d.length > 5000 && j.spd && j.spm) DATA.storico = j; } catch { /* file non valido: ignorato */ } }
   if (cl) { try { const j = normClass(JSON.parse(cl)); if (j) DATA.classif = j; } catch { /* file non valido: ignorato */ } }
   if (gs) { try { const j = normGrandi(JSON.parse(gs)); if (j) DATA.grandi = j; } catch { /* file non valido: ignorato */ } }
@@ -2987,7 +2988,7 @@ async function loadOnlineData() {          // dal sito: storico prezzi e dati di
   if (az) { try { const j = JSON.parse(az); if (j && j.app === 'finanze-aziende' && Array.isArray(j.giorno)) DATA.aziende = j; } catch { /* file non valido: ignorato */ } }
   if (S && !DEMO && DATA.cat) { const n = applyCatalog(); if (n) { touch(); setStatus('Prezzi dal catalogo: ' + pl(n, 'strumento aggiornato', 'strumenti aggiornati')); } }
   if ((az || cl) && S && !LOCKED) { try { oppRecord(); oppLogUpdate(); } catch { /* niente */ } }
-  if (S && !LOCKED && (hh || mm || az || ct || an || gs || cl || sto)) render();
+  if (S && !LOCKED && (hh || mm || az || ct || an || gs || cl || sto || ar)) render();
 }
 /* ============ catalogo: i prezzi di TUTTI gli ETF, ETC/ETN, BTP e obbligazioni quotati in Italia e delle crypto principali (catalogo.json, scritto dal sito) ============ */
 const normT = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -3775,11 +3776,11 @@ function analisiBanner() {
   const an = DATA.analisi; if (!an) return null;
   return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
 }
-const CONS_VISTE = [['analisi', 'Analisi del giorno'], ['mercato', 'Mercati e notizie'], ['movers', 'Market movers'], ['storia', 'Storia'], ['grandi', 'Grandi fondi'], ['titoli', 'Classifiche'], ['chiedi', 'Chiedi all\'AI']];
+const CONS_VISTE = [['analisi', 'Analisi del giorno'], ['mercato', 'Mercati e notizie'], ['movers', 'Market movers'], ['storia', 'Storia'], ['grandi', 'Grandi fondi'], ['titoli', 'Classifiche'], ['arena', 'Arena'], ['chiedi', 'Chiedi all\'AI']];
 function tabConsigli() {          // una riga di sezioni da scorrere di lato (sottolineata quella aperta), poi la vista scelta
   const sub = UI.csub || 'analisi', seg = h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Mercati e idee' }, CONS_VISTE.map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
   setTimeout(() => { const a = seg.querySelector('[aria-selected=true]'); if (a && a.scrollIntoView) { try { seg.scrollLeft = Math.max(0, a.offsetLeft - 16); } catch (e) { /* ok */ } } }, 0);
-  return h('div', null, seg, sub === 'mercato' ? tabMercati() : sub === 'movers' ? tabMovers() : sub === 'storia' ? tabStoria() : sub === 'grandi' ? tabGrandi() : sub === 'titoli' ? tabClassifiche() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
+  return h('div', null, seg, sub === 'mercato' ? tabMercati() : sub === 'movers' ? tabMovers() : sub === 'storia' ? tabStoria() : sub === 'grandi' ? tabGrandi() : sub === 'titoli' ? tabClassifiche() : sub === 'arena' ? tabArena() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
 }
 function dataContext() {          // cio' che si manda all'AI: totali e pesi, MAI nomi dei conti o codici; per i titoli solo il nome e il peso
   const tot = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), cls = exposure('class', true).map(([l, v]) => ({ classe: l, peso_pct: Math.round(v / tot * 1000) / 10 })), area = exposure('area', true).map(([l, v]) => ({ area: l, peso_pct: Math.round(v / tot * 1000) / 10 }));
@@ -4236,6 +4237,72 @@ function bigLosersCard() {
   return h('section', { class: 'card' }, h('h2', null, 'Grandi aziende che scendono di più'), chips,
     rows.length ? talkBars(rows, true) : h('p', { class: 'muted' }, k === 'giorno' ? 'Nessuna grande azienda in calo nell\'ultima seduta.' : 'Questa lista si riempie man mano che si accumula lo storico (ora ' + pl(A.giorni_di_storico || 0, 'giorno', 'giorni') + '): servono ' + (k === 'settimana' ? '7' : '30') + ' giorni.'),
     h('p', { class: 'muted' }, 'Tra ' + (A.universo || 'le grandi aziende USA') + ': ' + A.lette + ' lette, seduta del ' + fmtDate(A.seduta) + ', aggiornato il ' + String(A.generato || '').slice(0, 16).replace('T', ' ') + '. Tocca un\'azienda per le notizie. Chi scende tanto può continuare a scendere: è un elenco da studiare, non un segnale di acquisto.'));
+}
+/* ============ Arena: investitori simulati con soldi finti, analisti e giudice (arena.json, scritto ogni giorno feriale dal sito) ============ */
+const arGr = g => (DATA.arena && DATA.arena.gruppi && DATA.arena.gruppi[g]) || g;
+const arLast = s => s.storia && s.storia.length ? s.storia[s.storia.length - 1][1] : (DATA.arena ? DATA.arena.budget : 10000);
+const arRet = s => (arLast(s) / ((DATA.arena && DATA.arena.budget) || 10000) - 1) * 100;
+const arSp = n => !fin(n) ? '—' : (n > 0 ? '+' : '') + nfp.format(n) + '%';
+const arClima = c => c >= 2 ? 'molto favorevole' : c === 1 ? 'favorevole' : c === 0 ? 'neutro' : c === -1 ? 'prudente' : 'molto prudente';
+function talkArenaSogg(s) {
+  const A = DATA.arena, m = (A.giudice && A.giudice.metriche && A.giudice.metriche[s.id]) || {}, v = arLast(s), ctrl = s.tipo === 'controllo';
+  const rows = Object.entries(s.pesi || {}).sort((a, b) => b[1] - a[1]).map(([g, p]) => [arGr(g), p, '', null, nfp.format(p) + '%']);
+  const ult = (s.decisioni || []).slice().reverse().find(d => d.motivo), op = (s.ops || [])[s.ops.length - 1];
+  talk({ kind: ctrl ? 'Metro di confronto' : 'Investitore simulato (soldi finti)', title: s.nome + ' · ' + s.stile, value: eur(v), num: v, say: s.mentalita + (ult ? ' Ultima decisione (' + fmtDate(ult.d) + '): ' + ult.motivo : ''),
+    how: 'Parte da ' + eur(A.budget) + ' finti il ' + fmtDate(A.avvio) + ' e paga ' + nfp.format(A.commissione * 100) + '% di commissione su ogni acquisto e vendita. Finora: ' + arSp(m.ret) + (fin(m.dd) ? ', peggior calo ' + nfp.format(m.dd) + '%' : '') + (fin(m.vsPassivo) && s.id !== 'passivo' ? ', ' + arSp(m.vsPassivo) + ' rispetto al passivo' : '') + (fin(m.commissioni) ? ', commissioni pagate ' + eur(m.commissioni) : '') + '.',
+    box: op && op.mosse && op.mosse.length ? ['Ultima operazione (' + fmtDate(op.d) + ')', op.mosse.slice(0, 8).map(x => arGr(x.g) + ': da ' + nfp.format(x.da) + '% a ' + nfp.format(x.a) + '%').join(' · ')] : null,
+    rows, rowsTitle: 'Come ha ripartito i soldi (peso per tema)', tip: ctrl ? 'Chi non batte questo metro non aggiunge niente rispetto a un semplice ETF: serve a distinguere la bravura dalla fortuna.' : 'È una simulazione: serve a capire quali mentalità reggono nel tempo, non a copiare un portafoglio.' });
+}
+function talkArenaAnalista(a) {
+  const sc = a.scheda, P = (DATA.arena.pagellaAnalisti || {})[a.id] || {};
+  talk({ kind: 'Analista · ' + a.reparto, title: a.nome + ', ' + a.reparto, value: sc ? 'Clima: ' + arClima(sc.clima) : 'Nessuna scheda', say: sc ? sc.sintesi : 'Questo analista non ha ancora scritto una scheda.',
+    box: sc && sc.rischi && sc.rischi.length ? ['Rischi che vede', sc.rischi.join(' · ')] : null,
+    how: 'Legge titoli di giornali pubblici e numeri di mercato del suo reparto (' + a.focus + '). Tesi a 3 mesi: ' + (P.chiuse ? P.giuste + ' giuste su ' + P.chiuse + ' chiuse' : 'ancora nessuna chiusa') + (P.aperte ? ', ' + P.aperte + ' aperte' : '') + '.' + (sc && sc.limiti ? ' Limite: ' + sc.limiti : ''),
+    tip: 'Le schede sono pareri scritti da un\'IA su notizie pubbliche: possono sbagliare. Il giudice controlla dopo 3 mesi chi aveva ragione.' });
+}
+function arenaCards() {
+  const A = DATA.arena, out = [], J = A.giudice || {}, sogg = (A.soggetti || []).slice().sort((a, b) => arRet(b) - arRet(a));
+  const pas = sogg.find(s => s.id === 'passivo'), nInv = sogg.filter(s => s.tipo === 'investitore').length;
+  out.push(h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, nInv + ' investitori simulati con mentalità diverse partono da ' + eur(A.budget) + ' finti a testa, con prezzi veri. Ogni settimana ripartiscono i soldi leggendo le schede di 6 analisti; tre "metri" (ETF mondiale, scelte a caso, liquidità) dicono se qualcuno è davvero bravo. Nessun soldo vero: serve a capire quali approcci reggono.')));
+  out[0].append(tiles([
+    { l: 'Giorni di gara', v: String(A.giorni || 0), s: 'dal ' + fmtDate(A.avvio), x: () => ({ kind: 'Arena', say: 'Da quanti giorni gli investitori simulati sono in gara. Con pochi giorni la classifica è quasi tutta fortuna.' }) },
+    { l: 'Affidabilità', v: J.maturita || '—', s: 'della classifica', x: () => ({ kind: 'Arena', say: J.avviso || 'Più passa il tempo, più la classifica dice qualcosa di vero.' }) },
+    { l: 'Battono il passivo', v: (J.battonoPassivo != null ? J.battonoPassivo : '—') + ' su ' + nInv, s: pas ? 'passivo ' + arSp(arRet(pas)) : '', x: () => ({ kind: 'Arena', say: 'Quanti investitori hanno fatto meglio di chi ha comprato un solo ETF mondiale e non ha toccato niente. Se pochi lo battono, la bravura serve a poco.' }) }]));
+  if (J.avviso) out[0].append(h('p', { class: 'muted' }, h('b', null, 'Attenzione: '), J.avviso));
+  const rows = sogg.map(s => { const r = arRet(s); return [s.nome + (s.tipo === 'controllo' ? ' (metro)' : ''), r, s.stile + ' · ' + eur(arLast(s)) + (s.id !== 'passivo' && pas && fin((J.metriche || {})[s.id] && J.metriche[s.id].vsPassivo) ? ' · ' + arSp(J.metriche[s.id].vsPassivo) + ' sul passivo' : ''), () => talkArenaSogg(s), arSp(r)]; });
+  out.push(h('section', { class: 'card' }, h('h2', null, 'Classifica'), talkBars(rows, true), h('p', { class: 'muted' }, 'Tocca un nome per vedere la mentalità, come ha ripartito i soldi e perché. Aggiornata il ' + fmtDate(A.data) + '. Due investitori non possono mai somigliarsi più del ' + A.soglia + '% (regola controllata dal sito, non dall\'IA).')));
+  const gc = h('section', { class: 'card' }, h('h2', null, 'Il giudice'));
+  if (J.verdetto) {
+    gc.append(h('p', null, J.verdetto));
+    if (J.sensatiIa && J.sensatiIa.length) gc.append(h('h4', null, 'Più sensati ora'), h('ul', { class: 'list' }, J.sensatiIa.map(x => { const s = sogg.find(y => y.id === x.id); return h('li', null, h('span', null, h('b', null, s ? s.nome : x.id), ' — ' + x.perche)); })));
+    if (J.rischiosiIa && J.rischiosiIa.length) gc.append(h('h4', null, 'Più rischiosi ora'), h('ul', { class: 'list' }, J.rischiosiIa.map(x => { const s = sogg.find(y => y.id === x.id); return h('li', null, h('span', null, h('b', null, s ? s.nome : x.id), ' — ' + x.perche)); })));
+    if (J.approcci && J.approcci.length) gc.append(h('h4', null, 'Cosa fanno di sensato i migliori'), h('ul', { class: 'list' }, J.approcci.map(x => h('li', null, h('span', null, x)))));
+    if (J.fortuna) gc.append(h('p', null, h('b', null, 'Bravura o fortuna? '), J.fortuna));
+    if (J.analistiNota) gc.append(h('p', null, h('b', null, 'Gli analisti: '), J.analistiNota));
+  } else gc.append(h('p', { class: 'muted' }, 'Oggi il giudice ha solo i numeri (il testo scritto dall\'IA non è disponibile).'), (J.sensati && J.sensati.length) ? h('p', null, h('b', null, 'Meglio dei metri e con il miglior rapporto tra guadagno e rischio: '), J.sensati.map(id => (sogg.find(y => y.id === id) || {}).nome || id).join(', ') + '.') : h('p', { class: 'muted' }, 'Nessun investitore batte ancora il passivo.'));
+  gc.append(h('p', { class: 'muted' }, 'La classifica e i numeri li calcola il codice; il testo lo scrive Gemini sui numeri forniti. ' + (J.limiti || '') + ' Non è un consiglio di investimento.'));
+  out.push(gc);
+  const an = (A.analisti || []), P = A.pagellaAnalisti || {};
+  out.push(h('section', { class: 'card' }, h('h2', null, 'Gli analisti'), h('p', { class: 'muted' }, 'Ognuno copre un reparto, legge titoli pubblici e numeri, scrive una scheda al giorno e ogni tanto una tesi da verificare in 3 mesi (fa meglio o peggio dell\'ETF mondiale?).'),
+    an.map(a => { const sc = a.scheda, p = P[a.id] || {};
+      return h('details', { class: 'src' }, h('summary', null, a.nome + ' · ' + a.reparto, h('small', null, sc ? ' · clima ' + arClima(sc.clima) + (p.chiuse ? ' · tesi ' + p.giuste + '/' + p.chiuse : '') : ' · nessuna scheda')),
+        sc ? h('div', null, h('p', null, sc.sintesi), sc.idee.map(i => h('div', { class: 'art-why' }, h('span', { class: 'art-chip' + (i.dir === 'giu' ? ' bad' : '') }, arGr(i.gruppo) + ': ' + (i.dir === 'su' ? 'meglio del mondo' : 'peggio del mondo') + ' (fiducia ' + i.fiducia + '/5)'), h('div', { class: 'muted', style: 'font-size:12px' }, i.perche, (i.fonti || []).slice(0, 2).map(f => h('span', null, ' · ', linkEl(f.url, f.testata)))))),
+          sc.rischi.length ? h('p', { class: 'muted' }, 'Rischi: ' + sc.rischi.join(' · ')) : null, btn('Apri la scheda', () => talkArenaAnalista(a), 'sm')) : h('p', { class: 'muted' }, 'Non ha ancora scritto una scheda (notizie non lette o IA non disponibile).'));
+    })));
+  const ts = (A.tesi || []).slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 10);
+  if (ts.length) out.push(h('section', { class: 'card' }, h('h2', null, 'Tesi da verificare'), h('ul', { class: 'news art-list' }, ts.map(t => { const an0 = an.find(a => a.id === t.analista); return h('li', null, h('b', null, (an0 ? an0.nome : '') + ': ' + arGr(t.gruppo) + (t.dir === 'su' ? ' meglio del mondo' : ' peggio del mondo')), h('span', { class: 'art-chip' + (t.esito === 'sbagliata' ? ' bad' : '') }, t.esito ? t.esito + ' (' + arSp(t.alfa) + ' sul mondo)' : 'in corso, scade il ' + fmtDate(t.scad)), h('div', { class: 'muted', style: 'font-size:12px' }, t.perche + ' Sarebbe sbagliata se: ' + t.errore)); })), h('p', { class: 'muted' }, 'Il giudice chiude ogni tesi dopo 3 mesi confrontando il tema con l\'ETF mondiale.')));
+  out.push(h('section', { class: 'card' }, h('h2', null, 'Come funziona e cosa non è'), h('ul', { class: 'list' }, [
+    'Tutto simulato: nessun ordine, nessun broker, nessun dato tuo. I prezzi sono veri, le commissioni (' + nfp.format(A.commissione * 100) + '%) sono contate.',
+    'I portafogli di partenza li ho scelti io per dare a ognuno una mentalità diversa; da lì l\'IA li modifica una volta a settimana, ma il codice blocca tutto ciò che esce dalle regole di quel profilo o che somiglia troppo a un altro investitore.',
+    'Gli investitori sono lo stesso modello di IA con istruzioni diverse: non sono persone vere e le loro opinioni sono meno indipendenti di quanto sembri.',
+    'Non è un consiglio: un buon risultato in simulazione non garantisce niente di reale.'].map(x => h('li', null, h('span', null, x))))));
+  if (A.note && A.note.length) out.push(h('details', { class: 'src' }, h('summary', null, 'Cosa è successo nell\'ultimo giro', h('small', null, ' · ' + fmtDate(A.data))), h('ul', { class: 'news' }, A.note.map(x => h('li', null, x)))));
+  return out;
+}
+function tabArena() {
+  const el = h('div'), A = DATA.arena;
+  if (!A) { el.append(h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, ONLINE ? 'La gara non è ancora partita: parte con il primo giro automatico del sito (ogni giorno di borsa a fine giornata). Poi qui vedrai classifica, giudice e analisti.' : 'L\'Arena si vede dal sito online (arena.json).'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null)); return el; }
+  arenaCards().forEach(c => el.append(c)); return el;
 }
 function tabMercati() {
   const m = DATA.mercati, el = h('div');
@@ -4983,7 +5050,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '13/11/2026 · v47 (piu compatta e avvisi chiudibili)';
+const APP_VER = '18/11/2026 · v48 (Arena degli investitori simulati)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
