@@ -97,7 +97,11 @@ function riequilibra(st, inv, pesi, data) {      // porta il portafoglio ai pesi
 
 /* ---------------- stato ---------------- */
 function statoVuoto() { return { app: 'finanze-arena', versione: 1, avvio: null, data: null, giorni: 0, sett: null, ultimoGiudice: null, trim: null, scelti: {}, ids: {}, mercato: {}, soggetti: [], analisti: [], tesi: [], giudice: null, note: [], diario: [] }; }
-function leggiJson(f, vuoto) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return vuoto; } }
+function leggiJson(f, vuoto) {          // file assente = si parte da zero; file rotto = ci si ferma (meglio un giro in meno che azzerare mesi di storia)
+  let t; try { t = fs.readFileSync(f, 'utf8'); } catch (e) { if (e && e.code === 'ENOENT') return vuoto; throw e; }
+  try { return JSON.parse(t); } catch (e) { throw new Error('Il file ' + path.basename(f) + ' esiste ma non e leggibile (' + e.message + '): non lo sovrascrivo.'); }
+}
+function scriviSicuro(f, testo) { const tmp = f + '.tmp'; fs.writeFileSync(tmp, testo); fs.renameSync(tmp, f); }          // prima in un file di appoggio, poi si sostituisce: una scrittura interrotta non lascia un file a meta
 function nuovoSoggetto(c, tipo) { return { id: c.id, nome: c.nome, stile: c.stile, mentalita: c.mentalita, tipo, cash: CFG.budget, versato: CFG.budget, pos: {}, pesi: {}, storia: [], ops: [], motivo: '', conv: 0, decisioni: [] }; }
 const idxDi = x => x[2] != null ? x[2] : x[1] / CFG.budget;           // indice del rendimento (1 = inizio): tiene conto dei versamenti mensili
 const versatoDi = s => s.versato != null ? s.versato : CFG.budget;
@@ -381,7 +385,7 @@ async function eseguiGiorno(o) {
   if (st.data && data < st.data) { log('Data ' + data + ' precedente all\'ultima elaborata (' + st.data + '): niente da fare.'); return { st, logs, saltato: true }; }
   // 1) prezzi
   const r = await o.prezzi(st, log), tot = CFG.strumenti.length;
-  if (r.nOk < tot * 0.6) { log('Letti solo ' + r.nOk + ' prezzi su ' + tot + ': non aggiorno la simulazione oggi (meglio un giorno in meno che un giorno sbagliato).'); st.note = logs.slice(-12); if (!o.senzaScrittura) fs.writeFileSync(fArena, JSON.stringify(st)); return { st, logs, saltato: true }; }
+  if (r.nOk < tot * 0.6) { log('Letti solo ' + r.nOk + ' prezzi su ' + tot + ': non aggiorno la simulazione oggi (meglio un giorno in meno che un giorno sbagliato).'); st.note = logs.slice(-12); if (!o.senzaScrittura) scriviSicuro(fArena, JSON.stringify(st)); return { st, logs, saltato: true }; }
   const ultimi = {}; for (const d of Object.keys(hist.giorni).sort()) Object.assign(ultimi, hist.giorni[d]);
   const oggiPx = {};
   for (const [id, x] of Object.entries(r.out)) { const ult = ultimi[id], lim = /^[A-Za-z]+$/.test(id) && !/^[A-Z]{2}/.test(id) ? 0.6 : 0.35; if (ult > 0 && Math.abs(x.p / ult - 1) > lim) { log('Prezzo sospetto ignorato: ' + id + ' (' + pc((x.p / ult - 1) * 100, 0) + ' in un giorno)'); continue; } oggiPx[id] = x.p; }
@@ -415,8 +419,8 @@ async function eseguiGiorno(o) {
   st.data = data; st.giorni = st.avvio ? giorniTra(st.avvio, data) : 0; st.generato = new Date().toISOString(); st.note = logs.filter(x => !/^Prezzo non letto/.test(x)).slice(-14);
   st.versione = 1; st.budget = CFG.budget; st.versamento = CFG.versamentoMensile; st.commissione = CFG.commissione; st.soglia = CFG.sogliaSomiglianza; st.gruppi = Object.fromEntries(Object.keys(GRUPPI).map(g => [g, nomeGruppo(g)])); st.classiGruppi = Object.fromEntries(Object.keys(GRUPPI).map(g => [g, classeDi(g)])); st.stagioneGiorni = CFG.stagioneGiorni || 182;
   const json = JSON.stringify(st);
-  if (/(password|passphrase|iban|api[_-]?key|\bsecret\b)/i.test(json)) throw new Error('Il testo contiene parole sospette: non scrivo.');
-  if (!o.senzaScrittura) { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(fArena, json); fs.writeFileSync(fPrezzi, JSON.stringify(hist)); }
+  if (/(AIza[\w-]{30,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_\w{30,}|\bIT\d{2}[A-Z]\d{10}[A-Z0-9]{12}\b|"(password|passphrase|api[_-]?key|secret)"\s*:)/i.test(json)) throw new Error('Il testo contiene parole sospette: non scrivo.');
+  if (!o.senzaScrittura) { fs.mkdirSync(dir, { recursive: true }); scriviSicuro(fPrezzi, JSON.stringify(hist)); scriviSicuro(fArena, json); }
   return { st, logs, nuovo, decisi };
 }
 

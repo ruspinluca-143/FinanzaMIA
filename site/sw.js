@@ -7,7 +7,7 @@ self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin || u.searchParams.has('nc')) return;        // solo file di questo sito; con ?nc= (controllo versione) sempre dalla rete
   const nome = u.pathname.split('/').pop(), pagina = e.request.mode === 'navigate' || nome === '' || nome === 'index.html', chiave = pagina ? 'index.html' : e.request;
-  const rete = () => fetch(e.request, { cache: 'no-store' }).then(r => { if (r.ok) { const cp = r.clone(); caches.open(V).then(c => c.put(chiave, cp)); } return r; });
+  const rete = () => fetch(e.request, { cache: 'no-store' }).then(r => { if (!r.ok) return r; const cp = r.clone(); return caches.open(V).then(c => c.put(chiave, cp)).then(() => r, () => r); });          // la copia si scrive PRIMA di chiudere il lavoro in sottofondo
   const copia = () => caches.match(chiave).then(m => m || (pagina ? caches.match('index.html') : null));
   if (VELOCI.includes(nome)) { e.respondWith(Promise.race([rete(), new Promise((_, no) => setTimeout(no, 4000))]).catch(() => copia().then(m => m || rete().catch(() => Response.error())))); return; }
   e.respondWith(copia().then(m => { if (m) { e.waitUntil(rete().catch(() => {})); return m; } return rete().catch(() => Response.error()); }));        // pagina e dati grandi: subito dalla copia, aggiornata in sottofondo (la versione nuova si vede alla riapertura, o con "Aggiorna adesso")

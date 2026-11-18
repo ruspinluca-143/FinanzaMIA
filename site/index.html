@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-a6dtI1IgOks1vMOhIa9ICiwL6gHq85+OF6kXOdSKTsQ='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+tDyrzoept4ME+G3ouAyaGYisTL6+K3tVpff7giAbE8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -984,7 +984,7 @@ const idbOpen = () => new Promise((res, rej) => {
 });
 async function idbDo(mode, fn) {
   const db = await idbOpen();
-  try { return await new Promise((res, rej) => { const tx = db.transaction('k', mode), rq = fn(tx.objectStore('k')); tx.oncomplete = () => res(rq ? rq.result : undefined); tx.onerror = tx.onabort = () => rej(tx.error || new Error('operazione annullata')); }); }
+  try { return await new Promise((res, rej) => { setTimeout(() => rej(new Error('il browser non risponde (archivio bloccato)')), 12000); const tx = db.transaction('k', mode), rq = fn(tx.objectStore('k')); tx.oncomplete = () => res(rq ? rq.result : undefined); tx.onerror = tx.onabort = () => rej(tx.error || new Error('operazione annullata')); }); }
   finally { db.close(); }
 }
 const LS_KEY = 'finanze-archivio';          // riserva: se IndexedDB non funziona (alcuni browser o criteri aziendali) si prova con la memoria locale semplice
@@ -1055,7 +1055,7 @@ async function checkPass(pass) {
 }
 async function openArchive(text, fh, pass, fromLocal) {          // fromLocal: la copia salvata sul dispositivo (si apre con la sola passphrase)
   let f; try { f = JSON.parse(text); } catch { return /^﻿?#\s*Finanze|;/.test(String(text).slice(0, 400)) ? 'Questo è un file da IMPORTARE (CSV), non l\'archivio. Prima entra nell\'archivio (o creane uno), poi usa "Importa i file dei conti…".' : 'Il file non è un archivio valido.'; }
-  if (!f || f.app !== 'finanze' || f.v !== 1 || f.kdf !== 'PBKDF2-SHA256' || !(f.iter >= 100000 && f.iter <= 20000000) || !f.salt || !f.iv || !f.ct) return 'Il file non è un archivio Finanze valido.';
+  if (!f || f.app !== 'finanze' || f.v !== 1 || f.kdf !== 'PBKDF2-SHA256' || !(f.iter >= 100000 && f.iter <= 2000000) || !f.salt || !f.iv || !f.ct) return 'Il file non è un archivio Finanze valido.';
   if (fh && fh.requestPermission) { try { if (await fh.requestPermission({ mode: 'readwrite' }) !== 'granted') fh = null; } catch { fh = null; } }
   const salt = unb64(f.salt), key = await deriveKey(pass, salt, f.iter);
   const header = { app: f.app, v: f.v, kdf: f.kdf, iter: f.iter, salt: f.salt };
@@ -1497,7 +1497,7 @@ async function checkNewVersion() {
   if (!ONLINE || NEWVER || !MY_HASH || Date.now() - verAt < 5 * 60000) return; verAt = Date.now();
   try { const t = await (await fetch('./?nc=' + Date.now(), { cache: 'no-store' })).text(), x = /script-src '([^']+)'/.exec(t); if (x && x[1] !== MY_HASH) { NEWVER = true; if (!LOCKED) render(); } } catch { /* senza rete: niente */ }
 }
-async function updateNow() { try { clearTimeout(saveTimer); if (S && !DEMO) { await save(false); if (CL.pending && CL.ready) await clPush(); } } finally { location.reload(); } }
+async function updateNow() { try { try { if (window.caches) await (await caches.open('finanze-v2')).delete('index.html'); } catch { /* si ricarica lo stesso */ } clearTimeout(saveTimer); if (S && !DEMO) { await save(false); if (CL.pending && CL.ready) await clPush(); } } finally { location.reload(); } }
 const newVerBar = () => NEWVER ? h('div', { class: 'banner' }, h('span', null, 'C\'è una versione nuova dell\'app.'), btn('Aggiorna adesso', updateNow, 'pri sm')) : null;
 
 /* ============ blocco automatico ============ */
@@ -1530,7 +1530,7 @@ const totalValue = () => S.accounts.reduce((t, a) => t + accValue(a), 0);
 const netContrib = (a, upto) => a.flows.filter(f => !upto || f.date <= upto).reduce((t, f) => t + flowSign(f.type) * f.amount, 0);
 
 function xirr(flows) {            // flussi: {t: ms, a: importo}, versamenti negativi, valore finale positivo
-  if (!flows.some(f => f.a > 0) || !flows.some(f => f.a < 0)) return null;
+  if (!flows.some(f => f.a > 0) || !flows.some(f => f.a < 0) || flows.some(f => !isFinite(f.t) || !isFinite(f.a))) return null;          // una data o un importo non validi: meglio nessun numero che un numero assurdo
   const t0 = Math.min(...flows.map(f => f.t));
   const npv = r => flows.reduce((t, f) => t + f.a / Math.pow(1 + r, (f.t - t0) / 31557600000), 0);
   let lo = -0.99, hi = 10, flo = npv(lo), fhi = npv(hi);
@@ -2742,7 +2742,8 @@ function autoImport(items) {          // tutti i file sono "Finanze": nessuna fi
   for (const it of items) {
     if (it.bad) { out.push({ it, skip: it.bad }); continue; }
     if (it.fin.meta.piano) { const r = applyPlanFile(it.fin.clean); out.push({ it, refs: r.n, plan: true, skip: pl(r.n, 'acquisto programmato caricato', 'acquisti programmati caricati') + (r.replaced ? ' · ' + pl(r.replaced, 'PAC singolo assorbito', 'PAC singoli assorbiti') : '') + (r.miss.length ? ' · non caricati: ' + r.miss.join(', ') : '') }); continue; }          // file "piano": i PAC, con conferma a ogni scadenza
-    if (it.fin.meta.storico) { const r = applyStoricoFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'transazione dello storico caricata', 'transazioni dello storico caricate') + ' (non toccano i saldi)' + (r.bad ? ' · ' + pl(r.bad, 'riga scartata', 'righe scartate') : '') }); continue; }          // file \ const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
+    if (it.fin.meta.storico) { const r = applyStoricoFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'transazione dello storico caricata', 'transazioni dello storico caricate') + ' (non toccano i saldi)' + (r.bad ? ' · ' + pl(r.bad, 'riga scartata', 'righe scartate') : '') }); continue; }          // file "storico": le transazioni del passato
+    if (it.fin.meta.operazioni) { const r = applyOpsFile(it.fin.clean); out.push({ it, refs: r.n, ops: true, skip: pl(r.n, 'operazione registrata', 'operazioni registrate') + (r.dup ? ' · ' + pl(r.dup, 'già presente (saltata)', 'già presenti (saltate)') : '') + (r.miss.length ? ' · non registrate: ' + r.miss.join(', ') : '') }); continue; }          // file "operazioni": acquisti e vendite gia' fatti, con le quantita' esatte
     if (it.fin.meta.correzioni) { const r = applyFixFile(it.fin.clean, it.fin.meta); out.push({ it, refs: r.pos + r.cash, skip: pl(r.pos, 'posizione corretta', 'posizioni corrette') + ' · ' + pl(r.cash, 'liquidità impostata', 'liquidità impostate') + (r.created.length ? ' · nuovi strumenti: ' + r.created.join(', ') : '') + (r.reset ? ' · GIORNO 1: grafici e storico ripartono da oggi' : '') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "correzioni": ritocca solo le righe scritte (e, se vuoi, riparte da oggi)
     if (it.fin.meta.riferimenti) { const r = applyRefFile(it.fin.clean); out.push({ it, refs: r.n, skip: pl(r.n, 'strumento collegato a un riferimento', 'strumenti collegati a un riferimento') + (r.miss.length ? ' · non trovati: ' + r.miss.join(', ') : '') }); continue; }          // file "riferimenti": solo le regole di stima, niente posizioni
     const m = it.fin.meta, name = (m.conto || '').trim() || newAccountFromFile(it.name).name;
@@ -4283,10 +4284,10 @@ function arDigest(A, sogg) {
 function arTwin(A, sogg) {          // il tuo portafoglio vero messo accanto a ciascun investitore, per classi di attivita'; resta sul tuo telefono
   const cl = A.classiGruppi; if (!cl || !S || !S.accounts.length) return null;
   const KEY = { az: 'azioni', ob: 'obbligazioni', ma: 'materie', cr: 'crypto', li: 'monetario' }, NOME = { azioni: 'azioni', obbligazioni: 'obbligazioni', monetario: 'liquidità', materie: 'oro e materie prime', crypto: 'cripto' }, my = {}; let tot = 0;
-  for (const [l, v] of exposure('class', true)) { const k = KEY[labCls(l)]; my[k] = (my[k] || 0) + v; tot += v; } if (!(tot > 0)) return null; for (const k in my) my[k] = my[k] / tot * 100;
+  for (const [l, v] of exposure('class', true)) { const k = KEY[labCls(l)]; if (!k) continue; my[k] = (my[k] || 0) + v; tot += v; }          // il capitale in trading non ha un equivalente nell'Arena: non entra nel confronto if (!(tot > 0)) return null; for (const k in my) my[k] = my[k] / tot * 100;
   const mix = o => Object.entries(o).filter(x => x[1] >= 0.5).sort((a, b) => b[1] - a[1]).map(([k, v]) => NOME[k] + ' ' + Math.round(v) + '%').join(', ');
   const rows = sogg.map(s => { const w = {}; for (const [g, p] of Object.entries(s.pesi || {})) { const c = cl[g]; if (c) w[c] = (w[c] || 0) + p; } let sim = 0; for (const k of Object.keys(my)) sim += Math.min(my[k], w[k] || 0); return { s, w, sim }; }).sort((a, b) => b.sim - a.sim);
-  const best = rows[0], pas = sogg.find(s => s.id === 'passivo');
+  const best = rows[0], pas = sogg.find(s => s.id === 'passivo'); if (!best) return null;
   return h('section', { class: 'card' }, h('h2', null, 'Il tuo gemello nell\'Arena'), h('p', { class: 'muted' }, 'Il tuo portafoglio vero (' + mix(my) + ') messo accanto a quello di ciascun investitore simulato, per classi di attività. Il calcolo avviene solo sul tuo telefono: l\'Arena non vede niente dei tuoi conti.'),
     h('p', null, 'Ti somiglia di più ', h('b', null, best.s.nome), ' (' + Math.round(best.sim) + '% in comune), che oggi fa ' + arSp(arRet(best.s)) + (pas && best.s.id !== 'passivo' ? ' contro ' + arSp(arRet(pas)) + ' del passivo.' : '.')),
     talkBars(rows.slice(0, 8).map(r => [r.s.nome + (r.s.tipo === 'controllo' ? ' (metro)' : ''), r.sim, mix(r.w) + ' · ' + arSp(arRet(r.s)) + ' dall\'inizio', () => talkArenaSogg(r.s), Math.round(r.sim) + '%']), false),
@@ -5095,7 +5096,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '18/11/2026 · v49 (Laboratorio e stagioni Arena)';
+const APP_VER = '18/11/2026 · v50 (audit: sicurezza, affidabilità, prove)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5933,7 +5934,7 @@ function tabDati() {
     h('p', null, po.horizon || po.maxLoss || po.target || po.notes ? 'Orizzonte: ' + (po.horizon || '—') + ' anni · Perdita massima: ' + (po.maxLoss ? po.maxLoss + '%' : '—') + ' · Obiettivo: ' + (po.target || '—') + (po.notes ? ' · ' + po.notes : '') : 'Non ancora definita.')));
   el.append(h('section', { class: 'card' }, h('h2', null, 'Chiedi all\'AI'), h('p', { class: 'muted' }, 'Il riepilogo anonimo da incollare in un assistente AI e le domande dirette ora stanno tutti in un posto solo: Mercati e idee → Chiedi all\'AI.'), btn('Apri Chiedi all\'AI', () => { UI.tab = 'consigli'; UI.csub = 'chiedi'; render(); window.scrollTo(0, 0); }, 'sm')));
   el.append(securityCard() || '', cloudCard() || '', fidCard() || '', h('section', { class: 'card' }, h('h2', null, 'Sicurezza e archivio'),
-    h('ul', null, h('li', null, CLOUD_ON() ? 'Una sola connessione verso fuori: il salvataggio online (Supabase), che riceve soltanto la copia cifrata con il tuo codice. La policy del browser (CSP) vieta qualsiasi altro invio.' : 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
+    h('ul', null, h('li', null, CLOUD_ON() ? 'Connessioni verso fuori: il salvataggio online (Supabase) riceve la copia cifrata e anche il tuo codice, per verificarlo: chi gestisse quel servizio potrebbe quindi leggere i dati. Se usi l\'assistente AI, gli screenshot partono verso Google (Gemini). La policy del browser (CSP) vieta qualsiasi altro invio.' : 'Nessuna connessione di rete: la policy del browser (CSP) vieta qualsiasi invio. L\'unico modo di far uscire dati è un tuo copia-incolla.'), h('li', null, 'File cifrato con AES-256-GCM; chiave derivata dalla passphrase con PBKDF2-SHA256 (' + nf0.format(ITER) + ' iterazioni).'), h('li', null, 'Face ID e Windows Hello sono un blocco comodo dell\'interfaccia, non una cifratura in più: la protezione vera è la passphrase.'), h('li', null, DEMO ? 'Modalità demo: nulla è salvato.' : (LOC.ok && !LOC.off ? 'Salvato su questo dispositivo (' + (LOC.where || 'browser') + ') a ogni modifica' + (LOC.persisted === false ? ' (il browser non ha garantito di conservarlo: tieni aggiornata una copia su file)' : '') + (LOC.rec ? ', l\'ultima volta il ' + new Date(LOC.rec.saved).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '') + '. Al prossimo avvio ti basta la passphrase.' : 'Questo dispositivo non conserva i dati da solo' + (LOC.off ? ' (hai scelto di dimenticarli)' : LOC.err ? ' (' + LOC.err + ')' : '') + ': salva una copia su file dopo le modifiche.') + (FH ? ' File collegato: ' + FH.name + ' (si aggiorna a ogni modifica).' : '')),
       DEMO ? null : h('li', null, 'Ultima copia di sicurezza su file: ' + (S.settings.backupAt ? fmtDate(S.settings.backupAt) + (backupDays() ? ' (' + pl(backupDays(), 'giorno', 'giorni') + ' fa)' : ' (oggi)') : 'mai') + '. Se il browser cancellasse i dati del sito, quella copia è l\'unica cosa che ti salva.')),
     DEMO ? null : h('div', { class: 'row' },
       btn(typeof navigator.canShare === 'function' ? 'Salva copia di sicurezza in File' : 'Scarica copia cifrata (backup)', typeof navigator.canShare === 'function' ? shareCopy : downloadCopy, 'pri'),
@@ -6287,6 +6288,7 @@ function dogsCard() {
 /* ============ operazioni da uno screenshot (AI): si controlla riga per riga prima di registrare ============ */
 function aiOpsStart() {
   const cand = S.accounts.filter(a => !a.dep); if (!cand.length) { alert('Prima crea un conto.'); return; }
+  if (!confirm('Lo screenshot o il PDF che scegli parte verso Google (Gemini) per essere letto. Può contenere il tuo nome, l\'IBAN e gli importi: con la chiave gratuita Google può usarlo per migliorare i suoi servizi. Continuo?')) return;
   wzRun({ steps: () => [api => ({ q: 'Di quale conto sono le operazioni?', next: false, noBack: true, body: cand.map(a => wzOpt(a.name, (TYPES[a.type] || {}).label || '', () => { api.shut(); aiOpsPick(a); })) })] });
 }
 function aiOpsPick(a) {
@@ -7585,7 +7587,7 @@ function labObiettivi() {
   return el;
 }
 /* ---- "e se...?": cosa sarebbe successo, e cosa puo' succedere ---- */
-const LAB_SP = () => { const D = DATA.storico; if (!D || !D.spd || !D.spm) return null; if (LAB_SP.k !== D) { LAB_SP.c = stSerie(D); LAB_SP.k = D; } return LAB_SP.c; };
+const LAB_SP = () => { const D = DATA.storico; if (!D || !D.spd || !D.spm || !D.spd.d || !D.spd.d.length || !D.spm.m) return null; if (LAB_SP.k !== D) { LAB_SP.c = stSerie(D); LAB_SP.k = D; } return LAB_SP.c; };
 function labPriceAt(ser, d0) { let lo = 0, hi = ser.length - 1; if (d0 <= ser[0][0]) return ser[0]; if (d0 > ser[hi][0]) return ser[hi]; while (lo < hi) { const mid = (lo + hi) >> 1; if (ser[mid][0] >= d0) hi = mid; else lo = mid + 1; } return ser[lo]; }
 function labBacktest(ser, amount, years, monthly) {          // amount: una tantum o al mese; prezzi dell'S&P 500 (senza dividendi)
   const last = ser[ser.length - 1], t = new Date(last[0] + 'T12:00:00'), n = years * 12, pts = []; let units = 0, paid = 0, worst = 0, worstD = '';
@@ -7637,7 +7639,7 @@ const LAB_CRISI = [          // ipotesi grossolane per classe (frazione): obblig
 const labCls = l => /trading/i.test(l) ? 'tr' : /crypto|cripto/i.test(l) ? 'cr' : /obblig/i.test(l) ? 'ob' : /oro|material|commod|prime/i.test(l) ? 'ma' : /liquid|cassa|cash|monet/i.test(l) ? 'li' : 'az';
 function labCrisi() {
   const el = h('div'), D = DATA.storico, tot = totalValue(), ex = exposure('class', true);
-  if (!D) { el.append(h('section', { class: 'card' }, h('h2', null, 'Crisi del passato'), h('p', { class: 'muted' }, ONLINE ? 'Lo storico del mercato non è ancora disponibile: riprova tra poco.' : 'Apri l\'app dal sito per vedere lo storico.'))); return el; }
+  if (!D || !LAB_SP()) { el.append(h('section', { class: 'card' }, h('h2', null, 'Crisi del passato'), h('p', { class: 'muted' }, ONLINE ? 'Lo storico del mercato non è ancora disponibile: riprova tra poco.' : 'Apri l\'app dal sito per vedere lo storico.'))); return el; }
   const eps = stEpisodi(stSerie(D), 0.15), NAMES = { az: 'Azioni', ob: 'Obbligazioni', ma: 'Oro e materie prime', cr: 'Cripto', li: 'Liquidità', tr: 'Trading (MetaTrader, buy e sell: nessuna perdita ipotizzata)' };
   const base = {}; for (const [l, v] of ex) base[labCls(l)] = (base[labCls(l)] || 0) + v; const sum = Object.values(base).reduce((a, b) => a + b, 0);
   const res = LAB_CRISI.map(c => { const cand = eps.filter(e => stNome(e) === c.n).sort((a, b) => a.dd - b.dd)[0]; if (!cand) return null; const sh = { az: cand.dd, ob: c.ob, ma: c.ma, cr: c.cr, li: 0, tr: 0 }, per = Object.entries(base).map(([k, v]) => [NAMES[k], v * sh[k], k, v]), loss = per.reduce((t, x) => t + x[1], 0); return { c, e: cand, per, loss, p: sum > 0 ? loss / sum : 0 }; }).filter(Boolean).sort((a, b) => a.p - b.p);
