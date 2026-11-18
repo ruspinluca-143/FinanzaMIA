@@ -6,6 +6,8 @@
   "sogliaSomiglianza": 49,
   "turnoverMax": 40,
   "orizzonteTesiGiorni": 90,
+  "stagioneGiorni": 182,
+  "sostituzioniPerStagione": 2,
   "gruppi": {
     "world": ["azioni", "Azioni mondo"], "usa500": ["azioni", "Azioni USA S&P 500"], "nasdaq": ["azioni", "Nasdaq 100 (tecnologia USA)"], "usa-value": ["azioni", "Azioni USA value"],
     "semis": ["azioni", "Semiconduttori"], "europa": ["azioni", "Azioni Europa"], "eurozona": ["azioni", "Azioni area euro"], "em": ["azioni", "Mercati emergenti"],
@@ -103,6 +105,24 @@
       "ammessi": ["btc", "eth", "sol", "xrp", "az-tsla", "az-nvda", "semis", "energia-pulita", "difesa", "minatori-oro", "az-amzn", "az-meta", "az-leonardo", "monetario"],
       "classi": { "azioni": [25, 70], "obbligazioni": [0, 0], "monetario": [0, 20], "materie": [0, 15], "crypto": [25, 60] }, "maxGruppo": 25, "maxAzione": 10, "minGruppi": 8,
       "inizio": { "btc": 22, "eth": 12, "sol": 8, "xrp": 5, "az-tsla": 8, "az-nvda": 5, "semis": 4, "energia-pulita": 6, "difesa": 5, "minatori-oro": 6, "az-amzn": 5, "az-leonardo": 4, "monetario": 10 } }
+  ],
+  "riserve": [
+    { "id": "irene", "nome": "Irene", "stile": "Dividendi e qualita", "mentalita": "Cerca aziende solide che pagano dividendi e resistono nelle crisi: USA value, utility, salute, banche e obbligazioni aziendali.",
+      "ammessi": ["usa-value", "europa", "eurozona", "world", "utility", "salute", "az-brk", "az-jpm", "az-enel", "az-eni", "obbl-corp-euro", "obbl-breve-euro", "oro", "monetario"],
+      "classi": { "azioni": [45, 75], "obbligazioni": [15, 40], "monetario": [0, 15], "materie": [0, 10], "crypto": [0, 0] }, "maxGruppo": 22, "maxAzione": 8, "minGruppi": 8,
+      "inizio": { "usa-value": 18, "europa": 8, "utility": 10, "salute": 8, "az-brk": 8, "az-jpm": 7, "az-eni": 5, "obbl-corp-euro": 14, "obbl-breve-euro": 8, "oro": 6, "monetario": 8 } },
+    { "id": "paolo", "nome": "Paolo", "stile": "Tendenza e momentum", "mentalita": "Segue chi sale: compra i temi che stanno andando bene e li vende quando perdono forza, con un po' di obbligazioni lunghe e oro per difesa.",
+      "ammessi": ["nasdaq", "semis", "usa500", "giappone", "corea", "az-nvda", "az-meta", "az-avgo", "az-tsmc", "az-asml", "difesa", "oro", "usa-bond", "monetario", "energia-pulita", "minatori-oro"],
+      "classi": { "azioni": [55, 85], "obbligazioni": [0, 30], "monetario": [0, 20], "materie": [0, 20], "crypto": [0, 0] }, "maxGruppo": 22, "maxAzione": 8, "minGruppi": 8,
+      "inizio": { "usa500": 12, "giappone": 12, "corea": 8, "nasdaq": 8, "az-meta": 6, "az-avgo": 5, "az-asml": 5, "difesa": 8, "energia-pulita": 5, "oro": 10, "usa-bond": 14, "monetario": 7 } },
+    { "id": "nora", "nome": "Nora", "stile": "Sostenibile e salute", "mentalita": "Investe in cio che serve al futuro: energia pulita, salute, servizi essenziali e aziende europee di qualita, con obbligazioni per stabilita.",
+      "ammessi": ["energia-pulita", "salute", "utility", "az-novo", "az-sap", "az-asml", "world", "europa", "eurozona", "obbl-globali", "obbl-corp-euro", "obbl-breve-euro", "monetario", "oro"],
+      "classi": { "azioni": [50, 80], "obbligazioni": [10, 35], "monetario": [0, 15], "materie": [0, 8], "crypto": [0, 0] }, "maxGruppo": 22, "maxAzione": 8, "minGruppi": 8,
+      "inizio": { "energia-pulita": 12, "salute": 15, "utility": 8, "az-novo": 7, "az-sap": 6, "az-asml": 5, "world": 10, "europa": 7, "obbl-globali": 12, "obbl-corp-euro": 6, "monetario": 7, "oro": 5 } },
+    { "id": "omar", "nome": "Omar", "stile": "Tre mondi", "mentalita": "Divide i soldi tra paesi e materie prime diversi (India, Giappone, Europa, USA) con obbligazioni americane e BTP per bilanciare.",
+      "ammessi": ["world", "usa500", "europa", "giappone", "india", "em", "brasile", "obbl-globali", "usa-bond", "btp", "oro", "monetario", "materie-prime"],
+      "classi": { "azioni": [45, 75], "obbligazioni": [10, 35], "monetario": [0, 15], "materie": [0, 20], "crypto": [0, 0] }, "maxGruppo": 22, "maxAzione": 0, "minGruppi": 8,
+      "inizio": { "india": 10, "europa": 6, "giappone": 8, "usa500": 8, "em": 8, "brasile": 6, "materie-prime": 10, "usa-bond": 15, "btp": 8, "oro": 7, "monetario": 7, "world": 7 } }
   ],
   "controlli": [
     { "id": "passivo", "nome": "Passivo (ETF mondiale)", "stile": "Confronto", "mentalita": "Compra un solo ETF mondiale e non tocca piu niente. E il metro: chi non lo batte non serve.", "inizio": { "world": 100 } },
