@@ -96,7 +96,24 @@ function riequilibra(st, inv, pesi, data) {      // porta il portafoglio ai pesi
 /* ---------------- stato ---------------- */
 function statoVuoto() { return { app: 'finanze-arena', versione: 1, avvio: null, data: null, giorni: 0, sett: null, ultimoGiudice: null, trim: null, scelti: {}, ids: {}, mercato: {}, soggetti: [], analisti: [], tesi: [], giudice: null, note: [], diario: [] }; }
 function leggiJson(f, vuoto) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return vuoto; } }
-function nuovoSoggetto(c, tipo) { return { id: c.id, nome: c.nome, stile: c.stile, mentalita: c.mentalita, tipo, cash: CFG.budget, pos: {}, pesi: {}, storia: [], ops: [], motivo: '', conv: 0, decisioni: [] }; }
+function nuovoSoggetto(c, tipo) { return { id: c.id, nome: c.nome, stile: c.stile, mentalita: c.mentalita, tipo, cash: CFG.budget, versato: CFG.budget, pos: {}, pesi: {}, storia: [], ops: [], motivo: '', conv: 0, decisioni: [] }; }
+const idxDi = x => x[2] != null ? x[2] : x[1] / CFG.budget;           // indice del rendimento (1 = inizio): tiene conto dei versamenti mensili
+const versatoDi = s => s.versato != null ? s.versato : CFG.budget;
+function aggiornaIndice(st, inv, data) {   // rendimento del giorno prima di versare nuovi soldi (cosi' i versamenti non finiscono nel rendimento)
+  const ult = inv.storia[inv.storia.length - 1]; if (!ult) { inv.idxOggi = 1; return; }
+  const prec = ult[0] === data ? inv.storia[inv.storia.length - 2] : ult;
+  if (!prec) { inv.idxOggi = 1; return; }
+  let v = valore(inv, st.px); if (inv.ultimoVers && inv.ultimoVers.d === data) v -= inv.ultimoVers.imp;
+  inv.idxOggi = idxDi(prec) * (prec[1] > 0 && v > 0 ? v / prec[1] : 1);
+}
+function investiVersamento(st, inv, imp, data) {    // i soldi nuovi si investono subito secondo i pesi obiettivo (solo acquisti)
+  inv.versato = versatoDi(inv) + imp; inv.ultimoVers = { d: data, imp };
+  const pesi = inv.pesi && Object.keys(inv.pesi).length ? inv.pesi : null; let fee = 0;
+  const ok = pesi ? Object.keys(pesi).filter(g => { const id = istrumentoDi(st, g); return id && st.px[id] > 0; }) : [];
+  if (ok.length) { const tot = ok.reduce((a, g) => a + pesi[g], 0); fee = imp * CFG.commissione; for (const g of ok) { const id = istrumentoDi(st, g); inv.pos[id] = (inv.pos[id] || 0) + (imp - fee) * pesi[g] / tot / st.px[id]; } }
+  else inv.cash += imp;
+  inv.ops.push({ d: data, mosse: [], costo: Math.round(fee * 100) / 100, versamento: imp }); if (inv.ops.length > 40) inv.ops.shift();
+}
 function avviaSoggetti(st, data, log) {
   st.avvio = data;
   for (const c of INV_REALI) st.soggetti.push(nuovoSoggetto(c, 'investitore'));
@@ -257,9 +274,9 @@ async function decidiInvestitori(ctx) {
   const sett = Number(settimanaIso(data).slice(-2)), ordine = reali.slice(sett % reali.length).concat(reali.slice(0, sett % reali.length));          // ordine a rotazione: nessuno ha sempre la precedenza
   const altri = () => { const o = {}; for (const s of reali) o[s.id] = s.pesi; return o; };
   for (const inv of ordine) {
-    const cfg = INV_REALI.find(x => x.id === inv.id), attuali = pesiAttuali(inv, st.px), v = valore(inv, st.px), rend = (v / CFG.budget - 1) * 100;
-    const ult7 = inv.storia.length > 1 ? (() => { const t = inv.storia.filter(x => giorniTra(x[0], data) >= 7).pop(); return t ? (v / t[1] - 1) * 100 : null; })() : null;
-    const base = 'Oggi e ' + data + '. Sei ' + inv.nome + ' (' + inv.stile + '). ' + inv.mentalita + '\n' + regoleTesto(cfg) + '\nIL TUO PORTAFOGLIO ORA (% per tema): ' + (Object.entries(attuali).sort((a, b) => b[1] - a[1]).map(([g, p]) => g + ' ' + p.toFixed(1)).join(', ') || 'vuoto') + '\nVALORE: ' + Math.round(v) + ' euro (' + pc(rend) + ' da inizio' + (ult7 != null ? ', ' + pc(ult7) + ' nell\'ultima settimana' : '') + ').\nRENDIMENTI DEI TEMI AMMESSI (%):\n' + tabellaGruppi(cfg.ammessi, st) + '\nSCHEDE DEGLI ANALISTI:\n' + riassuntoSchede(st);
+    const cfg = INV_REALI.find(x => x.id === inv.id), attuali = pesiAttuali(inv, st.px), v = valore(inv, st.px), lastI = inv.storia[inv.storia.length - 1], rend = lastI ? (idxDi(lastI) - 1) * 100 : 0, vers = versatoDi(inv);
+    const ult7 = inv.storia.length > 1 ? (() => { const t = inv.storia.filter(x => giorniTra(x[0], data) >= 7).pop(); return t ? (idxDi(lastI) / idxDi(t) - 1) * 100 : null; })() : null;
+    const base = 'Oggi e ' + data + '. Sei ' + inv.nome + ' (' + inv.stile + '). ' + inv.mentalita + '\n' + regoleTesto(cfg) + '\nIL TUO PORTAFOGLIO ORA (% per tema): ' + (Object.entries(attuali).sort((a, b) => b[1] - a[1]).map(([g, p]) => g + ' ' + p.toFixed(1)).join(', ') || 'vuoto') + '\nVALORE: ' + Math.round(v) + ' euro, di cui ' + Math.round(vers) + ' versati da te (guadagno ' + Math.round(v - vers) + ' euro; rendimento ' + pc(rend) + ' da inizio' + (ult7 != null ? ', ' + pc(ult7) + ' nell\'ultima settimana' : '') + ').\nSOLDI NUOVI: ogni mese, il primo giorno di borsa, ricevi ' + CFG.versamentoMensile + ' euro da investire secondo i tuoi pesi obiettivo. Ogni settimana puoi anche vendere: decidi se comprare ancora i temi che hai, venderne una parte o spostarti su altri; i pesi che scrivi sono quelli che vuoi avere dopo.\nRENDIMENTI DEI TEMI AMMESSI (%):\n' + tabellaGruppi(cfg.ammessi, st) + '\nSCHEDE DEGLI ANALISTI:\n' + riassuntoSchede(st);
     let feedback = '', esito = 'invariato', nota = '', finale = null, motivo = '', conv = 0;
     for (let tent = 0; tent < 2 && !finale; tent++) {
       let g; try { g = await llm('investitore', SYS_INV, base + (feedback ? '\n\nATTENZIONE, la tua proposta precedente e stata respinta: ' + feedback + ' Correggila.' : ''), { attuali, ammessi: cfg.ammessi, estremo: ctx.estremo }); } catch (e) { nota = e.message; break; }
@@ -283,11 +300,11 @@ function maturita(giorni) { return giorni < 30 ? ['troppo presto', 'Dopo meno di
 function metriche(st, data) {
   const w = {}, passivo = st.soggetti.find(s => s.id === 'passivo');
   for (const s of st.soggetti) {
-    const serie = s.storia.map(x => x[1]); if (!serie.length) continue;
-    const v = serie[serie.length - 1], ret = (v / CFG.budget - 1) * 100; let picco = serie[0], dd = 0; for (const x of serie) { picco = Math.max(picco, x); dd = Math.max(dd, (1 - x / picco) * 100); }
+    const serie = s.storia.map(idxDi); if (!serie.length) continue;
+    const v = s.storia[s.storia.length - 1][1], ret = (serie[serie.length - 1] - 1) * 100; let picco = serie[0], dd = 0; for (const x of serie) { picco = Math.max(picco, x); dd = Math.max(dd, (1 - x / picco) * 100); }
     const rs = []; for (let i = 1; i < serie.length; i++) rs.push(serie[i] / serie[i - 1] - 1); let vol = null; if (rs.length >= 10) { const m = rs.reduce((a, b) => a + b, 0) / rs.length; vol = Math.sqrt(rs.reduce((a, b) => a + (b - m) * (b - m), 0) / (rs.length - 1)) * Math.sqrt(252) * 100; }
-    const t7 = s.storia.filter(x => giorniTra(x[0], data) >= 7).pop(), commissioni = s.ops.reduce((a, o) => a + o.costo, 0);
-    w[s.id] = { id: s.id, nome: s.nome, stile: s.stile, tipo: s.tipo, valore: Math.round(v), ret: Math.round(ret * 10) / 10, dd: Math.round(dd * 10) / 10, vol: vol == null ? null : Math.round(vol * 10) / 10, sett: t7 ? Math.round((v / t7[1] - 1) * 1000) / 10 : null, commissioni: Math.round(commissioni * 10) / 10 };
+    const t7 = s.storia.filter(x => giorniTra(x[0], data) >= 7).pop(), commissioni = s.ops.reduce((a, o) => a + o.costo, 0), vers = versatoDi(s);
+    w[s.id] = { id: s.id, nome: s.nome, stile: s.stile, tipo: s.tipo, valore: Math.round(v), versato: Math.round(vers), guadagno: Math.round(v - vers), ret: Math.round(ret * 10) / 10, dd: Math.round(dd * 10) / 10, vol: vol == null ? null : Math.round(vol * 10) / 10, sett: t7 ? Math.round((serie[serie.length - 1] / idxDi(t7) - 1) * 1000) / 10 : null, commissioni: Math.round(commissioni * 10) / 10 };
   }
   const pr = passivo && w.passivo ? w.passivo.ret : null; for (const k in w) w[k].vsPassivo = pr == null ? null : Math.round((w[k].ret - pr) * 10) / 10;
   return w;
@@ -328,7 +345,10 @@ async function eseguiGiorno(o) {
   for (const [id, x] of Object.entries(r.out)) if (oggiPx[id]) st.mercato[id] = { p: Math.round(x.p * 1000) / 1000, w1: x.w1, m1: x.m1, m3: x.m3, ytd: x.ytd, y1: x.y1 };
   // 2) avvio o aggiornamento dei conti
   let nuovo = false; if (!st.avvio) { avviaSoggetti(st, data, log); nuovo = true; }
-  const sett = settimanaIso(data), giornoSett = (new Date(data + 'T12:00:00Z').getUTCDay() + 6) % 7, feriale = giornoSett < 5;
+  const mese = data.slice(0, 7);
+  if (nuovo) st.mese = mese;
+  else if (st.mese !== mese && (new Date(data + 'T12:00:00Z').getUTCDay() + 6) % 7 < 5) { for (const s of st.soggetti) investiVersamento(st, s, CFG.versamentoMensile, data); st.mese = mese; log('Versamento mensile: ' + CFG.versamentoMensile + ' euro a testa'); }
+  const sett =settimanaIso(data), giornoSett = (new Date(data + 'T12:00:00Z').getUTCDay() + 6) % 7, feriale = giornoSett < 5;
   // 3) analisti (ogni giorno)
   const ctx = { st, data, dir, log, forza: !!o.forza, llm: o.llm, feed: o.feed, estremo: !!o.estremo };
   try { await eseguiAnalisti(ctx); } catch (e) { log('Analisti: errore ' + e.message); }
@@ -338,12 +358,13 @@ async function eseguiGiorno(o) {
   // 5) investitori (una volta a settimana, di giorno feriale, mai nel giorno di avvio)
   let decisi = false; if (!nuovo && st.sett !== sett && (feriale || o.forzaSettimana)) { await decidiInvestitori(ctx); st.sett = sett; decisi = true; } else if (nuovo) st.sett = sett;
   // 6) valore del giorno
-  for (const s of st.soggetti) { const v = Math.round(valore(s, st.px) * 100) / 100, ult = s.storia[s.storia.length - 1]; if (ult && ult[0] === data) ult[1] = v; else s.storia.push([data, v]); }
+  if (!nuovo) for (const s of st.soggetti) aggiornaIndice(st, s, data);          // dopo decisioni e commissioni: i costi pesano sul rendimento, i versamenti no
+  for (const s of st.soggetti) { const v = Math.round(valore(s, st.px) * 100) / 100, ix = Math.round((s.idxOggi != null ? s.idxOggi : 1) * 1e6) / 1e6, ult = s.storia[s.storia.length - 1]; delete s.idxOggi; if (ult && ult[0] === data) { ult[1] = v; ult[2] = ix; } else s.storia.push([data, v, ix]); }
   // 7) giudice (a ogni decisione settimanale e al primo giorno)
   if (decisi || nuovo || !st.giudice || giorniTra(st.ultimoGiudice || data, data) >= 7) { await eseguiGiudice(ctx); } else { const b = giudiceBase(st, data); st.giudice = Object.assign({}, st.giudice, { data: b.data, giorni: b.giorni, maturita: b.maturita, avviso: b.avviso, metriche: b.metriche, classifica: b.classifica, battonoPassivo: b.battonoPassivo, battonoCaso: b.battonoCaso, sensati: b.sensati, miglioreRischio: b.miglioreRischio }); }
   st.pagellaAnalisti = pagellaAnalisti(st);
   st.data = data; st.giorni = st.avvio ? giorniTra(st.avvio, data) : 0; st.generato = new Date().toISOString(); st.note = logs.filter(x => !/^Prezzo non letto/.test(x)).slice(-14);
-  st.versione = 1; st.budget = CFG.budget; st.commissione = CFG.commissione; st.soglia = CFG.sogliaSomiglianza; st.gruppi = Object.fromEntries(Object.keys(GRUPPI).map(g => [g, nomeGruppo(g)]));
+  st.versione = 1; st.budget = CFG.budget; st.versamento = CFG.versamentoMensile; st.commissione = CFG.commissione; st.soglia = CFG.sogliaSomiglianza; st.gruppi = Object.fromEntries(Object.keys(GRUPPI).map(g => [g, nomeGruppo(g)]));
   const json = JSON.stringify(st);
   if (/(password|passphrase|iban|api[_-]?key|\bsecret\b)/i.test(json)) throw new Error('Il testo contiene parole sospette: non scrivo.');
   if (!o.senzaScrittura) { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(fArena, json); fs.writeFileSync(fPrezzi, JSON.stringify(hist)); }

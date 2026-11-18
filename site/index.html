@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lFM5Vp6l5Sox/53k0j6BWU5gQOhNzWyvBI+0LnRkGlU='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-HHP1l+3JQyYtiN4p5auxHwdh+mGtN3m6wRfIBv3hXV0='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4241,7 +4241,8 @@ function bigLosersCard() {
 /* ============ Arena: investitori simulati con soldi finti, analisti e giudice (arena.json, scritto ogni giorno feriale dal sito) ============ */
 const arGr = g => (DATA.arena && DATA.arena.gruppi && DATA.arena.gruppi[g]) || g;
 const arLast = s => s.storia && s.storia.length ? s.storia[s.storia.length - 1][1] : (DATA.arena ? DATA.arena.budget : 10000);
-const arRet = s => (arLast(s) / ((DATA.arena && DATA.arena.budget) || 10000) - 1) * 100;
+const arVers = s => s.versato != null ? s.versato : ((DATA.arena && DATA.arena.budget) || 10000);
+const arRet = s => { const u = s.storia && s.storia.length ? s.storia[s.storia.length - 1] : null; return u && u[2] != null ? (u[2] - 1) * 100 : (arLast(s) / ((DATA.arena && DATA.arena.budget) || 10000) - 1) * 100; };          // rendimento che non conta i versamenti mensili
 const arSp = n => !fin(n) ? '—' : (n > 0 ? '+' : '') + nfp.format(n) + '%';
 const arClima = c => c >= 2 ? 'molto favorevole' : c === 1 ? 'favorevole' : c === 0 ? 'neutro' : c === -1 ? 'prudente' : 'molto prudente';
 function talkArenaSogg(s) {
@@ -4249,7 +4250,7 @@ function talkArenaSogg(s) {
   const rows = Object.entries(s.pesi || {}).sort((a, b) => b[1] - a[1]).map(([g, p]) => [arGr(g), p, '', null, nfp.format(p) + '%']);
   const ult = (s.decisioni || []).slice().reverse().find(d => d.motivo), op = (s.ops || [])[s.ops.length - 1];
   talk({ kind: ctrl ? 'Metro di confronto' : 'Investitore simulato (soldi finti)', title: s.nome + ' · ' + s.stile, value: eur(v), num: v, say: s.mentalita + (ult ? ' Ultima decisione (' + fmtDate(ult.d) + '): ' + ult.motivo : ''),
-    how: 'Parte da ' + eur(A.budget) + ' finti il ' + fmtDate(A.avvio) + ' e paga ' + nfp.format(A.commissione * 100) + '% di commissione su ogni acquisto e vendita. Finora: ' + arSp(m.ret) + (fin(m.dd) ? ', peggior calo ' + nfp.format(m.dd) + '%' : '') + (fin(m.vsPassivo) && s.id !== 'passivo' ? ', ' + arSp(m.vsPassivo) + ' rispetto al passivo' : '') + (fin(m.commissioni) ? ', commissioni pagate ' + eur(m.commissioni) : '') + '.',
+    how: 'Parte da ' + eur(A.budget) + ' finti il ' + fmtDate(A.avvio) + ', riceve ' + eur(A.versamento || 0) + ' nuovi ogni mese (finora versati ' + eur(arVers(s)) + ', guadagno ' + eur(v - arVers(s)) + ') e paga ' + nfp.format(A.commissione * 100) + '% di commissione su ogni acquisto e vendita. Il rendimento non conta i versamenti. Finora: ' + arSp(m.ret) + (fin(m.dd) ? ', peggior calo ' + nfp.format(m.dd) + '%' : '') + (fin(m.vsPassivo) && s.id !== 'passivo' ? ', ' + arSp(m.vsPassivo) + ' rispetto al passivo' : '') + (fin(m.commissioni) ? ', commissioni pagate ' + eur(m.commissioni) : '') + '.',
     box: op && op.mosse && op.mosse.length ? ['Ultima operazione (' + fmtDate(op.d) + ')', op.mosse.slice(0, 8).map(x => arGr(x.g) + ': da ' + nfp.format(x.da) + '% a ' + nfp.format(x.a) + '%').join(' · ')] : null,
     rows, rowsTitle: 'Come ha ripartito i soldi (peso per tema)', tip: ctrl ? 'Chi non batte questo metro non aggiunge niente rispetto a un semplice ETF: serve a distinguere la bravura dalla fortuna.' : 'È una simulazione: serve a capire quali mentalità reggono nel tempo, non a copiare un portafoglio.' });
 }
@@ -4263,13 +4264,13 @@ function talkArenaAnalista(a) {
 function arenaCards() {
   const A = DATA.arena, out = [], J = A.giudice || {}, sogg = (A.soggetti || []).slice().sort((a, b) => arRet(b) - arRet(a));
   const pas = sogg.find(s => s.id === 'passivo'), nInv = sogg.filter(s => s.tipo === 'investitore').length;
-  out.push(h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, nInv + ' investitori simulati con mentalità diverse partono da ' + eur(A.budget) + ' finti a testa, con prezzi veri. Ogni settimana ripartiscono i soldi leggendo le schede di 6 analisti; tre "metri" (ETF mondiale, scelte a caso, liquidità) dicono se qualcuno è davvero bravo. Nessun soldo vero: serve a capire quali approcci reggono.')));
+  out.push(h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, nInv + ' investitori simulati con mentalità diverse partono da ' + eur(A.budget) + ' finti a testa, con prezzi veri, e ogni mese ricevono ' + eur(A.versamento || 0) + ' nuovi da investire. Ogni settimana decidono se comprare ancora, vendere o spostarsi, leggendo le schede di 6 analisti; tre "metri" (ETF mondiale, scelte a caso, liquidità) dicono se qualcuno è davvero bravo. Nessun soldo vero: serve a capire quali approcci reggono.')));
   out[0].append(tiles([
     { l: 'Giorni di gara', v: String(A.giorni || 0), s: 'dal ' + fmtDate(A.avvio), x: () => ({ kind: 'Arena', say: 'Da quanti giorni gli investitori simulati sono in gara. Con pochi giorni la classifica è quasi tutta fortuna.' }) },
     { l: 'Affidabilità', v: J.maturita || '—', s: 'della classifica', x: () => ({ kind: 'Arena', say: J.avviso || 'Più passa il tempo, più la classifica dice qualcosa di vero.' }) },
     { l: 'Battono il passivo', v: (J.battonoPassivo != null ? J.battonoPassivo : '—') + ' su ' + nInv, s: pas ? 'passivo ' + arSp(arRet(pas)) : '', x: () => ({ kind: 'Arena', say: 'Quanti investitori hanno fatto meglio di chi ha comprato un solo ETF mondiale e non ha toccato niente. Se pochi lo battono, la bravura serve a poco.' }) }]));
   if (J.avviso) out[0].append(h('p', { class: 'muted' }, h('b', null, 'Attenzione: '), J.avviso));
-  const rows = sogg.map(s => { const r = arRet(s); return [s.nome + (s.tipo === 'controllo' ? ' (metro)' : ''), r, s.stile + ' · ' + eur(arLast(s)) + (s.id !== 'passivo' && pas && fin((J.metriche || {})[s.id] && J.metriche[s.id].vsPassivo) ? ' · ' + arSp(J.metriche[s.id].vsPassivo) + ' sul passivo' : ''), () => talkArenaSogg(s), arSp(r)]; });
+  const rows = sogg.map(s => { const r = arRet(s); return [s.nome + (s.tipo === 'controllo' ? ' (metro)' : ''), r, s.stile + ' · ' + eur(arLast(s)) + ' (versati ' + eur(arVers(s)) + ')' + (s.id !== 'passivo' && pas && fin((J.metriche || {})[s.id] && J.metriche[s.id].vsPassivo) ? ' · ' + arSp(J.metriche[s.id].vsPassivo) + ' sul passivo' : ''), () => talkArenaSogg(s), arSp(r)]; });
   out.push(h('section', { class: 'card' }, h('h2', null, 'Classifica'), talkBars(rows, true), h('p', { class: 'muted' }, 'Tocca un nome per vedere la mentalità, come ha ripartito i soldi e perché. Aggiornata il ' + fmtDate(A.data) + '. Due investitori non possono mai somigliarsi più del ' + A.soglia + '% (regola controllata dal sito, non dall\'IA).')));
   const gc = h('section', { class: 'card' }, h('h2', null, 'Il giudice'));
   if (J.verdetto) {

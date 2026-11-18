@@ -1,6 +1,7 @@
 {
   "versione": 1,
   "budget": 10000,
+  "versamentoMensile": 1500,
   "commissione": 0.001,
   "sogliaSomiglianza": 49,
   "turnoverMax": 40,
