@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9pn2IBvpRoLBXWzmJN4J2QiI0VCwP9q6TQazo+DOqmM='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-iQNPCqLz0edVXQ77PR2P7vPZVx3ne2OXmhej0arMlH8='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -964,6 +964,15 @@ function migrate(d) {
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
   d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || []; d.trr = d.trr || []; d.favs = Array.isArray(d.favs) ? d.favs : []; d.trb =Object.assign({ income: 0, pct: {} }, d.trb); d.trb.pct = d.trb.pct || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
+  for (const a of d.accounts) {          // MetaTrader (conto 'trading'): niente liquidita', tutto in UNA posizione. Il saldo vecchio entra nella posizione piu' grande, il valore totale non cambia
+    if (a.type !== 'trading' || !(a.cash > 0.005) || (a.cashCcy || 'EUR') !== 'EUR' || a.dep || !a.positions.length) continue;
+    const val = p => { const i = d.instruments.find(x => x.id === p.instId); return i && (i.ccy || 'EUR') === 'EUR' ? p.qty * i.price : -1; };
+    const p = a.positions.slice().sort((x, y) => val(y) - val(x))[0], i = p && d.instruments.find(x => x.id === p.instId); if (!i || val(p) < 0 || !(i.price > 0)) continue;
+    const usi = d.accounts.reduce((t, b) => t + b.positions.filter(q => q.instId === i.id).length, 0);
+    if (p.qty === 1 && usi === 1) i.price = Math.round((i.price + a.cash) * 100) / 100; else p.qty = p.qty + a.cash / i.price;
+    if (p.cost > 0) p.cost = Math.round((p.cost + a.cash) * 100) / 100;
+    a.cash = 0;
+  }
 }
 
 /* ============ cifratura (AES-256-GCM, chiave da passphrase con PBKDF2) ============ */
