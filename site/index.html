@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wiR6btC0sh+F4OSufPHjkww1uchGffLWNbyXaytN/Kg='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9pn2IBvpRoLBXWzmJN4J2QiI0VCwP9q6TQazo+DOqmM='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -955,14 +955,14 @@ const TYPES = {
 };
 const FLOW_TYPES = [['versamento', 'Versamento'], ['prelievo', 'Prelievo'], ['partenza', 'Valore di partenza']];
 const flowSign = t => t === 'prelievo' ? -1 : 1;
-const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [], trx: [], trh: [], trb: { income: 0, pct: {} }, trr: [] });
+const newData = () => ({ v: 1, created: today(), settings: { autolock: 15 }, fx: {}, accounts: [], instruments: [], snapshots: [], policy: { horizon: '', maxLoss: '', target: '', notes: '' }, journal: [], goal: { cagr: 20, years: 5, monthly: 0, assume: {} }, ops: [], plans: [], budget: newBudget(), boxes: {}, goals: [], trx: [], trh: [], trb: { income: 0, pct: {} }, trr: [], favs: [] });
 function migrate(d) {
   d.settings = Object.assign({ autolock: 5 }, d.settings); d.fx = d.fx || {}; d.snapshots = d.snapshots || []; d.instruments = d.instruments || [];
   d.policy = Object.assign({ horizon: '', maxLoss: '', target: '', notes: '' }, d.policy);
   d.journal = d.journal || []; d.goal = Object.assign({ cagr: 20, years: 5, monthly: 0, assume: {} }, d.goal);
   d.ops = d.ops || []; d.plans = d.plans || []; d.budget = Object.assign(newBudget(), d.budget); d.budget.items = d.budget.items || []; d.budget.hist = d.budget.hist || [];
   for (const a of (d.accounts = d.accounts || [])) { a.positions = a.positions || []; a.flows = a.flows || []; a.imports = a.imports || []; a.cash = a.cash || 0; a.cashCcy = a.cashCcy || 'EUR'; if (a.box == null && /cassa\s*cani/i.test(a.name)) a.box = 'Cassa cani'; }
-  d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || []; d.trr = d.trr || []; d.trb = Object.assign({ income: 0, pct: {} }, d.trb); d.trb.pct = d.trb.pct || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
+  d.boxes = d.boxes || {}; d.goals = d.goals || []; d.trx = d.trx || []; d.trh = d.trh || []; d.trr = d.trr || []; d.favs = Array.isArray(d.favs) ? d.favs : []; d.trb =Object.assign({ income: 0, pct: {} }, d.trb); d.trb.pct = d.trb.pct || {};          // casse separate: { "Cassa cani": { goal: 8000 } }
   for (const i of d.instruments) i.hist = i.hist || [];
 }
 
@@ -3787,11 +3787,11 @@ function analisiBanner() {
   const an = DATA.analisi; if (!an) return null;
   return h('div', { class: 'banner' }, h('span', null, h('b', null, 'Analisi di oggi: '), an.umore ? an.umore.etichetta + ' — ' : '', an.titolo), btn('Leggi', () => { UI.tab = 'consigli'; render(); window.scrollTo(0, 0); }, 'pri sm'));
 }
-const CONS_VISTE = [['analisi', 'Analisi del giorno'], ['mercato', 'Mercati e notizie'], ['movers', 'Market movers'], ['storia', 'Storia'], ['grandi', 'Grandi fondi'], ['titoli', 'Classifiche'], ['arena', 'Arena'], ['chiedi', 'Chiedi all\'AI']];
+const CONS_VISTE = [['arena', 'Arena'], ['analisi', 'Analisi del giorno'], ['mercato', 'Mercati e notizie'], ['movers', 'Market movers'], ['storia', 'Storia'], ['grandi', 'Grandi fondi'], ['titoli', 'Classifiche'], ['chiedi', 'Chiedi all\'AI']];
 function tabConsigli() {          // una riga di sezioni da scorrere di lato (sottolineata quella aperta), poi la vista scelta
-  const sub = UI.csub || 'analisi', seg = h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Mercati e idee' }, CONS_VISTE.map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
+  const sub = UI.csub || 'arena', seg = h('nav', { class: 'subtabs', role: 'tablist', 'aria-label': 'Sezioni di Mercati e idee' }, CONS_VISTE.map(([k, l]) => h('button', { type: 'button', class: 'subtab', role: 'tab', 'aria-selected': sub === k ? 'true' : 'false', onclick: () => { UI.csub = k; render(); window.scrollTo(0, 0); } }, l)));
   setTimeout(() => { const a = seg.querySelector('[aria-selected=true]'); if (a && a.scrollIntoView) { try { seg.scrollLeft = Math.max(0, a.offsetLeft - 16); } catch (e) { /* ok */ } } }, 0);
-  return h('div', null, seg, sub === 'mercato' ? tabMercati() : sub === 'movers' ? tabMovers() : sub === 'storia' ? tabStoria() : sub === 'grandi' ? tabGrandi() : sub === 'titoli' ? tabClassifiche() : sub === 'arena' ? tabArena() : sub === 'chiedi' ? tabChiedi() : tabConsigliAnalisi());
+  return h('div', null, seg, sub === 'mercato' ? tabMercati() : sub === 'movers' ? tabMovers() : sub === 'storia' ? tabStoria() : sub === 'grandi' ? tabGrandi() : sub === 'titoli' ? tabClassifiche() : sub === 'arena' ? tabArena() : sub === 'chiedi' ? tabChiedi() : sub === 'analisi' ? tabConsigliAnalisi() : tabArena());
 }
 function dataContext() {          // cio' che si manda all'AI: totali e pesi, MAI nomi dei conti o codici; per i titoli solo il nome e il peso
   const tot = totalValue(), pa = S.accounts.filter(a => a.perf), tp = perfOf(pa), cls = exposure('class', true).map(([l, v]) => ({ classe: l, peso_pct: Math.round(v / tot * 1000) / 10 })), area = exposure('area', true).map(([l, v]) => ({ area: l, peso_pct: Math.round(v / tot * 1000) / 10 }));
@@ -4256,14 +4256,42 @@ const arVers = s => s.versato != null ? s.versato : ((DATA.arena && DATA.arena.b
 const arRet = s => { const u = s.storia && s.storia.length ? s.storia[s.storia.length - 1] : null; return u && u[2] != null ? (u[2] - 1) * 100 : (arLast(s) / ((DATA.arena && DATA.arena.budget) || 10000) - 1) * 100; };          // rendimento che non conta i versamenti mensili
 const arSp = n => !fin(n) ? '—' : (n > 0 ? '+' : '') + nfp.format(n) + '%';
 const arClima = c => c >= 2 ? 'molto favorevole' : c === 1 ? 'favorevole' : c === 0 ? 'neutro' : c === -1 ? 'prudente' : 'molto prudente';
+/* ---- Arena: i titoli veri dietro ogni tema (stessa lista di arena-config.json, "strumenti") e i Preferiti ---- */
+const AR_STRUM = {"world":[["IE00B4L5Y983","iShares Core MSCI World","etf"],["IE000BI8OT95","Amundi Core MSCI World","etf"]],"usa500":[["LU0490618542","Xtrackers S&P 500 Swap","etf"],["IE00BFMXXD54","Vanguard S&P 500","etf"]],"nasdaq":[["LU1829221024","Amundi Nasdaq-100 Swap","etf"],["IE00BFZXGZ54","Invesco EQQQ Nasdaq-100","etf"]],"usa-value":[["IE00BD1F4M44","iShares MSCI USA Value","etf"]],"semis":[["IE000I8KRLL9","iShares MSCI Global Semiconductors","etf"]],"europa":[["IE00B4K48X80","iShares Core MSCI Europe","etf"],["IE00BK5BQX27","Vanguard FTSE Developed Europe","etf"],["LU0908500753","Amundi Core Stoxx Europe 600","etf"]],"eurozona":[["FR0007054358","Amundi Euro Stoxx 50","etf"],["IE00B53L3W79","iShares Core Euro Stoxx 50","etf"]],"em":[["IE00BKM4GZ66","iShares Core MSCI EM IMI","etf"]],"brasile":[["LU0292109344","Xtrackers MSCI Brazil","etf"]],"giappone":[["LU0274209740","Xtrackers MSCI Japan","etf"]],"corea":[["IE00B0M63391","iShares MSCI Korea","etf"],["LU0292100046","Xtrackers MSCI Korea","etf"]],"cina":[["LU0514695690","Xtrackers MSCI China","etf"]],"india":[["IE00BZCQB185","iShares MSCI India","etf"]],"asia-em":[["IE00B5L8K969","iShares MSCI EM Asia","etf"]],"energia-pulita":[["IE00B1XNHC34","iShares Global Clean Energy","etf"]],"difesa":[["IE000YYE6WK5","VanEck Defense","etf"]],"salute":[["IE00BYZK4776","iShares Healthcare Innovation","etf"]],"utility":[["IE00052T92P8","Amundi S&P World Utilities","etf"]],"oro":[["IE00B579F325","Invesco Physical Gold","etc"],["JE00BN2CJ301","WisdomTree Core Physical Gold","etc"]],"minatori-oro":[["IE00B6R52036","iShares Gold Producers","etf"]],"materie-prime":[["LU1829218749","Amundi Bloomberg Commodity ex-Agri","etf"]],"obbl-globali":[["LU0378818131","Xtrackers Global Government Bond (EUR hedged)","etf"]],"obbl-breve-euro":[["FR0010754200","Amundi Euro Government Bond 0-6M","etf"]],"obbl-corp-euro":[["LU1437018168","Amundi EUR Corporate Bond ESG","etf"]],"btp":[["IE000589MF42","iShares Italy Government Bond (BTP)","etf"]],"usa-bond":[["US912810TV08","T-Bond USA 4,75% nov 2053","bond"]],"monetario":[["LU0290358497","Xtrackers EUR Overnight Rate Swap","etf"]],"btc":[["bitcoin","Bitcoin","crypto"]],"eth":[["ethereum","Ether","crypto"]],"sol":[["solana","Solana","crypto"]],"xrp":[["ripple","XRP","crypto"]],"az-nvda":[["US67066G1040","Nvidia","azione"]],"az-aapl":[["US0378331005","Apple","azione"]],"az-googl":[["US02079K3059","Alphabet A","azione"]],"az-msft":[["US5949181045","Microsoft","azione"]],"az-amzn":[["US0231351067","Amazon","azione"]],"az-avgo":[["US11135F1012","Broadcom","azione"]],"az-meta":[["US30303M1027","Meta","azione"]],"az-tsla":[["US88160R1014","Tesla","azione"]],"az-jpm":[["US46625H1005","JPMorgan","azione"]],"az-brk":[["US0846707026","Berkshire Hathaway B","azione"]],"az-asml":[["NL0010273215","ASML","azione"]],"az-lvmh":[["FR0000121014","LVMH","azione"]],"az-sap":[["DE0007164600","SAP","azione"]],"az-novo":[["DK0062498333","Novo Nordisk B","azione"]],"az-leonardo":[["IT0003856405","Leonardo","azione"]],"az-enel":[["IT0003128367","Enel","azione"]],"az-eni":[["IT0003132476","Eni","azione"]],"az-ferrari":[["NL0011585146","Ferrari","azione"]],"az-toyota":[["JP3633400001","Toyota","azione"]],"az-tsmc":[["US8740391003","TSMC (ADR)","azione"]],"az-tencent":[["KYG875721634","Tencent","azione"]],"az-alibaba":[["US01609W1027","Alibaba (ADR)","azione"]]};
+const AR_KIND = { etf: 'ETF', etc: 'ETC (oro fisico)', bond: 'Titolo di Stato', crypto: 'Criptovaluta', azione: 'Azione' };
+const AR_KIND_PL = { azione: 'Azioni', etf: 'ETF', etc: 'ETC', bond: 'Titoli di Stato', crypto: 'Criptovalute' };
+const favList = () => (S.favs = Array.isArray(S.favs) ? S.favs : []);
+const favHas = code => favList().some(f => f.code === code);
+function favToggle(t, g, s) {
+  const L = favList(), i = L.findIndex(f => f.code === t[0]);
+  if (i >= 0) { L.splice(i, 1); done(); toastMsg(t[1] + ' tolto dai preferiti.'); }
+  else { L.push({ code: t[0], name: t[1], kind: t[2], g: g || '', gruppo: g ? arGr(g) : '', da: s ? s.nome : '', added: today() }); done(); toastMsg(t[1] + ' salvato nei preferiti.'); }
+}
+async function copyCode(code) { try { await navigator.clipboard.writeText(code); toastMsg('Codice copiato: ' + code); } catch { toastMsg('Non riesco a copiare: il codice è ' + code); } }
+function talkArenaTitolo(t, g, s) {          // il titolo vero dietro un tema: nome, codice, chi lo ha, e il pulsante per salvarlo
+  const A = DATA.arena || {}, code = t[0], isIsin = /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(code), fav = favHas(code), mine = S && (S.instruments || []).find(i => i.code && String(i.code).toUpperCase() === code.toUpperCase());
+  const same = (AR_STRUM[g] || []).filter(x => x[0] !== code), chi = (A.soggetti || []).filter(x => x.tipo !== 'ritirato' && x.pesi && x.pesi[g] >= 0.5).sort((a, b) => b.pesi[g] - a.pesi[g]);
+  talk({ kind: (AR_KIND[t[2]] || 'Titolo') + (g ? ' · ' + arGr(g) : ''), title: t[1], value: isIsin ? code : 'codice ' + code,
+    say: (isIsin ? 'ISIN ' + code + ': è il codice che cerchi nel tuo broker per comprarlo.' : 'Si compra con questo nome o simbolo sulla piattaforma crypto.') + (s && g && s.pesi && s.pesi[g] ? ' ' + s.nome + ' ci mette ' + nfp.format(s.pesi[g]) + '% del portafoglio simulato.' : ''),
+    box: mine ? ['Ce l\'hai già', 'Questo titolo è già in ' + (S.accounts.filter(a => a.positions.some(p => p.instId === mine.id)).map(a => a.name).join(', ') || 'uno dei tuoi conti') + '.'] : (same.length ? ['Alternative per lo stesso tema', same.map(x => x[1] + ' (' + x[0] + ')').join(' · ')] : null),
+    rows: chi.map(x => [x.nome, x.pesi[g], x.stile, () => talkArenaSogg(x), nfp.format(x.pesi[g]) + '%']), rowsTitle: 'Chi ce l\'ha nell\'Arena (peso del tema)',
+    how: 'Nell\'Arena il tema «' + arGr(g) + '» è rappresentato da questo titolo (se ce ne sono più di uno, usa il primo che ha un prezzo). I soldi sono finti e i prezzi veri: serve a sapere cosa replicare, non è un consiglio.',
+    acts: [[fav ? 'Togli dai preferiti' : 'Salva nei preferiti', () => favToggle(t, g, s), fav ? '' : 'pri'], ['Copia il codice', () => copyCode(code)], ['Apri i preferiti', rvGo('preferiti')]] });
+}
+function talkArenaGruppo(g, s) {          // tocco su un tema: un solo titolo lo mostro subito, piu' titoli equivalenti li elenco
+  const L = AR_STRUM[g] || [];
+  if (L.length === 1) return talkArenaTitolo(L[0], g, s);
+  talk({ kind: 'Tema', title: arGr(g), value: s && s.pesi && s.pesi[g] ? nfp.format(s.pesi[g]) + '%' : '', say: L.length ? 'Questo tema è coperto da ' + L.length + ' titoli equivalenti: per replicarlo ne basta uno. Tocca quello che vuoi vedere o salvare.' : 'Per questo tema non ho l\'elenco dei titoli.',
+    acts: L.map(t => [t[1] + (favHas(t[0]) ? ' ★' : ''), () => talkArenaTitolo(t, g, s)]) });
+}
 function talkArenaSogg(s) {
   const A = DATA.arena, m = (A.giudice && A.giudice.metriche && A.giudice.metriche[s.id]) || {}, v = arLast(s), ctrl = s.tipo === 'controllo';
-  const rows = Object.entries(s.pesi || {}).sort((a, b) => b[1] - a[1]).map(([g, p]) => [arGr(g), p, '', null, nfp.format(p) + '%']);
+  const rows = Object.entries(s.pesi || {}).sort((a, b) => b[1] - a[1]).map(([g, p]) => { const L = AR_STRUM[g] || []; return [arGr(g), p, L.length === 1 ? L[0][1] + (favHas(L[0][0]) ? ' ★' : '') : L.length ? L.length + ' titoli equivalenti' : '', () => talkArenaGruppo(g, s), nfp.format(p) + '%']; });
   const ult = (s.decisioni || []).slice().reverse().find(d => d.motivo), op = (s.ops || [])[s.ops.length - 1];
   talk({ kind: ctrl ? 'Metro di confronto' : 'Investitore simulato (soldi finti)', title: s.nome + ' · ' + s.stile, value: eur(v), num: v, say: s.mentalita + (ult ? ' Ultima decisione (' + fmtDate(ult.d) + '): ' + ult.motivo : ''),
     how: 'Parte da ' + eur(A.budget) + ' finti il ' + fmtDate(s.entrata || A.avvio) + (s.entrata ? ' (è entrato a fine stagione al posto di un altro)' : '') + ', riceve ' + eur(A.versamento || 0) + ' nuovi ogni mese (finora versati ' + eur(arVers(s)) + ', guadagno ' + eur(v - arVers(s)) + ') e paga ' + nfp.format(A.commissione * 100) + '% di commissione su ogni acquisto e vendita. Il rendimento non conta i versamenti. Finora: ' + arSp(m.ret) + (fin(m.dd) ? ', peggior calo ' + nfp.format(m.dd) + '%' : '') + (fin(m.vsPassivo) && s.id !== 'passivo' ? ', ' + arSp(m.vsPassivo) + ' rispetto al passivo' : '') + (fin(m.commissioni) ? ', commissioni pagate ' + eur(m.commissioni) : '') + '.',
     box: op && op.mosse && op.mosse.length ? ['Ultima operazione (' + fmtDate(op.d) + ')', op.mosse.slice(0, 8).map(x => arGr(x.g) + ': da ' + nfp.format(x.da) + '% a ' + nfp.format(x.a) + '%').join(' · ')] : null,
-    rows, rowsTitle: 'Come ha ripartito i soldi (peso per tema)', tip: ctrl ? 'Chi non batte questo metro non aggiunge niente rispetto a un semplice ETF: serve a distinguere la bravura dalla fortuna.' : 'È una simulazione: serve a capire quali mentalità reggono nel tempo, non a copiare un portafoglio.' });
+    rows, rowsTitle: 'Come ha ripartito i soldi (tocca un tema per vedere il titolo e salvarlo)', tip: ctrl ? 'Chi non batte questo metro non aggiunge niente rispetto a un semplice ETF: serve a distinguere la bravura dalla fortuna.' : 'È una simulazione: serve a capire quali mentalità reggono nel tempo, non a copiare un portafoglio.' });
 }
 function talkArenaAnalista(a) {
   const sc = a.scheda, P = (DATA.arena.pagellaAnalisti || {})[a.id] || {};
@@ -4353,6 +4381,25 @@ function tabArena() {
   const el = h('div'), A = DATA.arena;
   if (!A) { el.append(h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, ONLINE ? 'La gara non è ancora partita: parte con il primo giro automatico del sito (ogni giorno di borsa a fine giornata). Poi qui vedrai classifica, giudice e analisti.' : 'L\'Arena si vede dal sito online (arena.json).'), ONLINE ? btn('Riscarica', () => loadOnlineData(), 'sm') : null)); return el; }
   arenaCards().forEach(c => el.append(c)); return el;
+}
+function tabPreferiti() {          // i titoli salvati dall'Arena: cercabili, raggruppati per tipo e in ordine alfabetico
+  const el = h('div'), L = favList(), q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca un titolo o un codice', 'aria-label': 'Cerca nei preferiti', autocomplete: 'off', enterkeyhint: 'search' }), box = h('div');
+  el.append(h('section', { class: 'card' }, h('h2', null, 'I miei preferiti'), h('p', { class: 'muted' }, 'I titoli che hai salvato dall\'Arena per replicarli un giorno. Tocca un titolo per vedere il codice, chi ce l\'ha nell\'Arena e per toglierlo. Restano nei tuoi dati, cifrati con tutto il resto.')));
+  if (!L.length) { el.append(h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Non hai ancora salvato niente. Apri l\'Arena, tocca un investitore, poi un tema: trovi il titolo e il pulsante «Salva nei preferiti».'), btn('Vai su Arena', rvGo('consigli', { csub: 'arena' }), 'pri'))); return el; }
+  const draw = () => {
+    const toks = normT(q.value).split(' ').filter(Boolean), hit = f => toks.every(w => normT(f.name + ' ' + f.code + ' ' + (AR_KIND[f.kind] || '') + ' ' + (f.gruppo || '')).includes(w)), by = {};
+    L.filter(hit).forEach(f => (by[f.kind] = by[f.kind] || []).push(f));
+    const kinds = Object.keys(by).sort((a, b) => Object.keys(AR_KIND_PL).indexOf(a) - Object.keys(AR_KIND_PL).indexOf(b));
+    box.replaceChildren(...(kinds.length ? kinds.map(k => h('section', { class: 'card' }, h('h2', null, (AR_KIND_PL[k] || 'Altro') + ' · ' + by[k].length),
+      h('ul', { class: 'list' }, by[k].sort((a, b) => a.name.localeCompare(b.name, 'it')).map(f => h('li', { class: 'tapme', role: 'button', tabindex: '0', onclick: e => { tapFx(e.currentTarget); talkArenaTitolo([f.code, f.name, f.kind], f.g, null); }, onkeydown: e => { if (e.key === 'Enter') talkArenaTitolo([f.code, f.name, f.kind], f.g, null); } },
+        h('span', null, f.name, h('small', null, ' · ' + f.code)), h('span', null, h('small', null, (f.gruppo || '') + (f.da ? ' · visto da ' + f.da : '') + ' · ' + fmtDate(f.added)))))))) : [h('section', { class: 'card' }, h('p', { class: 'muted' }, 'Nessun preferito corrisponde.'))]));
+  };
+  q.addEventListener('input', draw); draw();
+  el.append(h('div', { class: 'cq-row' }, q), box); return el;
+}
+function arenaHomeCard() {          // in fondo alla Home: scorciatoia diretta all'Arena
+  const A = DATA.arena, top = A && (A.soggetti || []).filter(s => s.tipo === 'investitore').sort((a, b) => arRet(b) - arRet(a))[0];
+  return h('section', { class: 'card' }, h('h2', null, 'Arena degli investitori'), h('p', { class: 'muted' }, top ? 'In testa oggi: ' + top.nome + ' (' + arSp(arRet(top)) + '). Tocca un investitore per vedere i titoli che ha comprato e salvarli nei preferiti.' : 'Investitori simulati con soldi finti e prezzi veri: guarda chi va meglio e quali titoli ha scelto.'), h('div', { class: 'row' }, btn('Vai su Arena', rvGo('consigli', { csub: 'arena' }), 'pri'), (S.favs || []).length ? btn('I miei preferiti (' + S.favs.length + ')', rvGo('preferiti')) : null));
 }
 function tabMercati() {
   const m = DATA.mercati, el = h('div');
@@ -4706,7 +4753,7 @@ function openMenu() {
   bg.addEventListener('click', close); document.addEventListener('keydown', esc);
   document.body.append(bg, pan); const f = pan.querySelector('.mi'); if (f) f.focus();
 }
-const TABS = [['plusvalenze', 'Plusvalenze'], ['panoramica', 'Home'], ['investimenti', 'Investimenti'], ['altro', 'Altro'], ['lab', 'Laboratorio'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Portafoglio'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Mercati e idee'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
+const TABS = [['plusvalenze', 'Plusvalenze'], ['panoramica', 'Home'], ['investimenti', 'Investimenti'], ['altro', 'Altro'], ['lab', 'Laboratorio'], ['preferiti', 'Preferiti'], ['conti', 'Conti'], ['strumenti', 'Strumenti'], ['allocazione', 'Portafoglio'], ['pac', 'PAC'], ['transazioni', 'Transazioni'], ['grafici', 'Grafici'], ['consigli', 'Mercati e idee'], ['analisi', 'Analisi'], ['grandi', 'Grandi fondi'], ['mercati', 'Mercati'], ['dati', 'Dati e sicurezza']];
 const MAIN_TABS = ['panoramica', 'investimenti', 'transazioni', 'altro'];
 const TAB_GROUP = k => k === 'panoramica' ? 'panoramica' : ['investimenti', 'conti', 'pac', 'plusvalenze'].includes(k) ? 'investimenti' : k === 'transazioni' ? 'transazioni' : 'altro';          // a quale delle 4 schede della barra appartiene ogni vista
 /* ============ TRANSAZIONI: spese, guadagni e trasferimenti (calendario, inserimento guidato, statistiche). Le operazioni nuove muovono la liquidita' dei conti; lo storico importato (S.trh) e' solo andamento e non tocca i saldi ============ */
@@ -5100,7 +5147,7 @@ const CLASSIC_TABS =['panoramica', 'conti', 'pac', 'transazioni', 'consigli', 'a
 const mainTabs = () => LAYOUT() === 'classico' ? CLASSIC_TABS : MAIN_TABS;
 /* ogni campo che accetta solo numeri apre la tastiera NUMERICA del telefono (non quella del testo) */
 try { new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType !== 1) continue; const L = (nd.matches && nd.matches('input[type=number]') ? [nd] : []).concat(nd.querySelectorAll ? [...nd.querySelectorAll('input[type=number]')] : []); for (const x of L) if (!x.hasAttribute('inputmode')) x.setAttribute('inputmode', 'decimal'); } }).observe(document.documentElement, { childList: true, subtree: true }); } catch { /* niente */ }
-const APP_VER = '18/11/2026 · v50 (audit: sicurezza, affidabilità, prove)';
+const APP_VER = '19/11/2026 · v51 (Arena: titoli cliccabili, Preferiti, Arena in Home)';
 /* ============ RIORDINO DELLE SEZIONI: tieni premuto su una sezione, tutto si muove e la trascini su e giu'; l'ordine resta salvato e vale per ogni disposizione ============ */
 const REORDER = { on: false, box: null, bar: null, key: '' };
 const SEC_ORDER = () => ((S && S.settings) ? (S.settings.order = S.settings.order || {}) : {});
@@ -5208,7 +5255,7 @@ function tabsBar() { const mt = mainTabs(); return h('nav', { class: 'tabs', rol
 const ICONS = { plusvalenze: ['M3 17l6-6 4 4 8-8', 'M15 7h6v6'], investimenti: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], altro: ['M4 5h6v6H4z', 'M14 5h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h6v6h-6z'], transazioni: ['M7 7h13', 'M16 3l4 4-4 4', 'M17 17H4', 'M8 13l-4 4 4 4'], grandi: ['M3 21h18', 'M5 21V10l7-6 7 6v11', 'M9 21v-5h6v5'], grafici: ['M3 3v18h18', 'M7 15l4-5 3 3 5-7'], pac: ['M17 2l4 4-4 4', 'M3 11V9a3 3 0 013-3h15', 'M7 22l-4-4 4-4', 'M21 13v2a3 3 0 01-3 3H3'], consigli: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'], panoramica: ['M3 11l9-8 9 8', 'M5 10v10h14V10'], conti: ['M5 6h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z', 'M3 10h18', 'M16 14.5h2'], strumenti: ['M4 7h16', 'M4 12h16', 'M4 17h10'], allocazione: ['M12 3a9 9 0 109 9h-9z', 'M15 3.5A9 9 0 0120.5 9H15z'], analisi: ['M4 20V11', 'M10 20V4', 'M16 20v-6', 'M22 20H2'], piano: ['M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'], mercati: ['M12 3a9 9 0 100 18 9 9 0 000-18z', 'M3 12h18', 'M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z'], scenari: ['M13 2L4 14h7l-1 8 9-12h-7z'], dati: ['M6 11h12a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1v-8a1 1 0 011-1z', 'M8 11V8a4 4 0 018 0v3'] };
 const SHORT = { transazioni: 'Spese', grandi: 'Fondi', panoramica: 'Home', strumenti: 'Titoli', allocazione: 'Mix', dati: 'Dati' };
 const tabIcon = k => s('svg', { viewBox: '0 0 24 24', width: 24, height: 24, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, (ICONS[k] || []).map(d => s('path', { d })));
-function content() { return { plusvalenze: tabPlusvalenze, panoramica: tabPanoramica, investimenti: tabInvestimenti, altro: tabAltro, conti: tabConti, strumenti: tabStrumenti, allocazione: tabPortafoglio, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, lab: tabLab, dati: tabDati }[UI.tab](); }
+function content() { return { plusvalenze: tabPlusvalenze, panoramica: tabPanoramica, investimenti: tabInvestimenti, altro: tabAltro, conti: tabConti, strumenti: tabStrumenti, allocazione: tabPortafoglio, pac: tabPac, transazioni: tabTransazioni, grafici: tabGrafici, consigli: tabConsigli, analisi: tabAnalisi, grandi: tabGrandi, piano: tabPiano, mercati: tabMercati, scenari: tabScenari, lab: tabLab, preferiti: tabPreferiti, dati: tabDati }[UI.tab](); }
 
 const qaBtn = (label, paths, fn) => h('button', { type: 'button', class: 'qa', onclick: fn }, s('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, paths.map(d => s('path', { d }))), label);
 /* ============ LAYOUT STILE REVOLUT: Home a riquadri, scheda Investimenti (conti a fisarmonica), scheda Altro ============ */
@@ -5500,7 +5547,7 @@ function tabPlusvalenze() {
 }
 function tabAltro() {
   const el = h('div', { class: 'rv-menu' }), D = DEMO;
-  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, plusvalenze, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')], ['lab', 'Laboratorio', 'la tua settimana, obiettivi nel tempo, «e se…?», crisi del passato e radar delle spese', rvGo('lab')]];
+  const ITEMS = [['conti', 'Conti', 'saldi, estratti, importazioni e operazioni di ogni conto', rvGo('conti')], ['pac', 'PAC', 'acquisti che si ripetono, calendario e conferme', rvGo('pac')], ['consigli', 'Mercati e idee', 'opportunità, notizie, grandi fondi, classifiche e analisi del giorno', rvGo('consigli')], ['analisi', 'Analisi', 'grafici, plusvalenze, tasse, ribilanciamento, regole e affidabilità dei dati', rvGo('analisi')], ['allocazione', 'Portafoglio', 'come sei diviso per classe, area e valuta, e i prezzi dei tuoi titoli', rvGo('allocazione')], ['lab', 'Laboratorio', 'la tua settimana, obiettivi nel tempo, «e se…?», crisi del passato e radar delle spese', rvGo('lab')], ['preferiti', 'Preferiti', 'i titoli salvati dall\'Arena che vuoi replicare un giorno', rvGo('preferiti')]];
   const tech = [['dati', 'Dati e sicurezza', 'aspetto, salvataggio online, Face ID e tassi di cambio', rvGo('dati')], ...[!D ? ['Aggiorna i prezzi', 'prezzi di oggi di titoli, ETF e crypto', () => { ONLINE ? pricesOnline() : pickPrices(); }, ['M20 11a8 8 0 00-14.5-4.5L4 8', 'M4 4v4h4', 'M4 13a8 8 0 0014.5 4.5L20 16', 'M20 20v-4h-4']] : null, !D ? ['Da screenshot', 'leggi un\'operazione da una foto con l\'AI', () => { if ((S.settings || {}).aiKey) aiOpsStart(); else if (confirm('Per leggere uno screenshot serve la chiave AI gratuita di Google (due minuti, una volta sola). Ti porto a Dati e sicurezza. Vuoi andarci?')) rvGo('dati')(); }, ['M4 7h3l2-2h6l2 2h3v12H4z', 'M12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z']] : null, !D ? ['Importa i file dei conti', 'carica gli estratti e i file di Fineco, Directa…', () => pickBatch(), MICO.imp] : null, !D ? ['Aggiorna i saldi', 'conti correnti, contanti e carte', openBalances, MICO.saldi] : null, ['Menu completo', 'salvataggi, versioni precedenti, blocco, uscita', openMenu, ['M4 7h16', 'M4 12h16', 'M4 17h16']]].filter(Boolean)];
   const q = h('input', { type: 'search', class: 'cq', placeholder: 'Cerca una sezione', 'aria-label': 'Cerca una sezione', autocomplete: 'off', enterkeyhint: 'search' }), box = h('section', { class: 'card rv' }), box2 = h('section', { class: 'card rv' });
   const draw = () => { const toks = normT(q.value).split(' ').filter(Boolean), hit = t => toks.every(w => normT(t).includes(w));
@@ -5571,6 +5618,7 @@ function tabPanoramica() {
   el.append(h('div', { class: 'two' }, h('section', { class: 'card' }, h('h2', null, 'Dove guadagni'), good.length ? h('ul', { class: 'list' }, good.map(li)) : h('p', { class: 'muted' }, pp.length ? 'Nessuna posizione in guadagno.' : 'Inserisci il costo di carico delle posizioni per vederlo.')),
     h('section', { class: 'card' }, h('h2', null, 'Dove perdi'), bad.length ? h('ul', { class: 'list' }, bad.map(li)) : h('p', { class: 'muted' }, pp.length ? 'Nessuna posizione in perdita.' : 'Inserisci il costo di carico delle posizioni per vederlo.'))));
   secTag(el); applyOrder('home', el);
+  if (!DEMO) el.append(arenaHomeCard());          // sempre in fondo alla Home
   el.append(h('p', { class: 'muted' }, 'Guadagno = valore attuale − versato netto: comprende anche dividendi, interessi, commissioni e plusvalenze già realizzate. Per le singole posizioni è il guadagno non ancora realizzato.'));
   return el;
 }
