@@ -51,6 +51,17 @@ if ($I.tassi_usa) { $t = $I.tassi_usa; $righe.Add('Tassi USA: 10 anni ' + (Fmt $
 if ($I.crypto) { $c = $I.crypto; $txt = 'Crypto: ' + (Fmt $c.var_24h_pct 1) + '% in 24 ore'; if ($I.paura_avidita_crypto) { $txt += ', paura/avidita ' + $I.paura_avidita_crypto.valore + ' (' + $I.paura_avidita_crypto.classe + ')' }; $righe.Add($txt + '.') }
 if ($I.calendario) { $n = @($I.calendario) | Where-Object { $_.data -ge $oggi } | Select-Object -First 1; if ($n) { $righe.Add('Prossimo appuntamento: ' + ([datetime]::ParseExact($n.data, 'yyyy-MM-dd', $inv)).ToString('d MMM', $itc) + ' - ' + $n.titolo + '.') } }
 
+# l'analisi del giorno (scritta ogni mattina dall'AI sulle notizie pubbliche, in site/analisi.json): "In breve" e due cose da tenere d'occhio. Solo se e' di oggi o di ieri.
+$anf = Join-Path $Sito 'analisi.json'
+if (Test-Path $anf) { try {
+  $an = Get-Content $anf -Raw -Encoding UTF8 | ConvertFrom-Json
+  if ([string]$an.data -ge $ora.AddDays(-1).ToString('yyyy-MM-dd') -and $an.titolo) {
+    $sin = [string]$an.sintesi; if ($sin.Length -gt 300) { $cut = $sin.Substring(0, 300); $pp = $cut.LastIndexOf('. '); $sin = if ($pp -gt 120) { $cut.Substring(0, $pp + 1) } else { $cut.TrimEnd() + '...' } }
+    $att = (@($an.attenzione | Select-Object -First 2 | ForEach-Object { [string]$_.titolo }) -join '; ')
+    $righe.Insert(0, 'In breve: ' + $an.titolo + '. ' + $sin + $(if ($att) { ' Da tenere d''occhio: ' + $att + '.' } else { '' }))
+  }
+} catch { } }
+
 # movimenti forti: strumenti seguiti che dall'ultima seduta si sono mossi piu' del 3% (8% per le crypto). Solo prezzi pubblici.
 $forti = @(); $stor = Join-Path $Sito 'storico-prezzi.csv'
 if (Test-Path $stor) {

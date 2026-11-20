@@ -1,0 +1,20 @@
+name: Rapporto mensile sui mercati
+on:
+  schedule:
+    - cron: '15 7 1 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rapporto-mensile
+  cancel-in-progress: false
+jobs:
+  rapporto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Manda il rapporto del mese sul telefono (se hai impostato NTFY_TOPIC)
+        shell: pwsh
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: ./rapporto-mensile.ps1 -Sito ./site -Watch ./watchlist-pubblica.json
