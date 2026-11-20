@@ -81,8 +81,12 @@ try {
   $fh = New-Object Collections.Generic.List[string]          # senza prezzo: nuovi (non erano nel catalogo di ieri) o gia' presenti con prezzo 0
   foreach ($s in $elenco.psbase.Keys) { if (-not $px.ContainsKey($s) -and (-not $prev.ContainsKey($s) -or $prev[$s] -eq 0)) { $fh.Add($s) } }
   $fp = @{}
-  if ($env:FINNHUB_KEY -and $fh.Count) {
-    $fhs = @($fh | Sort-Object); $off = ([int](Get-Date).DayOfYear * 80 + $(if ((Get-Date).Hour -ge 12) { 40 } else { 0 })) % [Math]::Max(1, $fhs.Count); $coda = @($fhs | Where-Object { -not $prev.ContainsKey($_) }) + @(($fhs[$off..($fhs.Count - 1)] + $fhs[0..([Math]::Max(0, $off - 1))]) | Where-Object { $prev.ContainsKey($_) })          # prima i nuovi, poi a rotazione gli altri\n    foreach ($s in ($coda | Select-Object -First 80)) { try { $q = Invoke-RestMethod ("https://finnhub.io/api/v1/quote?symbol={0}&token={1}" -f [Uri]::EscapeDataString($s), $env:FINNHUB_KEY) -UserAgent $ua -TimeoutSec 20; if ($q.c -gt 0) { $fp[$s] = [double]$q.c } } catch { }; Start-Sleep -Milliseconds 1100 }
+  if ($fh.Count) {          # prezzo dei simboli senza prezzo: prima Finnhub (se c'e' la chiave), poi Yahoo (grafico pubblico); al massimo 80 per giro
+    $fhs = @($fh | Sort-Object); $off = ([int](Get-Date).DayOfYear * 80 + $(if ((Get-Date).Hour -ge 12) { 40 } else { 0 })) % [Math]::Max(1, $fhs.Count); $coda = @($fhs | Where-Object { -not $prev.ContainsKey($_) }) + @(($fhs[$off..($fhs.Count - 1)] + $fhs[0..([Math]::Max(0, $off - 1))]) | Where-Object { $prev.ContainsKey($_) })          # prima i nuovi, poi a rotazione gli altri
+    foreach ($s in ($coda | Select-Object -First 80)) {
+      if ($env:FINNHUB_KEY) { try { $q = Invoke-RestMethod ("https://finnhub.io/api/v1/quote?symbol={0}&token={1}" -f [Uri]::EscapeDataString($s), $env:FINNHUB_KEY) -UserAgent $ua -TimeoutSec 20; if ($q.c -gt 0) { $fp[$s] = [double]$q.c } } catch { }; Start-Sleep -Milliseconds 1100 }
+      if (-not $fp.ContainsKey($s)) { try { $y = Invoke-RestMethod ("https://query1.finance.yahoo.com/v8/finance/chart/{0}?range=5d&interval=1d" -f [Uri]::EscapeDataString($s)) -UserAgent 'FinanzeApp-personale/1.0 (uso privato, lettura di singole pagine pubbliche)' -TimeoutSec 20; $pr = [double]$y.chart.result[0].meta.regularMarketPrice; if ($pr -gt 0 -and [string]$y.chart.result[0].meta.currency -eq 'USD') { $fp[$s] = $pr } } catch { }; Start-Sleep -Milliseconds 500 }
+    }
   }
   $nuovi = New-Object Collections.Generic.List[object]; $dataUsa = $oggi.ToString('yyyy-MM-dd')
   foreach ($s in ($px.psbase.Keys | Sort-Object)) { $nuovi.Add([pscustomobject]@{ t = $s; n = (Pulisci $(if ($elenco[$s]) { $elenco[$s] } else { $nomi[$s] })); p = $px[$s]; d = $dataUsa }) }
