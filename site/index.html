@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanze">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-rIElla8A3d/IWf2VhR1BbJMRzzikaB560kOQKj11wBc='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2JTrgh2rm1ERjj0EXMYe34kC8Mt+bI6TKZzFwYLXNvg='; style-src 'unsafe-inline'; font-src data:; img-src 'self' data:; connect-src 'self' https://ktjuglujopxalzbbrehw.supabase.co https://generativelanguage.googleapis.com https://dogsitterini.vercel.app; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3024,7 +3024,14 @@ function setCatalog(j) {
   const byIsin = new Map(), list = [];
   for (const v of j.voci) { if (!Array.isArray(v) || !(v[2] > 0)) continue; const e = { isin: v[0], name: v[1], p: v[2], c: v[3] || 'EUR', d: v[4] || '', t: v[5] || 'etf', n: normT(v[1] + ' ' + v[0]) }; byIsin.set(String(v[0]).toLowerCase(), e); list.push(e); }
   const coins = (j.crypto || []).filter(c => Array.isArray(c) && c[3] > 0).map(c => ({ id: c[0], sym: c[1], name: c[2], p: c[3], n: normT(c[2] + ' ' + c[1]) }));
-  DATA.cat = { byIsin, list, coins, at: j.generato || '' };
+  const usa = [];          // azioni USA (elenco ufficiale Nasdaq Trader, nuove quotazioni comprese): [simbolo, nome, prezzo in USD (0 = da scrivere a mano), data]
+  for (const v of (j.usa || [])) { if (!Array.isArray(v) || !v[0] || !v[1]) continue; const e = { isin: String(v[0]), name: String(v[1]), p: v[2] > 0 ? v[2] : 0, c: 'USD', d: v[3] || '', t: 'azione', n: normT(v[1] + ' ' + v[0]) }; usa.push(e); if (e.p > 0 && !byIsin.has(e.isin.toLowerCase())) byIsin.set(e.isin.toLowerCase(), e); }
+  DATA.cat = { byIsin, list, coins, usa, at: j.generato || '' };
+}
+function usaCands(nq, toks, have, lim) {          // azioni USA che corrispondono alla ricerca: prima il simbolo esatto (es. ANT), poi i nomi che cominciano cosi'
+  const C = DATA.cat; if (!C || !C.usa || !toks.length) return []; const t0 = nq.replace(/\s+/g, ''), rank = e => e.isin.toLowerCase() === t0 ? 0 : normT(e.name).startsWith(nq) ? 1 : 2;
+  return C.usa.filter(e => !have.has(e.isin.toLowerCase()) && toks.every(k => e.n.includes(k))).sort((a, b) => rank(a) - rank(b) || a.name.length - b.name.length).slice(0, lim)
+    .map(e => ({ id: '', name: e.name, code: e.isin, ccy: 'USD', price: e.p, st: e.p > 0 ? 'auto' : 'man', held: [], cat: true, cls: 'Azioni', src: 'catalogo' }));
 }
 function applyCatalog() {          // ogni strumento con un ISIN presente nel catalogo (o con lo stesso nome) prende da solo il prezzo di oggi
   const C = DATA.cat; if (!C) return 0; let n = 0, nm = new Map(C.list.map(e => [normT(e.name), e]));
@@ -6426,6 +6433,7 @@ function opCands(q, accId, kind) {          // titoli proposti: i tuoi, quelli c
       const have = new Set(S.instruments.map(i => String(i.code || '').toLowerCase()).filter(Boolean));
       list = list.concat(DATA.cat.list.filter(e => !have.has(e.isin.toLowerCase()) && toks.every(k => e.n.includes(k))).slice(0, 80).map(e => ({ id: '', name: e.name, code: e.isin, ccy: normCcy(e.c), price: e.p, st: 'auto', held: [], cat: true, cls: catCls(e.t, e.name), src: 'catalogo' })));
       list = list.concat(DATA.cat.coins.filter(c => toks.every(k => c.n.includes(k)) && !S.instruments.some(i => normT(i.name) === normT(c.name))).slice(0, 6).map(c => ({ id: '', name: c.name, code: c.sym, ccy: 'EUR', price: c.p, st: 'auto', held: [], cat: true, cls: 'Crypto', src: 'catalogo' })));
+      list = list.concat(usaCands(nq, toks, have, 40));
     }
   } else list = list.filter(c => c.held.length);
   const mine = c => c.held.some(x => x.a.id === accId) ? 0 : c.held.length ? 1 : 2;
@@ -6614,6 +6622,7 @@ function editOperationAdv(pre, after) {
       const have = new Set(S.instruments.map(i => String(i.code || '').toLowerCase()).filter(Boolean));
       cs = DATA.cat.list.filter(e => !have.has(e.isin.toLowerCase()) && toks.every(k => e.n.includes(k))).slice(0, 60).map(e => ({ id: '', name: e.name, code: e.isin, ccy: normCcy(e.c), price: e.p, st: 'auto', held: [], cat: true, cls: catCls(e.t, e.name), src: 'catalogo' }));
       cs = cs.concat(DATA.cat.coins.filter(c => toks.every(k => c.n.includes(k)) && !S.instruments.some(i => normT(i.name) === normT(c.name))).slice(0, 5).map(c => ({ id: '', name: c.name, code: c.sym, ccy: 'EUR', price: c.p, st: 'auto', held: [], cat: true, cls: 'Crypto', src: 'catalogo' })));
+      cs = cs.concat(usaCands(nt, toks, have, 30));
     }
     return own.concat(xs, cs);
   }

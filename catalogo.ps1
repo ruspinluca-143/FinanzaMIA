@@ -1,4 +1,4 @@
-﻿# Catalogo dei prezzi: legge in blocco gli elenchi pubblici di Borsa Italiana (ETF, ETC/ETN, BTP/BOT/CCT, obbligazioni in euro, Extramot)
+# Catalogo dei prezzi: legge in blocco gli elenchi pubblici di Borsa Italiana (ETF, ETC/ETN, BTP/BOT/CCT, obbligazioni in euro, Extramot)
 # e le prime 500 crypto di CoinGecko, e scrive catalogo.json: l'app lo usa per trovare da sola il prezzo di QUALSIASI strumento
 # che ha un ISIN presente (cosi' un titolo nuovo si aggiorna senza che nessuno lo aggiunga a un elenco).
 # Solo dati pubblici di mercato. Non legge niente di tuo.
@@ -63,10 +63,39 @@ $usa = New-Object Collections.Generic.List[object]
 $az = Join-Path $Uscita 'aziende.json'
 if (Test-Path $az) { try { $a = Get-Content $az -Raw -Encoding UTF8 | ConvertFrom-Json; foreach ($k in 'giorno', 'settimana', 'mese') { foreach ($x in @($a.$k)) { if (-not ($usa | Where-Object { $_.t -eq $x.ticker })) { $usa.Add([pscustomobject]@{ t = $x.ticker; n = $x.nome; p = [double]$x.prezzo; d = $x.data }) } } } } catch { } }
 
+# Azioni USA: l'elenco ufficiale di Nasdaq Trader (comprende le NUOVE quotazioni, es. Anthropic = ANT dal 19/11/2026) + i prezzi dello screener pubblico del Nasdaq.
+# Un simbolo che non e' nello screener (di solito una quotazione appena nata) entra comunque nel catalogo; se c'e' FINNHUB_KEY se ne legge il prezzo (al massimo 80 per volta), altrimenti il prezzo lo scrive chi compra.
+try {
+  $px = @{}; $nomi = @{}
+  $sc = Invoke-RestMethod 'https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=30000&offset=0&download=true' -UserAgent $ua -TimeoutSec 90
+  foreach ($r in @($sc.data.rows)) { $s = [string]$r.symbol; if (-not $s -or $s -match '[\^/]') { continue }; $d = 0.0; if ([double]::TryParse(([string]$r.lastsale -replace '[\$,]', ''), [Globalization.NumberStyles]::Float, $inv, [ref]$d) -and $d -gt 0) { $px[$s] = $d }; $nomi[$s] = [string]$r.name }
+  if ($px.Count -lt 3000) { throw "screener con troppi pochi titoli ($($px.Count))" }
+  $elenco = @{}          # simbolo -> nome, da Nasdaq Trader (nasdaqlisted + otherlisted), senza titoli di prova, warrant, diritti, unita' e privilegiate
+  foreach ($f in @(@('nasdaqlisted', 0, 1, 3, 6), @('otherlisted', 0, 1, 6, 4))) {          # ... ultimo numero = colonna ETF (gli ETF USA non servono: si comprano quelli europei)
+    $txt = [string](Invoke-WebRequest "https://www.nasdaqtrader.com/dynamic/SymDir/$($f[0]).txt" -UseBasicParsing -TimeoutSec 60 -UserAgent $ua).Content
+    foreach ($l in ($txt -split "`r?`n" | Select-Object -Skip 1)) { $c = $l.Split('|'); if ($c.Count -lt 7 -or $c[0] -like 'File Creation*') { continue }; $s = $c[$f[1]].Trim(); if ($c[$f[3]] -ne 'N' -or $c[$f[4]] -eq 'Y' -or $s -match '[\$\^/ ]' -or $c[1] -match '(?i)warrant|\brights?\b|\bunits?\b|preferred|notes due|debenture|depositary shares each representing') { continue }; $elenco[$s] = $c[1].Trim() }
+  }
+  $prev = @{}; $cj = Join-Path $Uscita 'catalogo.json'
+  if (Test-Path $cj) { try { foreach ($u in @((Get-Content $cj -Raw -Encoding UTF8 | ConvertFrom-Json).usa)) { $prev[[string]$u[0]] = [double]$u[2] } } catch { } }
+  function Pulisci([string]$n) { (($n -replace '\s+-\s+.*$', '') -replace '(?i)\s+(class [a-z] )?(common|ordinary) (stock|shares)$', '' -replace '(?i)\s+american depositary shares$', '').Trim() }
+  $fh = New-Object Collections.Generic.List[string]          # senza prezzo: nuovi (non erano nel catalogo di ieri) o gia' presenti con prezzo 0
+  foreach ($s in $elenco.psbase.Keys) { if (-not $px.ContainsKey($s) -and (-not $prev.ContainsKey($s) -or $prev[$s] -eq 0)) { $fh.Add($s) } }
+  $fp = @{}
+  if ($env:FINNHUB_KEY -and $fh.Count) {
+    $fhs = @($fh | Sort-Object); $off = ([int](Get-Date).DayOfYear * 80 + $(if ((Get-Date).Hour -ge 12) { 40 } else { 0 })) % [Math]::Max(1, $fhs.Count); $coda = @($fhs | Where-Object { -not $prev.ContainsKey($_) }) + @(($fhs[$off..($fhs.Count - 1)] + $fhs[0..([Math]::Max(0, $off - 1))]) | Where-Object { $prev.ContainsKey($_) })          # prima i nuovi, poi a rotazione gli altri\n    foreach ($s in ($coda | Select-Object -First 80)) { try { $q = Invoke-RestMethod ("https://finnhub.io/api/v1/quote?symbol={0}&token={1}" -f [Uri]::EscapeDataString($s), $env:FINNHUB_KEY) -UserAgent $ua -TimeoutSec 20; if ($q.c -gt 0) { $fp[$s] = [double]$q.c } } catch { }; Start-Sleep -Milliseconds 1100 }
+  }
+  $nuovi = New-Object Collections.Generic.List[object]; $dataUsa = $oggi.ToString('yyyy-MM-dd')
+  foreach ($s in ($px.psbase.Keys | Sort-Object)) { $nuovi.Add([pscustomobject]@{ t = $s; n = (Pulisci $(if ($elenco[$s]) { $elenco[$s] } else { $nomi[$s] })); p = $px[$s]; d = $dataUsa }) }
+  foreach ($s in $fh) { $nuovi.Add([pscustomobject]@{ t = $s; n = (Pulisci $elenco[$s]); p = $(if ($fp[$s]) { $fp[$s] } else { 0.0 }); d = $dataUsa }) }
+  foreach ($s in $prev.psbase.Keys) { if (-not $px.ContainsKey($s) -and -not ($fh -contains $s) -and $elenco.ContainsKey($s)) { $nuovi.Add([pscustomobject]@{ t = $s; n = (Pulisci $elenco[$s]); p = $prev[$s]; d = $dataUsa }) } }          # gia' presenti ieri con un prezzo: restano
+  $usa = $nuovi
+  Write-Host ("  azioni USA: {0} (screener {1}, senza prezzo dallo screener {2}, prezzo da Finnhub {3})" -f $usa.Count, $px.Count, $fh.Count, $fp.Count)
+} catch { Write-Host "  azioni USA: elenco non aggiornato ($($_.Exception.Message)): resta quello di prima" ; if (-not $usa.Count) { $cj = Join-Path $Uscita 'catalogo.json'; if (Test-Path $cj) { try { foreach ($u in @((Get-Content $cj -Raw -Encoding UTF8 | ConvertFrom-Json).usa)) { $usa.Add([pscustomobject]@{ t = [string]$u[0]; n = [string]$u[1]; p = [double]$u[2]; d = [string]$u[3] }) } } catch { } } } }
+
 $items = foreach ($v in $voci.Values) { '[' + (JStr $v.isin) + ',' + (JStr $v.name) + ',' + ([double]$v.p).ToString('R', $inv) + ',"EUR",' + (JStr $v.d) + ',' + (JStr $v.t) + ']' }
 $cr = foreach ($c in $crypto) { '[' + (JStr $c.id) + ',' + (JStr $c.s) + ',' + (JStr $c.n) + ',' + ([double]$c.p).ToString('R', $inv) + ']' }
 $us = foreach ($u in $usa) { '[' + (JStr $u.t) + ',' + (JStr $u.n) + ',' + ([double]$u.p).ToString('R', $inv) + ',' + (JStr $u.d) + ']' }
-$json = "{`n`"app`":`"finanze-catalogo`",`"versione`":1,`"generato`":" + (JStr (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')) + ",`n`"voci`":[`n" + ($items -join ",`n") + "`n],`n`"crypto`":[`n" + ($cr -join ",`n") + "`n],`n`"usa`":[`n" + ($us -join ",`n") + "`n]}`n"
+$json = "{`n`"app`":`"finanze-catalogo`",`"versione`":2,`"generato`":" + (JStr (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')) + ",`n`"voci`":[`n" + ($items -join ",`n") + "`n],`n`"crypto`":[`n" + ($cr -join ",`n") + "`n],`n`"usa`":[`n" + ($us -join ",`n") + "`n]}`n"
 $null = $json | ConvertFrom-Json          # deve essere un JSON valido
 "Catalogo: {0} strumenti di Borsa Italiana, {1} crypto, {2} azioni USA ({3:N0} KB)" -f $voci.Count, $crypto.Count, $usa.Count, ($json.Length / 1KB)
 if ($SoloProva) { 'Solo prova: nessun file scritto.'; return }

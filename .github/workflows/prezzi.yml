@@ -70,8 +70,10 @@ jobs:
         id: catalogo
         continue-on-error: true
         shell: pwsh
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
         run: |
-          $vecchio = $true; if (Test-Path ./site/catalogo.json) { $m = [regex]::Match((Get-Content ./site/catalogo.json -TotalCount 4) -join ' ', '\"generato\":\"([^\"]+)\"'); if ($m.Success) { $vecchio = ((Get-Date) - [DateTimeOffset]::Parse($m.Groups[1].Value).UtcDateTime.ToLocalTime()).TotalHours -gt 10 } }
+          $vecchio = $true; if (Test-Path ./site/catalogo.json) { $m = [regex]::Match((Get-Content ./site/catalogo.json -TotalCount 4) -join ' ', '\"generato\":\"([^\"]+)\"'); if ($m.Success) { $vecchio = ((Get-Date) - [DateTimeOffset]::Parse($m.Groups[1].Value).UtcDateTime.ToLocalTime()).TotalHours -gt 10 }; if (((Get-Content ./site/catalogo.json -TotalCount 4) -join ' ') -notmatch '\"versione\":2') { $vecchio = $true } }
           if ($vecchio) { ./catalogo.ps1 -Uscita ./site } else { 'Catalogo recente: riuso quello di prima' }
       - name: Avviso se i mercati non si leggono
         if: steps.mercati.outcome == 'failure'
@@ -99,4 +101,11 @@ jobs:
         with:
           path: site
       - id: deploy
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+      - name: Se GitHub Pages ha dato un errore sul suo server (500), ritento dopo due minuti
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 120
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v5
