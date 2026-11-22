@@ -1,1 +1,283 @@
-{"app":"finanze-analisi","versione":1,"generato":"2026-11-21T15:55:35","data":"2026-11-21","titolo":"Giovedì nero sui mercati tech: correzione su Wall Street e paura sulle crypto","sintesi":"Le Borse vivono una giornata di forte contrazione guidata dal crollo dei titoli tecnologici, con il Nasdaq che registra un ribasso del 5,37%. Il comparto dell'intelligenza artificiale risente dei dubbi sulla sostenibilità dei costi e dei ricavi, spingendo anche l'S&P 500 in correzione. Sul fronte obbligazionario si nota un leggero calo dei rendimenti dei titoli di Stato USA a 10 anni, ora al 4,92%. Il mercato delle criptovalute evidenzia una flessione marcata della capitalizzazione, accompagnata da un clima di extrema paura tra gli operatori. Per l'investitore in PAC, questa fase suggerisce prudenza e il rispetto del proprio piano senza compiere mosse dettate dal panico.","umore":{"valore":-2,"etichetta":"Molto prudente (Mercati in correzione)"},"classi":[{"classe":"Azioni","giudizio":-2,"etichetta":"Forte correzione guidata dal Tech","perche":"I listini azionari mostrano pesanti flessioni con il settore tecnologico USA (XLK) in calo del 7,27% e il Nasdaq a -5,37% [11]. L'indice S&P 500 è entrato in territorio di correzione a causa delle preoccupazioni sulla redditività dei grandi investimenti in intelligenza artificiale [23, 65].","mossa":"Proseguire i versamenti periodici diversificati senza tentare di anticipare i minimi di mercato.","fonti":[1,2,3]},{"classe":"Obbligazioni","giudizio":1,"etichetta":"Fase di stabilità e interesse","perche":"I rendimenti dei Titoli di Stato USA a 10 anni sono scesi al 4,92% dal 5,04% precedente. Gli analisti strategici vedono nel comparto obbligazionario una valida fonte di stabilità e rendimento per la gestione dei portafogli [56].","mossa":"Mantenere o integrare una quota di titoli governativi diversificati a protezione del capitale.","fonti":4},{"classe":"Liquidita","giudizio":1,"etichetta":"Presidio difensivo","perche":"Mantenere risorse liquide in momenti di elevata volatilità sui mercati azionari offre un riparo dai ribassi di breve termine. Garantisce inoltre la riserva necessaria per proseguire gli acquisti pianificati.","mossa":"Conservare la liquidità necessaria al fondo di emergenza e ai prossimi acquisti del PAC.","fonti":null},{"classe":"Crypto","giudizio":-2,"etichetta":"Paura estrema e vendite diffuse","perche":"La capitalizzazione complessiva del settore scende del 4,82% nelle 24 ore a 2087 miliardi di dollari. L'indice di paura e avidità si posiziona a quota 12, nella classe Extreme Fear.","mossa":"Evitare ingressi affrettati in una fase dominata dalla forte emotività del mercato.","fonti":null},{"classe":"Materie prime","giudizio":0,"etichetta":"Incertezza e tensioni geopolitiche","perche":"Il petrolio WTI chiude in rialzo dello 0,99% a 84,03 dollari al barile [8]. I flussi attraverso lo Stretto di Hormuz registrano contrazioni a causa delle tensioni geopolitiche, rendendo incerto il quadro energetico [59].","mossa":"Mantenere l'esposizione al comparto entro limiti contenuti all'interno del portafoglio.","fonti":[5,6]}],"temi":[{"titolo":"Crollo del settore tecnologico ed intelligenza artificiale","giudizio":-2,"perche":"La forte contrazione del Nasdaq (-5,37%) e il ribasso di Anthropic (-8,50%) riflettono i timori degli investitori sulla tenuta dei rendimenti promessi a fronte di spese e debiti elevati [11, 23].","fonti":[1,2]},{"titolo":"Attrattività dei titoli governativi globali","giudizio":1,"perche":"Il calo dei rendimenti USA a 10 e 2 anni offre spunti di interesse per la componente di protezione del portafoglio [56].","fonti":4},{"titolo":"Tensioni sulle rotte del greggio in Medio Oriente","giudizio":0,"perche":"Il calo dei volumi di petrolio trasportati nello Stretto di Hormuz per via degli attacchi iraniani sostiene le quotazioni ma incrementa la volatilità [8, 59].","fonti":[5,6]}],"attenzione":[{"titolo":"Correzione per S&P 500 e Dow Jones","perche":"Le flessioni dei titoli tecnologici hanno trascinato i principali indici statunitensi in fase correttiva [65]."},{"titolo":"Tensione sul mercato cripto","perche":"L'indicatore Fear & Greed a 12 segnala uno stato di forte sfiducia e potenziale volatilità sulle valute digitali."},{"titolo":"Sostenibilità finanziaria nel settore IA","perche":"Spese elevate e tassi di interesse alti pongono dubbi sulla reale capacità di generare utili del comparto tech [23]."}],"idee":[{"classe":"Obbligazioni","isin":"LU0378818131","perche":"Permette un'esposizione diversificata al mercato obbligazionario governativo globale con copertura dal rischio di cambio."},{"classe":"Azioni","isin":"IE00B4L5Y983","perche":"Offre una diversificazione azionaria globale sui paesi sviluppati utile per proseguire il PAC senza concentrare il rischio sul solo settore tech."},{"classe":"Monetario","isin":"LU0290358497","perche":"Strumento difensivo in euro per gestire la liquidità a breve termine in contesti di mercato volatili."}],"indicatori":[{"nome":"Tasso USA 10 anni","valore":"4.92%","nota":"In calo dal 5.04% precedente"},{"nome":"Settore Tecnologia USA (XLK)","valore":"-7.27%","nota":"Variazione percentuale giornaliera"},{"nome":"Crypto Fear & Greed Index","valore":"12","nota":"Classe Extreme Fear"},{"nome":"Petrolio WTI","valore":"84.03 USD","nota":"Variazione del +0.99%"},{"nome":"Capitalizzazione Crypto","valore":"2087 mld USD","nota":"Flessione del -4.82% nelle 24h"}],"fonti":[{"testata":"Il Sole 24 Ore","titolo":"Borse, venerdì nero per i tech. Nasdaq chiude in picchiata a -5,37% con Anthropic a -8,50% dopo l’Ipo dei record","url":"https://www.ilsole24ore.com/art/borse-asiatiche-calo-anthropic-cauta-il-debutto-record-AJpG3xMC","data":"2026-11-20"},{"testata":"la Repubblica","titolo":"Il rischio bolla scuote l’IA dalle fondamenta","url":"https://www.repubblica.it/economia/2026/11/21/news/il_rischio_bolla_scuote_l_ia_dalle_fondamenta-425738502/?rss","data":"2026-11-21"},{"testata":"BBC Business","titolo":"Tech stock sell-off drags markets down as Anthropic shares slide","url":"https://www.bbc.co.uk/news/articles/c6808ym10vzgo?at_medium=RSS&at_campaign=rss","data":"2026-11-20"},{"testata":"Wall Street Italia","titolo":"Portafoglio 2027: UBS guarda ora all’obbligazionario e all’azionario europeo","url":"https://www.wallstreetitalia.com/portafoglio-2027-ubs-guarda-ora-allobbligazionario-e-allazionario-europeo/","data":"2026-11-20"},{"testata":"ANSA","titolo":"Il petrolio chiude in rialzo a New York a 84,03 dollari","url":"https://www.ansa.it/sito/notizie/economia/2026/11/20/il-petrolio-chiude-in-rialzo-a-new-york-a-8403-dollari_1bb340dd-a096-44c7-aab0-880c11445568.html","data":"2026-11-20"},{"testata":"Financial Times","titolo":"Oil shipped through Hormuz falls as Iranian strikes increase","url":"https://www.ft.com/content/5fbc2b9d-0360-4a1f-9e4a-3e86168cbbc5?syn-25a6b1a6=1","data":"2026-11-21"}],"limiti":"Non sono stati analizzati i dettagli completi degli articoli soggetti a registrazione o paywall non inclusi nel testo fornito. Scritta dall'AI Gemini leggendo i titoli e i riassunti dei giornali, non gli articoli interi.","autore":"Gemini (cloud)"}
+{
+    "app":  "finanze-analisi",
+    "versione":  1,
+    "generato":  "2026-11-22T09:00:00+01:00",
+    "data":  "2026-11-22",
+    "titolo":  "Venerdì di panico sulle Borse: Nasdaq -5,4%, S\u0026P 500 in correzione, per i tech è la peggior settimana dal 2020",
+    "sintesi":  "Venerdì la vendita sui titoli legati all\u0027intelligenza artificiale si è estesa a tutto il mercato: a Wall Street S\u0026P 500 -3,8%, Nasdaq -5,4%, Dow -2,0%; in Europa il Dax ha perso il 2,6% e Milano circa il 2,5%. Pesano i timori sul ritorno degli investimenti nell\u0027AI, i guai di Nvidia e l\u0027attesa di un possibile rialzo dei tassi USA a dicembre. Oggi è domenica e i mercati sono chiusi: lunedì l\u0027apertura potrebbe essere nervosa. Giornata da vivere con calma: niente decisioni d\u0027impulso, rate regolari e cuscinetto di liquidità.",
+    "umore":  {
+                  "valore":  -2,
+                  "etichetta":  "Paura, vicino al panico"
+              },
+    "classi":  [
+                   {
+                       "classe":  "Azioni",
+                       "giudizio":  -2,
+                       "etichetta":  "Prudenza alta",
+                       "perche":  "Venerdì l\u0027S\u0026P 500 ha chiuso a 6.902 punti (-3,81%), il Dow a 48.102 (-2,03%) e il Nasdaq a 22.597 (-5,37%) (Il Sole 24 Ore); S\u0026P e Dow sono ormai in correzione, cioè circa -10% dai massimi, e il Nasdaq è circa 17% sotto il record (Handelsblatt). In Europa il Dax ha chiuso a 24.803 (-2,6%), sesto ribasso di fila, e il FTSE MIB è sceso sotto 49.000 (-6,1% in settimana). Anthropic ha perso l\u00278,5% il giorno dopo il debutto e Nvidia è in forte calo settimanale. Giudizio sceso da -1 a -2 rispetto a giovedì perché la vendita si è allargata a quasi tutti i settori. Caso contrario: dopo cali così rapidi i rimbalzi tecnici sono frequenti e chi investe a rate compra a prezzi più bassi; a sfavore: tassi in salita, valutazioni ancora alte e sentimento vicino al panico.",
+                       "mossa":  "Non vendere per paura e non comprare tutto in una volta: continua con piani a rate su ETF globali molto diversificati.",
+                       "fonti":  [
+                                     0,
+                                     1,
+                                     2,
+                                     3
+                                 ]
+                   },
+                   {
+                       "classe":  "Obbligazioni",
+                       "giudizio":  1,
+                       "etichetta":  "Rifugio, ma con cautela",
+                       "perche":  "Con la fuga dal rischio i Treasury USA sono saliti di prezzo: il rendimento a 10 anni è sceso al 4,92% (giovedì 5,04%), quello a 2 anni al 4,63% e a 30 anni al 5,31%. Il BTP a 10 anni rende circa 4,39% e lo spread BTP-Bund è a 109 punti base (Il Sole 24 Ore). Giudizio invariato a +1. Caso contrario: se la Fed dovesse davvero alzare i tassi a dicembre i prezzi dei titoli già emessi scenderebbero; a sfavore anche il debito USA e un\u0027inflazione alimentata dall\u0027AI.",
+                       "mossa":  "Aggiungi a rate e con scadenze medie, evitando le più lunghe.",
+                       "fonti":  [
+                                     0,
+                                     6,
+                                     9
+                                 ]
+                   },
+                   {
+                       "classe":  "Crypto",
+                       "giudizio":  -2,
+                       "etichetta":  "Prudenza massima",
+                       "perche":  "Il bitcoin è sceso a 55.130 dollari, minimo da settembre 2024, con 1,8 miliardi di dollari di posizioni a leva liquidate, poi ha recuperato sopra i 60.000 (CoinDesk). L\u0027indice paura/avidità è a 12 (paura estrema), le stablecoin sono a -6,3% in 30 giorni e gli ETF su bitcoin USA hanno perso circa 1,1 miliardi di dollari in settimana. Giudizio sceso da -1 a -2. Caso contrario: la paura estrema e le liquidazioni forzate spesso precedono rimbalzi tecnici (come quello di sabato); a sfavore: lunedì dipende da come aprono le Borse e le crypto restano molto sensibili ai cali del Nasdaq.",
+                       "mossa":  "Non rincorrere né i ribassi né i rimbalzi; se proprio, quote piccole e a rate.",
+                       "fonti":  [
+                                     4,
+                                     0
+                                 ]
+                   },
+                   {
+                       "classe":  "Materie prime",
+                       "giudizio":  -1,
+                       "etichetta":  "Debole, rischi aperti",
+                       "perche":  "Venerdì petrolio e oro sono scesi: WTI circa 82 dollari e Brent circa 91; l\u0027oro spot circa 3.540 dollari, nella peggior settimana da otto mesi per il dollaro forte e il possibile rialzo dei tassi USA (Il Sole 24 Ore). Il gas ad Amsterdam è sopra 88 euro al megawattora; restano le tensioni in Medio Oriente (attacchi degli Houthi su Riad, Bahrein-Iran). Giudizio sceso da 0 a -1: l\u0027oro non ha fatto da rifugio questa settimana. Caso contrario: le tensioni sulle forniture possono far risalire il petrolio e un dollaro meno forte aiuterebbe l\u0027oro; sulle posizioni dei grandi investitori l\u0027oro era ancora molto lungo (+40,7% degli interessi aperti al 17/11), quindi rischia vendite forzate.",
+                       "mossa":  "L\u0027oro resta una piccola quota di protezione, non una previsione di breve.",
+                       "fonti":  [
+                                     0,
+                                     8
+                                 ]
+                   },
+                   {
+                       "classe":  "Liquidità",
+                       "giudizio":  1,
+                       "etichetta":  "Cuscinetto prezioso",
+                       "perche":  "Con la volatilità in forte aumento (VIX +30% venerdì, Handelsblatt) e la Fed che decide il 9 dicembre (la BCE il 17), avere liquidità remunerata permette di non vendere in perdita. Giudizio salito da 0 a +1. Caso contrario: troppa liquidità perde potere d\u0027acquisto e può lasciarti fuori dai rimbalzi.",
+                       "mossa":  "Tieni un cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
+                       "fonti":  [
+                                     1,
+                                     6
+                                 ]
+                   }
+               ],
+    "temi":  [
+                 {
+                     "titolo":  "Correzione a Wall Street",
+                     "giudizio":  -2,
+                     "perche":  "S\u0026P 500 e Dow sono entrati in correzione (-10% dai massimi) e il Nasdaq ha perso circa il 10% in cinque sedute, la peggior settimana dai primi tempi del Covid; il tech ha cancellato tutti i guadagni dell\u0027anno.",
+                     "fonti":  [
+                                   1,
+                                   3
+                               ]
+                 },
+                 {
+                     "titolo":  "Anthropic e Nvidia sotto pressione",
+                     "giudizio":  -2,
+                     "perche":  "Anthropic ha chiuso a 88,91 dollari (-8,5% venerdì) dopo il debutto da record; Nvidia ha perso circa il 23% in settimana, il peggio in 18 anni, tra l\u0027uscita del suo amministratore delegato e le notizie di indagini (SEC e California).",
+                     "fonti":  [
+                                   0,
+                                   3,
+                                   7
+                               ]
+                 },
+                 {
+                     "titolo":  "Europa: il rally di fine anno si ferma",
+                     "giudizio":  -2,
+                     "perche":  "Il Dax è sceso sotto 25.000 per la prima volta da inizio ottobre, perdendo oltre 2.000 punti in settimana; gli analisti parlano di sentimento vicino al panico.",
+                     "fonti":  [
+                                   2,
+                                   0
+                               ]
+                 },
+                 {
+                     "titolo":  "Tassi e Fed",
+                     "giudizio":  -1,
+                     "perche":  "Si discute di un possibile rialzo dei tassi USA a dicembre; i dirigenti Fed parlano più del previsto e il mercato fatica a leggere la linea. Intanto il rendimento USA a 10 anni è sceso al 4,92%.",
+                     "fonti":  [
+                                   6,
+                                   0
+                               ]
+                 },
+                 {
+                     "titolo":  "Dubbi sul boom dell\u0027AI",
+                     "giudizio":  -1,
+                     "perche":  "Crescono le domande su quanto rendano davvero gli enormi investimenti e su quanto debito li finanzi (il caso CoreWeave); si parla apertamente di bolla.",
+                     "fonti":  [
+                                   10,
+                                   5
+                               ]
+                 },
+                 {
+                     "titolo":  "Crypto in capitolazione",
+                     "giudizio":  -2,
+                     "perche":  "Bitcoin ai minimi da due anni con 1,8 miliardi di dollari di liquidazioni, poi rimbalzo sopra 60.000 dollari.",
+                     "fonti":  [
+                                   4
+                               ]
+                 }
+             ],
+    "attenzione":  [
+                       {
+                           "titolo":  "Apertura di lunedì",
+                           "perche":  "Dopo un venerdì così, l\u0027apertura asiatica ed europea di lunedì può essere molto mossa, con rimbalzi e nuove vendite nel giro di poche ore."
+                       },
+                       {
+                           "titolo":  "Fed del 9 dicembre",
+                           "perche":  "Un rialzo dei tassi, o toni più duri del previsto, farebbe soffrire azioni e obbligazioni e rafforzerebbe il dollaro."
+                       },
+                       {
+                           "titolo":  "Bolla dell\u0027intelligenza artificiale",
+                           "perche":  "Valutazioni record, debito per finanziare i data center e indagini su Nvidia possono alimentare altre vendite sul settore."
+                       },
+                       {
+                           "titolo":  "Medio Oriente e petrolio",
+                           "perche":  "Gli attacchi nell\u0027area del Golfo possono far risalire di colpo petrolio e gas, con effetto sull\u0027inflazione."
+                       },
+                       {
+                           "titolo":  "Vendite forzate",
+                           "perche":  "Posizioni a leva liquidate (crypto e non solo) possono amplificare i movimenti in entrambe le direzioni."
+                       }
+                   ],
+    "idee":  [
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00B4L5Y983",
+                     "perche":  "ETF sul mondo sviluppato a costo basso: base diversificata da accumulare a rate."
+                 },
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00BK5BQT80",
+                     "perche":  "ETF sull\u0027intero mondo, adatto a un piano regolare senza puntare su un solo tema."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "LU1437018598",
+                     "perche":  "Titoli di Stato dell\u0027area euro: cedole interessanti, da comprare a rate con cautela."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "LU1437024729",
+                     "perche":  "Obbligazioni globali miste, più diversificate di un singolo Paese."
+                 },
+                 {
+                     "classe":  "Liquidità",
+                     "isin":  "FR0010510800",
+                     "perche":  "ETF monetario: segue i tassi a breve, utile come cuscinetto."
+                 },
+                 {
+                     "classe":  "Materie prime",
+                     "isin":  "IE00B4ND3602",
+                     "perche":  "Oro fisico: piccola quota come protezione, non come previsione."
+                 }
+             ],
+    "indicatori":  [
+                       {
+                           "nome":  "S\u0026P 500",
+                           "valore":  "6.902 punti (-3,81%)",
+                           "nota":  "chiusura 20/11 (Il Sole 24 Ore)"
+                       },
+                       {
+                           "nome":  "Nasdaq",
+                           "valore":  "22.597 punti (-5,37%)",
+                           "nota":  "chiusura 20/11, circa -10% in settimana"
+                       },
+                       {
+                           "nome":  "Dax",
+                           "valore":  "24.803 punti (-2,6%)",
+                           "nota":  "chiusura 20/11 (Handelsblatt)"
+                       },
+                       {
+                           "nome":  "Rendimento USA 10 anni",
+                           "valore":  "4,92%",
+                           "nota":  "20/11; 2 anni 4,63%, 30 anni 5,31%"
+                       },
+                       {
+                           "nome":  "Bitcoin",
+                           "valore":  "circa 60.000 dollari",
+                           "nota":  "minimo a 55.130 sabato, poi rimbalzo (CoinDesk)"
+                       },
+                       {
+                           "nome":  "Paura/avidità crypto",
+                           "valore":  "12 (paura estrema)",
+                           "nota":  "invariato rispetto a ieri"
+                       }
+                   ],
+    "fonti":  [
+                  {
+                      "testata":  "Il Sole 24 Ore",
+                      "titolo":  "Borse, venerdì nero per i tech. Nasdaq chiude in picchiata a -5,37% con Anthropic a -8,50% dopo l\u0027Ipo dei record",
+                      "url":  "https://www.ilsole24ore.com/art/borse-asiatiche-calo-anthropic-cauta-il-debutto-record-AJpG3xMC",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "US-Börsen: Flucht aus Risikoassets: Ausverkauf an der Nasdaq, S\u0026P im Korrekturmodus",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/us-boersen-us-boersenschluss-sp-500-und-dow-nach-ausverkauf-in-korrektur/100271593.html",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Dax aktuell: Dax verliert 660 Zähler und schließt weit unter 26.000 Punkten",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dax-aktuell-dax-verliert-660-punkte-und-schliesst-weit-unter-26.000-punkten/100271464.html",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Anthropic\u0027s record IPO collides with tech\u0027s worst week on Wall Street since 2020",
+                      "url":  "https://www.cnbc.com/2026/11/21/anthropic-ipo-tech-selloff.html",
+                      "data":  "2026-11-21"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "Bitcoin rebounds above $60,000 after $1.8 billion crypto liquidation wave",
+                      "url":  "https://www.coindesk.com/markets/2026/11/21/bitcoin-bounces-9-from-two-year-low-to-retake-usd60-000-as-traders-eye-monday-s-stock-open",
+                      "data":  "2026-11-21"
+                  },
+                  {
+                      "testata":  "BBC",
+                      "titolo":  "Tech stock sell-off drags markets down as Anthropic shares slide",
+                      "url":  "https://www.bbc.co.uk/news/articles/c6808ym10vzgo?at_medium=RSS\u0026at_campaign=rss",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Warsh wants Fed officials to talk less. Instead, they\u0027re talking more",
+                      "url":  "https://www.cnbc.com/2026/11/20/warsh-fed-forward-guidance-rate-hikes.html",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Nvidia Said to Face S.E.C. Probe Into Its Accounting Practices",
+                      "url":  "https://www.nytimes.com/2026/11/20/business/nvidia-sec-accounting.html",
+                      "data":  "2026-11-21"
+                  },
+                  {
+                      "testata":  "Investing.com",
+                      "titolo":  "Bahrain blames Iran for strike on industrial site; Trump seeks \"permanent\" deal",
+                      "url":  "https://www.investing.com/news/economy-news/iran-war-sees-tanker-hit-near-hormuz-as-saudi-arabia-intercepts-houthi-missiles-5043277",
+                      "data":  "2026-11-21"
+                  },
+                  {
+                      "testata":  "BCE",
+                      "titolo":  "Christine Lagarde: Acting in time",
+                      "url":  "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp261120~e52bcc4db2.en.html",
+                      "data":  "2026-11-20"
+                  },
+                  {
+                      "testata":  "The Guardian",
+                      "titolo":  "\u0027Little room for error\u0027: what a debt-laden cloud computing company says about the AI boom",
+                      "url":  "https://www.theguardian.com/business/2026/nov/21/debt-laden-cloud-computing-company-coreweave-ai-boom",
+                      "data":  "2026-11-21"
+                  }
+              ],
+    "limiti":  "Oggi è domenica: i mercati sono chiusi e i dati sono quelli di venerdì 20/11. Letti nel testo: Il Sole 24 Ore (Radiocor), due articoli di Handelsblatt, CoinDesk e CNBC su Anthropic; gli altri link sono usati solo per titolo e fonte (BBC, CNBC Warsh, NYT, Investing, BCE, Guardian). Livello del VIX, variazioni di petrolio e oro e valori precisi di Bund e dollaro non letti; il dato sulle chiusure di Wall Street varia leggermente tra le fonti (S\u0026P -3,5% per Handelsblatt, -3,81% per Il Sole). Rendimenti USA e dati crypto dal file di dati del progetto. WSJ, Barron\u0027s, Reuters e testate italiane minori non raggiunte."
+}
