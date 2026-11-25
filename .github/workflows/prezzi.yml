@@ -103,9 +103,17 @@ jobs:
       - id: deploy
         continue-on-error: true
         uses: actions/deploy-pages@v5
-      - name: Se GitHub Pages ha dato un errore sul suo server (500), ritento dopo due minuti
+      - name: Se GitHub Pages ha avuto un problema (errore 500 o dati non trovati), riprovo dopo due minuti ricaricando il sito
         if: steps.deploy.outcome == 'failure'
         run: sleep 120
+      - name: Ricarico il sito per il secondo tentativo
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          name: github-pages-2
+          path: site
       - id: deploy2
         if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages-2

@@ -27,11 +27,23 @@ jobs:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
         run: ./raccogli-mercati.ps1 -Uscita ./site
       - name: Scrivi l'analisi con Gemini
+        id: gemini
+        continue-on-error: true
         shell: pwsh
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
           FORZA: ${{ inputs.forza }}
         run: |
+          if ($env:FORZA -eq 'true') { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json -Forza }
+          else { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json }
+      - name: Gemini era sovraccarico (errore 503): riprovo tra 15 minuti
+        if: steps.gemini.outcome == 'failure'
+        shell: pwsh
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          FORZA: ${{ inputs.forza }}
+        run: |
+          Start-Sleep -Seconds 900
           if ($env:FORZA -eq 'true') { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json -Forza }
           else { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json }
       - name: Salva l'analisi e pubblica il sito
