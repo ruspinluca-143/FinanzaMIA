@@ -36,7 +36,7 @@ jobs:
         run: |
           if ($env:FORZA -eq 'true') { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json -Forza }
           else { ./analisi-cloud.ps1 -Uscita ./site -Watch ./watchlist-pubblica.json }
-      - name: Gemini era sovraccarico (errore 503): riprovo tra 15 minuti
+      - name: Gemini era sovraccarico (errore 503), riprovo tra 15 minuti
         if: steps.gemini.outcome == 'failure'
         shell: pwsh
         env:
