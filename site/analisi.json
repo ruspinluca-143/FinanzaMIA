@@ -1,1 +1,350 @@
-{"app":"finanze-analisi","versione":1,"generato":"2026-11-25T20:34:09","data":"2026-11-25","titolo":"Ritorno di fiamma e scricchiolii tecnologici: i mercati frenano tra intelligenza artificiale e timori sui tassi","sintesi":"Le borse internazionali hanno registrato una forte volatilità a causa dei timori legati alla tenuta dei titoli tecnologici e dell'intelligenza artificiale, nonostante il temporaneo entusiasmo per il ritorno di Jensen Huang alla guida di Nvidia. Negli Stati Uniti, i dati sull'inflazione e sul Pil hanno alimentato le preoccupazioni su un possibile rialzo dei tassi da parte della Federal Reserve. Nel frattempo, l'Europa fa i conti con la pressione dei nuovi dazi annunciati dagli Stati Uniti e con l'aumento dello spread Btp-Bund. Per chi investe con un piano di accumulo in ETF, la fase richiede massima prudenza, evitando decisioni impulsive e mantenendo una rigorosa diversificazione tra le diverse classi di attivo.","umore":{"valore":-1,"etichetta":"Cauto"},"classi":[{"classe":"Azioni","giudizio":-1,"etichetta":"In tensione","perche":"I listini azionari globali hanno subito forti ribassi, con il Nasdaq sotto pressione a causa dei dubbi sui ritorni degli investimenti nell'intelligenza artificiale e dei timori sull'inflazione statunitense [10, 40]. A Milano e in Europa il clima è negativo, appesantito anche dal calo dei titoli tecnologici e dai timori sui dazi commerciali verso l'Unione Europea [7, 8, 20]. Sulle azioni pesano inoltre le notizie di vigilanza e rating, come la messa sotto osservazione di Nvidia da parte di S&P [1, 48].","mossa":"Mantieni la calma e prosegui il tuo piano di accumulo senza farti spingere dalla paura dei ribassi improvvisi.","fonti":[1,2,3,4,5,6,7]},{"classe":"Obbligazioni","giudizio":1,"etichetta":"Stabili","perche":"Il rendimento del Btp italiano si attesta al 4,34% con uno spread salito a 111,9 punti, offrendo tassi di interesse che continuano a interessare gli investitori alla ricerca di rendimenti prevedibili [5]. Sul fronte dei titoli di Stato USA, i tassi a 2 anni restano al 4,63% e quelli a 10 anni al 4,91%, rispecchiando le attese sulle mosse future delle banche centrali.","mossa":"Considera i titoli di Stato come un'ancora di stabilità per mitigare la forte oscillazione del portafoglio azionario.","fonti":8},{"classe":"Liquidita","giudizio":1,"etichetta":"Prudente","perche":"In un contesto di mercati azionari instabili e di tassi ancora elevati, disporre di una riserva di liquidità protetta rappresenta una scelta difensiva saggia. Gli strumenti monetari offrono un rendimento privo di rischio di mercato mentre si attendono le decisioni di Fed e BCE.","mossa":"Conserva la tua scorta di liquidità di emergenza senza impegnare denaro che potresti dover usare a breve.","fonti":null},{"classe":"Crypto","giudizio":-2,"etichetta":"Fuga dal rischio","perche":"Il sentiment nel settore delle criptovalute rimane fortemente depresso, come dimostra l'indice di paura e avidità posizionato a quota 13 in zona di 'Extreme Fear'. La capitalizzazione complessiva è scesa a 2.091 miliardi di dollari e le stablecoin registrano deflussi negli ultimi trenta giorni.","mossa":"Evita esposizioni speculative in questa fase di altissimo stress e paura estrema.","fonti":null},{"classe":"Materie prime","giudizio":-1,"etichetta":"In calo","perche":"Il prezzo del gas naturale TTF ad Amsterdam ha registrato una forte discesa del 6% portandosi a 86 euro, mentre l'oro e il petrolio mostrano segnali di debolezza in un quadro di rallentamento generale dei prezzi delle commodities [6, 33]. L'OPEC+ si prepara inoltre a un vertice complesso per gestire l'offerta globale di greggio [61].","mossa":"Limita l'esposizione alle materie prime se non rientrano strettamente nella tua strategia di lungo periodo.","fonti":[9,10,11]}],"temi":[{"titolo":"La bolla dell'Intelligenza Artificiale scricchiola","giudizio":-2,"perche":"Il rimbalzo dei mercati guidato dal ritorno di Jensen Huang in Nvidia è durato meno di ventiquattro ore, soffocato dai dubbi sui reali ritorni economici degli investimenti in IA e dal declassamento del giudizio di rating da parte di S&P [10, 48].","fonti":[4,7]},{"titolo":"Il ritorno dei dazi e le tensioni commerciali con l'Europa","giudizio":-1,"perche":"Gli Stati Uniti hanno annunciato nuovi dazi che potrebbero colpire pesantemente l'Unione Europea con un incremento fino al 20%, aumentando l'incertezza per le aziende esportatrici [20, 67].","fonti":[5,12]},{"titolo":"Inflazione e banche centrali sotto osservazione","giudizio":-1,"perche":"I dati sull'inflazione e sul Pil USA superiori alle attese aumentano la probabilità di un nuovo rialzo dei tassi da parte della Federal Reserve nella riunione di dicembre [40, 78].","fonti":[6,13]}],"attenzione":[{"titolo":"Volatilità estrema sul settore tecnologico","perche":"I forti cali del Nasdaq dimostrano che i titoli tech possono subire correzioni molto rapide e profonde dopo anni di grandi guadagni."},{"titolo":"Decisioni imminenti delle banche centrali","perche":"Il calendario prevede a dicembre le riunioni cruciali di Fed e BCE sui tassi di interesse, che potrebbero muovere ulteriormente i mercati."}],"idee":[{"classe":"Azioni","isin":"IE00B4L5Y983","perche":"Per mantenere un approccio diversificato a lungo termine sulle azioni globali, riducendo il rischio legato ai singoli titoli tecnologici."},{"classe":"Obbligazioni","isin":"LU0378818131","perche":"Per inserire in portafoglio una componente obbligazionaria governativa globale coperta in euro capace di fare da ammortizzatore."},{"classe":"Monetario","isin":"LU0290358497","perche":"Per parcheggiare la liquidità difensiva sfruttando i tassi attuali in attesa di maggiore stabilità sui mercati."}],"indicatori":[{"nome":"Spread Btp-Bund","valore":"111,9 bps","nota":"In aumento rispetto alle sedute precedenti"},{"nome":"Rendimento Btp 10 anni","valore":"4,34%","nota":"Rendimento dei titoli di Stato italiani"},{"nome":"Gas naturale TTF","valore":"86 €/MWh","nota":"In calo del 6% ad Amsterdam"},{"nome":"Indice Paura/Avidità Crypto","valore":"13","nota":"Classe Extreme Fear"},{"nome":"Tasso USA 10 anni","valore":"4,91%","nota":"Riferimento per i tassi obbligazionari americani"}],"fonti":[{"testata":"ANSA","titolo":"S mette sotto osservazione il rating di Nvidia, non esclude declassamento","url":"https://www.ansa.it/sito/notizie/economia/2026/11/25/s-mette-sotto-osservazione-il-rating-di-nvidia-non-esclude-declassamento_3bbcf9f1-f146-47fa-999c-f2b90a83580c.html","data":"2026-11-25"},{"testata":"ANSA","titolo":"Borsa: Milano zavorrata da Prysmian e Stm, in luce Stellantis","url":"https://www.ansa.it/sito/notizie/economia/2026/11/25/borsa-milano-zavorrata-da-prysmian-e-stm-in-luce-stellantis_c150f3fa-df21-45a3-ae80-b234db7662a0.html","data":"2026-11-25"},{"testata":"ANSA","titolo":"Borsa: l'Europa conclude negativa, Francoforte -1,26%","url":"https://www.ansa.it/sito/notizie/economia/2026/11/25/borsa-leuropa-conclude-negativa-francoforte-126_ee9e8e61-134d-44ef-92da-ab2e2b63d543.html","data":"2026-11-25"},{"testata":"Il Sole 24 Ore","titolo":"Sulle Borse si esaurisce l’effetto Huang, timori AI e dazi rubano la scena. Milano chiude a -1,8%, WS contrastata","url":"https://www.ilsole24ore.com/art/borse-future-positivi-maxi-rimbalzo-nasdaq-greggio-calo-AJBRZxQC","data":"2026-11-24"},{"testata":"la Repubblica","titolo":"Gli Usa lanciano nuovi dazi verso Cina, Ue e altri paesi. Possibile rialzo al 20% per l’Europa","url":"https://www.repubblica.it/economia/2026/11/25/news/usa_dazi_ue_cina-425749412/?rss","data":"2026-11-25"},{"testata":"Money.it","titolo":"Nvidia perde oltre l'8% a Wall Street: inflazione e Pil Usa avvicinano il rialzo della Fed","url":"https://www.money.it/nvidia-perde-8-per-cento-wall-street-inflazione-pil-usa-rialzo-fed-25-11-2026","data":""},{"testata":"Investing.com Italia","titolo":"S&P mette NVIDIA in CreditWatch per preoccupazioni sulla governance","url":"https://it.investing.com/news/stock-market-news/sp-mette-nvidia-in-creditwatch-per-preoccupazioni-sulla-governance-3666231","data":"2026-11-25"},{"testata":"ANSA","titolo":"Lo spread Btp-Bund conclude in aumento a 111,9 punti","url":"https://www.ansa.it/sito/notizie/economia/2026/11/25/lo-spread-btp-bund-conclude-in-aumento-a-1119-punti_dcbcb8c9-2fb9-4310-b4cb-3f34bf2ae1d3.html","data":"2026-11-25"},{"testata":"ANSA","titolo":"Il prezzo del gas è in discesa a 86 euro ad Amsterdam","url":"https://www.ansa.it/sito/notizie/economia/2026/11/25/il-prezzo-del-gas-e-in-discesa-a-86-euro-ad-amsterdam_11a0bb65-bfcb-4498-ba6b-2e1565b46149.html","data":"2026-11-25"},{"testata":"Money.it","titolo":"Inflazione al 4%, oro e petrolio in calo. Come proteggere i risparmi nei prossimi 12 mesi?","url":"https://www.money.it/inflazione-al-4-oro-e-petrolio-in-calo-come-proteggere-i-risparmi-nei-prossimi-12-mesi","data":""},{"testata":"Financial Times","titolo":"Opec+’s largest members head for clash over oil production estimates","url":"https://www.ft.com/content/b24d5c8c-4c9b-48f0-b4a8-5f83eee2d3e9?syn-25a6b1a6=1","data":"2026-11-25"},{"testata":"BBC Business","titolo":"US announces new tariffs on host of countries including China","url":"https://www.bbc.co.uk/news/articles/c893r9ke5p97o?at_medium=RSS&at_campaign=rss","data":"2026-11-25"},{"testata":"CNBC","titolo":"Fed's John Williams indicates higher interest rates likely 'over time' to address inflation","url":"https://www.cnbc.com/2026/11/23/john-williams-fed-inflation-rate-hikes.html","data":"2026-11-24"}],"limiti":"Non ho potuto leggere i bilanci completi delle singole aziende menzionate nei dispacci di stampa né i dettagli interni dei piani industriali non pubblicati. Scritta dall'AI Gemini leggendo i titoli e i riassunti dei giornali, non gli articoli interi.","autore":"Gemini (cloud)"}
+{
+    "app":  "finanze-analisi",
+    "versione":  1,
+    "generato":  "2026-11-25T20:41:02+01:00",
+    "data":  "2026-11-25",
+    "titolo":  "Il rimbalzo di Nvidia svanisce in un giorno: tornano paura sull\u0027AI e dazi",
+    "sintesi":  "Il rally di lunedì si è già sgonfiato: ieri Nvidia ha perso il 5,9% e oggi i titoli dei chip asiatici crollano (SoftBank -15%). Si aggiungono il timore di nuovi dazi americani e un bitcoin sotto i 60.000 dollari. Una singola buona notizia non cambia la tendenza: calma, acquisti a rate e un cuscinetto di liquidità, in attesa di Fed (9 dicembre) e BCE (17).",
+    "umore":  {
+                  "valore":  -1,
+                  "etichetta":  "Cauto, di nuovo nervoso"
+              },
+    "classi":  [
+                   {
+                       "classe":  "Azioni",
+                       "giudizio":  -1,
+                       "etichetta":  "Rally già sgonfiato",
+                       "perche":  "Il rimbalzo di lunedì è durato un giorno: a Wall Street ieri chiusura mista con Nvidia -5,9% (Handelsblatt), il Dax ha chiuso in calo con un titolo dei chip a -9% (Handelsblatt) e oggi l\u0027Asia perde terreno: SoftBank -15% (CNBC), TSMC e SK Hynix in forte calo (Bloomberg). Nei dati del progetto il settore tecnologico USA ha perso il 3,26% mentre salute (+2,95%) e beni di base (+1,66%) salivano: i capitali ruotano verso i settori difensivi. Giudizio invariato a -1: la notizia di lunedì non ha risolto i dubbi sull\u0027AI. Caso contrario: Dell mostra vendite più che raddoppiate grazie all\u0027AI (MarketWatch) e per alcuni trader \u0027il trade AI non è mai morto\u0027 (CoinDesk). A sfavore: nuovi dazi in arrivo (FT, BBC) e Fed con tassi possibilmente più alti.",
+                       "mossa":  "Non inseguire né i rimbalzi né i ribassi: continua con acquisti a rate su ETF globali diversificati.",
+                       "fonti":  [
+                                     0,
+                                     1,
+                                     2,
+                                     3,
+                                     6,
+                                     17,
+                                     13,
+                                     9
+                                 ]
+                   },
+                   {
+                       "classe":  "Obbligazioni",
+                       "giudizio":  1,
+                       "etichetta":  "Rifugio, con cautela",
+                       "perche":  "Il rendimento USA a 10 anni è 4,91% (2 anni 4,63%, 30 anni 5,30%; dati del 24/11), quasi invariato. Il clima di avversione al rischio pesa su altri mercati dei titoli di Stato: l\u0027asta giapponese a 40 anni ha visto domanda debole (Bloomberg). Giudizio invariato a +1. Caso contrario: Williams (Fed) vede tassi più alti nel tempo (CNBC) e i grandi fondi sono molto corti sui titoli di Stato USA, segno di sfiducia diffusa.",
+                       "mossa":  "Aggiungi a rate e con scadenze medie, evitando le più lunghe.",
+                       "fonti":  [
+                                     14,
+                                     15
+                                 ]
+                   },
+                   {
+                       "classe":  "Crypto",
+                       "giudizio":  -2,
+                       "etichetta":  "Prudenza massima",
+                       "perche":  "Il bitcoin è sceso sotto i 60.000 dollari (CoinDesk); capitalizzazione totale circa 2.056 miliardi di dollari (-4,3% in 24 ore), indice paura/avidità a 13 (paura estrema), stablecoin -5,9% in 30 giorni. A novembre i deflussi dagli ETF spot di bitcoin sono a un record di 4,71 miliardi di dollari (CoinDesk). Giudizio invariato a -2. Caso contrario: la paura estrema precede spesso rimbalzi e alcuni trader vedono spazio di recupero per le azioni. A sfavore: il bitcoin non partecipa ai rimbalzi.",
+                       "mossa":  "Non rincorrere i ribassi; se proprio, quote piccole e a rate.",
+                       "fonti":  [
+                                     11,
+                                     12,
+                                     13
+                                 ]
+                   },
+                   {
+                       "classe":  "Materie prime",
+                       "giudizio":  -1,
+                       "etichetta":  "Petrolio in calo, oro scosso",
+                       "perche":  "Il Brent scende sotto i 91 dollari e il WTI cede oltre l\u00271,5% (Investing.com) per eccesso di offerta e margini deboli, nonostante gli attacchi a Hormuz; un attacco degli Houthi alla torre del fondo saudita PIF ha ferito 11 persone (CNBC). I metalli sono contrastati dopo una forte vendita (Bloomberg) in attesa dei dati sull\u0027inflazione USA. Giudizio invariato a -1. Caso contrario: un\u0027escalation nel Golfo può far salire il petrolio di colpo. A sfavore: i grandi investitori sono molto lunghi sull\u0027oro (+40,7% degli interessi aperti al 17/11), con rischio di vendite forzate.",
+                       "mossa":  "L\u0027oro resta una piccola quota di protezione, non una previsione di breve.",
+                       "fonti":  [
+                                     7,
+                                     8,
+                                     18
+                                 ]
+                   },
+                   {
+                       "classe":  "Liquidità",
+                       "giudizio":  1,
+                       "etichetta":  "Cuscinetto prezioso",
+                       "perche":  "Con Fed il 9 dicembre, BCE il 17, dati sull\u0027inflazione USA in arrivo e nuovi dazi all\u0027orizzonte, la liquidità remunerata evita vendite in perdita. Giudizio invariato a +1. Caso contrario: troppa liquidità perde potere d\u0027acquisto e lascia fuori dai rimbalzi.",
+                       "mossa":  "Tieni un cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
+                       "fonti":  [
+                                     14,
+                                     9
+                                 ]
+                   }
+               ],
+    "temi":  [
+                 {
+                     "titolo":  "Il rimbalzo di Nvidia svanisce",
+                     "giudizio":  -1,
+                     "perche":  "Dopo il rally di lunedì, ieri Nvidia ha perso il 5,9% a Wall Street e oggi i titoli dei chip asiatici sono scesi sotto i livelli pre-rally (Handelsblatt, Bloomberg).",
+                     "fonti":  [
+                                   0,
+                                   3,
+                                   5
+                               ]
+                 },
+                 {
+                     "titolo":  "Contagio sull\u0027Asia tecnologica",
+                     "giudizio":  -1,
+                     "perche":  "SoftBank -15%, TSMC e SK Hynix in forte calo; il FT parla di ritorno dei timori sull\u0027AI e si chiede se la crisi Nvidia fermi il boom dei data center asiatici.",
+                     "fonti":  [
+                                   4,
+                                   6,
+                                   3
+                               ]
+                 },
+                 {
+                     "titolo":  "Nuovi dazi di Trump",
+                     "giudizio":  -1,
+                     "perche":  "Il FT e la BBC riportano che gli USA preparano un piano di nuovi dazi verso grandi economie; CoinDesk lo cita tra le cause del calo dei mercati.",
+                     "fonti":  [
+                                   9,
+                                   10,
+                                   11
+                               ]
+                 },
+                 {
+                     "titolo":  "Nvidia: indagini e clienti",
+                     "giudizio":  -1,
+                     "perche":  "Il ministro della Giustizia USA evita le domande sull\u0027inchiesta mentre gli investigatori esaminano i clienti dell\u0027azienda (NYT): rischio legale e di governance aperto.",
+                     "fonti":  [
+                                   16
+                               ]
+                 },
+                 {
+                     "titolo":  "AI: i conti reggono",
+                     "giudizio":  1,
+                     "perche":  "Dell vede vendite più che raddoppiate grazie all\u0027AI (MarketWatch): la domanda reale c\u0027è, il problema sono valutazioni e aspettative.",
+                     "fonti":  [
+                                   17,
+                                   2
+                               ]
+                 },
+                 {
+                     "titolo":  "Petrolio giù, tensioni in Golfo",
+                     "giudizio":  0,
+                     "perche":  "Brent sotto 91 dollari per offerta abbondante, ma gli attacchi nella regione continuano (Investing.com, CNBC).",
+                     "fonti":  [
+                                   7,
+                                   18
+                               ]
+                 }
+             ],
+    "attenzione":  [
+                       {
+                           "titolo":  "Dazi in arrivo",
+                           "perche":  "Un annuncio di nuovi dazi può riaccendere le vendite e far salire i prezzi."
+                       },
+                       {
+                           "titolo":  "Fed del 9 dicembre",
+                           "perche":  "Toni più duri o un rialzo farebbero soffrire azioni e obbligazioni."
+                       },
+                       {
+                           "titolo":  "Bolla AI e Nvidia",
+                           "perche":  "Valutazioni alte, indagini e fiducia fragile: i rimbalzi si sgonfiano in fretta."
+                       },
+                       {
+                           "titolo":  "Crypto in fuga",
+                           "perche":  "Deflussi record dagli ETF e paura estrema: movimenti bruschi possibili."
+                       },
+                       {
+                           "titolo":  "Golfo e petrolio",
+                           "perche":  "Un\u0027escalation può far risalire energia e inflazione."
+                       }
+                   ],
+    "idee":  [
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00B4L5Y983",
+                     "perche":  "ETF sul mondo sviluppato a costo basso: base diversificata da accumulare a rate."
+                 },
+                 {
+                     "classe":  "Azioni",
+                     "isin":  "IE00BK5BQT80",
+                     "perche":  "ETF sull\u0027intero mondo, adatto a un piano regolare senza puntare su un solo tema."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "LU1437018598",
+                     "perche":  "Titoli di Stato dell\u0027area euro: da comprare a rate con cautela."
+                 },
+                 {
+                     "classe":  "Obbligazioni",
+                     "isin":  "LU1437024729",
+                     "perche":  "Obbligazioni globali miste, più diversificate di un singolo Paese."
+                 },
+                 {
+                     "classe":  "Liquidità",
+                     "isin":  "FR0010510800",
+                     "perche":  "ETF monetario: segue i tassi a breve, utile come cuscinetto."
+                 },
+                 {
+                     "classe":  "Materie prime",
+                     "isin":  "IE00B4ND3602",
+                     "perche":  "Oro fisico: piccola quota come protezione, non come previsione."
+                 }
+             ],
+    "indicatori":  [
+                       {
+                           "nome":  "Nvidia a Wall Street",
+                           "valore":  "-5,9%",
+                           "nota":  "chiusura 24/11 (Handelsblatt)"
+                       },
+                       {
+                           "nome":  "Settore tecnologico USA (XLK)",
+                           "valore":  "-3,26%",
+                           "nota":  "ultima seduta, dati del progetto"
+                       },
+                       {
+                           "nome":  "Rendimento USA 10 anni",
+                           "valore":  "4,91%",
+                           "nota":  "24/11; 2 anni 4,63%, 30 anni 5,30%"
+                       },
+                       {
+                           "nome":  "Brent",
+                           "valore":  "sotto 91 dollari",
+                           "nota":  "25/11, WTI oltre -1,5% (Investing.com)"
+                       },
+                       {
+                           "nome":  "Paura/avidità crypto",
+                           "valore":  "13 (paura estrema)",
+                           "nota":  "ieri 11"
+                       },
+                       {
+                           "nome":  "Capitalizzazione crypto",
+                           "valore":  "circa 2.056 miliardi di dollari",
+                           "nota":  "-4,3% in 24 ore; bitcoin sotto 60.000 dollari"
+                       }
+                   ],
+    "fonti":  [
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Wall Street: US-Börsen schließen uneinheitlich – Nvidia verliert 5,9 Prozent",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dow-jones-sp-500-nasdaq-us-boersen-schliessen-uneinheitlich-nvidia-verliert-59-prozent/100272379.html",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Dax aktuell: Dax schließt im Minus – Chip-Aktie verliert mehr als neun Prozent",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dax-aktuell-dax-schliesst-im-minus-chip-aktie-verliert-mehr-als-neun-prozent/100272268.html",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Aktien: Huang-Effekt verpufft – wovon der KI-Trade nun abhängt",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/aktien/aktien-huang-effekt-verpufft-wovon-der-ki-trade-nun-abhaengt/100272271.html",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Huang Boost Fades Quickly as AI Fears Sink TSMC, SK Hynix Shares",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-25/jensen-huang-boost-fades-fast-as-taiwan-stocks-tumble-8",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Asian markets lose ground as AI fears return",
+                      "url":  "https://www.ft.com/content/705eb84c-801d-4a96-b908-e366511e886a?syn-25a6b1a6=1",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "Handelsblatt",
+                      "titolo":  "Nikkei, Kospi, Taiex: Viele Chipaktien in Asien fallen unter das Niveau vor der Rally",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/nikkei-kospi-taiex-viele-chipaktien-in-asien-fallen-unter-das-niveau-vor-der-rally/100272545.html",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "SoftBank drops 15% as Wall Street AI sell-off ripples across Asian tech names",
+                      "url":  "https://www.cnbc.com/2026/11/25/tech-stocks-softbank-group-advantest-sk-hynix-samsung.html",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "Investing.com",
+                      "titolo":  "Oil extends losses as Brent falls below $91, WTI slides over 1.5%",
+                      "url":  "https://www.investing.com/news/commodities-news/oil-mixed-as-hormuz-attacks-mount-supply-surplus-and-weak-fuel-margins-weigh-5049487",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Metals Mixed After Major Selloff as Traders Await US Inflation",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-25/metals-mixed-after-major-selloff-as-traders-await-us-inflation",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Trump readies raft of new tariffs on major economies",
+                      "url":  "https://www.ft.com/content/335b593d-1478-4550-ab0a-71fec6280eb0?syn-25a6b1a6=1",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "BBC",
+                      "titolo":  "US preparing to unveil plan for new tariffs on global trading partners",
+                      "url":  "https://www.bbc.co.uk/news/articles/c893r9ke5p97o?at_medium=RSS\u0026at_campaign=rss",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "Live updates: Bitcoin pulls back below $60,000, stock rally fades, as tariffs re-enter the picture",
+                      "url":  "https://www.coindesk.com/tech/2026/11/24/live-updates-bitcoin-pulls-back-to-usd60-000-as-stock-rally-fails-to-budge-crypto",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "Bitcoin drops as November spot ETF outflows increase to record $4.71 billion",
+                      "url":  "https://www.coindesk.com/daybook-us/2026/11/24/bitcoin-drops-as-november-spot-etf-outflows-increase-to-record-usd4-71-billion",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "CoinDesk",
+                      "titolo":  "\u0027AI trade never died\u0027: Traders see room for market recovery, but bitcoin\u0027s participation is another story",
+                      "url":  "https://www.coindesk.com/markets/2026/11/24/ai-trade-never-died-traders-see-room-for-market-recovery-despite-bitcoin-s-weakness",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Fed\u0027s John Williams indicates higher interest rates likely \u0027over time\u0027 to address inflation",
+                      "url":  "https://www.cnbc.com/2026/11/23/john-williams-fed-inflation-rate-hikes.html",
+                      "data":  "2026-11-23"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Japan\u0027s 40-Year Bond Sale Draws Weaker Demand on Risk Off Mood",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-25/japan-40-year-bond-sale-sees-weaker-demand-than-12-month-average-mwvkr2jb",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Blanche Downplays Questions Over Nvidia as Investigators Examine Company\u0027s Customers",
+                      "url":  "https://www.nytimes.com/2026/11/24/us/politics/nvidia-justice-department-todd-blanche.html",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "MarketWatch",
+                      "titolo":  "Dell\u0027s stock rises as the AI boom helps sales more than double",
+                      "url":  "https://www.marketwatch.com/story/dells-stock-rises-as-the-ai-boom-helps-sales-more-than-double-cfb8cf65?mod=mw_rss_topstories",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "CNBC",
+                      "titolo":  "Houthi attack on Saudi Arabian sovereign wealth fund PIF\u0027s tower injures 11",
+                      "url":  "https://www.cnbc.com/2026/11/25/us-iran-war-trump-hormuz-houthi-saudi-pif-tower.html",
+                      "data":  "2026-11-25"
+                  },
+                  {
+                      "testata":  "The Economist",
+                      "titolo":  "Copper shows how AI is messing with markets",
+                      "url":  "https://www.economist.com/finance-and-economics/2026/11/24/copper-shows-how-ai-is-messing-with-markets",
+                      "data":  "2026-11-24"
+                  },
+                  {
+                      "testata":  "ANSA",
+                      "titolo":  "Borsa: Tokyo, apertura in calo (-0,36%)",
+                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/25/borsa-tokyo-apertura-in-calo-036_2d355356-5ba4-4a00-9a99-c4a5690834ac.html",
+                      "data":  "2026-11-25"
+                  }
+              ],
+    "limiti":  "La ricerca web non ha restituito cronache di oggi: uso i titoli dei feed (mercati.json) di Handelsblatt, Bloomberg, FT, CNBC, CoinDesk, Investing.com, BBC, NYT, MarketWatch, ANSA. Articoli letti solo per titolo e fonte (spesso a pagamento). Non disponibili: chiusure esatte di S\u0026P 500, Nasdaq e FTSE MIB, spread BTP-Bund di oggi, WSJ, Barron\u0027s, Reuters, Il Sole 24 Ore."
+}
