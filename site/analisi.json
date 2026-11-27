@@ -1,129 +1,123 @@
 {
     "app":  "finanze-analisi",
     "versione":  1,
-    "generato":  "2026-11-26T16:00:58+01:00",
-    "data":  "2026-11-26",
-    "titolo":  "Asia rimbalza, ma inflazione alta e nuovi dazi spingono la Fed verso un rialzo",
-    "sintesi":  "Dopo la seduta volatile di ieri (Dow +0,44%, Nasdaq -0,78%) le Borse asiatiche rimbalzano, con Tokyo in apertura a +1,41%. Ma i dati dicono altro: PIL USA al +4,3% e inflazione ancora calda fanno scommettere su un rialzo dei tassi Fed, arrivano nuovi dazi e S\u0026P minaccia di tagliare il rating di Nvidia. Il Dax ha chiuso sotto i 25.000 punti, ai minimi da giugno. Calma: acquisti a rate e un cuscinetto di liquidità.",
+    "generato":  "2026-11-27T15:49:23+01:00",
+    "data":  "2026-11-27",
+    "titolo":  "Tech e Asia si riprendono, ma Iran, Nvidia e Fed in rialzo tengono alta la tensione",
+    "sintesi":  "Ieri Wall Street era chiusa per il Ringraziamento; il Dax ha chiuso in rialzo con la tecnologia che recupera e le Borse emergenti asiatiche vanno verso un guadagno settimanale. Pesano però la guerra con l\u0027Iran (nuovi attacchi con droni in Kuwait), lo stop di Nvidia alle vendite nel Sud-Est asiatico e un\u0027inflazione che mantiene la Fed su un possibile rialzo il 9 dicembre. Il clima migliora, ma resta fragile: calma, acquisti a rate e un cuscinetto di liquidità.",
     "umore":  {
                   "valore":  -1,
-                  "etichetta":  "Cauto, rimbalzo fragile"
+                  "etichetta":  "Cauto, clima in miglioramento"
               },
     "classi":  [
                    {
                        "classe":  "Azioni",
                        "giudizio":  -1,
-                       "etichetta":  "Rimbalzo fragile",
-                       "perche":  "Ieri Wall Street ha chiuso mista (Dow +0,44%, Nasdaq -0,78%, ANSA) e il Dax è sceso sotto 25.000 punti, ai minimi da fine giugno (Handelsblatt). Oggi l\u0027Asia rimbalza (Tokyo +1,41% in apertura), ma S\u0026P minaccia di tagliare il rating di Nvidia (CNBC) e la paura di una bolla AI non passa (Handelsblatt). Nei dati del progetto la tecnologia USA ha perso lo 0,83% mentre materiali (+2,07%) e immobiliare salivano. Giudizio invariato a -1: il rimbalzo non risolve i dubbi. Caso contrario: la crescita USA è forte e i conti AI reggono; MarketWatch però avverte che il ribasso potrebbe peggiorare prima di migliorare.",
-                       "mossa":  "Non inseguire i rimbalzi: continua con acquisti a rate su ETF globali diversificati.",
+                       "etichetta":  "Rimbalzo, ancora fragile",
+                       "perche":  "Il Dax ha chiuso in rialzo con i titoli tech che si riprendono (Handelsblatt) e le Borse emergenti asiatiche puntano a un guadagno settimanale (Bloomberg). I profitti industriali cinesi di ottobre crescono del 20,1% (CNBC). Ma Nvidia ferma le vendite al Sud-Est asiatico (NYT), la guerra con l\u0027Iran continua e Wall Street ieri era chiusa, quindi il rimbalzo non è confermato dagli USA. Nei dati del progetto i settori difensivi guidano, segno di prudenza. Giudizio invariato a -1. Caso contrario: la crescita USA è solida, gli utili reggono e il rischio sembra tornare (Bloomberg).",
+                       "mossa":  "Continua con acquisti a rate su ETF globali diversificati, senza inseguire i rimbalzi.",
                        "fonti":  [
-                                     0,
                                      1,
                                      2,
-                                     3,
+                                     5,
                                      4,
-                                     5
+                                     9
                                  ]
                    },
                    {
                        "classe":  "Obbligazioni",
                        "giudizio":  1,
                        "etichetta":  "Rifugio, con cautela",
-                       "perche":  "Il rendimento USA a 10 anni scende al 4,85% (2 anni 4,61%, 30 anni 5,24%; 25/11), poco sotto il 4,91% del giorno prima. Un\u0027inflazione ancora alta tiene però in gioco un rialzo Fed (NYT, ANSA). Giudizio invariato a +1. Caso contrario: se la Fed alza i tassi i prezzi dei bond lunghi scendono; i grandi fondi sono molto corti sui Treasury a 10 anni (netto -16,8% degli interessi aperti).",
+                       "perche":  "Il rendimento USA a 10 anni era al 4,85% il 25/11 (2 anni 4,61%, 30 anni 5,24%), poco sotto il 4,91% del giorno prima. Un\u0027inflazione ancora calda tiene però in gioco un rialzo Fed (NYT). Giudizio invariato a +1. Caso contrario: se la Fed alza i tassi i bond lunghi perdono valore; i grandi fondi sono molto corti sui Treasury a 10 anni (netto -16,8% degli interessi aperti al 17/11). CNBC segnala rendimenti interessanti sul credito USA ma con rischi di prezzi troppo ottimisti.",
                        "mossa":  "Aggiungi a rate e con scadenze medie, evitando le più lunghe.",
                        "fonti":  [
-                                     6,
                                      7,
-                                     16
+                                     8
                                  ]
                    },
                    {
                        "classe":  "Crypto",
                        "giudizio":  -2,
                        "etichetta":  "Prudenza massima",
-                       "perche":  "Il bitcoin resta sotto 60.000 dollari; capitalizzazione totale circa 2.111 miliardi di dollari (-0,28% in 24 ore), indice paura/avidità a 11 (paura estrema, ieri 13), stablecoin -5,75% in 30 giorni. CoinDesk titola che \u0027questa volta sembra diverso\u0027 e i veterani si preparano a più dolore. Giudizio invariato a -2. Caso contrario: la paura estrema precede spesso rimbalzi e oggi la capitalizzazione è stabile. A sfavore: con la Fed verso un rialzo gli asset rischiosi soffrono.",
+                       "perche":  "Capitalizzazione totale circa 2.130 miliardi di dollari (-1,47% in 24 ore), dominanza bitcoin 58%, indice paura/avidità a 12 (paura estrema, ieri 11), stablecoin -5,87% in 30 giorni: i soldi escono dal settore. Giudizio invariato a -2. Caso contrario: la paura estrema precede spesso rimbalzi e con il ritorno di appetito al rischio sui mercati (Bloomberg) le crypto potrebbero seguire. Ma con la Fed verso un rialzo gli asset rischiosi soffrono.",
                        "mossa":  "Non rincorrere i ribassi; se proprio, quote piccole e a rate.",
                        "fonti":  [
-                                     12
+                                     2
                                  ]
                    },
                    {
                        "classe":  "Materie prime",
-                       "giudizio":  -1,
-                       "etichetta":  "Oro sotto pressione",
-                       "perche":  "L\u0027oro cede perché i dati sull\u0027inflazione USA rafforzano le scommesse su un rialzo Fed (Investing.com); il rame rimbalza dai minimi dell\u0027anno ma i metalli restano molto volatili (Bloomberg). Il WTI ha chiuso a 83,68 dollari, in rialzo (ANSA). Giudizio invariato a -1. Caso contrario: tensioni geopolitiche e dazi possono rilanciare oro e petrolio. A sfavore: i grandi investitori sono molto lunghi sull\u0027oro (+40,7% degli interessi aperti al 17/11), rischio di vendite forzate.",
-                       "mossa":  "L\u0027oro resta una piccola quota di protezione, non una previsione di breve.",
+                       "giudizio":  0,
+                       "etichetta":  "Rame in recupero, oro incerto",
+                       "perche":  "Il rame rimbalza dal minimo di 11 mesi con il ritorno dell\u0027appetito per il rischio (Bloomberg). La guerra con l\u0027Iran e il tema Hormuz tengono alta l\u0027attenzione sul petrolio (CNBC); il WTI aveva chiuso a 83,68 dollari il 25/11, un dato di oggi non l\u0027ho letto. L\u0027oro era sotto pressione per le scommesse su un rialzo Fed e i grandi investitori sono molto lunghi (+40,7% degli interessi aperti al 17/11): rischio di vendite. Giudizio portato da -1 a 0 per il recupero dei metalli industriali. Caso contrario: un\u0027escalation in Medio Oriente può spingere petrolio e oro; un dollaro forte può invece frenarli.",
+                       "mossa":  "Oro come piccola quota di protezione, non come previsione di breve.",
                        "fonti":  [
-                                     9,
-                                     10,
-                                     11
+                                     3,
+                                     0
                                  ]
                    },
                    {
                        "classe":  "Liquidità",
                        "giudizio":  1,
                        "etichetta":  "Cuscinetto prezioso",
-                       "perche":  "Con inflazione calda, Fed il 9 dicembre (rialzo possibile), BCE il 17 e nuovi dazi, la liquidità remunerata evita vendite in perdita e beneficia di tassi in salita. Giudizio invariato a +1. Caso contrario: troppa liquidità perde potere d\u0027acquisto e lascia fuori dai rimbalzi.",
+                       "perche":  "Con inflazione calda, Fed il 9 dicembre (rialzo possibile), BCE il 17 e guerra in corso, la liquidità remunerata evita vendite in perdita e beneficia di tassi in salita. Giudizio invariato a +1. Caso contrario: troppa liquidità perde potere d\u0027acquisto e lascia fuori dai rimbalzi.",
                        "mossa":  "Tieni un cuscinetto di 3-6 mesi di spese; il resto investilo con regolarità.",
                        "fonti":  [
-                                     6,
-                                     7
+                                     7,
+                                     0
                                  ]
                    }
                ],
     "temi":  [
                  {
-                     "titolo":  "Fed verso un rialzo",
+                     "titolo":  "Guerra con l\u0027Iran",
                      "giudizio":  -1,
-                     "perche":  "PIL USA del terzo trimestre +4,3% sopra le attese e inflazione ancora alta: ANSA e NYT vedono la Fed sulla strada di un nuovo rialzo; il Beige Book parla di crescita da leggera a moderata.",
+                     "perche":  "Due italiani uccisi in un attacco con droni in Kuwait; Trump dice che la guerra finisce \u0027quando vorrò\u0027 (CNBC). Rischio per petrolio e clima di mercato.",
                      "fonti":  [
-                                   6,
-                                   7,
-                                   17
+                                   0
                                ]
                  },
                  {
-                     "titolo":  "Nuovi dazi USA",
+                     "titolo":  "Nvidia ferma le vendite nel Sud-Est asiatico",
                      "giudizio":  -1,
-                     "perche":  "Gli Stati Uniti annunciano nuovi dazi su molti Paesi, Cina inclusa (BBC); l\u0027Asia però li ha digeriti senza panico (Investing.com).",
+                     "perche":  "Gli USA stringono le restrizioni sulla Cina e Nvidia sospende le vendite nella regione (NYT); Singapore non ha ancora confermato lo stop (Investing.com).",
                      "fonti":  [
-                                   8,
+                                   4,
+                                   10
+                               ]
+                 },
+                 {
+                     "titolo":  "Dax e tech in recupero",
+                     "giudizio":  1,
+                     "perche":  "Il Dax chiude in rialzo con la ripresa dei titoli tecnologici (Handelsblatt); le Borse emergenti asiatiche verso un guadagno settimanale (Bloomberg).",
+                     "fonti":  [
+                                   1,
+                                   2
+                               ]
+                 },
+                 {
+                     "titolo":  "Cina: profitti industriali +20,1%",
+                     "giudizio":  1,
+                     "perche":  "I profitti delle imprese industriali cinesi di ottobre salgono al massimo da 5 mesi (CNBC): segnale positivo per la domanda globale e per il rame.",
+                     "fonti":  [
+                                   5,
                                    3
                                ]
                  },
                  {
-                     "titolo":  "Nvidia: rating a rischio",
-                     "giudizio":  -1,
-                     "perche":  "S\u0026P avverte che il rating di Nvidia può essere tagliato per rischi di gestione e governance (CNBC): rischio per tutto il settore AI.",
-                     "fonti":  [
-                                   4,
-                                   15
-                               ]
-                 },
-                 {
-                     "titolo":  "Rimbalzo asiatico",
+                     "titolo":  "Rivisto il PIL USA, polemica politica",
                      "giudizio":  0,
-                     "perche":  "Tokyo apre a +1,41% e l\u0027Asia sale dopo la seduta volatile USA (FT, Investing.com); la Banca di Corea alza i tassi (FT).",
+                     "perche":  "Il PIL del terzo trimestre è stato rivisto molto al rialzo e Trump chiede un\u0027indagine su un \u0027errore record\u0027 (CNBC). Dati più forti rafforzano l\u0027idea di tassi alti.",
                      "fonti":  [
-                                   2,
-                                   3,
-                                   13
+                                   6
                                ]
                  },
                  {
-                     "titolo":  "Giappone e tassi",
-                     "giudizio":  -1,
-                     "perche":  "Un membro falco della Banca del Giappone chiede rialzi rapidi dei tassi per l\u0027inflazione (Bloomberg): rischio per i mercati globali.",
+                     "titolo":  "Brasile: nuovo ministro delle Finanze",
+                     "giudizio":  0,
+                     "perche":  "Lula nomina un banchiere ministro delle Finanze per calmare i mercati (FT).",
                      "fonti":  [
-                                   14
-                               ]
-                 },
-                 {
-                     "titolo":  "Europa debole",
-                     "giudizio":  -1,
-                     "perche":  "Il Dax è sceso sotto 25.000 punti, ai minimi da fine giugno (Handelsblatt).",
-                     "fonti":  [
-                                   1
+                                   11
                                ]
                  }
              ],
@@ -133,20 +127,20 @@
                            "perche":  "Un rialzo dei tassi farebbe soffrire azioni e obbligazioni lunghe."
                        },
                        {
-                           "titolo":  "Dazi in arrivo",
-                           "perche":  "Nuove tariffe possono riaccendere le vendite e far salire i prezzi."
+                           "titolo":  "Guerra con l\u0027Iran",
+                           "perche":  "Escalation o problemi a Hormuz possono far salire il petrolio e scuotere le Borse."
                        },
                        {
-                           "titolo":  "Bolla AI e Nvidia",
-                           "perche":  "Valutazioni alte e rischio rating: i rimbalzi si sgonfiano in fretta."
+                           "titolo":  "Nvidia e bolla AI",
+                           "perche":  "Restrizioni, scandali e valutazioni alte rendono fragile il settore."
                        },
                        {
                            "titolo":  "Crypto in paura estrema",
                            "perche":  "Movimenti bruschi possibili in entrambe le direzioni."
                        },
                        {
-                           "titolo":  "Banca del Giappone",
-                           "perche":  "Rialzi rapidi dei tassi possono scuotere i mercati globali."
+                           "titolo":  "Fiducia nei mercati",
+                           "perche":  "Il gestore El-Erian avverte che nel caso peggiore potrebbe esserci una crisi di fiducia (Handelsblatt)."
                        }
                    ],
     "idee":  [
@@ -183,71 +177,77 @@
              ],
     "indicatori":  [
                        {
-                           "nome":  "Dow Jones / Nasdaq",
-                           "valore":  "+0,44% / -0,78%",
-                           "nota":  "chiusura 25/11 (ANSA)"
-                       },
-                       {
                            "nome":  "Rendimento USA 10 anni",
                            "valore":  "4,85%",
                            "nota":  "25/11; 2 anni 4,61%, 30 anni 5,24%"
                        },
                        {
-                           "nome":  "Settore tecnologico USA (XLK)",
-                           "valore":  "-0,83%",
-                           "nota":  "ultima seduta, dati del progetto; materiali +2,07%"
-                       },
-                       {
-                           "nome":  "Petrolio WTI",
-                           "valore":  "83,68 dollari",
-                           "nota":  "chiusura 25/11 a New York (ANSA)"
-                       },
-                       {
                            "nome":  "Paura/avidità crypto",
-                           "valore":  "11 (paura estrema)",
-                           "nota":  "ieri 13"
+                           "valore":  "12 (paura estrema)",
+                           "nota":  "ieri 11"
                        },
                        {
                            "nome":  "Capitalizzazione crypto",
-                           "valore":  "circa 2.111 miliardi di dollari",
-                           "nota":  "-0,28% in 24 ore; dominanza bitcoin 57,9%"
+                           "valore":  "circa 2.130 miliardi di dollari",
+                           "nota":  "-1,47% in 24 ore; dominanza bitcoin 58%"
+                       },
+                       {
+                           "nome":  "Profitti industriali Cina",
+                           "valore":  "+20,1%",
+                           "nota":  "ottobre, su base annua (CNBC)"
+                       },
+                       {
+                           "nome":  "Stablecoin totali",
+                           "valore":  "281,9 miliardi di dollari",
+                           "nota":  "-5,87% in 30 giorni"
+                       },
+                       {
+                           "nome":  "Posizione grandi fondi sull\u0027oro",
+                           "valore":  "+40,7% degli interessi aperti",
+                           "nota":  "dato al 17/11: molto affollata"
                        }
                    ],
     "fonti":  [
                   {
-                      "testata":  "ANSA",
-                      "titolo":  "Wall Street recupera, Dj +0,44%, Nasdaq -0,78%",
-                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/25/wall-street-recupera-dj-044-nasdaq-078_71c41bba-e936-4677-a001-9227fde4b430.html",
-                      "data":  "2026-11-25"
+                      "testata":  "CNBC",
+                      "titolo":  "Two Italians killed in Kuwait drone attack; Trump says Iran war ends \u0027whenever I want it\u0027",
+                      "url":  "https://www.cnbc.com/2026/11/27/us-iran-war-trump-hormuz-italian-killed-trump.html",
+                      "data":  "2026-11-27"
                   },
                   {
                       "testata":  "Handelsblatt",
-                      "titolo":  "Dax aktuell: Dax rutscht unter 25.000-Punkte-Marke – und schließt auf tiefstem Stand seit Ende Juni",
-                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dax-aktuell-dax-schliesst-auf-tiefstem-stand-seit-ende-juni/100272589.html",
-                      "data":  "2026-11-25"
-                  },
-                  {
-                      "testata":  "Financial Times",
-                      "titolo":  "Stocks advance in Asia after volatile US trading over AI risks",
-                      "url":  "https://www.ft.com/content/6e217409-9fbb-456c-b405-2eb15bb69679",
+                      "titolo":  "Dax aktuell: Dax schließt im Plus – Tech-Aktien erholen sich",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/marktberichte/dax-aktuell-dax-schliesst-deutlich-im-plus-tech-aktien-erholen-sich/100272884.html",
                       "data":  "2026-11-26"
                   },
                   {
-                      "testata":  "Investing.com",
-                      "titolo":  "Stocks rally in Asia, unrocked by US tariffs",
-                      "url":  "https://www.investing.com/news/stock-market-news/asia-shares-bounce-ai-and-tariffs-lurk-in-background-5051871",
+                      "testata":  "Bloomberg",
+                      "titolo":  "EM Asia Stocks Set for Weekly Gain as Markets Regain Footing",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-27/em-asia-stocks-set-for-weekly-gain-as-markets-regain-footing",
+                      "data":  "2026-11-27"
+                  },
+                  {
+                      "testata":  "Bloomberg",
+                      "titolo":  "Copper Rebounds From 11-Month Low on Return of Risk Appetite",
+                      "url":  "https://www.bloomberg.com/news/articles/2026-11-27/copper-rebounds-from-11-month-low-on-return-of-risk-appetite",
+                      "data":  "2026-11-27"
+                  },
+                  {
+                      "testata":  "New York Times",
+                      "titolo":  "Nvidia Halts Sales to Southeast Asia as U.S. Tightens China Restrictions",
+                      "url":  "https://www.nytimes.com/2026/11/26/business/nvidia-southeast-asia-sales.html",
                       "data":  "2026-11-26"
                   },
                   {
                       "testata":  "CNBC",
-                      "titolo":  "S\u0026P warns Nvidia credit rating could be cut over \u0027rising\u0027 management and governance risk",
-                      "url":  "https://www.cnbc.com/2026/11/26/nvidia-market-governance-risk.html",
-                      "data":  "2026-11-26"
+                      "titolo":  "China industrial profits growth surges to a 5-month high of 20.1% in October",
+                      "url":  "https://www.cnbc.com/2026/11/27/china-industrial-profits-october.html",
+                      "data":  "2026-11-27"
                   },
                   {
-                      "testata":  "MarketWatch",
-                      "titolo":  "Why this stock-market selloff is probably going to get worse before it gets better",
-                      "url":  "https://www.marketwatch.com/story/why-this-stock-market-selloff-is-probably-going-to-get-worse-before-it-gets-better-fce63a89?mod=mw_rss_topstories",
+                      "testata":  "CNBC",
+                      "titolo":  "Trump demands probe into \u0027record setting error\u0027 after third-quarter GDP data gets massive revision higher",
+                      "url":  "https://www.cnbc.com/2026/11/26/trump-gdp-revision-investigation.html",
                       "data":  "2026-11-26"
                   },
                   {
@@ -257,71 +257,35 @@
                       "data":  "2026-11-25"
                   },
                   {
-                      "testata":  "ANSA",
-                      "titolo":  "Pil Usa col botto ma corre anche l\u0027inflazione, Fed verso il rialzo del tassi",
-                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/25/il-pil-usa-cresce-nel-terzo-trimestre-del-43-sopra-le-attese.-inflazione_58740f40-f0e3-4fd9-aa91-2fe3626eb0c4.html",
-                      "data":  "2026-11-25"
-                  },
-                  {
-                      "testata":  "BBC",
-                      "titolo":  "US announces new tariffs on host of countries including China",
-                      "url":  "https://www.bbc.co.uk/news/articles/c893r9ke5p97o?at_medium=RSS\u0026at_campaign=rss",
-                      "data":  "2026-11-26"
-                  },
-                  {
-                      "testata":  "Investing.com",
-                      "titolo":  "Gold eases as U.S. inflation data reinforces Fed rate-hike bets",
-                      "url":  "https://www.investing.com/news/commodities-news/gold-eases-as-us-inflation-data-reinforces-fed-ratehike-bets-5051964",
-                      "data":  "2026-11-26"
-                  },
-                  {
-                      "testata":  "Bloomberg",
-                      "titolo":  "Copper Rebounds From Lowest This Year as Volatility Grips Metals",
-                      "url":  "https://www.bloomberg.com/news/articles/2026-11-26/copper-rebounds-from-lowest-this-year-as-volatility-hits-metals",
-                      "data":  "2026-11-26"
-                  },
-                  {
-                      "testata":  "ANSA",
-                      "titolo":  "Il petrolio chiude in rialzo a New York a 83,68 dollari",
-                      "url":  "https://www.ansa.it/sito/notizie/economia/2026/11/25/il-petrolio-chiude-in-rialzo-a-new-york-a-8368-dollari_60cd3bc2-2b66-45f2-9e88-469c3650bbd2.html",
-                      "data":  "2026-11-25"
-                  },
-                  {
-                      "testata":  "CoinDesk",
-                      "titolo":  "\u0027This time actually seems different\u0027: Crypto veterans brace for more pain as bitcoin tumbles",
-                      "url":  "https://www.coindesk.com/markets/2026/11/25/this-time-actually-seems-different-crypto-veterans-brace-for-more-pain-as-bitcoin-tumbles",
-                      "data":  "2026-11-25"
-                  },
-                  {
-                      "testata":  "Financial Times",
-                      "titolo":  "Bank of Korea raises interest rates amid AI chip boom",
-                      "url":  "https://www.ft.com/content/823af978-e22b-49a4-a2a1-52867a6520fa",
-                      "data":  "2026-11-26"
-                  },
-                  {
-                      "testata":  "Bloomberg",
-                      "titolo":  "Hawkish Bank of Japan Member Seeks Quick Rate Hikes On Inflation",
-                      "url":  "https://www.bloomberg.com/news/articles/2026-11-26/hawkish-bank-of-japan-member-seeks-quick-rate-hikes-on-inflation",
-                      "data":  "2026-11-26"
-                  },
-                  {
                       "testata":  "CNBC",
-                      "titolo":  "Where the market may be mispricing risk most: AI boom, volatility, high-yield bonds",
+                      "titolo":  "Beware higher correlation but nab high U.S. credit yields, fund managers say",
                       "url":  "https://www.cnbc.com/2026/11/26/mispricing-risk-fund-managers-ai-volatility.html",
                       "data":  "2026-11-26"
                   },
                   {
-                      "testata":  "Handelsblatt",
-                      "titolo":  "Börsen: Die Furcht vor einem KI-Crash will nicht weichen",
-                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/boersen-die-angst-vor-einem-ki-crash-haelt-an/100272767.html",
-                      "data":  "2026-11-25"
+                      "testata":  "Seeking Alpha",
+                      "titolo":  "S\u0026P 500 Sector Rotation Tracker: Consumer Staples lead as investors get defensive",
+                      "url":  "https://seekingalpha.com/news/4676907-sp-500-sector-rotation-tracker-consumer-staples-lead-as-investors-get-defensive",
+                      "data":  "2026-11-26"
+                  },
+                  {
+                      "testata":  "Investing.com",
+                      "titolo":  "Singapore yet to confirm if Nvidia has halted advanced chip shipments- deputy PM",
+                      "url":  "https://www.investing.com/news/stock-market-news/singapore-yet-to-confirm-if-nvidia-has-halted-advanced-chip-shipments-deputy-pm-5052834",
+                      "data":  "2026-11-27"
+                  },
+                  {
+                      "testata":  "Financial Times",
+                      "titolo":  "Lula names banker as Brazil finance minister in attempt to calm markets",
+                      "url":  "https://www.ft.com/content/94f93408-476b-479c-be0e-d7f7942f9491",
+                      "data":  "2026-11-27"
                   },
                   {
                       "testata":  "Handelsblatt",
-                      "titolo":  "Beige Book: US-Wirtschaft wächst laut Notenbank-Bericht leicht bis moderat",
-                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/konjunktur-us-wirtschaft-waechst-laut-notenbank-bericht-leicht-bis-moderat/100272820.html",
-                      "data":  "2026-11-25"
+                      "titolo":  "Mohamed El-Erian: Im schlimmsten Fall könnte eine Vertrauenskrise drohen",
+                      "url":  "https://www.handelsblatt.com/finanzen/maerkte/boerse-inside/mohamed-el-erian-im-interview-das-ist-kein-kapitalismus-mehr-wie-wir-ihn-kannten/100272622.html",
+                      "data":  "2026-11-26"
                   }
               ],
-    "limiti":  "La ricerca web non è stata usata: lavoro con i titoli dei feed di mercati.json (ANSA, FT, Bloomberg, CNBC, NYT, BBC, Handelsblatt, Investing.com, MarketWatch, CoinDesk). Articoli letti solo per titolo e fonte (spesso a pagamento). Non disponibili: chiusure di S\u0026P 500, Nasdaq e FTSE MIB in punti, spread BTP-Bund di oggi, WSJ, Barron\u0027s, Reuters, Il Sole 24 Ore."
+    "limiti":  "Letti solo titoli e sommari dei feed (molti articoli a pagamento). Ieri Wall Street era chiusa (Ringraziamento): niente chiusure USA. Non trovati: chiusura di oggi di FTSE MIB, spread BTP-Bund e prezzi aggiornati di petrolio e oro; WSJ, Barron\u0027s, Reuters, Il Sole 24 Ore non accessibili."
 }
